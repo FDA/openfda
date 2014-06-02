@@ -1,0 +1,33 @@
+{
+  "name": "openfda-api",
+  "version": "0.0.1",
+  "description": "A research project to provide open APIs, raw data downloads, documentation and examples, and a developer community for an important collection of FDA public datasets.",
+  "author": "openFDA",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fda/openfda.git"
+  },
+  "dependencies": {
+    "bunyan": "~0.22.3",
+    "elasticsearch": "~2.1.4",
+    "elastic.js": "~1.1.1",
+    "express": "~3.5.2",
+    "forever" : "~0.11.1",
+    "moment" : "~2.6.0",
+    "underscore": "~1.6.0"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.4",
+    "grunt-contrib-nodeunit": "~0.3.3"
+  },
+  "scripts": {
+    "start": "node api.js",
+    "test": "grunt nodeunit:all"
+  },
+  "engines": {
+    "node": "0.10.x"
+  },
+  "license": "CC0",
+  "subdomain": "api"
+}

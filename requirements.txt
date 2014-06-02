@@ -1,0 +1,13 @@
+BeautifulSoup4
+click
+flask
+leveldb
+luigi
+lxml
+nose
+python-gflags
+pyyaml
+requests
+simplejson
+xmltodict
+

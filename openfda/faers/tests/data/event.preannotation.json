@@ -1,0 +1,432 @@
+{
+  "@case_number": "4562564",
+  "@timestamp": "2003-04-07",
+  "companynumb": "US-MERCK-0304USA00739",
+  "fulfillexpeditecriteria": "1",
+  "patient": {
+    "drug": [
+      {
+        "drugadministrationroute": "048",
+        "drugcharacterization": "1",
+        "drugenddate": "20010501",
+        "drugenddateformat": "102",
+        "drugindication": "PAIN",
+        "drugstartdate": "20000918",
+        "drugstartdateformat": "102",
+        "drugtreatmentduration": "8",
+        "drugtreatmentdurationunit": "802",
+        "medicinalproduct": "VIOXX"
+      },
+      {
+        "drugadministrationroute": "048",
+        "drugcharacterization": "1",
+        "drugenddate": "20010501",
+        "drugenddateformat": "102",
+        "drugindication": "OSTEOARTHRITIS",
+        "drugstartdate": "20000918",
+        "drugstartdateformat": "102",
+        "drugtreatmentduration": "8",
+        "drugtreatmentdurationunit": "802",
+        "medicinalproduct": "VIOXX"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "OS-CAL + D"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "MAGNESIUM SULFATE"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "POTASSIUM CHLORIDE"
+      },
+      {
+        "drugadministrationroute": "048",
+        "drugcharacterization": "2",
+        "medicinalproduct": "ROCALTROL"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "SYNTHROID"
+      },
+      {
+        "drugadministrationroute": "048",
+        "drugcharacterization": "2",
+        "drugstartdate": "20010401",
+        "drugstartdateformat": "102",
+        "medicinalproduct": "SYNTHROID"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "PRILOSEC"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "REGLAN"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "REGLAN"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "drugstartdate": "20000101",
+        "drugstartdateformat": "102",
+        "medicinalproduct": "AMBIEN"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "DITROPAN XL"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "drugenddate": "20010101",
+        "drugenddateformat": "102",
+        "drugindication": "GENERALISED ANXIETY DISORDER",
+        "drugstartdate": "19990101",
+        "drugstartdateformat": "102",
+        "medicinalproduct": "AMITRIPTYLINE HYDROCHLORIDE"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "CLARITIN"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "CLARITIN-D"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "drugindication": "SWELLING",
+        "medicinalproduct": "LASIX"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "drugindication": "SWELLING",
+        "medicinalproduct": "SLOW-K"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "PREMARIN"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "QUININE"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "FLONASE"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "TESSALON"
+      },
+      {
+        "drugadministrationroute": "065",
+        "drugcharacterization": "2",
+        "medicinalproduct": "PERCOCET"
+      }
+    ],
+    "patientonsetage": "62",
+    "patientonsetageunit": "801",
+    "patientsex": "2",
+    "patientweight": "62",
+    "reaction": [
+      {
+        "reactionmeddrapt": "ACTIVATED PARTIAL THROMBOPLASTIN TIME PROLONGED"
+      },
+      {
+        "reactionmeddrapt": "AMAUROSIS FUGAX"
+      },
+      {
+        "reactionmeddrapt": "AMNESIA"
+      },
+      {
+        "reactionmeddrapt": "ANAEMIA HAEMOLYTIC AUTOIMMUNE"
+      },
+      {
+        "reactionmeddrapt": "ANXIETY"
+      },
+      {
+        "reactionmeddrapt": "ARTHRALGIA"
+      },
+      {
+        "reactionmeddrapt": "ARTHRITIS BACTERIAL"
+      },
+      {
+        "reactionmeddrapt": "ASTHENIA"
+      },
+      {
+        "reactionmeddrapt": "ATELECTASIS"
+      },
+      {
+        "reactionmeddrapt": "AZOTAEMIA"
+      },
+      {
+        "reactionmeddrapt": "BLINDNESS TRANSIENT"
+      },
+      {
+        "reactionmeddrapt": "BLOOD CHOLESTEROL INCREASED"
+      },
+      {
+        "reactionmeddrapt": "BLOOD CREATINE PHOSPHOKINASE INCREASED"
+      },
+      {
+        "reactionmeddrapt": "BLOOD PRESSURE INCREASED"
+      },
+      {
+        "reactionmeddrapt": "CARDIAC FLUTTER"
+      },
+      {
+        "reactionmeddrapt": "CELLULITIS"
+      },
+      {
+        "reactionmeddrapt": "CEREBRAL VENTRICLE DILATATION"
+      },
+      {
+        "reactionmeddrapt": "CEREBROVASCULAR ACCIDENT"
+      },
+      {
+        "reactionmeddrapt": "CHEST PAIN"
+      },
+      {
+        "reactionmeddrapt": "CHOLECYSTITIS"
+      },
+      {
+        "reactionmeddrapt": "CHOLELITHIASIS"
+      },
+      {
+        "reactionmeddrapt": "COAGULATION FACTOR VIII LEVEL INCREASED"
+      },
+      {
+        "reactionmeddrapt": "COAGULOPATHY"
+      },
+      {
+        "reactionmeddrapt": "CONDITION AGGRAVATED"
+      },
+      {
+        "reactionmeddrapt": "DECREASED APPETITE"
+      },
+      {
+        "reactionmeddrapt": "DISTURBANCE IN ATTENTION"
+      },
+      {
+        "reactionmeddrapt": "DRUG HYPERSENSITIVITY"
+      },
+      {
+        "reactionmeddrapt": "DRUG INEFFECTIVE"
+      },
+      {
+        "reactionmeddrapt": "DYSPHAGIA"
+      },
+      {
+        "reactionmeddrapt": "DYSPNOEA"
+      },
+      {
+        "reactionmeddrapt": "EMOTIONAL DISTRESS"
+      },
+      {
+        "reactionmeddrapt": "ENDOCRINE DISORDER"
+      },
+      {
+        "reactionmeddrapt": "EYE PAIN"
+      },
+      {
+        "reactionmeddrapt": "FACE OEDEMA"
+      },
+      {
+        "reactionmeddrapt": "FALL"
+      },
+      {
+        "reactionmeddrapt": "GASTRIC POLYPS"
+      },
+      {
+        "reactionmeddrapt": "GASTRITIS EROSIVE"
+      },
+      {
+        "reactionmeddrapt": "GASTROOESOPHAGEAL REFLUX DISEASE"
+      },
+      {
+        "reactionmeddrapt": "HAEMATOCHEZIA"
+      },
+      {
+        "reactionmeddrapt": "HAEMOPHILUS INFECTION"
+      },
+      {
+        "reactionmeddrapt": "HAEMORRHAGE"
+      },
+      {
+        "reactionmeddrapt": "HIATUS HERNIA"
+      },
+      {
+        "reactionmeddrapt": "HIGH DENSITY LIPOPROTEIN DECREASED"
+      },
+      {
+        "reactionmeddrapt": "HYPERCALCAEMIA"
+      },
+      {
+        "reactionmeddrapt": "HYPERGLYCAEMIA"
+      },
+      {
+        "reactionmeddrapt": "HYPOCALCAEMIA"
+      },
+      {
+        "reactionmeddrapt": "HYPOMAGNESAEMIA"
+      },
+      {
+        "reactionmeddrapt": "INCREASED APPETITE"
+      },
+      {
+        "reactionmeddrapt": "INJURY"
+      },
+      {
+        "reactionmeddrapt": "INSOMNIA"
+      },
+      {
+        "reactionmeddrapt": "IRON DEFICIENCY"
+      },
+      {
+        "reactionmeddrapt": "IRRITABLE BOWEL SYNDROME"
+      },
+      {
+        "reactionmeddrapt": "LEUKOCYTOSIS"
+      },
+      {
+        "reactionmeddrapt": "LOSS OF CONSCIOUSNESS"
+      },
+      {
+        "reactionmeddrapt": "LOW DENSITY LIPOPROTEIN INCREASED"
+      },
+      {
+        "reactionmeddrapt": "LUNG NEOPLASM"
+      },
+      {
+        "reactionmeddrapt": "MENTAL STATUS CHANGES"
+      },
+      {
+        "reactionmeddrapt": "MIGRAINE"
+      },
+      {
+        "reactionmeddrapt": "MUSCLE SPASMS"
+      },
+      {
+        "reactionmeddrapt": "MUSCLE TWITCHING"
+      },
+      {
+        "reactionmeddrapt": "MUSCULOSKELETAL STIFFNESS"
+      },
+      {
+        "reactionmeddrapt": "NEUROGENIC BLADDER"
+      },
+      {
+        "reactionmeddrapt": "OESOPHAGEAL DISORDER"
+      },
+      {
+        "reactionmeddrapt": "OPERATIVE HAEMORRHAGE"
+      },
+      {
+        "reactionmeddrapt": "PHARYNGITIS STREPTOCOCCAL"
+      },
+      {
+        "reactionmeddrapt": "PRESBYOESOPHAGUS"
+      },
+      {
+        "reactionmeddrapt": "PRURITUS"
+      },
+      {
+        "reactionmeddrapt": "PULMONARY GRANULOMA"
+      },
+      {
+        "reactionmeddrapt": "PYREXIA"
+      },
+      {
+        "reactionmeddrapt": "RED BLOOD CELL SPHEROCYTES PRESENT"
+      },
+      {
+        "reactionmeddrapt": "RENAL FAILURE"
+      },
+      {
+        "reactionmeddrapt": "RENAL FAILURE ACUTE"
+      },
+      {
+        "reactionmeddrapt": "SINUS DISORDER"
+      },
+      {
+        "reactionmeddrapt": "SINUSITIS"
+      },
+      {
+        "reactionmeddrapt": "SPUTUM DISCOLOURED"
+      },
+      {
+        "reactionmeddrapt": "TACHYCARDIA"
+      },
+      {
+        "reactionmeddrapt": "TINNITUS"
+      },
+      {
+        "reactionmeddrapt": "TOOTH DISORDER"
+      },
+      {
+        "reactionmeddrapt": "TOOTHACHE"
+      },
+      {
+        "reactionmeddrapt": "TRACHEOBRONCHITIS"
+      },
+      {
+        "reactionmeddrapt": "TRANSIENT ISCHAEMIC ATTACK"
+      },
+      {
+        "reactionmeddrapt": "UPPER RESPIRATORY TRACT INFECTION"
+      },
+      {
+        "reactionmeddrapt": "VIRAL INFECTION"
+      },
+      {
+        "reactionmeddrapt": "VISUAL DISTURBANCE"
+      },
+      {
+        "reactionmeddrapt": "WEIGHT DECREASED"
+      },
+      {
+        "reactionmeddrapt": "WEIGHT INCREASED"
+      }
+    ]
+  },
+  "primarysource": {
+    "qualification": "1"
+  },
+  "receiptdate": "20030407",
+  "receiptdateformat": "102",
+  "receivedate": "20050127",
+  "receivedateformat": "102",
+  "receiver": null,
+  "safetyreportid": "4562564-7",
+  "sender": {
+    "senderorganization": "FDA-Public Use"
+  },
+  "serious": "1",
+  "seriousnessdisabling": "1",
+  "seriousnesshospitalization": "1",
+  "seriousnessother": "1",
+  "transmissiondate": "20050727",
+  "transmissiondateformat": "102"
+}

@@ -1,0 +1,16 @@
+# http://git-scm.com/docs/gitignore
+
+.DS_Store
+*.pyc
+_package-env/
+_python-env/
+bower_components/
+dist/
+node_modules/
+npm-debug.log
+openfda-*.zip
+openfda.egg-info/
+tmp/
+annotation_table/data
+faers/data
+

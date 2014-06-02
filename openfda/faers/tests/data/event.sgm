@@ -1,0 +1,430 @@
+<ichicsr lang="en">
+  <safetyreport>
+   <safetyreportid>4562564-7</safetyreportid>
+   <transmissiondateformat>102</transmissiondateformat>
+   <transmissiondate>20050727</transmissiondate>
+   <serious>1</serious>
+   <seriousnesshospitalization>1</seriousnesshospitalization>
+   <seriousnessdisabling>1</seriousnessdisabling>
+   <seriousnessother>1</seriousnessother>
+   <receivedateformat>102</receivedateformat>
+   <receivedate>20050127</receivedate>
+   <receiptdateformat>102</receiptdateformat>
+   <receiptdate>20030407</receiptdate>
+   <fulfillexpeditecriteria>1</fulfillexpeditecriteria>
+   <companynumb>US-MERCK-0304USA00739</companynumb>
+  <primarysource>
+     <qualification>1</qualification>
+  </primarysource>
+  <sender>
+    <senderorganization>FDA-Public Use</senderorganization>
+  </sender>
+  <receiver>
+  </receiver>
+  <patient>
+     <patientonsetage>62</patientonsetage>
+     <patientonsetageunit>801</patientonsetageunit>
+     <patientweight>62</patientweight>
+     <patientsex>2</patientsex>
+  <reaction>
+     <reactionmeddrapt>ACTIVATED PARTIAL THROMBOPLASTIN TIME PROLONGED</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>AMAUROSIS FUGAX</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>AMNESIA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>ANAEMIA HAEMOLYTIC AUTOIMMUNE</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>ANXIETY</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>ARTHRALGIA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>ARTHRITIS BACTERIAL</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>ASTHENIA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>ATELECTASIS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>AZOTAEMIA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>BLINDNESS TRANSIENT</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>BLOOD CHOLESTEROL INCREASED</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>BLOOD CREATINE PHOSPHOKINASE INCREASED</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>BLOOD PRESSURE INCREASED</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>CARDIAC FLUTTER</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>CELLULITIS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>CEREBRAL VENTRICLE DILATATION</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>CEREBROVASCULAR ACCIDENT</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>CHEST PAIN</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>CHOLECYSTITIS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>CHOLELITHIASIS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>COAGULATION FACTOR VIII LEVEL INCREASED</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>COAGULOPATHY</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>CONDITION AGGRAVATED</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>DECREASED APPETITE</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>DISTURBANCE IN ATTENTION</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>DRUG HYPERSENSITIVITY</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>DRUG INEFFECTIVE</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>DYSPHAGIA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>DYSPNOEA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>EMOTIONAL DISTRESS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>ENDOCRINE DISORDER</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>EYE PAIN</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>FACE OEDEMA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>FALL</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>GASTRIC POLYPS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>GASTRITIS EROSIVE</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>GASTROOESOPHAGEAL REFLUX DISEASE</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>HAEMATOCHEZIA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>HAEMOPHILUS INFECTION</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>HAEMORRHAGE</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>HIATUS HERNIA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>HIGH DENSITY LIPOPROTEIN DECREASED</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>HYPERCALCAEMIA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>HYPERGLYCAEMIA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>HYPOCALCAEMIA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>HYPOMAGNESAEMIA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>INCREASED APPETITE</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>INJURY</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>INSOMNIA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>IRON DEFICIENCY</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>IRRITABLE BOWEL SYNDROME</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>LEUKOCYTOSIS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>LOSS OF CONSCIOUSNESS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>LOW DENSITY LIPOPROTEIN INCREASED</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>LUNG NEOPLASM</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>MENTAL STATUS CHANGES</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>MIGRAINE</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>MUSCLE SPASMS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>MUSCLE TWITCHING</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>MUSCULOSKELETAL STIFFNESS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>NEUROGENIC BLADDER</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>OESOPHAGEAL DISORDER</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>OPERATIVE HAEMORRHAGE</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>PHARYNGITIS STREPTOCOCCAL</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>PRESBYOESOPHAGUS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>PRURITUS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>PULMONARY GRANULOMA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>PYREXIA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>RED BLOOD CELL SPHEROCYTES PRESENT</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>RENAL FAILURE</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>RENAL FAILURE ACUTE</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>SINUS DISORDER</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>SINUSITIS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>SPUTUM DISCOLOURED</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>TACHYCARDIA</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>TINNITUS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>TOOTH DISORDER</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>TOOTHACHE</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>TRACHEOBRONCHITIS</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>TRANSIENT ISCHAEMIC ATTACK</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>UPPER RESPIRATORY TRACT INFECTION</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>VIRAL INFECTION</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>VISUAL DISTURBANCE</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>WEIGHT DECREASED</reactionmeddrapt>
+  </reaction>
+  <reaction>
+     <reactionmeddrapt>WEIGHT INCREASED</reactionmeddrapt>
+  </reaction>
+  <drug>
+     <drugcharacterization>1</drugcharacterization>
+     <medicinalproduct>VIOXX</medicinalproduct>
+     <drugadministrationroute>048</drugadministrationroute>
+     <drugindication>PAIN</drugindication>
+     <drugstartdateformat>102</drugstartdateformat>
+     <drugstartdate>20000918</drugstartdate>
+     <drugenddateformat>102</drugenddateformat>
+     <drugenddate>20010501</drugenddate>
+     <drugtreatmentduration>8</drugtreatmentduration>
+     <drugtreatmentdurationunit>802</drugtreatmentdurationunit>
+  </drug>
+  <drug>
+     <drugcharacterization>1</drugcharacterization>
+     <medicinalproduct>VIOXX</medicinalproduct>
+     <drugadministrationroute>048</drugadministrationroute>
+     <drugindication>OSTEOARTHRITIS</drugindication>
+     <drugstartdateformat>102</drugstartdateformat>
+     <drugstartdate>20000918</drugstartdate>
+     <drugenddateformat>102</drugenddateformat>
+     <drugenddate>20010501</drugenddate>
+     <drugtreatmentduration>8</drugtreatmentduration>
+     <drugtreatmentdurationunit>802</drugtreatmentdurationunit>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>OS-CAL + D</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>MAGNESIUM SULFATE</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>POTASSIUM CHLORIDE</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>ROCALTROL</medicinalproduct>
+     <drugadministrationroute>048</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>SYNTHROID</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>SYNTHROID</medicinalproduct>
+     <drugadministrationroute>048</drugadministrationroute>
+     <drugstartdateformat>102</drugstartdateformat>
+     <drugstartdate>20010401</drugstartdate>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>PRILOSEC</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>REGLAN</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>REGLAN</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>AMBIEN</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+     <drugstartdateformat>102</drugstartdateformat>
+     <drugstartdate>20000101</drugstartdate>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>DITROPAN XL</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>AMITRIPTYLINE HYDROCHLORIDE</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+     <drugindication>GENERALISED ANXIETY DISORDER</drugindication>
+     <drugstartdateformat>102</drugstartdateformat>
+     <drugstartdate>19990101</drugstartdate>
+     <drugenddateformat>102</drugenddateformat>
+     <drugenddate>20010101</drugenddate>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>CLARITIN</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>CLARITIN-D</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>LASIX</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+     <drugindication>SWELLING</drugindication>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>SLOW-K</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+     <drugindication>SWELLING</drugindication>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>PREMARIN</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>QUININE</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>FLONASE</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>TESSALON</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  <drug>
+     <drugcharacterization>2</drugcharacterization>
+     <medicinalproduct>PERCOCET</medicinalproduct>
+     <drugadministrationroute>065</drugadministrationroute>
+  </drug>
+  </patient>
+  </safetyreport>
+</ichicsr>
+

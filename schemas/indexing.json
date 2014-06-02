@@ -1,0 +1,16 @@
+{
+  "settings": {
+    "index": {
+      "refresh_interval": "30s"
+    },
+    "analysis": {
+      "analyzer": {
+        "uppercase_not_tokenized": {
+          "type": "custom",
+          "tokenizer": "keyword",
+          "filter": ["uppercase"]
+        }
+      }
+    }
+  }
+}
