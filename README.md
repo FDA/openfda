@@ -13,7 +13,7 @@ This repository contains the code which powers the `api.fda.gov/drug/event.json`
 
 * An [Elasticsearch](http://www.elasticsearch.org/) schema for the Adverse Event JSON format.
 
-* A Node.js API Server written with [Express](http://expressjs.com/), [Elasticsearch.js](http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/) and [Elastic.js](http://www.fullscale.co/elasticjs/) that communicates with Elasticsearch and provides the `api.fda.gov/drug/event.json` interface (documented in detail at http://open.fda.gov).
+* A [Node.js](https://github.com/joyent/node) API Server written with [Express](http://expressjs.com/), [Elasticsearch.js](http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/) and [Elastic.js](http://www.fullscale.co/elasticjs/) that communicates with Elasticsearch and provides the `api.fda.gov/drug/event.json` interface (documented in detail at http://open.fda.gov).
 
 # Prerequisites
 
