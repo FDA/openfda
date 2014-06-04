@@ -72,7 +72,7 @@ class ExtractZip(luigi.Task):
     os.system('mkdir -p "%s"' % self.output().path)
     for zip_file in glob.glob(src_dir + '/*.[Zz][Ii][Pp]'):
       extract_dir = join(self.output().path, basename(zip_file).split('.')[0])
-      os.system('unzip -d %(extract_dir)s %(zip)s' % locals())
+      os.system('unzip -d %(extract_dir)s %(zip_file)s' % locals())
 
     # AERS SGM records don't always properly escape &
     for sgm in glob.glob(self.output().path + '/*/sgml/*.SGM'):
