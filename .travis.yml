@@ -7,3 +7,4 @@ install:
 script:
   - python setup.py test
   - pushd api/faers && npm test && popd
+
