@@ -1,0 +1,9 @@
+language: python
+python:
+  - "2.7"
+install:
+  - python setup.py develop
+  - pushd api/faers && npm install && popd
+script:
+  - python setup.py test
+  - pushd api/faers && npm test && popd

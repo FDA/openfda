@@ -31,4 +31,5 @@ setuptools.setup(
               'openfda.spl',
               ],
   zip_safe=False,
+  test_suite = 'nose.collector',
 )
