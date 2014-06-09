@@ -1,6 +1,8 @@
 openFDA
 =======
 
+[![Build Status](https://travis-ci.org/FDA/openfda.svg?branch=master)](https://travis-ci.org/FDA/openfda)
+
 openFDA is a research project to provide open APIs, raw data downloads, documentation and examples, and a developer community for an important collection of FDA public datasets.
 
 *Please note that openFDA is a beta research project and not for clinical use. While we make every effort to ensure that data and logic are accurate, you should assume all results are unvalidated.*
