@@ -33,7 +33,7 @@ def combine(product_file,
             json_out):
   json_output_file = open(json_out, 'w')
 
-  product = csv.DictReader(product_file, delimiter='\t')
+  product = csv.DictReader(open(product_file), delimiter='\t')
   label = read_json_file(open(spl_extract))
   rx = read_json_file(open(rx_extract))
   unii = read_json_file(open(unii_extract))
