@@ -107,24 +107,24 @@ class DownloadRXNorm(luigi.Task):
     download(RXNORM_DOWNLOAD, self.output().path)
 
 
-def ListZipFilesInZip(zip_filename):
+def list_zip_files_in_zip(zip_filename):
   return subprocess.check_output("unzip -l %s | grep zip | awk '{print $4}'" % zip_filename,
                                  shell=True).strip().split('\n')
 
 
-def ListXMLFileInZip(zip_filename):
+def list_xml_file_in_zip(zip_filename):
   return subprocess.check_output("unzip -l %s | grep xml | awk '{print $4}'" % zip_filename,
                                  shell=True).strip()
 
 
 def ExtractXMLFromNestedZip(zip_filename, output_dir):
-  for child_zip_filename in ListZipFilesInZip(zip_filename):
+  for child_zip_filename in list_zip_files_in_zip(zip_filename):
     temp_zip_filename = '%(output_dir)s/child.zip' % locals()
 
     cmd = 'unzip -p %(zip_filename)s %(child_zip_filename)s > %(temp_zip_filename)s' % locals()
     os.system(cmd)
 
-    xml_filename = ListXMLFileInZip(temp_zip_filename)
+    xml_filename = list_xml_file_in_zip(temp_zip_filename)
     cmd = 'unzip -p %(temp_zip_filename)s %(xml_filename)s > %(output_dir)s/%(xml_filename)s' % locals()
     os.system(cmd)
 
