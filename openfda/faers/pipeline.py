@@ -9,7 +9,6 @@ from bs4 import BeautifulSoup
 import glob
 import leveldb
 import logging
-import leveldb
 import luigi
 import os
 from os.path import join, basename, dirname
