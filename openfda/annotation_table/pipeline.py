@@ -46,23 +46,9 @@ NDC_DOWNLOAD_PAGE = \
   'http://www.fda.gov/drugs/informationondrugs/ucm142438.htm'
 
 
-def Download(url, output_filename):
+def download(url, output_filename):
+  os.system('mkdir -p %s' % dirname(output_filename))
   os.system("curl '%s' > '%s'" % (url, output_filename))
-
-
-def DownloadNDCDatabaseFromPage(page_url, output_filename):
-  zip_url = None
-
-  soup = BeautifulSoup(urllib2.urlopen(NDC_DOWNLOAD_PAGE).read())
-  for a in soup.find_all(href=re.compile('.*.zip')):
-    if 'NDC Database File' in a.text:
-      zip_url = 'http://www.fda.gov' + a['href']
-      break
-
-  if not zip_url:
-    logging.fatal('NDC database file not found!')
-
-  Download(zip_url, output_filename)
 
 
 class DownloadSPL(luigi.Task):
@@ -73,10 +59,9 @@ class DownloadSPL(luigi.Task):
     return luigi.LocalTarget(join(BASE_DIR, 'spl/raw'))
 
   def run(self):
-    os.system('mkdir -p %s' % self.output().path)
     for url in SPL_DOWNLOADS:
       filename = join(self.output().path, url.split('/')[-1])
-      Download(url, filename)
+      download(url, filename)
 
 
 class DownloadNDC(luigi.Task):
@@ -87,8 +72,17 @@ class DownloadNDC(luigi.Task):
     return luigi.LocalTarget(join(BASE_DIR, 'ndc/raw/ndc_database.zip'))
 
   def run(self):
-    os.system('mkdir -p %s' % dirname(self.output().path))
-    DownloadNDCDatabaseFromPage(NDC_DOWNLOAD_PAGE, self.output().path)
+    zip_url = None
+    soup = BeautifulSoup(urllib2.urlopen(NDC_DOWNLOAD_PAGE).read())
+    for a in soup.find_all(href=re.compile('.*.zip')):
+      if 'NDC Database File' in a.text:
+        zip_url = 'http://www.fda.gov' + a['href']
+        break
+
+    if not zip_url:
+      logging.fatal('NDC database file not found!')
+
+    download(zip_url, self.output().path)
 
 
 class DownloadUNII(luigi.Task):
@@ -99,8 +93,7 @@ class DownloadUNII(luigi.Task):
     return luigi.LocalTarget(join(BASE_DIR, 'unii/raw/pharmacologic_class.zip'))
 
   def run(self):
-    os.system('mkdir -p %s' % dirname(self.output().path))
-    Download(PHARM_CLASS_DOWNLOAD, self.output().path)
+    download(PHARM_CLASS_DOWNLOAD, self.output().path)
 
 
 class DownloadRXNorm(luigi.Task):
@@ -111,8 +104,7 @@ class DownloadRXNorm(luigi.Task):
     return luigi.LocalTarget(join(BASE_DIR, 'rxnorm/raw/rxnorm_mappings.zip'))
 
   def run(self):
-    os.system('mkdir -p %s' % dirname(self.output().path))
-    Download(RXNORM_DOWNLOAD, self.output().path)
+    download(RXNORM_DOWNLOAD, self.output().path)
 
 
 def ListZipFilesInZip(zip_filename):
