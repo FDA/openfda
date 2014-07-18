@@ -2,6 +2,7 @@
 
 import leveldb
 import simplejson as json
+from openfda import parallel
 
 
 def read_json_file(json_file):
@@ -123,15 +124,14 @@ def AnnotateEvent(event, harmonized_dict):
   event['@timestamp'] = date[0:4] + '-' + date[4:6] + '-' + date[6:8]
 
 
-class AnnotateMapper(object):
+class AnnotateMapper(parallel.Mapper):
   def __init__(self, harmonized_file):
     self.harmonized_file = harmonized_file
 
-  def __call__(self, input_file, map_output):
-    event_db = leveldb.LevelDB(input_file)
+  def map_shard(self, map_input, map_output):
     harmonized_dict = read_harmonized_file(open(self.harmonized_file))
 
-    for i, (case_number, event_raw) in enumerate(event_db.RangeIter()):
+    for case_number, event_raw in map_input:
       event = json.loads(event_raw)
       AnnotateEvent(event, harmonized_dict)
       map_output.add(case_number, json.dumps(event))

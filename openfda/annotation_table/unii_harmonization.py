@@ -1,10 +1,10 @@
 #!/usr/bin/python
-
 """
-Extract fields from the SPL Pharmalogical Class Indexing Files.
+Extract data from the class_indexing file and join it to SPL set_id.
 
-Note: the set_id in these XMLs is NOT the set_id in the standard SPL,
-there is nothing that relates to the set_id in the XML file!
+
+Also, the set_id in the xml is NOT the set_id in the SPL, there is nothing
+that relates to the set_id in the XML file!
 
 Inputs:
         1) Directory filled with xml files that were extracted from
@@ -14,19 +14,19 @@ Inputs:
 """
 
 import csv
-import extract_unii
 import fnmatch
 import os
+
+import extract_unii
+from openfda import parallel_runner
 import simplejson as json
 
-from openfda import parallel_runner
-from openfda.spl import extract
 
 def harmonization_extract_worker(args):
   filename = args[0]
   name_queue = args[1]
   try:
-    tree = extract.parse_xml(filename)
+    tree = extract_unii.parse_xml(filename)
     harmonized = {}
     unii_list = []
     intermediate = []
@@ -34,18 +34,21 @@ def harmonization_extract_worker(args):
     harmonized['unii'] = extract_unii.extract_unii(tree)
     harmonized['set_id'] = extract_unii.extract_set_id(tree)
     harmonized['name'] = extract_unii.extract_unii_name(tree)
-    # zipping together two arrays, since they came from the same xpath locations
-    # these are the NUI codes and their respective names
-    # we might be able to get the names from somewhere else and avoid the zip
+    #zipping together two arrays, since they came from the same xpath locations
+    #these are the NUI codes and their respective names
+    #we might be able to get the names from somewhere else and avoid the zip
     intermediate = zip(extract_unii.extract_unii_other_code(tree),
                        extract_unii.extract_unii_other_name(tree))
+    # print intermediate
     header = ['number', 'name']
     harmonized['va'] = [dict(zip(header, s)) for s in intermediate]
+    # unii_list[harmonized['unii_name']] = harmonized
     unii_list.append(harmonized)
     name_queue.put(unii_list)
   except Exception as inst:
     print filename + 'has a problem'
     print inst
+
 
 def harmonize_unii(out_file, product_file, class_index_dir):
   out = open(out_file, 'w')
@@ -53,11 +56,11 @@ def harmonize_unii(out_file, product_file, class_index_dir):
 
   ndc_dict = {}
   for row in meta_file:
-    # Building the ndc_dict which is the out_fileer data structure of the final
-    # loop. A little weird because there are duplicate set_id entries in the
-    # Product file. Setting the key of the ndc_dict as the substance name
-    # and then checking to see if the set_id is already in value list of
-    # that key.
+
+    # Building the ndc_dict which is the out_fileer data structure of the final loop
+    # A little weird because there are duplicate set_id entries in the Product
+    # file. Setting the key of the ndc_dict as the substance name and then
+    # checking to see if the set_id is already in value list of that key.
     this_spl_id = row['PRODUCTID'].split('_')[1]
     this_substance = row['SUBSTANCENAME']
 
@@ -68,16 +71,24 @@ def harmonize_unii(out_file, product_file, class_index_dir):
     else:
       ndc_dict[this_spl_id] = [s.lstrip() for s in this_substance.split(';')]
 
+
+
   xmls = []
+  # Grab all of the xml files
   for root, _, filenames in os.walk(class_index_dir):
     for filename in fnmatch.filter(filenames, '*.xml'):
       xmls.append(os.path.join(root, filename))
-
+  # call async worker
   rows = parallel_runner.parallel_extract(xmls, harmonization_extract_worker)
 
   combo = []
 
-  # Handles the many-to-many relationship of ingredients to products.
+    # Loop over ndc_dict, split its key, look for each token as a separate
+    # UNII element, if it is one, then add it to the unii_info dict for this
+    # loop cycle, once done with all of the tokenized keys, then loop over each
+    # set_id in the ndc_dict value list and push a combine record onto the
+    # list that will be the output.
+    # Loop handles the many-to-many relationship of ingredients to products.
   unii_pivot = {}
   for key, value in ndc_dict.iteritems():
     for substance_list in value:

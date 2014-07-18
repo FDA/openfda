@@ -19,12 +19,17 @@ var ELASTICSEARCH_QUERY_ERROR = 'ElasticsearchQueryError';
 var SUPPORTED_QUERY_RE = '^[0-9a-zA-Z\.\_\:\(\)\"\\[\\]\{\}\\-\\+\>\<\= ]+$';
 
 var DATE_FIELDS = [
+  // FAERS
   'drugstartdate',
   'drugenddate',
   'patient.patientdeath.patientdeathdate',
   'receiptdate',
   'receivedate',
-  'transmissiondate'
+  'transmissiondate',
+
+  // RES
+  'report_date',
+  'recall_initiation_date'
 ];
 
 exports.SupportedQueryString = function(query) {
@@ -41,6 +46,11 @@ exports.ReplaceExact = function(search_or_count) {
 
 exports.BuildQuery = function(params) {
   q = ejs.Request();
+
+  if (!params.search && !params.count) {
+    q.query(ejs.MatchAllQuery());
+  }
+
   if (params.search) {
     if (!exports.SupportedQueryString(params.search)) {
       throw {

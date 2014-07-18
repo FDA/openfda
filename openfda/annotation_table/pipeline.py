@@ -20,27 +20,27 @@ import urllib2
 from openfda.annotation_table import combine_harmonization
 from openfda.annotation_table import rxnorm_harmonization
 from openfda.annotation_table import unii_harmonization
+from openfda.spl import process_barcodes
 from openfda.spl import spl_harmonization
-
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 BASE_DIR = './data/'
 
-
+DAILYMED_PREFIX = 'ftp://public.nlm.nih.gov/nlmdata/.dailymed/'
 SPL_DOWNLOADS = [
-  'ftp://public.nlm.nih.gov/nlmdata/.dailymed/dm_spl_release_human_rx_part1.zip',
-  'ftp://public.nlm.nih.gov/nlmdata/.dailymed/dm_spl_release_human_rx_part2.zip',
-  'ftp://public.nlm.nih.gov/nlmdata/.dailymed/dm_spl_release_human_otc_part1.zip',
-  'ftp://public.nlm.nih.gov/nlmdata/.dailymed/dm_spl_release_human_otc_part2.zip',
-  'ftp://public.nlm.nih.gov/nlmdata/.dailymed/dm_spl_release_human_otc_part3.zip',
-  'ftp://public.nlm.nih.gov/nlmdata/.dailymed/dm_spl_release_homeopathic.zip'
+  DAILYMED_PREFIX + 'dm_spl_release_human_rx_part1.zip',
+  DAILYMED_PREFIX + 'dm_spl_release_human_rx_part2.zip',
+  DAILYMED_PREFIX + 'dm_spl_release_human_otc_part1.zip',
+  DAILYMED_PREFIX + 'dm_spl_release_human_otc_part2.zip',
+  DAILYMED_PREFIX + 'dm_spl_release_human_otc_part3.zip',
+  DAILYMED_PREFIX + 'dm_spl_release_homeopathic.zip'
 ]
 
 PHARM_CLASS_DOWNLOAD = \
-  'ftp://public.nlm.nih.gov/nlmdata/.dailymed/pharmacologic_class_indexing_spl_files.zip'
+  DAILYMED_PREFIX + 'pharmacologic_class_indexing_spl_files.zip'
 
 RXNORM_DOWNLOAD = \
-  'ftp://public.nlm.nih.gov/nlmdata/.dailymed/rxnorm_mappings.zip'
+  DAILYMED_PREFIX + 'rxnorm_mappings.zip'
 
 NDC_DOWNLOAD_PAGE = \
   'http://www.fda.gov/drugs/informationondrugs/ucm142438.htm'
@@ -108,27 +108,27 @@ class DownloadRXNorm(luigi.Task):
 
 
 def list_zip_files_in_zip(zip_filename):
-  return subprocess.check_output("unzip -l %s | grep zip | awk '{print $4}'" % zip_filename,
-                                 shell=True).strip().split('\n')
+  return subprocess.check_output("unzip -l %s | \
+                                  grep zip | \
+                                  awk '{print $4}'" % zip_filename,
+                                  shell=True).strip().split('\n')
 
-
-def list_xml_file_in_zip(zip_filename):
-  return subprocess.check_output("unzip -l %s | grep xml | awk '{print $4}'" % zip_filename,
-                                 shell=True).strip()
-
-
-def ExtractXMLFromNestedZip(zip_filename, output_dir):
+def ExtractXMLFromNestedZip(zip_filename, output_dir, exclude_images=True):
   for child_zip_filename in list_zip_files_in_zip(zip_filename):
-    temp_zip_filename = '%(output_dir)s/child.zip' % locals()
-
-    cmd = 'unzip -p %(zip_filename)s %(child_zip_filename)s > %(temp_zip_filename)s' % locals()
+    base_zip = basename(child_zip_filename)
+    target_dir = base_zip.split('.')[0]
+    cmd = 'unzip -j -d %(output_dir)s/%(target_dir)s \
+                       %(zip_filename)s \
+                       %(child_zip_filename)s' % locals()
     os.system(cmd)
 
-    xml_filename = list_xml_file_in_zip(temp_zip_filename)
-    cmd = 'unzip -p %(temp_zip_filename)s %(xml_filename)s > %(output_dir)s/%(xml_filename)s' % locals()
-    os.system(cmd)
+    cmd = 'unzip %(output_dir)s/%(target_dir)s/%(base_zip)s -d \
+                   %(output_dir)s/%(target_dir)s' % locals()
+    if exclude_images:
+      cmd += ' -x *.jpg'
 
-    os.system('rm %(temp_zip_filename)s' % locals())
+    os.system(cmd)
+    os.system('rm %(output_dir)s/%(target_dir)s/%(base_zip)s' % locals())
 
 
 class ExtractNDC(luigi.Task):
@@ -142,7 +142,8 @@ class ExtractNDC(luigi.Task):
     zip_filename = self.input().path
     output_filename = self.output().path
     os.system('mkdir -p %s' % dirname(self.output().path))
-    cmd = 'unzip -p %(zip_filename)s product.txt > %(output_filename)s' % locals()
+    cmd = 'unzip -p %(zip_filename)s product.txt > \
+                    %(output_filename)s' % locals()
     os.system(cmd)
 
 
@@ -152,13 +153,14 @@ class ExtractRXNorm(luigi.Task):
 
   def output(self):
     return luigi.LocalTarget(join(BASE_DIR,
-      'rxnorm/extracted/rxnorm_mappings.txt'))
+                                  'rxnorm/extracted/rxnorm_mappings.txt'))
 
   def run(self):
     zip_filename = self.input().path
     output_filename = self.output().path
     os.system('mkdir -p %s' % dirname(self.output().path))
-    cmd = 'unzip -p %(zip_filename)s rxnorm_mappings.txt > %(output_filename)s' % locals()
+    cmd = 'unzip -p %(zip_filename)s rxnorm_mappings.txt > \
+                    %(output_filename)s' % locals()
     os.system(cmd)
 
 
@@ -191,11 +193,49 @@ class ExtractSPL(luigi.Task):
       zip_dir = basename(zip_filename).split('.')[0] + '_xml'
       output_dir = join(self.output().path, zip_dir)
       os.system('mkdir -p %s' % output_dir)
+      if 'otc' in zip_filename:
+        exclude_images = False
+      else:
+        exclude_images = True
+
       pool.apply_async(ExtractXMLFromNestedZip,
-                       args=(zip_filename, output_dir))
+                       args=(zip_filename,
+                       output_dir,
+                       exclude_images))
 
     pool.close()
     pool.join()
+
+class ExtractUPCFromSPL(luigi.Task):
+  def requires(self):
+    return ExtractSPL()
+
+  def output(self):
+    return luigi.LocalTarget(join(BASE_DIR, 'spl/upc_xml/otc-bars.xml'))
+
+  def run(self):
+    src_dir = self.input().path
+    output_file = self.output().path
+    os.system('mkdir -p %s' % dirname(self.output().path))
+    cmd = 'find %(src_dir)s -name "*.jpg" \
+                            -exec zbarimg -q --xml {} \; > \
+                          %(output_file)s' % locals()
+    os.system(cmd)
+
+
+class UpcXml2JSON(luigi.Task):
+  def requires(self):
+    return ExtractUPCFromSPL()
+
+  def output(self):
+    return luigi.LocalTarget(join(BASE_DIR, 'spl/upc_json/otc-bars.json'))
+
+  def run(self):
+    src_file = self.input().path
+    output_file = self.output().path
+
+    os.system('mkdir -p %s' % dirname(self.output().path))
+    process_barcodes.XML2JSON(src_file, output_file)
 
 
 class RXNormHarmonizationJSON(luigi.Task):
@@ -246,8 +286,9 @@ class SPLHarmonizationJSON(luigi.Task):
 
 class CombineHarmonization(luigi.Task):
   def requires(self):
-    return [ SPLHarmonizationJSON(), UNIIHarmonizationJSON(),
-             ExtractNDC(), RXNormHarmonizationJSON() ]
+    return [SPLHarmonizationJSON(), UNIIHarmonizationJSON(),
+            ExtractNDC(), RXNormHarmonizationJSON(),
+            UpcXml2JSON()]
 
   def output(self):
     return luigi.LocalTarget(join(BASE_DIR,
@@ -258,11 +299,13 @@ class CombineHarmonization(luigi.Task):
     unii_file = self.input()[1].path
     ndc_file = self.input()[2].path
     rxnorm_file = self.input()[3].path
+    upc_file = self.input()[4].path
     json_output_file = self.output().path
     combine_harmonization.combine(ndc_file,
                                   spl_file,
                                   rxnorm_file,
                                   unii_file,
+                                  upc_file,
                                   json_output_file)
 
 
