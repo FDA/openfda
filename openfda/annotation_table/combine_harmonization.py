@@ -8,6 +8,7 @@ Inputs:
         2) SPL extract
         3) RX Norm extract
         4) UNII extract
+        5) UPC extract
 
 Process: Serially merge each of the input files
 
@@ -16,6 +17,8 @@ Process: Serially merge each of the input files
         2) Combine Output of step 1 with RX Norm Extract
            Join Key: spl_set_id and spl_version
         3) Combine Output of step 2 with UNII Extract
+           Join Key: spl_set_id
+        4) Combine Output of step 3 with UPC Extract
            Join Key: spl_set_id
 """
 
@@ -26,17 +29,51 @@ def read_json_file(json_file):
   for line in json_file:
     yield json.loads(line)
 
+def _joinable_dict(record_list, join_key_list):
+  joinable_dict = {}
+  key_seperator = ''
+
+  if len(join_key_list) > 1:
+    key_seperator = ':'
+
+  for record in record_list:
+    join_key = key_seperator.join([record[s] for s in join_key_list])
+    if join_key in joinable_dict:
+      joinable_dict[join_key].append(record)
+    else:
+      joinable_dict[join_key] = [record]
+  return joinable_dict
+
+def _combine_dicts(record_dict, new_data_dict, new_data_key):
+  record_list = []
+  for join_key, record_value in record_dict.iteritems():
+    for pivot in record_value:
+      joined_dict = {}
+      if join_key in new_data_dict:
+        for new_data_value in new_data_dict[join_key]:
+          joined_dict = dict(pivot.items() + new_data_value.items())
+          record_list.append(joined_dict)
+      else:
+        if new_data_key == None:
+          continue
+        joined_dict = dict(pivot.items() + {new_data_key: []}.items())
+        record_list.append(joined_dict)
+  return record_list
+
+
 def combine(product_file,
             spl_extract,
             rx_extract,
             unii_extract,
+            upc_extract,
             json_out):
   json_output_file = open(json_out, 'w')
 
-  product = csv.DictReader(product_file, delimiter='\t')
+  product = csv.DictReader(open(product_file), delimiter='\t')
   label = read_json_file(open(spl_extract))
-  rx = read_json_file(open(rx_extract))
+  rxs = read_json_file(open(rx_extract))
   unii = read_json_file(open(unii_extract))
+  upcs = read_json_file(open(upc_extract))
 
   all_products = []
   for row in product:
@@ -58,7 +95,8 @@ def combine(product_file,
 
     all_products.append(clean_product)
 
-  all_labels = {}
+  joinable_labels = {}
+
   for spl_data in label:
     clean_label = {}
     clean_label['spl_set_id'] = spl_data['spl_set_id']
@@ -70,50 +108,29 @@ def combine(product_file,
        spl_data['OriginalPackagerProductNDSs']
     clean_label['package_ndc'] = spl_data['PackageNDCs']
 
-    all_labels[clean_label['id']] = clean_label
+    joinable_labels[clean_label['id']] = [clean_label]
 
-  all_uniis = {}
-  for unii_data in unii:
-    hid = unii_data['spl_id']
-    all_uniis[hid] = {'unii_indexing': unii_data['unii_indexing']}
+  # Adding labels
+  joinable_products = _joinable_dict(all_products, ['id'])
+  record_list = _combine_dicts(joinable_labels, joinable_products, None)
 
-  combo = []
-  for product in all_products:
-    p = {}
-    product_id = product['id']
-    if product_id in all_labels:
-      label_with_unii = dict(product.items() + all_labels[product_id].items())
-      if product_id in all_uniis:
-        p = dict(label_with_unii.items() + all_uniis[product_id].items())
+  # Adding UNII
+  joinable_record_dict = _joinable_dict(record_list, ['id'])
+  joinable_unii = _joinable_dict(unii, ['spl_id'])
+  record_list = _combine_dicts(joinable_record_dict,
+                               joinable_unii,
+                               'unii_indexing')
+  # Adding RXNorm
+  joinable_record_dict = _joinable_dict(record_list,
+                                        ['spl_set_id', 'spl_version'])
+  joinable_rxnorm = _joinable_dict(rxs, ['spl_set_id', 'spl_version'])
+  record_list = _combine_dicts(joinable_record_dict, joinable_rxnorm, 'rxnorm')
 
-      else:
-        p = dict(label_with_unii.items() + {'unii_indexing': []}.items())
+  # Adding UPC
+  joinable_record_dict = _joinable_dict(record_list, ['spl_set_id'])
+  joinable_upc = _joinable_dict(upcs, ['set_id'])
+  record_list = _combine_dicts(joinable_record_dict, joinable_upc, 'upc')
 
-      combo.append(p)
-
-  combo2 = []
-  rx_dict = {}
-  for this_rx in rx:
-    xid = this_rx['spl_set_id'] + ':' + this_rx['spl_version']
-    rx_dict[xid] = this_rx
-
-  combo_dict = {}
-  for row in combo:
-    cid = row['spl_set_id'] + ':' + row['spl_version']
-    if cid in combo_dict:
-      combo_dict[cid].append(row)
-    else:
-      combo_dict[cid] = [row]
-
-  for combo_key, combo_value in combo_dict.iteritems():
-    for pivot in combo_value:
-      tmp_dict = {}
-      if combo_key in rx_dict:
-        tmp_dict = dict(pivot.items() + rx_dict[combo_key].items())
-      else:
-        tmp_dict = dict(pivot.items() + {'rxnorm': []}.items())
-      combo2.append(tmp_dict)
-
-  for row in combo2:
+  for row in record_list:
     json.dump(row, json_output_file, encoding='utf-8-sig')
     json_output_file.write('\n')

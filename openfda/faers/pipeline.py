@@ -7,15 +7,16 @@ importing into Elasticsearch.
 
 from bs4 import BeautifulSoup
 import glob
-import leveldb
 import logging
-import luigi
 import os
 from os.path import join, basename, dirname
 import re
 import requests
 import sys
 import urllib2
+
+import leveldb
+import luigi
 
 from openfda import parallel
 from openfda.annotation_table.pipeline import CombineHarmonization
@@ -30,7 +31,6 @@ FAERS_HISTORIC = ('http://www.fda.gov/Drugs/GuidanceCompliance'
   'RegulatoryInformation/Surveillance/AdverseDrugEffects/ucm083765.htm')
 FAERS_CURRENT = ('http://www.fda.gov/Drugs/GuidanceCompliance'
   'RegulatoryInformation/Surveillance/AdverseDrugEffects/ucm082193.htm')
-
 
 class DownloadDataset(luigi.Task):
   def __init__(self):
@@ -86,6 +86,7 @@ class XML2JSON(luigi.Task):
     return luigi.LocalTarget(join(BASE_DIR, 'faers/json/'))
 
   def run(self):
+    print 'Pipelining....'
     # AERS_SGML_2007q4.ZIP has files in sqml
     filenames = glob.glob(self.input().path + '/AERS_SGML_*/s[gq]ml/*.SGM')
     filenames.extend(glob.glob(self.input().path + '/FAERS_XML*/xml/*.xml'))
@@ -97,11 +98,12 @@ class XML2JSON(luigi.Task):
       logging.info('Adding input file to pool: %s', filename)
       input_shards.append(filename)
 
-    parallel.mapreduce(input_shards,
-                       xml_to_json.extract_safety_reports,
-                       xml_to_json.merge_safety_reports,
-                       self.output().path,
-                       10)
+    parallel.mapreduce(
+      parallel.Collection.from_list(input_shards),
+      xml_to_json.ExtractSafetyReportsMapper(),
+      xml_to_json.MergeSafetyReportsReducer(),
+      self.output().path,
+      10)
 
 
 class AnnotateJSON(luigi.Task):
@@ -114,9 +116,9 @@ class AnnotateJSON(luigi.Task):
   def run(self):
     harmonized_file = self.input()[0].path
     parallel.mapreduce(
-      glob.glob(self.input()[1].path + '*-of-*'),
+      parallel.Collection.from_sharded(self.input()[1].path),
       annotate.AnnotateMapper(harmonized_file),
-      parallel.identity_reducer,
+      parallel.IdentityReducer(),
       self.output().path,
       num_shards=10,
       map_workers=2)
@@ -134,24 +136,24 @@ class ResetElasticSearch(luigi.Task):
     os.system('touch "%s"' % self.output().path)
 
 
-def load_json_mapper(input_file, map_output):
-  event_db = leveldb.LevelDB(input_file)
-  json_batch = []
-  def _post_batch():
-    response = requests.post(
-      'http://localhost:9200/drugevent/safetyreport/_bulk',
-      data='\n'.join(json_batch))
-    del json_batch[:]
-    if response.status_code != 200:
-      logging.info('Bad response: %s', response)
+class LoadJSONMapper(parallel.Mapper):
+  def map_shard(self, map_input, map_output):
+    json_batch = []
+    def _post_batch():
+      response = requests.post(
+        'http://localhost:9200/drugevent/safetyreport/_bulk',
+        data='\n'.join(json_batch))
+      del json_batch[:]
+      if response.status_code != 200:
+        logging.info('Bad response: %s', response)
 
-  for i, (case_number, event_raw) in enumerate(event_db.RangeIter()):
-    json_batch.append('{ "index" : {} }')
-    json_batch.append(event_raw)
-    if len(json_batch) > 1000:
-      _post_batch()
+    for i, (case_number, event_raw) in enumerate(map_input):
+      json_batch.append('{ "index" : {} }')
+      json_batch.append(event_raw)
+      if len(json_batch) > 1000:
+        _post_batch()
 
-  _post_batch()
+    _post_batch()
 
 
 class LoadJSON(luigi.Task):
@@ -163,9 +165,9 @@ class LoadJSON(luigi.Task):
 
   def run(self):
     parallel.mapreduce(
-      glob.glob(self.input()[1].path + '*-of-*'),
-      load_json_mapper,
-      parallel.null_reducer,
+      parallel.Collection.from_sharded(self.input()[1].path),
+      LoadJSONMapper(),
+      parallel.NullReducer,
       output_prefix=self.output().path,
       num_shards=1,
       map_workers=1)

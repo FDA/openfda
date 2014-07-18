@@ -1,6 +1,7 @@
-// FAERS API
+// FAERS and RES API
 //
-// Exposes /drug/event.json and /healthcheck GET endpoints
+// Exposes /drug/event.json, /drug/safety/enforcement.json
+//  and /healthcheck GET endpoints
 
 var ejs = require('elastic.js');
 var elasticsearch = require('elasticsearch');
@@ -11,7 +12,6 @@ var underscore = require('underscore');
 var api_request = require('./api_request.js');
 var elasticsearch_query = require('./elasticsearch_query.js');
 var logging = require('./logging.js');
-
 var META = {
   'disclaimer': 'openFDA is a beta research project and not for clinical ' +
                 'use. While we make every effort to ensure that data is ' +
@@ -33,6 +33,9 @@ var FIELDS_TO_REMOVE = [
   '@timestamp',
   '@case_number'
 ];
+
+var DRUG_EVENT_INDEX = 'drugevent';
+var ALL_ENFORCEMENT_INDEX = 'recall';
 
 var app = express();
 
@@ -66,7 +69,7 @@ var client = new elasticsearch.Client({
 
 app.get('/healthcheck', function(request, response) {
   client.cluster.health({
-    index: 'drugevent',
+    index: DRUG_EVENT_INDEX,
     timeout: 1000 * 60,
     waitForStatus: 'yellow'
   }, function(error, health_response, status) {
@@ -89,10 +92,12 @@ ApiError = function(response, code, message) {
   response.json(HTTP_CODE[code], error_response);
 };
 
-app.get('/drug/event.json', function(request, response) {
+LogRequest = function(request) {
   log.info(request.headers, 'Request Headers');
   log.info(request.query, 'Request Query');
+};
 
+SetHeaders = function(response) {
   response.header('Server', 'open.fda.gov');
   // http://john.sh/blog/2011/6/30/cross-domain-ajax-expressjs-
   // and-access-control-allow-origin.html
@@ -104,9 +109,11 @@ app.get('/drug/event.json', function(request, response) {
   response.header('X-Content-Type-Options', 'nosniff');
   response.header('X-Frame-Options', 'deny');
   response.header('X-XSS-Protection', '1; mode=block');
+};
 
+TryToCheckApiParams = function(request, response) {
   try {
-    var params = api_request.CheckParams(request.query);
+    return api_request.CheckParams(request.query);
   } catch (e) {
     log.error(e);
     if (e.name == api_request.API_REQUEST_ERROR) {
@@ -114,11 +121,14 @@ app.get('/drug/event.json', function(request, response) {
     } else {
       ApiError(response, 'BAD_REQUEST', '');
     }
-    return;
+    return null;
   }
+};
 
+TryToBuildElasticsearchParams = function(params, elasticsearch_index, response) {
   try {
     var es_query = elasticsearch_query.BuildQuery(params);
+    log.info(es_query.toString(), 'Elasticsearch Query');
   } catch (e) {
     log.error(e);
     if (e.name == elasticsearch_query.ELASTICSEARCH_QUERY_ERROR) {
@@ -126,13 +136,11 @@ app.get('/drug/event.json', function(request, response) {
     } else {
       ApiError(response, 'BAD_REQUEST', '');
     }
-    return;
+    return null;
   }
 
-  log.info(es_query.toString(), 'Elasticsearch Query');
-
   var es_search_params = {
-    index: 'drugevent',
+    index: elasticsearch_index,
     body: es_query.toString()
   };
 
@@ -141,16 +149,22 @@ app.get('/drug/event.json', function(request, response) {
     es_search_params.size = params.limit;
   }
 
+  return es_search_params;
+};
+
+TrySearch = function(index, params, es_search_params, response) {
   client.search(es_search_params).then(function(body) {
     if (body.hits.hits.length == 0) {
       ApiError(response, 'NOT_FOUND', 'No matches found!');
-      return;
     }
 
     var response_json = {};
     response_json.meta = underscore.clone(META);
+    if (index == ALL_ENFORCEMENT_INDEX) {
+      response_json.meta.last_updated = "2014-07-11";
+    }
 
-    if (params.search && !params.count) {
+    if (!params.count) {
       response_json.meta.results = {
         'skip': params.skip,
         'limit': params.limit,
@@ -198,6 +212,62 @@ app.get('/drug/event.json', function(request, response) {
     log.error(error);
     ApiError(response, 'SERVER_ERROR', 'Check your request and try again');
   });
+};
+
+EnforcementEndpoint = function(noun) {
+  app.get('/' + noun + '/enforcement.json', function(request, response) {
+    LogRequest(request);
+    SetHeaders(response);
+
+    var params = TryToCheckApiParams(request, response);
+    if (params == null) {
+      return;
+    }
+
+    var product_type_filter = 'product_type:'
+    if (noun == 'drug' || noun == 'device') {
+      product_type_filter += noun + 's';
+    } else if (noun == 'food') {
+      product_type_filter += noun;
+    }
+
+    if (params.search == undefined) {
+      params.search = product_type_filter;
+    } else {
+      params.search += ' AND ' + product_type_filter;
+    }
+
+    var index = ALL_ENFORCEMENT_INDEX;
+    var es_search_params =
+      TryToBuildElasticsearchParams(params, index, response);
+    if (es_search_params == null) {
+      return;
+    }
+
+    TrySearch(index, params, es_search_params, response);
+  });
+};
+EnforcementEndpoint('drug');
+EnforcementEndpoint('food');
+EnforcementEndpoint('device');
+
+app.get('/drug/event.json', function(request, response) {
+  LogRequest(request);
+  SetHeaders(response);
+
+  var params = TryToCheckApiParams(request, response);
+  if (params == null) {
+    return;
+  }
+
+  var index = DRUG_EVENT_INDEX;
+  var es_search_params =
+    TryToBuildElasticsearchParams(params, index, response);
+  if (es_search_params == null) {
+    return;
+  }
+
+  TrySearch(index, params, es_search_params, response);
 });
 
 // From http://strongloop.com/strongblog/

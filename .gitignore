@@ -11,6 +11,6 @@ npm-debug.log
 openfda-*.zip
 openfda.egg-info/
 tmp/
-annotation_table/data/
-faers/data/
-data/
+openfda/annotation_table/data/
+openfda/faers/data/
+openfda/res/data/
