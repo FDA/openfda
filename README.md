@@ -1,7 +1,14 @@
 openFDA
 =======
 
-[![Build Status](https://travis-ci.org/FDA/openfda.svg?branch=master)](https://travis-ci.org/FDA/openfda)
+This repository was forked from https://github.com/FDA/openfda and is being modified by Medullan.
+The goal is to added enhancements that Medullan would like to use into their API with the intention that it will make it into the official openFDA build.
+
+*The Build Status below has been changed to point to Medullan's Travis CI instance which builds this forked repository.*
+
+
+
+[![Build Status](https://api.travis-ci.org/medullan/openfda.svg?branch=master)](https://api.travis-ci.org/medullan/openfda)
 
 openFDA is a research project to provide open APIs, raw data downloads, documentation and examples, and a developer community for an important collection of FDA public datasets.
 
