@@ -1,8 +1,10 @@
 openFDA
 =======
 
+# Medullan Disclaimer
+
 This repository was forked from https://github.com/FDA/openfda and is being modified by Medullan.
-The goal is to added enhancements that Medullan would like to use into their API with the intention that it will make it into the official openFDA build.
+The goal is to add enhancements that Medullan would like to use into the openFDA API with the intention that the changes will make it into the official openFDA build.
 
 *The Build Status below has been changed to point to Medullan's Travis CI instance which builds this forked repository.*
 
