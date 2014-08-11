@@ -25,6 +25,7 @@ $PYTHON_ENV/bin/python setup.py develop
 #
 # Node
 #
-pushd api/faers
+
+cd api/faers
 npm install
-popd
+cd ../..

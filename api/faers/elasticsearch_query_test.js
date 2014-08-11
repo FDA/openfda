@@ -143,4 +143,10 @@ exports.testReplaceExact = function(test) {
 };
 
 
+// Tests for /drug/info.json Name Search
 
+exports.testSupportedQueryString_SearchName = function(test) {
+    supported(test, 'Cymbalta');
+
+    test.done();
+}

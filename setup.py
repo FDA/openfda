@@ -5,9 +5,9 @@ import setuptools
 setuptools.setup(
   name='openfda',
   version='0.01',
-  maintainer='openFDA',
-  maintainer_email='open@fda.hhs.gov',
-  url='http://github.com/fda/openfda',
+  maintainer='Medullan',
+  maintainer_email='mjoseph@medullan.com',
+  url='http://github.com/medullan/openfda',
   install_requires=[
     'BeautifulSoup4',
     'click',

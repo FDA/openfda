@@ -2,7 +2,7 @@
 
 var underscore = require('underscore');
 
-var EXPECTED_PARAMS = ['search', 'count', 'limit', 'skip'];
+var EXPECTED_PARAMS = ['search', 'count', 'limit', 'skip','name'];
 
 exports.API_REQUEST_ERROR = 'ApiRequestError';
 var API_REQUEST_ERROR = exports.API_REQUEST_ERROR;
