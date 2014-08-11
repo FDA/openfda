@@ -80,3 +80,18 @@ exports.testCountMaxLimit = function(test) {
 
   test.done();
 };
+
+
+// NDC /drug/info.json Tests
+var assert = require('assert');
+
+exports.testValidSearchNameParam = function(test) {
+  var request = 'name=Cymbalta';
+  var params = querystring.parse(request);
+
+  var clean_params = api_request.CheckParams(params)
+
+  assert.equal(params.name, 'Cymbalta', "Expected {\"name\":\"Cymbalta\"}")
+
+  test.done();
+};

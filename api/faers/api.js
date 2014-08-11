@@ -148,7 +148,6 @@ TryToBuildElasticsearchParams = function(params, elasticsearch_index, response) 
     es_search_params.from = params.skip;
     es_search_params.size = params.limit;
   }
-
   return es_search_params;
 };
 
@@ -282,4 +281,34 @@ if (process.env.NODE_ENV === 'production') {
 var port = process.env.PORT || 8000;
 app.listen(port, function() {
   console.log('Listening on ' + port);
+});
+
+
+// Endpoint /drug/info.json
+
+
+var DRUG_INFO_INDEX = 'druginfo';
+
+
+app.get('/drug/info.json', function(request, response) {
+  LogRequest(request);
+  SetHeaders(response);
+
+  var params = TryToCheckApiParams(request, response);
+  if (params == null) {
+    return;
+  }
+
+  // Convert api param to ES params
+
+
+
+  var index = null;//DRUG_INFO_INDEX;
+  var es_search_params =
+    TryToBuildElasticsearchParams(params, index, response);
+  if (es_search_params == null) {
+    return;
+  }
+
+  TrySearch(index, params, es_search_params, response);
 });

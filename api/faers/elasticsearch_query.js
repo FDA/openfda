@@ -32,6 +32,11 @@ var DATE_FIELDS = [
   'recall_initiation_date'
 ];
 
+var DRUG_NAME_FIELDS = [
+  'proprietaryName',
+  'nonProprietoryName'
+];
+
 exports.SupportedQueryString = function(query) {
   var supported_query_re = new RegExp(SUPPORTED_QUERY_RE);
   return supported_query_re.test(query);
@@ -47,7 +52,7 @@ exports.ReplaceExact = function(search_or_count) {
 exports.BuildQuery = function(params) {
   q = ejs.Request();
 
-  if (!params.search && !params.count) {
+  if (!params.search && !params.count&&!params.name) {
     q.query(ejs.MatchAllQuery());
   }
 
@@ -59,6 +64,17 @@ exports.BuildQuery = function(params) {
       };
     }
     q.query(ejs.QueryStringQuery(exports.ReplaceExact(params.search)));
+  }
+
+  if(params.name){
+
+    if (!exports.SupportedQueryString(params.name)) {
+      throw {
+        name: ELASTICSEARCH_QUERY_ERROR,
+        message: 'Search not supported: ' + params.name
+      };
+    }
+    q.query(ejs.MultiMatchQuery(DRUG_NAME_FIELDS, params.name));
   }
 
   if (params.count) {
