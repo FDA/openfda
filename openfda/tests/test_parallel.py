@@ -18,7 +18,7 @@ class ParallelTest(unittest.TestCase):
                        '/tmp/test-identity', 
                        2)
     
-    results = sorted(list(parallel.ShardedDB('/tmp/test-identity/', 2)))
+    results = sorted(list(parallel.ShardedDB.open('/tmp/test-identity/')))
     for i in range(10):
       key, value = results[i]
       assert key == '/tmp/test-identity-%d' % i, results[i]
@@ -37,7 +37,7 @@ class ParallelTest(unittest.TestCase):
                        parallel.SumReducer(),
                        '/tmp/test-sum', 5)
     
-    results = dict(parallel.ShardedDB('/tmp/test-sum/', 5))
+    results = dict(parallel.ShardedDB.open('/tmp/test-sum/'))
     for i in range(100):
       assert str(i) in results, str(i)
       value = results[str(i)]

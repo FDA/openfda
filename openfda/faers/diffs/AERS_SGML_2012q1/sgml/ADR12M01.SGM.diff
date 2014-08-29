@@ -1,2 +1,10 @@
-11a12
->   <safetyreport>
+--- ./data/faers/extracted/AERS_SGML_2012q1/sgml/ADR12M01.SGM	2014-07-23 14:16:31.000000000 -0700
++++ /tmp/ADR12M01.SGM	2014-07-23 15:27:05.000000000 -0700
+@@ -9,6 +9,7 @@
+   <messagedateformat>204</messagedateformat>
+   <messagedate>2012060806:47:06</messagedate>
+  </ichicsrmessageheader>
++  <safetyreport>
+    <safetyreportid>8016643-2</safetyreportid>
+    <transmissiondateformat>102</transmissiondateformat>
+    <transmissiondate>20120608</transmissiondate>

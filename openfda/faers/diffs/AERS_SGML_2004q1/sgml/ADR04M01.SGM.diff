@@ -1,3 +1,11 @@
-12,13d11
-<   </patient>
-<   </safetyreport>
+--- ./data/faers/extracted/AERS_SGML_2004q1/sgml/ADR04M01.SGM	2014-07-23 14:08:45.000000000 -0700
++++ /tmp/ADR04M01.SGM	2014-07-23 14:31:05.000000000 -0700
+@@ -9,8 +9,6 @@
+   <messagedateformat>204</messagedateformat>
+   <messagedate>2004112906:32:46</messagedate>
+  </ichicsrmessageheader>
+-  </patient>
+-  </safetyreport>
+   <safetyreport>
+    <safetyreportid>4261823-5</safetyreportid>
+    <transmissiondateformat>102</transmissiondateformat>

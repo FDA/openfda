@@ -29,7 +29,28 @@ var DATE_FIELDS = [
 
   // RES
   'report_date',
-  'recall_initiation_date'
+  'recall_initiation_date',
+
+  // SPL
+  'effective_time',
+
+  // MAUDE
+  'date_manufacturer_received',
+  'date_received',
+  'date_report',
+  'date_returned_to_manufacturer',
+  'device_date_of_manufacture'
+];
+
+// Fields which should be rewritten from field.exact to field_exact
+// in addition to the openfda fields.
+EXACT_FIELDS = [
+  // MAUDE
+  'remedial_action',
+  'source_type',
+  'sequence_number_treatment',
+  'sequence_number_outcome',
+  'type_of_report'
 ];
 
 exports.SupportedQueryString = function(query) {
@@ -40,8 +61,19 @@ exports.SupportedQueryString = function(query) {
 // For the openfda section, we have field_exact rather than field.exact stored
 // in elasticsearch.
 exports.ReplaceExact = function(search_or_count) {
-  return search_or_count.replace(/openfda\.([\w\.]+).exact/g,
+  // openfda section
+  search_or_count = search_or_count.replace(/openfda\.([\w\.]+).exact/g,
     'openfda.$1_exact');
+
+  for (i = 0; i < EXACT_FIELDS.length; i++) {
+    var field = EXACT_FIELDS[i];
+    var field_before = field + '.exact';
+    var field_after = field + '_exact';
+    search_or_count = search_or_count.replace(new RegExp(field_before, 'g'),
+      field_after);
+  }
+
+  return search_or_count;
 };
 
 exports.BuildQuery = function(params) {

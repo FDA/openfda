@@ -1,0 +1,3 @@
+mdr_report_key|patient_sequence_number|date_received|sequence_number_treatment|sequence_number_outcome
+538836|1|01-AUG-04||1,L;2,R;
+1511544|1|08-OCT-09||1,O;

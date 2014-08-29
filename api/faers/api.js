@@ -1,7 +1,5 @@
-// FAERS and RES API
+// OpenFDA APIs
 //
-// Exposes /drug/event.json, /drug/safety/enforcement.json
-//  and /healthcheck GET endpoints
 
 var ejs = require('elastic.js');
 var elasticsearch = require('elasticsearch');
@@ -31,11 +29,32 @@ var HTTP_CODE = {
 // via the API.
 var FIELDS_TO_REMOVE = [
   '@timestamp',
-  '@case_number'
+  '@case_number',
+
+  // MAUDE fields to remove
+  'baseline_510_k_exempt_flag',
+  'baseline_510_k_flag',
+  'baseline_510_k_number',
+  'baseline_brand_name',
+  'baseline_catalog_number',
+  'baseline_date_ceased_marketing',
+  'baseline_date_first_marketed',
+  'baseline_device_family',
+  'baseline_generic_name',
+  'baseline_model_number',
+  'baseline_other_id_number',
+  'baseline_pma_flag',
+  'baseline_pma_number',
+  'baseline_preamendment_flag',
+  'baseline_shelf_life_contained',
+  'baseline_shelf_life_in_months',
+  'baseline_transitional_flag'
 ];
 
-var DRUG_EVENT_INDEX = 'drugevent';
 var ALL_ENFORCEMENT_INDEX = 'recall';
+var DEVICE_EVENT_INDEX = 'deviceevent';
+var DRUG_EVENT_INDEX = 'drugevent';
+var DRUG_LABEL_INDEX = 'druglabel';
 
 var app = express();
 
@@ -160,8 +179,17 @@ TrySearch = function(index, params, es_search_params, response) {
 
     var response_json = {};
     response_json.meta = underscore.clone(META);
+
+    // TODO(mattmo): Pull this data from Elasticsearch or S3
+    // rather than hard coding
     if (index == ALL_ENFORCEMENT_INDEX) {
-      response_json.meta.last_updated = "2014-07-11";
+      response_json.meta.last_updated = "2014-08-06";
+    } else if (index == DEVICE_EVENT_INDEX) {
+      response_json.meta.last_updated = "2014-08-15";
+    } else if (index == DRUG_EVENT_INDEX) {
+      response_json.meta.last_updated = "2014-08-06";
+    } else if (index == DRUG_LABEL_INDEX) {
+      response_json.meta.last_updated = "2014-08-15";
     }
 
     if (!params.count) {
@@ -173,11 +201,19 @@ TrySearch = function(index, params, es_search_params, response) {
 
       response_json.results = [];
       for (i = 0; i < body.hits.hits.length; i++) {
-        var drugevent = body.hits.hits[i]._source;
+        var result = body.hits.hits[i]._source;
         for (j = 0; j < FIELDS_TO_REMOVE.length; j++) {
-          delete drugevent[FIELDS_TO_REMOVE[j]];
+          delete result[FIELDS_TO_REMOVE[j]];
+
+          // For MAUDE. TODO(mattmo): Refactor
+          var device = result.device;
+          if (device) {
+            for (k = 0; k < device.length; k++) {
+              delete device[k][FIELDS_TO_REMOVE[j]];
+            }
+          }
         }
-        response_json.results.push(drugevent);
+        response_json.results.push(result);
       }
       response.json(HTTP_CODE.OK, response_json);
 
@@ -261,6 +297,44 @@ app.get('/drug/event.json', function(request, response) {
   }
 
   var index = DRUG_EVENT_INDEX;
+  var es_search_params =
+    TryToBuildElasticsearchParams(params, index, response);
+  if (es_search_params == null) {
+    return;
+  }
+
+  TrySearch(index, params, es_search_params, response);
+});
+
+app.get('/drug/label.json', function(request, response) {
+  LogRequest(request);
+  SetHeaders(response);
+
+  var params = TryToCheckApiParams(request, response);
+  if (params == null) {
+    return;
+  }
+
+  var index = DRUG_LABEL_INDEX;
+  var es_search_params =
+    TryToBuildElasticsearchParams(params, index, response);
+  if (es_search_params == null) {
+    return;
+  }
+
+  TrySearch(index, params, es_search_params, response);
+});
+
+app.get('/device/event.json', function(request, response) {
+  LogRequest(request);
+  SetHeaders(response);
+
+  var params = TryToCheckApiParams(request, response);
+  if (params == null) {
+    return;
+  }
+
+  var index = DEVICE_EVENT_INDEX;
   var es_search_params =
     TryToBuildElasticsearchParams(params, index, response);
   if (es_search_params == null) {

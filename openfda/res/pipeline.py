@@ -18,6 +18,7 @@ from os.path import join, dirname
 import random
 import requests
 import simplejson as json
+import socket
 import StringIO
 import sys
 import time
@@ -36,9 +37,10 @@ BASE_DIR = './data'
 CURRENT_XML_BASE_URL = ('http://www.accessdata.fda.gov/scripts/'
                         'enforcement/enforce_rpt-Product-Tabs.cfm?'
                         'action=Expand+Index&w=WEEK&lang=eng&xml')
-
-XML_START_DATE = datetime.date(2012, 06, 20)
-XML_END_DATE = datetime.date(2014, 06, 18)
+# TODO(hansnelsen): need to externalize XML_END_DATE so that weekly date
+#                   do not require code changes
+XML_START_DATE = datetime.date(2012, 6, 20)
+XML_END_DATE = datetime.date(2014, 8, 27)
 
 
 # The FDA transitioned from HTML recall events to XML during the summer of 2012.
@@ -49,9 +51,9 @@ XML_END_DATE = datetime.date(2014, 06, 18)
 # to XML date logic a little quirky. These are collectively referred to as
 # CROSSOVER_XML dates.
 
-CROSSOVER_XML_START_DATE = datetime.date(2012, 06, 20)
-CROSSOVER_XML_END_DATE = datetime.date(2012, 06, 27)
-CROSSOVER_XML_WEIRD_DATE = datetime.date(2012, 07, 05)
+CROSSOVER_XML_START_DATE = datetime.date(2012, 6, 20)
+CROSSOVER_XML_END_DATE = datetime.date(2012, 6, 27)
+CROSSOVER_XML_WEIRD_DATE = datetime.date(2012, 7, 5)
 
 CROSSOVER_XML_URL = ('http://www.accessdata.fda.gov/scripts/'
                      'enforcement/enforce_rpt-Event-Tabs.cfm?'
@@ -80,21 +82,22 @@ def random_sleep():
 
 def download_to_file_with_retry(url, output_file):
   logging.info('Downloading: ' + url)
-
-  # Retry up to 10 times before failing
-  for i in range(10):
+  url_open = None
+  # Retry up to 25 times before failing
+  for i in range(25):
     try:
       random_sleep()
-      content = urllib2.urlopen(url).read()
-      if 'Gateway Timeout' in content:
-        raise HTTPError
-      output_file.write(content)
-      return
-
-    except HTTPError:
-      logging.info('Error fetching: %s. Retrying...' % url)
-
-  logging.fatal('Count not fetch in ten tries: ' + url)
+      url_open = urllib2.urlopen(url, timeout=5)
+      break
+    except socket.timeout:
+      logging.info('Timeout trying %s, retrying...', url)
+      continue
+  try:
+    content = url_open.read()
+    output_file.write(content)
+    return
+  except:
+    logging.fatal('Count not fetch in twenty five tries: ' + url)
 
 class DownloadHistoricHTMLReports(luigi.Task):
   def _find_urls(self, year):

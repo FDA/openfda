@@ -12,9 +12,9 @@ def read_json_file(json_file):
 
 def read_harmonized_file(harmonized_file):
   '''
-  Create a dictionary that is keyed by drug names. First brand_names,
-  then generic_names. Used to join against the event medicinalproduct
-  value.
+  Create a dictionary that is keyed by drug names. First brand_name,
+  then brand_name + brand_name_suffix, finally generic_name. Used to join
+  against the event medicinalproduct value.
   '''
   return_dict = {}
   for row in read_json_file(harmonized_file):
@@ -24,6 +24,16 @@ def read_harmonized_file(harmonized_file):
     else:
       return_dict[drug] = [row]
 
+  harmonized_file.seek(0)
+  for row in read_json_file(harmonized_file):
+    drug = row['brand_name'].rstrip() + ' ' + row['brand_name_suffix'].rstrip()
+    drug = drug.lower()
+    if drug in return_dict:
+      return_dict[drug].append(row)
+    else:
+      return_dict[drug] = [row]
+
+  harmonized_file.seek(0)
   for row in read_json_file(harmonized_file):
     generic_drug = row['generic_name'].lower()
     if generic_drug in return_dict:
@@ -31,6 +41,7 @@ def read_harmonized_file(harmonized_file):
     else:
       return_dict[generic_drug] = [row]
   return return_dict
+
 
 
 def _add_field(openfda, field, value):
@@ -53,7 +64,13 @@ def AddHarmonizedRowToOpenfda(openfda, row):
   if row['is_original_packager'] is True:
     if row['product_ndc'] in row['spl_product_ndc']:
       _add_field(openfda, 'application_number', row['application_number'])
-      _add_field(openfda, 'brand_name', row['brand_name'].rstrip().upper())
+      # Using the most precise possible name for brand_name
+      if row['brand_name_suffix']:
+        brand_name = row['brand_name'] + ' ' + row['brand_name_suffix']
+      else:
+        brand_name = row['brand_name']
+
+      _add_field(openfda, 'brand_name', brand_name.rstrip().upper())
       _add_field(openfda, 'generic_name', row['generic_name'].upper())
       _add_field(openfda, 'manufacturer_name', row['manufacturer_name'])
       _add_field(openfda, 'product_ndc', row['product_ndc'])

@@ -7,16 +7,18 @@ The main function of interest is `map_reduce`, which provides a local
 version of mapreduce.
 '''
 
-import leveldb
+from cPickle import loads, dumps
+import collections
+import glob
 import logging
 import multiprocessing
 import os
 import pprint
 import sys
 import traceback
-import glob
 
-from cPickle import loads, dumps
+import leveldb
+
 
 def _wrap_process(fn, args, kw=None):
   if kw is None: kw = {}
@@ -30,13 +32,25 @@ def _wrap_process(fn, args, kw=None):
 
 
 class ShardedDB(object):
-  def __init__(self, filebase, num_shards):
+  def __init__(self, filebase, num_shards, create_if_missing):
     self.filebase = filebase
     self.num_shards = num_shards
     self._shards = []
+    os.system('mkdir -p "%s"' % filebase)
     for i in range(num_shards):
       shard_file = '%s/shard-%05d-of-%05d.db' % (filebase, i, num_shards)
-      self._shards.append(leveldb.LevelDB(shard_file, create_if_missing=False))
+      self._shards.append(leveldb.LevelDB(shard_file, create_if_missing=create_if_missing))
+    
+  @staticmethod
+  def create(filebase, num_shards):  
+    'Create a new ShardedDB with the given number of output shards.'
+    return ShardedDB(filebase, num_shards, True)
+  
+  @staticmethod
+  def open(filebase):
+    'Open an existing ShardedDB.'
+    files = glob.glob('%s/*.db' % filebase)
+    return ShardedDB(filebase, len(files), False)
 
   def _shard_for(self, key):
     return self._shards[hash(key) % self.num_shards]
@@ -46,6 +60,12 @@ class ShardedDB(object):
 
   def get(self, key):
     self._shard_for(key).Get(key)
+    
+  def range_iter(self, start_key, end_key):
+    iters = [db.RangeIter(start_key, end_key) for db in self._shards]
+    for i in iters:
+      for key, value in i:
+        yield key, value
     
   def __iter__(self):
     for shard in self._shards:
@@ -121,7 +141,20 @@ class Collection(object):
   def __iter__(self):
     for filename in self.filenames:
       yield filename
+
+
+class Counters(object):
+  def __init__(self, master): 
+    self.master = master
+    self._local_counts = collections.defaultdict(int)
     
+  def increment(self, key):
+    self._local_counts[key] += 1
+    
+  def add(self, key, value):
+    self._local_counts[key] += value
+    
+  
   
 def _run_mapper(mapper, shuffle_queues, input_type, shard_file):
   try:
@@ -142,7 +175,7 @@ class Mapper(object):
     logging.info('Starting mapper: input=%s', map_input)
     mapper = self.map
     for key, value in map_input:
-      #logging.info('Mapping... %s, %s', key, value)
+      # logging.info('Mapping... %s, %s', key, value)
       mapper(key, value, map_output)
 
 
@@ -151,12 +184,17 @@ class IdentityMapper(Mapper):
     output.add(key, value)
     
 
-def group_by_key(iter):
+def group_by_key(iterator):
+  '''Group identical keys together.
+  
+  Given a sorted iterator of (key, value) pairs, returns an iterator of 
+  (key1, values), (key2, values).
+  '''
   last_key = None
   values = []
-  for key, value in iter:
+  for key, value in iterator:
     value = loads(value)
-    user_key, idx = key.rsplit('.', 1)
+    user_key, _ = key.rsplit('.', 1)
     if user_key != last_key:
       if last_key is not None:
         yield last_key, values
@@ -173,6 +211,7 @@ def _run_reducer(reducer, queue, output_prefix, i, num_shards):
   try:
     reducer.initialize(queue, output_prefix, i, num_shards)
     reducer.shuffle()
+    return reducer.reduce_finished()
   except:
     print >> sys.stderr, 'Error running reducer (%s)' % reducer
     traceback.print_exc()
@@ -214,6 +253,14 @@ class Reducer(object):
     
   def reduce(self, key, values, output):
     raise NotImplementedError
+
+  def reduce_finished(self):
+    '''Called after all values have been reduced.
+    
+    The result of this call is returned to the caller of `mapreduce`.
+    '''
+    pass
+  
 
 
 class IdentityReducer(Reducer):
@@ -270,9 +317,11 @@ def mapreduce(
     for q in shuffle_queues:
       q.put(None)
 
+    reduce_outputs = []
     for i, task in enumerate(reducer_tasks):
       logging.info('Waiting for reducers... %d/%d', i, len(reducer_tasks))
-      task.get()
+      reduce_outputs.append(task.get())
+    return reduce_outputs
   except:
     logging.error('MapReduce run failed.', exc_info=1)
     os.system('rm -rf "%s"' % output_prefix)
