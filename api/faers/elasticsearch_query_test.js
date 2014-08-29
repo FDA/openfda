@@ -139,6 +139,13 @@ exports.testReplaceExact = function(test) {
       'patient.reaction.reactionmeddrapt.exact',
         'patient.reaction.reactionmeddrapt.exact');
 
+  // No section, with known exact top level
+  test.ok(elasticsearch_query.ReplaceExact(
+    'type_of_report.exact') ==
+      'type_of_report_exact',
+        'type_of_report.exact');
+
+
   test.done();
 };
 

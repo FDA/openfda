@@ -6,16 +6,17 @@ importing into Elasticsearch.
 """
 
 from bs4 import BeautifulSoup
+import collections
 import glob
 import logging
 import os
 from os.path import join, basename, dirname
 import re
 import requests
+import subprocess
 import sys
 import urllib2
 
-import leveldb
 import luigi
 
 from openfda import parallel
@@ -46,6 +47,18 @@ class DownloadDataset(luigi.Task):
         url = 'http://www.fda.gov' + a['href']
         yield filename, url
 
+  def _download_with_retry(self, url, target_name):
+    for i in range(10):
+      logging.info('Downloading: ' + url)
+      cmd = "curl '%s' > '%s'" % (url, target_name)
+      subprocess.check_call(cmd, shell=True)
+      try:
+        subprocess.check_call('unzip -t %s' % target_name, shell=True)
+        return
+      except:
+        logging.info('Problem with zip %s, retrying...' % target_name)
+    logging.fatal('Zip File: %s is not valid, stop all processing')
+
   def requires(self):
     return []
 
@@ -56,8 +69,7 @@ class DownloadDataset(luigi.Task):
     os.system('mkdir -p "%s"' % self.output().path)
     for filename, url in list(self._fetch()):
       target_name = join(BASE_DIR, 'faers/raw', filename)
-      os.system("curl '%s' > '%s'" % (url, target_name))
-
+      self._download_with_retry(url, target_name)
 
 class ExtractZip(luigi.Task):
   def requires(self):
@@ -75,7 +87,17 @@ class ExtractZip(luigi.Task):
 
     # AERS SGM records don't always properly escape &
     for sgm in glob.glob(self.output().path + '/*/sgml/*.SGM'):
-      os.system('sed -i -e "s/&/&amp;/" %s' % sgm)
+      logging.info('Escaping SGML file: %s', sgm)
+      os.system('LANG=C sed -i -e "s/&/&amp;/" %s' % sgm)
+
+      # Apply patches if they exist for this SGM
+      sgm_filename = sgm.split('/')[-1]
+      sgm_diff_glob = join(RUN_DIR, 'faers/diffs/*/*/%(sgm_filename)s.diff' % locals())
+      for sgm_diff in glob.glob(sgm_diff_glob):
+        logging.info('Patching: %s', sgm)
+        cmd = 'patch -N %(sgm)s -i %(sgm_diff)s' % locals()
+        logging.info(cmd)
+        os.system(cmd)
 
 
 class XML2JSON(luigi.Task):
@@ -86,10 +108,12 @@ class XML2JSON(luigi.Task):
     return luigi.LocalTarget(join(BASE_DIR, 'faers/json/'))
 
   def run(self):
-    print 'Pipelining....'
+    logging.info('Pipelining...')
     # AERS_SGML_2007q4.ZIP has files in sqml
-    filenames = glob.glob(self.input().path + '/AERS_SGML_*/s[gq]ml/*.SGM')
-    filenames.extend(glob.glob(self.input().path + '/FAERS_XML*/xml/*.xml'))
+    sgml_path = '/AERS_SGML_*/s[gq]ml/*.SGM'
+    xml_path = '/FAERS_XML*/[Xx][Mm][Ll]/*.xml'
+    filenames = glob.glob(self.input().path + sgml_path)
+    filenames.extend(glob.glob(self.input().path + xml_path))
 
     input_shards = []
     for filename in filenames:
@@ -98,12 +122,22 @@ class XML2JSON(luigi.Task):
       logging.info('Adding input file to pool: %s', filename)
       input_shards.append(filename)
 
-    parallel.mapreduce(
+    report_counts = parallel.mapreduce(
       parallel.Collection.from_list(input_shards),
       xml_to_json.ExtractSafetyReportsMapper(),
       xml_to_json.MergeSafetyReportsReducer(),
       self.output().path,
       10)
+
+    combined_counts = collections.defaultdict(int)
+    for rc in report_counts:
+      for timestamp, count in rc.iteritems():
+        combined_counts[timestamp] += count
+
+    print '----REPORT COUNTS----'
+    for timestamp, count in sorted(combined_counts.items()):
+      print '>> ', timestamp, count
+
 
 
 class AnnotateJSON(luigi.Task):
@@ -122,7 +156,6 @@ class AnnotateJSON(luigi.Task):
       self.output().path,
       num_shards=10,
       map_workers=2)
-
 
 class ResetElasticSearch(luigi.Task):
   def requires(self):
@@ -167,7 +200,7 @@ class LoadJSON(luigi.Task):
     parallel.mapreduce(
       parallel.Collection.from_sharded(self.input()[1].path),
       LoadJSONMapper(),
-      parallel.NullReducer,
+      parallel.NullReducer(),
       output_prefix=self.output().path,
       num_shards=1,
       map_workers=1)

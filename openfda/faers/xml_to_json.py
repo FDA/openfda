@@ -11,13 +11,22 @@ import xmltodict
 
 from openfda import parallel
 import simplejson as json
+import pprint
 
 
 class MergeSafetyReportsReducer(parallel.Reducer):
+  def __init__(self):
+    self.report_counts = collections.defaultdict(int)
+    parallel.Reducer.__init__(self)
+    
   def reduce(self, key, values, output):
     # keys are case numbers, values are (timestamp, json_data)
-    _, json_value = sorted(values)[-1]
+    timestamp, json_value = sorted(values)[-1]
+    self.report_counts[timestamp] += 1
     output.Put(key, json_value)
+    
+  def reduce_finished(self):
+    return self.report_counts
       
 
 def timestamp_from_filename(filename):
@@ -124,7 +133,7 @@ class ExtractSafetyReportsMapper(parallel.Mapper):
         # Ignore them and continue processing.
         logging.info('Traceback in file: %s' % input_filename)
         traceback.print_exc()
-        logging.info('Bad record: %s' % repr(safety_report))
+        logging.warn('Report was: %s', pprint.pformat(safety_report))
         logging.info('Continuing...')
         return True
       

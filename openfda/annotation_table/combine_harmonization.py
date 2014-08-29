@@ -84,10 +84,8 @@ def combine(product_file,
     clean_product['product_type'] = row['PRODUCTTYPENAME']
     clean_product['generic_name'] = row['NONPROPRIETARYNAME']
     clean_product['manufacturer_name'] = row['LABELERNAME']
-
-    #TODO(hansnelsen): add suffix as a separate field in output
-    clean_product['brand_name'] = (row['PROPRIETARYNAME'] + ' ' +
-                                   row['PROPRIETARYNAMESUFFIX'])
+    clean_product['brand_name'] = row['PROPRIETARYNAME']
+    clean_product['brand_name_suffix'] = row['PROPRIETARYNAMESUFFIX']
     clean_product['product_ndc'] = row['PRODUCTNDC']
     clean_product['dosage_form'] = row['DOSAGEFORMNAME']
     clean_product['route'] = row['ROUTENAME']

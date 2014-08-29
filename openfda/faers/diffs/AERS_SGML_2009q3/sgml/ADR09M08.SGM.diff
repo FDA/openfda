@@ -1,4 +1,11 @@
-1800309c1800309
-<      <medicinalproduct>ATROPINRE SULFATE</medicinalproduct>
----
->      <medicinalproduct>ATROPINE SULFATE</medicinalproduct>
+--- ./data/faers/extracted/AERS_SGML_2009q3/sgml/ADR09M08.SGM	2014-07-23 14:12:53.000000000 -0700
++++ /tmp/ADR09M08.SGM	2014-07-23 14:37:08.000000000 -0700
+@@ -1800306,7 +1800306,7 @@
+   </reaction>
+   <drug>
+      <drugcharacterization>1</drugcharacterization>
+-     <medicinalproduct>ATROPINRE SULFATE</medicinalproduct>
++     <medicinalproduct>ATROPINE SULFATE</medicinalproduct>
+      <drugbatchnumb>8CCH1C</drugbatchnumb>
+      <drugdosagetext>1 GTT 8PM, 8AM, NOON; OPHTHALMIC</drugdosagetext>
+      <drugadministrationroute>047</drugadministrationroute>

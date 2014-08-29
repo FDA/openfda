@@ -1,0 +1,1524 @@
+{
+    "maude": {
+        "_source": {
+            "excludes": [
+                "*_exact",
+                "patient.*_exact",
+                "device.*_exact",
+                "mdr_text.*_exact"
+            ],
+            "includes": [
+                "*"
+            ]
+        },
+        "properties": {
+            "adverse_event_flag": {
+                "fields": {
+                    "adverse_event_flag": {
+                        "index": "analyzed",
+                        "type": "string"
+                    },
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "date_facility_aware": {
+                "format": "basic_date||date",
+                "type": "date"
+            },
+            "date_manufacturer_received": {
+                "format": "basic_date||date",
+                "type": "date"
+            },
+            "date_of_event": {
+                "format": "basic_date||date",
+                "type": "date"
+            },
+            "date_received": {
+                "format": "basic_date||date",
+                "type": "date"
+            },
+            "date_report": {
+                "format": "basic_date||date",
+                "type": "date"
+            },
+            "date_report_to_fda": {
+                "format": "basic_date||date",
+                "type": "date"
+            },
+            "date_report_to_manufacturer": {
+                "format": "basic_date||date",
+                "type": "date"
+            },
+            "device": {
+                "properties": {
+                    "baseline_510_k_exempt_flag": {
+                        "fields": {
+                            "baseline_510_k_exempt_flag": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "baseline_510_k_flag": {
+                        "fields": {
+                            "baseline_510_k_flag": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "baseline_510_k_number": {
+                        "fields": {
+                            "baseline_510_k_number": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "baseline_brand_name": {
+                        "fields": {
+                            "baseline_brand_name": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "baseline_catalog_number": {
+                        "fields": {
+                            "baseline_catalog_number": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "baseline_date_ceased_marketing": {
+                        "format": "basic_date||date",
+                        "type": "date"
+                    },
+                    "baseline_date_first_marketed": {
+                        "format": "basic_date||date",
+                        "type": "date"
+                    },
+                    "baseline_device_family": {
+                        "fields": {
+                            "baseline_device_family": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "baseline_generic_name": {
+                        "fields": {
+                            "baseline_generic_name": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "baseline_model_number": {
+                        "fields": {
+                            "baseline_model_number": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "baseline_other_id_number": {
+                        "fields": {
+                            "baseline_other_id_number": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "baseline_pma_flag": {
+                        "fields": {
+                            "baseline_pma_flag": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "baseline_pma_number": {
+                        "fields": {
+                            "baseline_pma_number": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "baseline_preamendment_flag": {
+                        "fields": {
+                            "baseline_preamendment_flag": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "baseline_shelf_life_contained": {
+                        "fields": {
+                            "baseline_shelf_life_contained": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "baseline_shelf_life_in_months": {
+                        "fields": {
+                            "baseline_shelf_life_in_months": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "baseline_transitional_flag": {
+                        "fields": {
+                            "baseline_transitional_flag": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "brand_name": {
+                        "fields": {
+                            "brand_name": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "catalog_number": {
+                        "fields": {
+                            "catalog_number": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "date_received": {
+                        "format": "basic_date||date",
+                        "type": "date"
+                    },
+                    "date_removed_flag": {
+                        "fields": {
+                            "date_removed_flag": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "date_returned_to_manufacturer": {
+                        "format": "basic_date||date",
+                        "type": "date"
+                    },
+                    "device_age_text": {
+                        "fields": {
+                            "device_age_text": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "device_availability": {
+                        "fields": {
+                            "device_availability": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "device_evaluated_by_manufacturer": {
+                        "fields": {
+                            "device_evaluated_by_manufacturer": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "device_event_key": {
+                        "fields": {
+                            "device_event_key": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "device_operator": {
+                        "fields": {
+                            "device_operator": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "device_report_product_code": {
+                        "fields": {
+                            "device_report_product_code": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "device_sequence_number": {
+                        "fields": {
+                            "device_sequence_number": {
+                                "index": "analyzed",
+                                "type": "string"
+                            },
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "expiration_date_of_device": {
+                        "format": "basic_date||date",
+                        "type": "date"
+                    },
+                    "generic_name": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "generic_name": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "implant_flag": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "implant_flag": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "lot_number": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "lot_number": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "manufacturer_d_address_1": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "manufacturer_d_address_1": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "manufacturer_d_address_2": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "manufacturer_d_address_2": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "manufacturer_d_city": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "manufacturer_d_city": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "manufacturer_d_country": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "manufacturer_d_country": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "manufacturer_d_name": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "manufacturer_d_name": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "manufacturer_d_postal_code": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "manufacturer_d_postal_code": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "manufacturer_d_state": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "manufacturer_d_state": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "manufacturer_d_zip_code": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "manufacturer_d_zip_code": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "manufacturer_d_zip_code_ext": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "manufacturer_d_zip_code_ext": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "model_number": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "model_number": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "other_id_number": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "other_id_number": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    }
+                }
+            },
+            "device_date_of_manufacturere": {
+                "format": "basic_date||date",
+                "type": "date"
+            },
+            "distributor_address_1": {
+                "fields": {
+                    "distributor_address_1": {
+                        "index": "analyzed",
+                        "type": "string"
+                    },
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "distributor_address_2": {
+                "fields": {
+                    "distributor_address_2": {
+                        "index": "analyzed",
+                        "type": "string"
+                    },
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "distributor_city": {
+                "fields": {
+                    "distributor_city": {
+                        "index": "analyzed",
+                        "type": "string"
+                    },
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "distributor_name": {
+                "fields": {
+                    "distributor_name": {
+                        "index": "analyzed",
+                        "type": "string"
+                    },
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "distributor_state": {
+                "fields": {
+                    "distributor_state": {
+                        "index": "analyzed",
+                        "type": "string"
+                    },
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "distributor_zip_code": {
+                "fields": {
+                    "distributor_zip_code": {
+                        "index": "analyzed",
+                        "type": "string"
+                    },
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "distributor_zip_code_ext": {
+                "fields": {
+                    "distributor_zip_code_ext": {
+                        "index": "analyzed",
+                        "type": "string"
+                    },
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "event_key": {
+                "fields": {
+                    "event_key": {
+                        "index": "analyzed",
+                        "type": "string"
+                    },
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "event_location": {
+                "fields": {
+                    "event_location": {
+                        "index": "analyzed",
+                        "type": "string"
+                    },
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "event_type": {
+                "fields": {
+                    "event_type": {
+                        "index": "analyzed",
+                        "type": "string"
+                    },
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "health_professional": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "health_professional": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "initial_report_to_fda": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "initial_report_to_fda": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_address_1": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_address_1": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_address_2": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_address_2": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_city": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_city": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_address_1": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_address_1": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_address_2": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_address_2": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_area_code": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_area_code": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_city": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_city": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_country": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_country": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_exchange": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_exchange": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_extension": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_extension": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_f_name": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_f_name": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_l_name": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_l_name": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_pcity": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_pcity": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_pcountry": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_pcountry": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_phone_number": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_phone_number": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_plocal": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_plocal": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_postal_code": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_postal_code": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_state": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_state": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_t_name": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_t_name": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_zip_code": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_zip_code": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_contact_zip_ext": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_contact_zip_ext": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_country": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_country": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_g1_city": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_g1_city": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_g1_country": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_g1_country": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_g1_name": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_g1_name": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_g1_postal_code": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_g1_postal_code": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_g1_state": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_g1_state": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_g1_street_1": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_g1_street_1": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_g1_street_2": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_g1_street_2": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_g1_zip_code": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_g1_zip_code": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_g1_zip_code_ext": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_g1_zip_code_ext": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_link_flag": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_link_flag": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_name": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_name": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_postal_code": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_postal_code": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_state": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_state": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_zip_code": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_zip_code": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "manufacturer_zip_code_ext": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "manufacturer_zip_code_ext": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "mdr_report_key": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "mdr_report_key": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "mdr_text": {
+                "properties": {
+                    "date_report": {
+                        "format": "basic_date||date",
+                        "type": "date"
+                    },
+                    "mdr_text_key": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "mdr_text_key": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "patient_sequence_number": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "patient_sequence_number": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "text": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "text": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "text_type_code": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "text_type_code": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    }
+                }
+            },
+            "number_devices_in_event": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "number_devices_in_event": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "number_patients_in_event": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "number_patients_in_event": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "patient": {
+                "properties": {
+                    "date_received": {
+                        "format": "basic_date||date",
+                        "type": "date"
+                    },
+                    "patient_sequence_number": {
+                        "fields": {
+                            "exact": {
+                                "index": "not_analyzed",
+                                "type": "string"
+                            },
+                            "patient_sequence_number": {
+                                "index": "analyzed",
+                                "type": "string"
+                            }
+                        },
+                        "type": "multi_field"
+                    },
+                    "sequence_number_outcome": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "sequence_number_outcome_exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "sequence_number_treatment": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "sequence_number_treatment_exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    }
+                }
+            },
+            "previous_use_code": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "previous_use_code": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "product_problem_flag": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "product_problem_flag": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "remedial_action": {
+                "index": "analyzed",
+                "type": "string"
+            },
+            "remedial_action_exact": {
+                "index": "not_analyzed",
+                "type": "string"
+            },
+            "removal_correction_number": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "removal_correction_number": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "report_date": {
+                "format": "basic_date||date",
+                "type": "date"
+            },
+            "report_number": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "report_number": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "report_source_code": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "report_source_code": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "report_to_fda": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "report_to_fda": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "report_to_manufacturer": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "report_to_manufacturer": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "reporter_occupation_code": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "reporter_occupation_code": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "reprocessed_and_reused_flag": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "reprocessed_and_reused_flag": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "single_use_flag": {
+                "fields": {
+                    "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                    },
+                    "single_use_flag": {
+                        "index": "analyzed",
+                        "type": "string"
+                    }
+                },
+                "type": "multi_field"
+            },
+            "source_type": {
+                "index": "analyzed",
+                "type": "string"
+            },
+            "source_type_exact": {
+                "index": "not_analyzed",
+                "type": "string"
+            },
+            "type_of_report": {
+                "index": "analyzed",
+                "type": "string"
+            },
+            "type_of_report_exact": {
+                "index": "not_analyzed",
+                "type": "string"
+            }
+        }
+    }
+}

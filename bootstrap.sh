@@ -28,3 +28,7 @@ $PYTHON_ENV/bin/python setup.py develop
 pushd api/faers
 npm install
 popd
+pushd openfda/res
+npm install
+popd
+

@@ -1,0 +1,213 @@
+key_name,code,code_desc
+report_source_code,P,Voluntary report
+report_source_code,U,User Facility report
+report_source_code,D,Distributor report
+report_source_code,M,Manufacturer report
+reporter_occupation_code,*,INVALID DATA
+reporter_occupation_code,000,OTHER
+reporter_occupation_code,001,PHYSICIAN
+reporter_occupation_code,002,NURSE
+reporter_occupation_code,0HP,HEALTH PROFESSIONAL
+reporter_occupation_code,0LP,LAY USER/PATIENT
+reporter_occupation_code,100,OTHER HEALTH CARE PROFESSIONAL
+reporter_occupation_code,101,AUDIOLOGIST
+reporter_occupation_code,102,DENTAL HYGIENIST
+reporter_occupation_code,103,DIETICIAN
+reporter_occupation_code,104,EMERGENCY MEDICAL TECHNICIAN
+reporter_occupation_code,105,MEDICAL TECHNOLOGIST
+reporter_occupation_code,106,NUCLEAR MEDICINE TECHNOLOGIST
+reporter_occupation_code,107,OCCUPATIONAL THERAPIST
+reporter_occupation_code,108,PARAMEDIC
+reporter_occupation_code,109,PHARMACIST
+reporter_occupation_code,110,PHLEBOTOMIST
+reporter_occupation_code,111,PHYSICAL THERAPIST
+reporter_occupation_code,112,PHYSICIAN ASSISTANT
+reporter_occupation_code,113,RADIOLOGIC TECHNOLOGIST
+reporter_occupation_code,114,RESPIRATORY THERAPIST
+reporter_occupation_code,115,SPEECH THERAPIST
+reporter_occupation_code,116,DENTIST
+reporter_occupation_code,300,OTHER CAREGIVERS
+reporter_occupation_code,301,DENTAL ASSISTANT
+reporter_occupation_code,302,HOME HEALTH AIDE
+reporter_occupation_code,303,MEDICAL ASSISTANT
+reporter_occupation_code,304,NURSING ASSISTANT
+reporter_occupation_code,305,PATIENT
+reporter_occupation_code,306,PATIENT FAMILY MEMBER OR FRIEND
+reporter_occupation_code,307,PERSONAL CARE ASSISTANT
+reporter_occupation_code,400,SERVICE AND TESTING PERSONNEL
+reporter_occupation_code,401,BIOMEDICAL ENGINEER
+reporter_occupation_code,402,HOSPITAL SERVICE TECHNICIAN
+reporter_occupation_code,403,MEDICAL EQUIPMENT COMPANY TECHNICIAN/REPRESENTATIVE
+reporter_occupation_code,404,PHYSICIST
+reporter_occupation_code,405,SERVICE PERSONNEL
+reporter_occupation_code,499,DEVICE UNATTENDED
+reporter_occupation_code,500,RISK MANAGER
+reporter_occupation_code,600,ATTORNEY
+reporter_occupation_code,999,UNKNOWN
+reporter_occupation_code,NA,NOT APPLICABLE
+reporter_occupation_code,NI,NO INFORMATION
+reporter_occupation_code,UNK,UNKNOWN
+initial_report_to_fda,Y,Yes
+initial_report_to_fda,N,No
+initial_report_to_fda,U,Unknown
+initial_report_to_fda,*,No answer provided
+type_of_report,I,Initial submission
+type_of_report,F,Followup
+type_of_report,X,Extra copy received
+type_of_report,O,Other information submitted
+source_type,00,Other
+source_type,01,Foreign
+source_type,02,Study
+source_type,03,Literature
+source_type,04,Consumer
+source_type,05,Health Professional
+source_type,06,User facility
+source_type,07,Company representation
+source_type,08,Distributor
+source_type,99,Unknown
+source_type,*,Invalid data
+remedial_action,RC,Recall
+remedial_action,RP,Repair
+remedial_action,RL,Replace
+remedial_action,RB,Relabeling
+remedial_action,OT,Other
+remedial_action,NO,Notification
+remedial_action,IN,Inspection
+remedial_action,PM,Patient Monitoring
+remedial_action,MA,Modification/Adjustment
+remedial_action,*,Invalid Data
+event_type,D,Death
+event_type,IN,Injury
+event_type,IL,Injury
+event_type,IJ,Injury
+event_type,M,Malfunction
+event_type,O,Other
+event_type,*,No answer provided
+date_removed_flag,U,Unknown
+date_removed_flag,A,Not available
+date_removed_flag,I,No information at this time
+date_removed_flag,M,Month and year provided only day defaults to 01
+date_removed_flag,Y,Year provided only, day defaulted to 01 month defaulted to January
+device_availability,Y,Yes
+device_availability,N,No
+device_availability,R,Device was returned to manufacturer
+device_availability,*,No answer provided
+device_evaluated_by_manufactur,Y,Yes
+device_evaluated_by_manufactur,N,No
+device_evaluated_by_manufactur,R,Device not returned to manufacturer
+device_evaluated_by_manufactur,*,No answer provided
+sequence_number_outcome,L,Life Threatening
+sequence_number_outcome,H,Hospitalization
+sequence_number_outcome,S,Disability
+sequence_number_outcome,C,Congenital Anomaly
+sequence_number_outcome,R,Required Intervention
+sequence_number_outcome,O,Other
+sequence_number_outcome,*,Invalid Data
+sequence_number_outcome,U,Unknown
+sequence_number_outcome,I,No Information
+sequence_number_outcome,A,Not Applicable
+sequence_number_outcome,D,Death
+event_location,*,INVALID DATA
+event_location,000,OTHER
+event_location,001,HOSPITAL
+event_location,002,HOME
+event_location,003,NURSING HOME
+event_location,004,OUTPATIENT TREATMENT FACILITY
+event_location,005,OUTPATIENT DIAGNOSTIC FACILITY
+event_location,006,AMBULATORY SURGICAL FACILITY
+event_location,500,HOSPITAL
+event_location,501,CATHETERIZATION SUITE
+event_location,502,CRITICAL CARE UNIT
+event_location,503,DIALYSIS UNIT
+event_location,504,EMERGENCY ROOM
+event_location,505,EXAMINATION ROOM
+event_location,506,LABORATORY/PATHOLOGY DEPARTMENT
+event_location,507,MATERNITY WARD - NURSERY
+event_location,508,OPERATING ROOM
+event_location,509,OUTPATIENT CLINIC/SURGERY
+event_location,510,PATIENT'S ROOM OR WARD
+event_location,511,RADIOLOGY DEPARTMENT
+event_location,600,AMBULATORY HEALTH CARE FACILITY
+event_location,601,AMBULATORY SURGICAL CENTER
+event_location,602,BLOOD BANK
+event_location,603,BLOODMOBILE
+event_location,604,CATHETERIZATION LAB - FREE STANDING
+event_location,605,CHEMOTHERAPY CENTER
+event_location,606,"CLINIC - WALK IN, OTHER"
+event_location,607,DIALYSIS CENTER
+event_location,608,DRUG CLINIC
+event_location,609,IMAGING CENTER - MOBILE
+event_location,610,IMAGING CENTER - STATIONARY
+event_location,611,LABORATORY
+event_location,612,MOBILE HEALTH UNIT
+event_location,613,MRI CENTERS
+event_location,614,"PSYCHIATRIC CENTER - WALK IN, OTHER"
+event_location,615,TUBERCULOSIS CLINIC
+event_location,616,URGENT CARE CENTER
+event_location,617,OUTPATIENT DIAGNOSTIC FACILITY
+event_location,700,LONG-TERM CARE FACILITY
+event_location,701,HOSPICE
+event_location,702,NURSING HOME
+event_location,703,PSYCHIATRIC FACILITY
+event_location,704,REHABILITATION CENTER
+event_location,705,RETIREMENT HOME
+event_location,810,PATIENT'S HOME
+event_location,820,IN TRANSIT TO USER/MEDICAL FACILITY
+event_location,830,PUBLIC VENUE
+event_location,831,OUTDOORS
+event_location,832,PARK
+event_location,833,PLAYGROUND
+event_location,834,PUBLIC BUILDING
+event_location,835,SCHOOL
+event_location,836,STREET
+event_location,999,UNKNOWN
+event_location,NA,NOT APPLICABLE
+event_location,NI,NO INFORMATION
+event_location,UNK,UNKNOWN
+device_operator,*,INVALID DATA
+device_operator,000,OTHER
+device_operator,001,PHYSICIAN
+device_operator,002,NURSE
+device_operator,0HP,HEALTH PROFESSIONAL
+device_operator,0LP,LAY USER/PATIENT
+device_operator,100,OTHER HEALTH CARE PROFESSIONAL
+device_operator,101,AUDIOLOGIST
+device_operator,102,DENTAL HYGIENIST
+device_operator,103,DIETICIAN
+device_operator,104,EMERGENCY MEDICAL TECHNICIAN
+device_operator,105,MEDICAL TECHNOLOGIST
+device_operator,106,NUCLEAR MEDICINE TECHNOLOGIST
+device_operator,107,OCCUPATIONAL THERAPIST
+device_operator,108,PARAMEDIC
+device_operator,109,PHARMACIST
+device_operator,110,PHLEBOTOMIST
+device_operator,111,PHYSICAL THERAPIST
+device_operator,112,PHYSICIAN ASSISTANT
+device_operator,113,RADIOLOGIC TECHNOLOGIST
+device_operator,114,RESPIRATORY THERAPIST
+device_operator,115,SPEECH THERAPIST
+device_operator,116,DENTIST
+device_operator,300,OTHER CAREGIVERS
+device_operator,301,DENTAL ASSISTANT
+device_operator,302,HOME HEALTH AIDE
+device_operator,303,MEDICAL ASSISTANT
+device_operator,304,NURSING ASSISTANT
+device_operator,305,PATIENT
+device_operator,306,PATIENT FAMILY MEMBER OR FRIEND
+device_operator,307,PERSONAL CARE ASSISTANT
+device_operator,400,SERVICE AND TESTING PERSONNEL
+device_operator,401,BIOMEDICAL ENGINEER
+device_operator,402,HOSPITAL SERVICE TECHNICIAN
+device_operator,403,MEDICAL EQUIPMENT COMPANY TECHNICIAN/REPRESENTATIVE
+device_operator,404,PHYSICIST
+device_operator,405,SERVICE PERSONNEL
+device_operator,499,DEVICE UNATTENDED
+device_operator,500,RISK MANAGER
+device_operator,600,ATTORNEY
+device_operator,999,UNKNOWN
+device_operator,NA,NOT APPLICABLE
+device_operator,NI,NO INFORMATION
+device_operator,UNK,UNKNOWN
+text_type_code,D,Description of Event or Problem
+text_type_code,E,Manufacturer Evaluation Summary
+text_type_code,N,Additional Manufacturer Narrative
