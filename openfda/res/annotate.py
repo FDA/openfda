@@ -3,6 +3,8 @@
 import re
 import simplejson as json
 
+from openfda import parallel
+
 def read_json_file(json_file):
   for line in json_file:
     yield json.loads(line)
@@ -192,16 +194,14 @@ def AnnotateEvent(recall, harmonized_dict):
           _insert_or_update(recall, key, this_value)
       recall.pop(key, None)
 
-class AnnotateMapper(object):
+class AnnotateMapper(parallel.Mapper):
   def __init__(self, harmonized_file):
     self.harmonized_file = harmonized_file
 
-  def __call__(self, input_file, output_file):
-    recall_event_json = open(input_file)
-    out = open(output_file, 'w')
-    harmonized_dict = read_harmonized_file(open(self.harmonized_file))
+  def map_shard(self, map_input, map_output):
+    self.harmonized_dict = read_harmonized_file(open(self.harmonized_file))
+    parallel.Mapper.map_shard(self, map_input, map_output)
 
-    for recall_raw in recall_event_json:
-      recall = json.loads(recall_raw)
-      AnnotateEvent(recall, harmonized_dict)
-      out.write(json.dumps(recall) + '\n')
+  def map(self, key, recall, out):
+    AnnotateEvent(recall, self.harmonized_dict)
+    out.add(key, recall)

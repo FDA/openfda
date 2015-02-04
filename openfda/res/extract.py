@@ -3,6 +3,7 @@
 Extract NDC and UPC from freetext fields in RES
 """
 
+import ean
 import re
 
 # http://en.wikipedia.org/wiki/National_Drug_Code
@@ -49,30 +50,7 @@ def extract_ndc_from_recall(recall):
   return extract_ndc(desc)
 
 def is_valid_upc(upc):
-  if upc is None:
-    return False
-
-  if not upc.isdigit():
-    return False
-
-  if len(upc) != 12:
-    return False
-
-  # http://en.wikipedia.org/wiki/Universal_Product_Code#Check_digits
-  check_digit = 0
-  for odd in upc[0:11:2]:
-    check_digit += int(odd)
-
-  check_digit *= 3
-
-  for even in upc[1:11:2]:
-    check_digit += int(even)
-
-  check_digit = check_digit % 10
-  if check_digit != 0:
-    check_digit = 10 - check_digit
-
-  return int(upc[-1]) == check_digit
+  return ean.upca_valid(upc)
 
 def clean_upc(upc):
   # Remove spaces

@@ -30,7 +30,7 @@ Example new record:
 
 {"product-type": "Biologics", "event-id": "40631", "status": "Terminated", "recalling-firm": "Belle Bonfils Memorial Blood Center", "city": "Denver", "state": "CO", "country": "US", "voluntary-mandated": "Voluntary: Firm Initiated", "initial-firm-notification": "E-Mail", "distribution-pattern": "Switzerland, CO", "classification": "Class II", "product-description": "Red Blood Cells Leukocytes Reduced", "code-info": "9049505", "product-quantity": "1 unit", "reason-for-recall": "Blood products, collected from a donor with a history of living in an HIV-O risk area, were distributed.", "recall-initiation-date": "08/22/2005", "report-date": "07/11/2012"}
 
-Note: It appears that the historic RES HTML is hand coded into the FDA CMS. The HTML structure has changed over the years. Thus we scrape the plaintext rather than the HTML.
+Note: It appears that the historic RES HTML is hand coded into the FDA CMS. The HTML structure has changed over the years. Thus
 """
 
 from bs4 import BeautifulSoup

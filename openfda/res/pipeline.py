@@ -1,47 +1,69 @@
 #!/usr/local/bin/python
-"""
-Pipeline for converting historic HTML and current XML RES data in JSON and
-importing into Elasticsearch.
 
-Note: RES data prior to July 2012 are only publically available in HTML format.
-The HTML2JSON step of this pipeline converts this HTML format into the canonical
-format used by Elasticsearch.
-"""
+'''
+Pipeline for converting XML RES data in JSON and importing into Elasticsearch.
+'''
 
 from bs4 import BeautifulSoup
-import datetime
 import glob
+import hashlib
 import logging
-import luigi
 import os
 from os.path import join, dirname
 import random
+import re
 import requests
 import simplejson as json
 import socket
-import StringIO
 import sys
 import time
 import urllib2
 import xmltodict
 
-from openfda import parallel
+import arrow
+import elasticsearch
+import luigi
+
+from openfda import common, parallel, index_util, elasticsearch_requests
 from openfda.annotation_table.pipeline import CombineHarmonization
+from openfda.index_util import AlwaysRunTask
 from openfda.res import annotate
 from openfda.res import extract
-from openfda.res import scrape_historic
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 BASE_DIR = './data'
 
+ES_HOST = luigi.Parameter('localhost:9200', is_global=True)
+
 CURRENT_XML_BASE_URL = ('http://www.accessdata.fda.gov/scripts/'
                         'enforcement/enforce_rpt-Product-Tabs.cfm?'
                         'action=Expand+Index&w=WEEK&lang=eng&xml')
-# TODO(hansnelsen): need to externalize XML_END_DATE so that weekly date
-#                   do not require code changes
-XML_START_DATE = datetime.date(2012, 6, 20)
-XML_END_DATE = datetime.date(2014, 8, 27)
+RES_BASE_URL = ('http://www.fda.gov/Safety/Recalls/'
+                'EnforcementReports/default.htm')
 
+def get_latest_date(input_url, download_url):
+  ''' A function that grabs all of the hrefs pointing to the download page
+      and then grabs the max date from the url to set the upper bound date of
+      the download loop.
+  '''
+  url_open = urllib2.urlopen(input_url)
+  soup = BeautifulSoup(url_open)
+  re_string = download_url.split('WEEK')[0]
+  re_string = re_string.replace('?','\?')\
+                       .replace('http:', '^http:')\
+                       .replace('+','\+')
+  urls = soup.find_all('a', href=re.compile(re_string))
+
+  def date_from_url(url):
+    dt = str(url).split('w=')[1].split('&')[0]
+    (month, day, year) = (dt[:2], dt[2:4], dt[4:])
+    return arrow.get(int(year), int(month), int(day))
+
+  dates = [date_from_url(url) for url in urls]
+  return max(dates)
+
+XML_START_DATE = arrow.get(2012, 6, 20)
+XML_END_DATE = get_latest_date(RES_BASE_URL, CURRENT_XML_BASE_URL)
 
 # The FDA transitioned from HTML recall events to XML during the summer of 2012.
 # During that transition, there are two dates where the enforcement reports are
@@ -51,28 +73,13 @@ XML_END_DATE = datetime.date(2014, 8, 27)
 # to XML date logic a little quirky. These are collectively referred to as
 # CROSSOVER_XML dates.
 
-CROSSOVER_XML_START_DATE = datetime.date(2012, 6, 20)
-CROSSOVER_XML_END_DATE = datetime.date(2012, 6, 27)
-CROSSOVER_XML_WEIRD_DATE = datetime.date(2012, 7, 5)
+CROSSOVER_XML_START_DATE = XML_START_DATE
+CROSSOVER_XML_END_DATE = XML_START_DATE.replace(days=+7)
+CROSSOVER_XML_WEIRD_DATE = XML_END_DATE.replace(days=+8)
 
 CROSSOVER_XML_URL = ('http://www.accessdata.fda.gov/scripts/'
                      'enforcement/enforce_rpt-Event-Tabs.cfm?'
                      'action=Expand+Index&w=WEEK&lang=eng&xml')
-
-HISTORIC_HTML_BASE_URL = ('http://www.fda.gov/Safety/Recalls/'
-                          'EnforcementReports/YEAR/default.htm')
-
-HISTORIC_HTML_YEARS = [
-  '2004',
-  '2005',
-  '2006',
-  '2007',
-  '2008',
-  '2009',
-  '2010',
-  '2011',
-  '2012'  # only through June 13, 2012
-]
 
 def random_sleep():
   # Give the FDA webservers a break between requests
@@ -99,137 +106,46 @@ def download_to_file_with_retry(url, output_file):
   except:
     logging.fatal('Count not fetch in twenty five tries: ' + url)
 
-class DownloadHistoricHTMLReports(luigi.Task):
-  def _find_urls(self, year):
-    url = HISTORIC_HTML_BASE_URL.replace('YEAR', year)
-    page_file = StringIO.StringIO()
-    download_to_file_with_retry(url, page_file)
-    page_file.seek(0)
-
-    urls = []
-    soup = BeautifulSoup(page_file.read())
-    urls_raw = soup.find('div',
-                         attrs={'class': 'middle-column_2'}).find_all('a')
-    for url_raw in urls_raw:
-      # ucm in the url indicates the old, static HTML links as opposed new,
-      # dynamic coldfusion links
-      url = 'http://www.fda.gov%s' % url_raw['href']
-      if 'ucm' in url:
-        urls.append(url)
-    return urls
+class DownloadXMLReports(luigi.Task):
+  batch = luigi.Parameter()
 
   def requires(self):
     return []
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'res/historic/html'))
+    batch_str = self.batch.strftime('%Y%m%d')
+    return luigi.LocalTarget(join(BASE_DIR, 'res/batches', batch_str))
 
   def run(self):
     output_dir = self.output().path
-    os.system('mkdir -p "%(output_dir)s"' % locals())
+    common.shell_cmd('mkdir -p %s', output_dir)
+    date = self.batch
+    if date >= CROSSOVER_XML_START_DATE and date <= CROSSOVER_XML_END_DATE:
+      url = CROSSOVER_XML_URL
+    else:
+      url = CURRENT_XML_BASE_URL
+    url = url.replace('WEEK', date.strftime('%m%d%Y'))
+    file_name = 'enforcementreport.xml'
+    xml_filepath = '%(output_dir)s/%(file_name)s' % locals()
+    xml_file = open(xml_filepath, 'w')
+    download_to_file_with_retry(url, xml_file)
 
-    for year in HISTORIC_HTML_YEARS:
-      year_dir = '%(output_dir)s/%(year)s' % locals()
-      os.system('mkdir -p "%(year_dir)s"' % locals())
 
-      urls = self._find_urls(year)
-      for url in urls:
-        html_filename = url.split('/')[-1]
-        html_filepath = join(year_dir, html_filename)
-        html_file = open(html_filepath, 'w')
-        download_to_file_with_retry(url, html_file)
+class XML2JSONMapper(parallel.Mapper):
+  ''' Mapper for the XML2JSON map-reduction. There is some special logic in here
+      to generate a hash() from the top level key/value pairs for the id in
+      Elasticsearch.
+      Also, upc and ndc are extracted and added to reports that are of drug
+      type.
+  '''
+  def _hash(self, doc_json):
+    ''' Hash function used to create unique IDs for the reports
+    '''
+    hasher = hashlib.sha256()
+    hasher.update(doc_json)
+    return hasher.hexdigest()
 
-class HistoricHTML2JSON(luigi.Task):
-  def requires(self):
-    return DownloadHistoricHTMLReports()
-
-  def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'res/historic/json'))
-
-  def run(self):
-    input_dir = self.input().path
-    output_dir = self.output().path
-    os.system('mkdir -p "%s"' % output_dir)
-    target_filename = join(output_dir, 'res_historic.json')
-    json_filename = open(target_filename, 'w')
-    for html_filename in glob.glob(input_dir + '/*/*.htm'):
-      html_filename = open(html_filename, 'r')
-      scraped_file = scrape_historic.scrape_report(html_filename)
-      for report in scraped_file:
-        json_filename.write(json.dumps(report) + '\n')
-
-class DownloadCurrentXMLReports(luigi.Task):
-  def requires(self):
-    return []
-
-  def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'res/current/xml'))
-
-  def run(self):
-    output_dir = self.output().path
-    os.system('mkdir -p "%(output_dir)s"' % locals())
-    # Required weirdness to work around both the URL mismatch and the 3 special
-    # date offsets that apply during the transition from HTML to XML
-    date = XML_START_DATE
-    while date <= XML_END_DATE:
-      if date >= CROSSOVER_XML_START_DATE and date <= CROSSOVER_XML_END_DATE:
-        url = CROSSOVER_XML_URL
-      else:
-        url = CURRENT_XML_BASE_URL
-
-      url = url.replace('WEEK', date.strftime('%m%d%Y'))
-      week = date.strftime('%Y-%m-%d')
-
-      xml_filepath = '%(output_dir)s/%(week)s.xml' % locals()
-      xml_file = open(xml_filepath, 'w')
-      download_to_file_with_retry(url, xml_file)
-
-      if date == CROSSOVER_XML_END_DATE:
-        date += datetime.timedelta(days=8)
-      if date == CROSSOVER_XML_WEIRD_DATE:
-        date += datetime.timedelta(days=6)
-      else:
-        date += datetime.timedelta(days=7)
-
-class CurrentXML2JSON(luigi.Task):
-  def requires(self):
-    return DownloadCurrentXMLReports()
-
-  def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'res/current/json'))
-
-  def run(self):
-    input_dir = self.input().path
-    output_dir = self.output().path
-    os.system('mkdir -p "%s"' % output_dir)
-    output_file = self.output().path + '/current_res.json'
-    out = open(output_file, 'w')
-
-    # Callback function for xmltodict.parse()
-    def handle_recall(_, recall):
-      out.write(json.dumps(recall) + '\n')
-      return True
-
-    for xml_filename in glob.glob('%(input_dir)s/*.xml' % locals()):
-      xmltodict.parse(open(xml_filename),
-                      item_depth=2,
-                      item_callback=handle_recall)
-
-class ExtractUpcNdcFromJSON(luigi.Task):
-  def requires(self):
-    return [CurrentXML2JSON(), HistoricHTML2JSON()]
-
-  def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'res/json'))
-
-  def run(self):
-    output_dir = self.output().path
-    os.system('mkdir -p "%s"' % output_dir)
-    current_event_files = glob.glob(self.input()[0].path + '/*.json')
-    historic_event_files = glob.glob(self.input()[1].path + '/*.json')
-    all_files = current_event_files + historic_event_files
-    output_file = self.output().path + '/all_res.json'
-    out = open(output_file, 'w')
+  def map(self, key, value, output):
     # These keys must exist in the JSON records for the annotation logic to work
     logic_keys = [
       'code-info',
@@ -237,88 +153,142 @@ class ExtractUpcNdcFromJSON(luigi.Task):
       'product-description'
     ]
 
-    for filename in all_files:
-      json_file = open(filename, 'r')
-      for row in json_file:
-        record = json.loads(row)
-        if record['product-type'] == 'Drugs':
-          record['upc'] = extract.extract_upc_from_recall(record)
-          record['ndc'] = extract.extract_ndc_from_recall(record)
-        # Only write out records that have required keys and a meaningful date
-        if set(logic_keys).issubset(record) and record['report-date'] != None:
-          out.write(json.dumps(record) + '\n')
+    val = json.loads(value)
 
-class AnnotateRes(luigi.Task):
+    if val['product-type'] == 'Drugs':
+      val['upc'] = extract.extract_upc_from_recall(val)
+      val['ndc'] = extract.extract_ndc_from_recall(val)
+
+    # There is no good ID for the report, so we need to make one
+    doc_id = self._hash(json.dumps(val, sort_keys=True))
+    val['@id'] = doc_id
+    val['@version'] = 1
+
+    # Only write out vals that have required keys and a meaningful date
+    if set(logic_keys).issubset(val) and val['report-date'] != None:
+      output.add(key, val)
+    else:
+      logging.warn('Docuemnt is missing required fields. %s',
+                   json.dumps(val, indent=2, sort_keys=True))
+
+class XML2JSON(luigi.Task):
+  batch = luigi.Parameter()
+
   def requires(self):
-    return [CombineHarmonization(), ExtractUpcNdcFromJSON()]
+    return DownloadXMLReports(self.batch)
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'res/annotated'))
+    return luigi.LocalTarget(join(self.input().path, 'json.db'))
 
   def run(self):
-    output_dir = self.output().path
-    os.system('mkdir -p "%s"' % output_dir)
-    harmonized_file = self.input()[0].path
-    event_file = glob.glob(self.input()[1].path + '/*.json')
-    output_file = self.output().path + '/annotated_res.json'
-    recall_event = annotate.AnnotateMapper(harmonized_file)
-    for file_name in event_file:
-      recall_event(file_name, output_file)
+    input_dir = self.input().path
+    for xml_filename in glob.glob('%(input_dir)s/*.xml' % locals()):
+      parallel.mapreduce(
+        input_collection=parallel.Collection.from_glob(xml_filename,
+                                                       parallel.XMLDictInput),
+        mapper=XML2JSONMapper(),
+        reducer=parallel.IdentityReducer(),
+        output_prefix=self.output().path,
+        num_shards=1,
+        map_workers=1)
 
-class ResetElasticSearch(luigi.Task):
+class AnnotateJSON(luigi.Task):
+  batch = luigi.Parameter()
+
   def requires(self):
-    return AnnotateRes()
+    return [XML2JSON(self.batch), CombineHarmonization()]
 
   def output(self):
-    return luigi.LocalTarget('/tmp/elastic.res.initialized')
+    output_dir = self.input()[0].path.replace('json.db', 'annotated.db')
+    return  luigi.LocalTarget(output_dir)
 
   def run(self):
-    cmd = join(RUN_DIR, 'res/clear_and_load_mapping.sh')
-    logging.info('Running Shell Script:' + cmd)
-    os.system(cmd)
-    os.system('touch "%s"' % self.output().path)
+    input_db = self.input()[0].path
+    harmonized_file = self.input()[1].path
 
-# TODO(hansnelsen): Look to consolidate this code into a shared library. It is
-# used by both res and faers pipeline.py. Res is slightly different, in that it
-# writes to JSON instead of LevelDB
-def load_json(input_file):
-  event_json = open(input_file, 'r')
-  json_batch = []
-  def _post_batch():
-    response = \
-    requests.post('http://localhost:9200/recall/enforcementreport/_bulk',
-                  data='\n'.join(json_batch))
-    del json_batch[:]
-    if response.status_code != 200:
-      logging.info('Bad response: %s', response)
+    parallel.mapreduce(
+      input_collection=parallel.Collection.from_sharded(input_db),
+      mapper=annotate.AnnotateMapper(harmonized_file),
+      reducer=parallel.IdentityReducer(),
+      output_prefix=self.output().path,
+      num_shards=1,
+      map_workers=1)
 
-  for row in event_json:
-    event_raw = json.loads(row)
-    json_batch.append('{ "index" : {} }')
-    json_batch.append(json.dumps(event_raw))
-    if len(json_batch) > 1000:
-      _post_batch()
 
-  _post_batch()
+class ResetElasticSearch(AlwaysRunTask):
+  es_host = ES_HOST
+  def _run(self):
+    es = elasticsearch.Elasticsearch(self.es_host)
+    elasticsearch_requests.load_mapping(
+      es, 'recall.base', 'enforcementreport', './schemas/res_mapping.json')
+
 
 class LoadJSON(luigi.Task):
+  ''' Load the annotated JSON documents into Elasticsearch
+  '''
+  batch = luigi.Parameter()
+  es_host = ES_HOST
+  epoch = time.time()
+
   def requires(self):
-    return [ResetElasticSearch(), AnnotateRes()]
+    return [ResetElasticSearch(), AnnotateJSON(self.batch)]
 
   def output(self):
-    return luigi.LocalTarget('/tmp/elastic.res.done')
+    output = self.input()[1].path.replace('annotated.db', 'load.done')
+    return luigi.LocalTarget(output)
 
   def run(self):
-    input_json = glob.glob(self.input()[1].path + '/*.json')
-    for filename in input_json:
-      load_json(filename)
-    os.system('touch "%s"' % self.output().path)
+    output_file = self.output().path
+    input_file = self.input()[1].path
+    es = elasticsearch.Elasticsearch(self.es_host)
+    index_util.start_index_transaction(es, 'recall', self.epoch)
+    parallel.mapreduce(
+      input_collection=parallel.Collection.from_sharded(input_file),
+      mapper=index_util.LoadJSONMapper(self.es_host,
+                                       'recall',
+                                       'enforcementreport',
+                                       self.epoch,
+                                       docid_key='@id',
+                                       version_key='@version'),
+      reducer=parallel.NullReducer(),
+      output_prefix='/tmp/loadjson.recall',
+      num_shards=1,
+      map_workers=1)
+    index_util.commit_index_transaction(es, 'recall')
+    common.shell_cmd('touch %s', output_file)
+
+class RunWeeklyProcess(luigi.Task):
+  ''' Generates a date object that is passed through the pipeline tasks in order
+      to generate and load JSON documents for the weekly enforcement reports.
+
+      There is some special date logic due to some gaps in the every 7 day
+      pattern.
+  '''
+  # TODO(hansnelsen): find a way to detect and auto adjust a gap in the every 7
+  #                   days logic.
+  def requires(self):
+    start = XML_START_DATE
+    end = get_latest_date(RES_BASE_URL, CURRENT_XML_BASE_URL)
+    for batch_date in arrow.Arrow.range('week', start, end):
+      # Handle annoying cases like July 5th, 2012 (it is +8)
+      if batch_date == arrow.get(2012, 7, 4):
+        batch = batch_date.replace(days=+1)
+      elif batch_date == arrow.get(2013, 12, 25):
+        batch = batch_date.replace(days=+1)
+      elif batch_date == arrow.get(2014, 10, 8):
+        batch = batch_date.replace(days=-1)
+      elif batch_date == arrow.get(2014, 12, 3):
+        batch = batch_date.replace(days=-1)
+      else:
+        batch = batch_date
+      yield LoadJSON(batch)
 
 if __name__ == '__main__':
+  fmt_string = '%(created)f %(filename)s:%(lineno)s [%(funcName)s] %(message)s'
   logging.basicConfig(stream=sys.stderr,
-                      format=\
-                      '%(created)f %(filename)s:%(lineno)s \
-                      [%(funcName)s] %(message)s',
-                      level=logging.DEBUG)
+                      format=fmt_string,
+                      level=logging.INFO)
+  # elasticsearch is too verbose by default (logs every successful request)
+  logging.getLogger('elasticsearch').setLevel(logging.WARN)
 
-  luigi.run()
+  luigi.run(main_task_cls=RunWeeklyProcess)

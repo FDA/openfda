@@ -17,6 +17,7 @@ import subprocess
 import sys
 import urllib2
 
+from openfda import common
 from openfda.annotation_table import combine_harmonization
 from openfda.annotation_table import rxnorm_harmonization
 from openfda.annotation_table import unii_harmonization
@@ -45,12 +46,6 @@ RXNORM_DOWNLOAD = \
 NDC_DOWNLOAD_PAGE = \
   'http://www.fda.gov/drugs/informationondrugs/ucm142438.htm'
 
-
-def download(url, output_filename):
-  os.system('mkdir -p %s' % dirname(output_filename))
-  os.system("curl '%s' > '%s'" % (url, output_filename))
-
-
 class DownloadSPL(luigi.Task):
   def requires(self):
     return []
@@ -61,8 +56,7 @@ class DownloadSPL(luigi.Task):
   def run(self):
     for url in SPL_DOWNLOADS:
       filename = join(self.output().path, url.split('/')[-1])
-      download(url, filename)
-
+      common.download(url, filename)
 
 class DownloadNDC(luigi.Task):
   def requires(self):
@@ -82,7 +76,7 @@ class DownloadNDC(luigi.Task):
     if not zip_url:
       logging.fatal('NDC database file not found!')
 
-    download(zip_url, self.output().path)
+    common.download(zip_url, self.output().path)
 
 
 class DownloadUNII(luigi.Task):
@@ -93,7 +87,7 @@ class DownloadUNII(luigi.Task):
     return luigi.LocalTarget(join(BASE_DIR, 'unii/raw/pharmacologic_class.zip'))
 
   def run(self):
-    download(PHARM_CLASS_DOWNLOAD, self.output().path)
+    common.download(PHARM_CLASS_DOWNLOAD, self.output().path)
 
 
 class DownloadRXNorm(luigi.Task):
@@ -104,7 +98,7 @@ class DownloadRXNorm(luigi.Task):
     return luigi.LocalTarget(join(BASE_DIR, 'rxnorm/raw/rxnorm_mappings.zip'))
 
   def run(self):
-    download(RXNORM_DOWNLOAD, self.output().path)
+    common.download(RXNORM_DOWNLOAD, self.output().path)
 
 
 def list_zip_files_in_zip(zip_filename):

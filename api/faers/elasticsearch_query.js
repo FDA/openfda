@@ -81,6 +81,7 @@ exports.BuildQuery = function(params) {
 
   if (!params.search && !params.count) {
     q.query(ejs.MatchAllQuery());
+    return q;
   }
 
   if (params.search) {

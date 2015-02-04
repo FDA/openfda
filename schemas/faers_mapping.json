@@ -6,6 +6,14 @@
       "excludes": ["patient.drug.openfda.*_exact"]
     },
     "properties": {
+      "@version": {
+        "type": "double",
+        "null_value" : 0.0
+      },
+      "@epoch": {
+        "type": "double",
+        "null_value" : 0.0
+      },
       "@timestamp": {
         "type": "date",
         "format": "dateOptionalTime"
@@ -343,13 +351,33 @@
                 "type": "string"
               },
               "drugstructuredosagenumb": {
-                "type": "float"
+                "type": "multi_field",
+                "fields": {
+                  "drugstructuredosagenumb": {
+                    "type": "string",
+                    "index": "analyzed"
+                  },
+                  "exact": {
+                    "type": "string",
+                    "index": "not_analyzed"
+                  }
+                }
               },
               "drugstructuredosageunit": {
                 "type": "string"
               },
               "drugtreatmentduration": {
-                "type": "float"
+                "type": "multi_field",
+                "fields": {
+                  "drugtreatmentduration": {
+                    "type": "string",
+                    "index": "analyzed"
+                  },
+                  "exact": {
+                    "type": "string",
+                    "index": "not_analyzed"
+                  }
+                }
               },
               "drugtreatmentdurationunit": {
                 "type": "string"

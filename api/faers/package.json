@@ -10,11 +10,12 @@
   },
   "dependencies": {
     "bunyan": "~0.22.3",
-    "elasticsearch": "~2.1.4",
     "elastic.js": "~1.1.1",
+    "elasticsearch": "~2.1.4",
     "express": "~3.5.2",
-    "forever" : "~0.11.1",
-    "moment" : "~2.6.0",
+    "fast-stats": "0.0.2",
+    "forever": "~0.11.1",
+    "moment": "~2.6.0",
     "underscore": "~1.6.0"
   },
   "devDependencies": {

@@ -10,6 +10,18 @@
       ]
     },
     "properties": {
+      "@version": {
+        "type": "double",
+        "null_value" : 0.0
+      },
+      "@id": {
+        "type": "string"
+      },
+      "@epoch": {
+        "type": "double",
+        "null_value" : 0.0
+      },
+
       "@timestamp": {
         "type": "date",
         "format": "dateOptionalTime"
