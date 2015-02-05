@@ -4,40 +4,36 @@ import collections
 import glob
 import logging
 from os.path import basename, dirname
+import pprint
 import re
 import traceback
 
+import arrow
 import xmltodict
 
 from openfda import parallel
-import simplejson as json
-import pprint
 
 
 class MergeSafetyReportsReducer(parallel.Reducer):
   def __init__(self):
     self.report_counts = collections.defaultdict(int)
     parallel.Reducer.__init__(self)
-    
+
   def reduce(self, key, values, output):
     # keys are case numbers, values are (timestamp, json_data)
-    timestamp, json_value = sorted(values)[-1]
+    timestamp, report = sorted(values)[-1]
     self.report_counts[timestamp] += 1
-    output.Put(key, json_value)
-    
+    output.put(key, (timestamp, report))
+
   def reduce_finished(self):
     return self.report_counts
-      
+
 
 def timestamp_from_filename(filename):
-  '''Returns a string YEAR.QUARTER extracted from ``filename``.
-
-  (The timestamp doesn't need to be an integer, just something that can
-  be ordered correctly).
-  '''
-  match = re.search(r'.*/.*_([0-9]+)q([0-4])/.*', filename)
+  '''Returns a timestamp corresponding to the year/quarter in `filename`. '''
+  match = re.search(r'/([0-9]+)q([0-4])/', filename)
   year, quarter = int(match.group(1)), int(match.group(2))
-  return '%04d.%02d' % (year, quarter)
+  return arrow.get('%04d.%02d' % (year, quarter), 'YYYY.MM').timestamp
 
 
 def parse_demo_file(demo_filename):
@@ -58,6 +54,10 @@ def parse_demo_file(demo_filename):
 
   return result
 
+def case_insensitive_glob(pattern):
+  def either(c):
+    return '[%s%s]'%(c.lower(),c.upper()) if c.isalpha() else c
+  return glob.glob(''.join(map(either,pattern)))
 
 class ExtractSafetyReportsMapper(parallel.Mapper):
   '''Extract safety reports from ``input_filename``.
@@ -70,6 +70,12 @@ class ExtractSafetyReportsMapper(parallel.Mapper):
   For each report, a 3-tuple (timestamp, case_number, json_str) is
   added to ``report_queue``.
   '''
+  def __init__(self, max_records_per_file=-1):
+    # For testing, this can be set to a number > 0, which will stop the
+    # extraction process early.
+    self.max_records_per_file = max_records_per_file
+    self._record_count = 0
+
   def map_shard(self, map_input, map_output):
     inputs = list(map_input)
     assert len(inputs) == 1
@@ -78,21 +84,28 @@ class ExtractSafetyReportsMapper(parallel.Mapper):
     file_timestamp = timestamp_from_filename(input_filename)
     logging.info('File timestamp: %s', file_timestamp)
 
-    input_dir = dirname(dirname(dirname(input_filename)))
-    input_base = basename(dirname(dirname(input_filename)))
-    
     # report id to case number conversion only needed for AERS SGM files
     # not FAERS XML files
-    input_is_sgml = input_filename.find('SGML') != -1
+    input_is_sgml = input_filename.lower().find('sgml') != -1
+    id_to_case = None
+
     if input_is_sgml:
-      ascii_base = input_base.replace('SGML', 'ASCII')
-      ascii_glob = '%s/%s/*/DEMO*.[Tt][Xx][Tt]' % (input_dir, ascii_base)
-      ascii_file = glob.glob(ascii_glob)[0]
-      id_to_case = parse_demo_file(ascii_file)
+      input_dir = dirname(dirname(input_filename))
+      ascii_files = case_insensitive_glob('%s/*/demo*.txt' % (input_dir))
+      if ascii_files:
+        logging.info('Found DEMO file %s', ascii_files[0])
+        id_to_case = parse_demo_file(ascii_files[0])
+      else:
+        logging.info('No DEMO file for input %s', input_filename)
+
 
     def handle_safety_report(_, safety_report):
       '''Handle a single safety_report entry.'''
       try:
+        self._record_count += 1
+        if self.max_records_per_file > 0 and self._record_count >= self.max_records_per_file:
+          return False
+
         # Skip the small number of records without a patient section
         if 'patient' not in safety_report.keys():
           return True
@@ -118,17 +131,16 @@ class ExtractSafetyReportsMapper(parallel.Mapper):
 
         # strip "check" digit
         report_id = report_id.split('-')[0]
-        if input_is_sgml:
+        if id_to_case:
           case_number = id_to_case[report_id]
         else:
           case_number = report_id
 
         safety_report['@case_number'] = case_number
 
-        report_json = json.dumps(safety_report) + '\n'
-        map_output.add(case_number, (file_timestamp, report_json))
+        map_output.add(case_number, (file_timestamp, safety_report))
         return True
-      except:
+      except Exception:
         # We sometimes encounter bad records.
         # Ignore them and continue processing.
         logging.info('Traceback in file: %s' % input_filename)
@@ -136,7 +148,7 @@ class ExtractSafetyReportsMapper(parallel.Mapper):
         logging.warn('Report was: %s', pprint.pformat(safety_report))
         logging.info('Continuing...')
         return True
-      
+
     try:
       xmltodict.parse(open(input_filename),
                       item_depth=2,

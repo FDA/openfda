@@ -1,5 +1,8 @@
+arrow
 BeautifulSoup4
+boto
 click
+elasticsearch
 flask
 leveldb
 luigi

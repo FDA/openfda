@@ -1,6 +1,7 @@
 {
   "@case_number": "4562564",
   "@timestamp": "2003-04-07",
+  "@version": 10000,
   "companynumb": "US-MERCK-0304USA00739",
   "fulfillexpeditecriteria": "1",
   "patient": {

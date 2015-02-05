@@ -15,11 +15,12 @@ class AnnotateUnitTest(unittest.TestCase):
     pass
 
   def test_annotate_event(self):
+    version = 10000
     harmonized_file = open_data_file('harmonized.small.json')
     harmonized_dict = annotate.read_harmonized_file(harmonized_file)
 
     event = json.load(open_data_file('event.preannotation.json'))
-    annotate.AnnotateEvent(event, harmonized_dict)
+    annotate.AnnotateEvent(event, version, harmonized_dict)
 
     # Note that assertMultiLineEqual doesn't give pretty diffs so we do dict
     # comparison of the parsed JSON instead.

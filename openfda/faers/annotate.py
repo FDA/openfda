@@ -26,7 +26,10 @@ def read_harmonized_file(harmonized_file):
 
   harmonized_file.seek(0)
   for row in read_json_file(harmonized_file):
-    drug = row['brand_name'].rstrip() + ' ' + row['brand_name_suffix'].rstrip()
+    if row['brand_name_suffix']:
+      drug = row['brand_name'] + ' ' + row['brand_name_suffix']
+    else:
+      drug = row['brand_name']
     drug = drug.lower()
     if drug in return_dict:
       return_dict[drug].append(row)
@@ -130,7 +133,7 @@ def AnnotateDrug(drug, harmonized_dict):
     drug['openfda'] = openfda_lists
 
 
-def AnnotateEvent(event, harmonized_dict):
+def AnnotateEvent(event, version, harmonized_dict):
   if 'patient' not in event:
     return
 
@@ -139,6 +142,7 @@ def AnnotateEvent(event, harmonized_dict):
 
   date = event['receiptdate']
   event['@timestamp'] = date[0:4] + '-' + date[4:6] + '-' + date[6:8]
+  event['@version'] = version
 
 
 class AnnotateMapper(parallel.Mapper):
@@ -148,7 +152,8 @@ class AnnotateMapper(parallel.Mapper):
   def map_shard(self, map_input, map_output):
     harmonized_dict = read_harmonized_file(open(self.harmonized_file))
 
-    for case_number, event_raw in map_input:
-      event = json.loads(event_raw)
-      AnnotateEvent(event, harmonized_dict)
-      map_output.add(case_number, json.dumps(event))
+    for case_number, (timestamp, event) in map_input:
+      # TODO(hansnelsen): Change all of the code to refer to the timestamp
+      #                   as 'version'
+      AnnotateEvent(event, timestamp, harmonized_dict)
+      map_output.add(case_number, event)

@@ -1,0 +1,2 @@
+Due to Docker restrictions, the Dockerfile for the openfda app server is
+located in the api/faers directory.

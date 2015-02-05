@@ -3,7 +3,6 @@
 #
 # Python
 #
-
 rm -rf build/
 
 # We emulate readlink with python, so we can work on OSX without greadlink.
@@ -12,8 +11,14 @@ rm -rf build/
 PYTHON_ENV=$(python -c 'import os,sys;print os.path.realpath(sys.argv[1])' ./_python-env)
 
 PYTHON=$(which python)
+if [[ -n MACHTYPE ]]; then
+  PIP="pip install"
+else
+  PIP="pip install --user"
+fi
 
-pip install --user virtualenv
+$PIP virtualenv
+$PIP awscli
 
 # Setup virtualenv if it doesn't exist.
 test -e $PYTHON_ENV || virtualenv -p $PYTHON $PYTHON_ENV
@@ -28,7 +33,6 @@ $PYTHON_ENV/bin/python setup.py develop
 pushd api/faers
 npm install
 popd
-pushd openfda/res
+pushd openfda/spl
 npm install
 popd
-

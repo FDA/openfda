@@ -87,7 +87,7 @@ date_removed_flag,U,Unknown
 date_removed_flag,A,Not available
 date_removed_flag,I,No information at this time
 date_removed_flag,M,Month and year provided only day defaults to 01
-date_removed_flag,Y,Year provided only, day defaulted to 01 month defaulted to January
+date_removed_flag,Y,"Year provided only, day defaulted to 01 month defaulted to January"
 device_availability,Y,Yes
 device_availability,N,No
 device_availability,R,Device was returned to manufacturer

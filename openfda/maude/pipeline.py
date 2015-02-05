@@ -17,6 +17,7 @@ import sys
 import urllib2
 
 from openfda.maude import join_maude
+import collections
 
 # Exceed default field_size limit, need to set to sys.maxsize
 csv.field_size_limit(sys.maxsize)
@@ -65,17 +66,131 @@ TEXT_KEYS = ['mdr_report_key',
   'date_report',
   'text']
 
-# Replacement text for field names. Old value on left, new value on right.
-REPLACEMENTS = [('__', '_'),
-  ('_no', '_number'),
-  ('evaluated_by_manufactur', 'evaluated_by_manufacturer'),
-  ('_state_code', '_state'),
-  ('_country_code', '_country'),
-  ('_preamendment', '_preamendment_flag'),
-  ('_transitional', '_transitional_flag'),
-  ('_link_flag_', '_link_flag'),
-  ('_contact_postal', '_contact_postal_code'),
-  ('contact_street_', 'contact_address_')]
+DEVICE_KEYS = [
+ 'mdr_report_key',
+ 'device_event_key',
+ 'implant_flag',
+ 'date_removed_flag',
+ 'device_sequence_number',
+ 'date_received',
+ 'brand_name',
+ 'generic_name',
+ 'manufacturer_d_name',
+ 'manufacturer_d_address_1',
+ 'manufacturer_d_address_2',
+ 'manufacturer_d_city',
+ 'manufacturer_d_state',
+ 'manufacturer_d_zip_code',
+ 'manufacturer_d_zip_code_ext',
+ 'manufacturer_d_country',
+ 'manufacturer_d_postal_code',
+ 'expiration_date_of_device',
+ 'model_number',
+ 'catalog_number',
+ 'lot_number',
+ 'other_id_number',
+ 'device_operator',
+ 'device_availability',
+ 'date_returned_to_manufacturer',
+ 'device_report_product_code',
+ 'device_age_text',
+ 'device_evaluated_by_manufacturer',
+ 'baseline_brand_name',
+ 'baseline_generic_name',
+ 'baseline_model_number',
+ 'baseline_catalog_number',
+ 'baseline_other_id_number',
+ 'baseline_device_family',
+ 'baseline_shelf_life_contained',
+ 'baseline_shelf_life_in_months',
+ 'baseline_pma_flag',
+ 'baseline_pma_number',
+ 'baseline_510_k__flag',
+ 'baseline_510_k__number',
+ 'baseline_preamendment_flag',
+ 'baseline_transitional_flag',
+ 'baseline_510_k__exempt_flag',
+ 'baseline_date_first_marketed',
+ 'baseline_date_ceased_marketing'
+]
+
+MDR_KEYS = [
+  'mdr_report_key',
+  'event_key',
+  'report_number',
+  'report_source_code',
+  'manufacturer_link_flag',
+  'number_devices_in_event',
+  'number_patients_in_event',
+  'date_received',
+  'adverse_event_flag',
+  'product_problem_flag',
+  'date_report',
+  'date_of_event',
+  'reprocessed_and_reused_flag',
+  'reporter_occupation_code',
+  'health_professional',
+  'initial_report_to_fda',
+  'distributor_name',
+  'distributor_address_1',
+  'distributor_address_2',
+  'distributor_city',
+  'distributor_state',
+  'distributor_zip_code',
+  'distributor_zip_code_ext',
+  'date_facility_aware',
+  'type_of_report',
+  'report_date',
+  'report_to_fda',
+  'date_report_to_fda',
+  'event_location',
+  'report_to_manufacturer',
+  'date_report_to_manufacturer',
+  'manufacturer_name',
+  'manufacturer_address_1',
+  'manufacturer_address_2',
+  'manufacturer_city',
+  'manufacturer_state',
+  'manufacturer_zip_code',
+  'manufacturer_zip_code_ext',
+  'manufacturer_country',
+  'manufacturer_postal_code',
+  'manufacturer_contact_t_name',
+  'manufacturer_contact_f_name',
+  'manufacturer_contact_l_name',
+  'manufacturer_contact_address_1',
+  'manufacturer_contact_address_2',
+  'manufacturer_contact_city',
+  'manufacturer_contact_state',
+  'manufacturer_contact_zip_code',
+  'manufacturer_contact_zip_ext',
+  'manufacturer_contact_country',
+  'manufacturer_contact_postal_code',
+  'manufacturer_contact_area_code',
+  'manufacturer_contact_exchange',
+  'manufacturer_contact_phone_number',
+  'manufacturer_contact_extension',
+  'manufacturer_contact_pcountry',
+  'manufacturer_contact_pcity',
+  'manufacturer_contact_plocal',
+  'manufacturer_g1_name',
+  'manufacturer_g1_address_1',
+  'manufacturer_g1_address_2',
+  'manufacturer_g1_city',
+  'manufacturer_g1_state',
+  'manufacturer_g1_zip_code',
+  'manufacturer_g1_zip_code_ext',
+  'manufacturer_g1_country',
+  'manufacturer_g1_postal_code',
+  'source_type',
+  'date_manufacturer_received',
+  'device_date_of_manufacturer',
+  'single_use_flag',
+  'remedial_action',
+  'previous_use_code',
+  'removal_correction_number',
+  'event_type'
+]
 
 def download(url, output_filename):
   os.system('mkdir -p %s' % dirname(output_filename))
@@ -183,56 +298,57 @@ class PartionEventData(luigi.Task):
     header = {}
     header['patient'] = PATIENT_KEYS
     header['foitext'] = TEXT_KEYS
+    header['mdrfoi'] = MDR_KEYS
+    header['foidev'] = DEVICE_KEYS
 
     for i in range(PARTITIONS):
       for category in CATEGORIES:
         filename = str(i) + '.' + category + '.txt'
+        filename = join(output_dir, filename)
         logging.info('Creating file handles for writing %s', filename)
-        # Append mode for the files
-        output_handle = open(join(output_dir, filename), 'a')
+        output_handle = open(filename, 'w')
+        csv_writer = csv.writer(output_handle, delimiter='|')
+        csv_writer.writerow(header[category])
         fh_dict[category + str(i)] = output_handle
 
     # Because we download all zips from the site, we need to ignore some of the
     # files for the partitioning process. Remove if files are excluded from
     # download.
     for filename in glob.glob(input_dir + '/*.txt'):
+      logging.info('Processing: %s', filename)
       skip = False
       for ignore in IGNORE_FILES:
         if ignore in filename:
           skip = True
+
       if skip:
+        logging.info('Skipping: %s', filename)
         continue
 
       for category in CATEGORIES:
         if category in filename:
           file_category = category
 
-      file_handle = csv.reader(open(filename, 'r'), delimiter='|')
+      # maude files do not escape quote characters.  we have to just hope that no
+      # pipe characters occur in records...
+      file_handle = csv.reader(open(filename, 'r'), quoting=csv.QUOTE_NONE, delimiter='|')
+      partioned = collections.defaultdict(list)
+      for i, row in enumerate(file_handle):
+        # skip header rows
+        if (i == 0) and ('MDR_REPORT_KEY' in row): continue
 
-      if file_category not in header:
-        head = file_handle.next()
-        # Clean up keys and lower() them. Saves lots of time downstream
-        for repl_text in REPLACEMENTS:
-          for i, head_val in enumerate(head):
-            head[i] = head_val.lower().replace(repl_text[0], repl_text[1])
-        header[file_category] = head
-
-      partioned = []
-      for row in file_handle:
         # Only work with rows that have data and the first column is a number
         if row and row[0].isdigit():
-          partioned.append((int(row[0]) % PARTITIONS, row))
+          partioned[int(row[0]) % PARTITIONS].append(row)
+        else:
+          logging.warn('Skipping row: %s', row)
 
-      partioned.sort()
+      for partnum, rows in partioned.iteritems():
+        output_handle = fh_dict[file_category + str(partnum)]
+        csv_writer = csv.writer(output_handle, delimiter='|')
+        logging.info('Writing: %s %s %s %s', partnum, file_category + str(partnum), output_handle, len(rows))
+        csv_writer.writerows(rows)
 
-      for i in range(PARTITIONS):
-        partition_file_handle = fh_dict[file_category + str(i)]
-        csv_writer = csv.writer(partition_file_handle, delimiter='|')
-        # Write a header if file is empty
-        if partition_file_handle.tell() == 0:
-          csv_writer.writerow(header[file_category])
-        # Write out only the current partition
-        csv_writer.writerows([part[1] for part in partioned if part[0] == i])
 
 class JoinPartitions(luigi.Task):
   def requires(self):

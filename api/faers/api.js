@@ -6,6 +6,7 @@ var elasticsearch = require('elasticsearch');
 var express = require('express');
 var moment = require('moment');
 var underscore = require('underscore');
+var Stats = require('fast-stats').Stats;
 
 var api_request = require('./api_request.js');
 var elasticsearch_query = require('./elasticsearch_query.js');
@@ -30,6 +31,7 @@ var HTTP_CODE = {
 var FIELDS_TO_REMOVE = [
   '@timestamp',
   '@case_number',
+  '@version',
 
   // MAUDE fields to remove
   'baseline_510_k_exempt_flag',
@@ -51,10 +53,24 @@ var FIELDS_TO_REMOVE = [
   'baseline_transitional_flag'
 ];
 
+
 var ALL_ENFORCEMENT_INDEX = 'recall';
 var DEVICE_EVENT_INDEX = 'deviceevent';
 var DRUG_EVENT_INDEX = 'drugevent';
 var DRUG_LABEL_INDEX = 'druglabel';
+var PROCESS_METADATA_INDEX = 'openfdametadata';
+
+var INDICES = {
+  'enforcement' : ALL_ENFORCEMENT_INDEX,
+  'device' : DEVICE_EVENT_INDEX,
+  'drug' : DRUG_EVENT_INDEX,
+  'label' : DRUG_LABEL_INDEX
+};
+
+// For each endpoint, we track the success/failure status for the
+// last REQUEST_HISTORY_LENGTH requests; this is used to determine
+// the green/yellow/red status for an endpoint.
+var REQUEST_HISTORY_LENGTH = 100;
 
 var app = express();
 
@@ -84,6 +100,87 @@ var client = new elasticsearch.Client({
 
   // Note that this doesn't abort the query.
   requestTimeout: 10000  // milliseconds
+});
+
+
+var index_info = {};
+for (var name in INDICES) {
+  index_info[INDICES[name]] = {
+    last_updated: '2015-01-01',
+    document_count: 1,
+    latency: new Stats({ bucket_precision: 10, store_data: false }),
+    status: []
+  };
+};
+
+// Fetch index update times
+client.search({
+  index: PROCESS_METADATA_INDEX,
+  type: 'last_run',
+  fields: 'last_update_date'
+}).then(function(body) {
+  var util = require('util');
+  for (var i = 0; i < body.hits.hits.length; ++i) {
+    var hit = body.hits.hits[i];
+    index_info[hit._id].last_updated = hit.fields.last_update_date[0];
+  }
+}, function (error) {
+  console.log('Failed to fetch index update times:: ', error.message);
+});
+
+// Fetch document counts
+for (var name in INDICES) {
+  var index = INDICES[name];
+  client
+    .count({ index: index })
+    .then(function(index, body) {
+    index_info[index].document_count = body.count;
+  }.bind(null, index));
+}
+
+
+// Returns a JSON response indicating the status of each endpoint. The status
+// includes the last time the index was updated, a green/yellow/red "status"
+// field indicating the recent health of the endpoint, the number of requests to
+// the endpoint, and the average latency of the endpoint in milliseconds.
+app.get('/status', function(request, response) {
+  // Allow the status page to get status info....
+  response.setHeader('Access-Control-Allow-Origin', '*');
+
+  var res = [];
+  for (var name in INDICES) {
+    var index = INDICES[name];
+    var info = index_info[index];
+    var errorCount = 0;
+    for (var i = 0; i < info.status.length; ++i) {
+      errorCount += info.status[i] == false ? 1 : 0;
+    }
+
+    var status = 'GREEN';
+    if (errorCount > REQUEST_HISTORY_LENGTH / 50) {
+      status = 'YELLOW';
+    }
+    if (errorCount > REQUEST_HISTORY_LENGTH / 10) {
+      status = 'RED';
+    }
+
+    var requestCount = 0;
+    var buckets = info.latency.distribution();
+    for (var i = 0; i < buckets.length; ++i) {
+      if (!buckets[i]) { continue; }
+      requestCount += buckets[i].count;
+    }
+
+    res.push({
+      endpoint: index,
+      status: status,
+      last_updated: info.last_updated,
+      documents: info.document_count,
+      requests: requestCount,
+      latency: info.latency.amean(),
+    });
+  }
+  response.json(res);
 });
 
 app.get('/healthcheck', function(request, response) {
@@ -158,9 +255,16 @@ TryToBuildElasticsearchParams = function(params, elasticsearch_index, response) 
     return null;
   }
 
+  var index = elasticsearch_index;
+  if (params.staging) {
+    index = elasticsearch_index + '.staging';
+  }
+  // Added sort by _id to ensure consistent results
+  // across servers
   var es_search_params = {
     index: elasticsearch_index,
-    body: es_query.toString()
+    body: es_query.toString(),
+    sort: '_uid'
   };
 
   if (!params.count) {
@@ -171,26 +275,29 @@ TryToBuildElasticsearchParams = function(params, elasticsearch_index, response) 
   return es_search_params;
 };
 
+AddRequestStatus = function(index, success) {
+  var info = index_info[index];
+  info.status.push(success);
+  if (info.status.length > REQUEST_HISTORY_LENGTH) {
+    info.status.shift();
+  }
+};
+
 TrySearch = function(index, params, es_search_params, response) {
   client.search(es_search_params).then(function(body) {
+    AddRequestStatus(index, true);
     if (body.hits.hits.length == 0) {
-      ApiError(response, 'NOT_FOUND', 'No matches found!');
+      return ApiError(response, 'NOT_FOUND', 'No matches found!');
     }
+
+    var requestTime = body.took;
+    index_info[index].latency.push(requestTime);
 
     var response_json = {};
     response_json.meta = underscore.clone(META);
-
-    // TODO(mattmo): Pull this data from Elasticsearch or S3
-    // rather than hard coding
-    if (index == ALL_ENFORCEMENT_INDEX) {
-      response_json.meta.last_updated = "2014-08-06";
-    } else if (index == DEVICE_EVENT_INDEX) {
-      response_json.meta.last_updated = "2014-08-15";
-    } else if (index == DRUG_EVENT_INDEX) {
-      response_json.meta.last_updated = "2014-08-06";
-    } else if (index == DRUG_LABEL_INDEX) {
-      response_json.meta.last_updated = "2014-08-15";
-    }
+    // TODO(hansnelsen): Need to check this periodically (TTL) when we switch to
+    //                   an always-on approach to Elasticsearch and the API
+    response_json.meta.last_updated = index_info[index].last_updated;
 
     if (!params.count) {
       response_json.meta.results = {
@@ -224,7 +331,7 @@ TrySearch = function(index, params, es_search_params, response) {
           response_json.results = body.facets.count.terms;
           response.json(HTTP_CODE.OK, response_json);
         } else {
-          ApiError(response, 'NOT_FOUND', 'Nothing to count');
+          return ApiError(response, 'NOT_FOUND', 'Nothing to count');
         }
       } else if (body.facets.count.entries) {
         // Date facet count
@@ -236,16 +343,17 @@ TrySearch = function(index, params, es_search_params, response) {
           response_json.results = body.facets.count.entries;
           response.json(HTTP_CODE.OK, response_json);
         } else {
-          ApiError(response, 'NOT_FOUND', 'Nothing to count');
+          return ApiError(response, 'NOT_FOUND', 'Nothing to count');
         }
       } else {
-        ApiError(response, 'NOT_FOUND', 'Nothing to count');
+        return ApiError(response, 'NOT_FOUND', 'Nothing to count');
       }
     } else {
-      ApiError(response, 'NOT_FOUND', 'No matches found!');
+      return ApiError(response, 'NOT_FOUND', 'No matches found!');
     }
   }, function(error) {
     log.error(error);
+    AddRequestStatus(index, false);
     ApiError(response, 'SERVER_ERROR', 'Check your request and try again');
   });
 };

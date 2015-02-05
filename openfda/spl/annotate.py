@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import simplejson as json
+from openfda import parallel
 
 def read_json_file(json_file):
   '''
@@ -119,16 +120,16 @@ def AnnotateLabel(label, harmonized_dict):
     openfda_lists[field] = [s for s in value.keys()]
   label['openfda'] = openfda_lists
 
-class AnnotateMapper(object):
+
+class AnnotateMapper(parallel.Mapper):
   def __init__(self, harmonized_file):
     self.harmonized_file = harmonized_file
 
-  def __call__(self, input_file, output_file):
-    label_json = open(input_file)
-    out = open(output_file, 'w')
-    harmonized_dict = read_harmonized_file(open(self.harmonized_file))
+  def map_shard(self, map_input, map_output):
+    self.harmonized_dict = read_harmonized_file(open(self.harmonized_file))
+    parallel.Mapper.map_shard(self, map_input, map_output)
 
-    for row in label_json:
-      label = json.loads(row)
-      AnnotateLabel(label, harmonized_dict)
-      out.write(json.dumps(label) + '\n')
+  def map(self, key, label, out):
+    AnnotateLabel(label, self.harmonized_dict)
+    out.add(key, label)
+
