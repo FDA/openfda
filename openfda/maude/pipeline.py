@@ -3,21 +3,27 @@
 ''' MAUDE pipeline for downloading, joining and loading into elasticsearch
 '''
 from bs4 import BeautifulSoup
+import collections
 import csv
 import glob
 import logging
-import luigi
 import multiprocessing
 import os
 from os.path import dirname, join
 import re
-import requests
-import simplejson as json
 import sys
 import urllib2
 
+import arrow
+import elasticsearch
+import luigi
+import requests
+import simplejson as json
+
+from openfda import common, parallel, index_util, elasticsearch_requests
+from openfda import process_metadata
+from openfda.index_util import AlwaysRunTask
 from openfda.maude import join_maude
-import collections
 
 # Exceed default field_size limit, need to set to sys.maxsize
 csv.field_size_limit(sys.maxsize)
@@ -26,8 +32,17 @@ RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 BASE_DIR = './data/'
 # A directory for holding files that track Task state
 META_DIR = join(BASE_DIR, 'maude/meta')
-os.system('mkdir -p %s' % META_DIR)
+common.shell_cmd('mkdir -p %s', META_DIR)
 
+ES_HOST = luigi.Parameter('localhost:9200', is_global=True)
+
+# The MAUDE pipeline will always create a new index, so we append the date
+prefix_name = 'deviceevent'
+# Need the prefix for updating the alias and the metadata datetime
+INDEX_PREFIX = luigi.Parameter(prefix_name, is_global=True)
+suffix = arrow.utcnow().format('YYYY-MM-DD-HH-mm')
+index_name = '.'.join([prefix_name, suffix])
+INDEX = luigi.Parameter(index_name, is_global=True)
 
 PARTITIONS = 32
 CATEGORIES = ['mdrfoi', 'patient', 'foidev', 'foitext']
@@ -192,10 +207,6 @@ MDR_KEYS = [
   'event_type'
 ]
 
-def download(url, output_filename):
-  os.system('mkdir -p %s' % dirname(output_filename))
-  os.system("curl '%s' > '%s'" % (url, output_filename))
-
 class DownloadDeviceEvents(luigi.Task):
   def requires(self):
     return []
@@ -214,7 +225,7 @@ class DownloadDeviceEvents(luigi.Task):
       logging.fatal('No MAUDE Zip Files Found At %s' % DEVICE_CLASS_DOWNLOAD)
     for zip_url in zip_urls:
       filename = zip_url.split('/')[-1]
-      download(zip_url, join(self.output().path, filename))
+      common.download(zip_url, join(self.output().path, filename))
 
 class DownloadFoiClass(luigi.Task):
   def requires(self):
@@ -225,7 +236,7 @@ class DownloadFoiClass(luigi.Task):
 
   def run(self):
     output_filename = join(self.output().path, DEVICE_CLASS_ZIP.split('/')[-1])
-    download(DEVICE_CLASS_ZIP, output_filename)
+    common.download(DEVICE_CLASS_ZIP, output_filename)
 
 class Download_510K(luigi.Task):
   def requires(self):
@@ -239,7 +250,7 @@ class Download_510K(luigi.Task):
 
     for zip_url in CLEARED_DEV_ZIPS:
       output_filename = join(output_dir, zip_url.split('/')[-1])
-      download(zip_url, output_filename)
+      common.download(zip_url, output_filename)
 
 class ExtractAndCleanDownloads(luigi.Task):
   ''' Unzip each of the download files and remove all the non-UTF8 characters.
@@ -253,18 +264,16 @@ class ExtractAndCleanDownloads(luigi.Task):
 
   def run(self):
     output_dir = self.output().path
-    os.system('mkdir -p %(output_dir)s' % locals())
+    common.shell_cmd('mkdir -p %s', output_dir)
     for i in range(len(self.input())):
       input_dir = self.input()[i].path
       for zip_filename in glob.glob(input_dir + '/*.zip'):
         txt_name = zip_filename.replace('zip', 'txt')
         txt_name = txt_name.replace('raw', 'extracted')
-        os.system('mkdir -p %s' % dirname(txt_name))
-        cmd = 'unzip -p %(zip_filename)s' % locals()
-        cmd += '| iconv -f "ISO-8859-1//TRANSLIT" '
-        cmd += '-t UTF8 -c > %(txt_name)s' % locals()
+        common.shell_cmd('mkdir -p %s', dirname(txt_name))
+        cmd = 'unzip -p %s | iconv -f "ISO-8859-1//TRANSLIT" -t UTF8 -c > %s'
         logging.info('Unzipping and converting %s', zip_filename)
-        os.system(cmd)
+        common.shell_cmd(cmd, zip_filename, txt_name)
 
 class PartionEventData(luigi.Task):
   ''' The historic files are not balanced (patient and text are split by year)
@@ -290,7 +299,7 @@ class PartionEventData(luigi.Task):
     input_dir = join(self.input().path, 'events')
     output_dir = self.output().path
     fh_dict = {}
-    os.system('mkdir -p %s' % output_dir)
+    common.shell_cmd('mkdir -p %s', output_dir)
 
     # Headers need to be written to the start of each partition. The patient
     # and foitext headers are manually created. The headers for mdrfoi and
@@ -329,9 +338,11 @@ class PartionEventData(luigi.Task):
         if category in filename:
           file_category = category
 
-      # maude files do not escape quote characters.  we have to just hope that no
+      # MAUDE files do not escape quote characters, we just hope that no
       # pipe characters occur in records...
-      file_handle = csv.reader(open(filename, 'r'), quoting=csv.QUOTE_NONE, delimiter='|')
+      file_handle = csv.reader(open(filename, 'r'),
+                               quoting=csv.QUOTE_NONE,
+                               delimiter='|')
       partioned = collections.defaultdict(list)
       for i, row in enumerate(file_handle):
         # skip header rows
@@ -346,9 +357,12 @@ class PartionEventData(luigi.Task):
       for partnum, rows in partioned.iteritems():
         output_handle = fh_dict[file_category + str(partnum)]
         csv_writer = csv.writer(output_handle, delimiter='|')
-        logging.info('Writing: %s %s %s %s', partnum, file_category + str(partnum), output_handle, len(rows))
+        logging.info('Writing: %s %s %s %s',
+                     partnum,
+                     file_category + str(partnum),
+                     output_handle,
+                     len(rows))
         csv_writer.writerows(rows)
-
 
 class JoinPartitions(luigi.Task):
   def requires(self):
@@ -361,7 +375,7 @@ class JoinPartitions(luigi.Task):
     input_dir = self.input().path
     output_dir = self.output().path
 
-    os.system('mkdir -p %s' % output_dir)
+    common.shell_cmd('mkdir -p %s', output_dir)
     # TODO(hansnelsen): change to the openfda.parallel version of multiprocess
     pool = multiprocessing.Pool(processes=6)
     for i in range(PARTITIONS):
@@ -388,59 +402,84 @@ class JoinPartitions(luigi.Task):
     pool.close()
     pool.join()
 
+class ResetElasticSearch(AlwaysRunTask):
+  ''' This will always make a new index. The approach is to make a new index
+      with a date suffix and then use the alias feature in elasticsearch to
+      point the deviceevent name to that new index (SwapIndex task does this).
+  '''
+  es_host = ES_HOST
+  index_name = INDEX
 
-class ResetElasticSearch(luigi.Task):
-  def requires(self):
-    return JoinPartitions()
-
-  def output(self):
-    return luigi.LocalTarget(join(META_DIR, 'ResetElasticSearch.done'))
-
-  def run(self):
-    cmd = join(RUN_DIR, 'maude/clear_and_load_mapping.sh')
-    logging.info('Running Shell Script:' + cmd)
-    os.system(cmd)
-    os.system('touch "%s"' % self.output().path)
-
-def load_json(input_file):
-  event_json = open(input_file, 'r')
-  json_batch = []
-  def _post_batch():
-    response = \
-    requests.post('http://localhost:9200/deviceevent/maude/_bulk',
-                  data='\n'.join(json_batch))
-    del json_batch[:]
-    if response.status_code != 200:
-      logging.info('Bad response: %s', response)
-
-  for row in event_json:
-    event_raw = json.loads(row)
-    json_batch.append('{ "index" : {} }')
-    json_batch.append(json.dumps(event_raw))
-    if len(json_batch) > 1000:
-      _post_batch()
-
-  _post_batch()
-
+  def _run(self):
+    es = elasticsearch.Elasticsearch(self.es_host)
+    elasticsearch_requests.load_mapping(es,
+                                        self.index_name,
+                                        'maude',
+                                        './schemas/maude_mapping.json')
 
 class LoadJSON(luigi.Task):
+  es_host = ES_HOST
+  index_name = INDEX
+
   def requires(self):
     return [ResetElasticSearch(), JoinPartitions()]
 
   def output(self):
-    return luigi.LocalTarget(join(META_DIR, 'LoadJSON.done'))
+    return luigi.LocalTarget(join(META_DIR, self.index_name + '.loadjson.done'))
 
   def run(self):
-   input_json = glob.glob(self.input()[1].path + '/*.json')
-   for filename in input_json:
-    load_json(filename)
+   json_dir = self.input()[1].path
+   input_glob = glob.glob(json_dir + '/*.json')
+   for file_name in input_glob:
+     logging.info('Running file %s', file_name)
+     parallel.mapreduce(
+       input_collection=parallel.Collection.from_glob(file_name,
+                                                      parallel.JSONLineInput),
+       mapper=index_util.ReloadJSONMapper(self.es_host,
+                                          self.index_name,
+                                          'maude'),
+       reducer=parallel.IdentityReducer(),
+       output_prefix='/tmp/loadjson.' + index_name,
+       map_workers=1)
+
    os.system('touch "%s"' % self.output().path)
 
+class SwapIndex(luigi.Task):
+  ''' This is a standalone task for now, until we get a feel for the pipeline in
+      production. This step should be run after LoadJSON is run and some sort of
+      test is run to determine the swap is realistic.
+
+      This task can be used to rollback an index as well, just pass in the
+      --swap-index-name <name of index you want to be aliased to deviceevent>
+  '''
+  es_host = ES_HOST
+  index_prefix = INDEX_PREFIX
+  swap_index_name = luigi.Parameter()
+
+  def requires(self):
+    return []
+
+  def output(self):
+    output_filename = self.swap_index_name + '.swap.done'
+    return luigi.LocalTarget(join(META_DIR, output_filename))
+
+  def run(self):
+    # We parse the date from the index so that the last_update_date is correct
+    # in the API meta field
+    # Assumes format of: indexname.YYYY-MM-DD-HH-mm
+    swap_index_date = arrow.get(self.swap_index_name.split('.')[1],
+                                'YYYY-MM-DD-HH-mm')\
+                           .format('YYYY-MM-DD')
+    index_util.swap_index(self.es_host, self.index_prefix, self.swap_index_name)
+    process_metadata.update_process_datetime(self.index_prefix,
+                                             swap_index_date)
+    os.system('touch "%s"' % self.output().path)
 
 if __name__ == '__main__':
   logging.basicConfig(stream=sys.stderr,
                       format=\
                       '%(created)f %(filename)s:%(lineno)s \
                       [%(funcName)s] %(message)s',
-                      level=logging.DEBUG)
+                      level=logging.INFO)
+  logging.getLogger('elasticsearch').setLevel(logging.WARN)
   luigi.run()

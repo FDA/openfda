@@ -153,23 +153,26 @@ class XML2JSONMapper(parallel.Mapper):
       'product-description'
     ]
 
-    val = json.loads(value)
+    for val in value['recall-number']:
+      if val['product-type'] == 'Drugs':
+        val['upc'] = extract.extract_upc_from_recall(val)
+        val['ndc'] = extract.extract_ndc_from_recall(val)
+      
+      # Copy the recall-number attribute value to an actual field
+      # The recall-number is not a reliable id, since it repeats
+      val['recall-number'] = val['@id']
 
-    if val['product-type'] == 'Drugs':
-      val['upc'] = extract.extract_upc_from_recall(val)
-      val['ndc'] = extract.extract_ndc_from_recall(val)
-
-    # There is no good ID for the report, so we need to make one
-    doc_id = self._hash(json.dumps(val, sort_keys=True))
-    val['@id'] = doc_id
-    val['@version'] = 1
-
-    # Only write out vals that have required keys and a meaningful date
-    if set(logic_keys).issubset(val) and val['report-date'] != None:
-      output.add(key, val)
-    else:
-      logging.warn('Docuemnt is missing required fields. %s',
-                   json.dumps(val, indent=2, sort_keys=True))
+      # There is no good ID for the report, so we need to make one
+      doc_id = self._hash(json.dumps(val, sort_keys=True))
+      val['@id'] = doc_id
+      val['@version'] = 1
+  
+      # Only write out vals that have required keys and a meaningful date
+      if set(logic_keys).issubset(val) and val['report-date'] != None:
+        output.add(doc_id, val)
+      else:
+        logging.warn('Docuemnt is missing required fields. %s',
+                     json.dumps(val, indent=2, sort_keys=True))
 
 class XML2JSON(luigi.Task):
   batch = luigi.Parameter()
