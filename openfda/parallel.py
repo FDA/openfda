@@ -138,11 +138,11 @@ class XMLDictInput(MapInput):
   def __iter__(self):
     _item = []
     def _handler(_, ord_dict):
-      _item.append(json.dumps(ord_dict))
+      _item.append(json.loads(json.dumps(ord_dict)))
       return True
 
     xml_file = open(self.filename).read()
-    xmltodict.parse(xml_file, item_depth=2, item_callback=_handler)
+    xmltodict.parse(xml_file, item_depth=1, item_callback=_handler)
 
     for idx, line in enumerate(_item):
       yield str(idx), line

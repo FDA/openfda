@@ -31,10 +31,30 @@ def copy_documents(es, source_index, dest_index, doc_type, docids):
                 version_type='external_gt')
 
     except elasticsearch.ConflictError:
-      logging.warn(
-      'A duplicate document id (%s) was found while indexing.  ' +
+      logging.warn('A duplicate document id (%s) was found while indexing.  ' +
       'The version originally present in the index will be kept.', docid)
-        )
+
+def create(es, index, doc_type, batch):
+  ''' A function for bulk loading a batch into an index without versioning.
+  '''
+  create_batch = []
+  for doc in batch:
+    create_batch.append({ '_index' : index,
+                          '_type' : doc_type,
+                          '_source' : doc })
+
+  create_count, errors = elasticsearch.helpers.bulk(es, create_batch)
+  conflicts = set()
+  for item in errors:
+    create_resp = item['create']
+    # conflict occurred
+    if create_resp['status'] == 409:
+      conflicts.add(create_resp['_id'])
+    elif create_resp['status'] >= 400:
+      logging.info('Bad result: %s', create_resp)
+
+  logging.info('Create batch finished: %s created %s errors',
+               create_count, len(errors))
 
 def create_or_spill(es, index, doc_type, batch):
   '''
@@ -129,7 +149,6 @@ def create_or_spill(es, index, doc_type, batch):
                create_count, update_count, skipped, old_version_count,
                len(errors) - old_version_count)
 
-
 def copy_mapping(es, source_index, target_index):
   '''
   Copy the mappings and settings from `source_index` to `target_index`.
@@ -145,7 +164,6 @@ def copy_mapping(es, source_index, target_index):
 
   for doc_type, schema in mapping[source_index]['mappings'].items():
     idx.put_mapping(index=target_index, doc_type=doc_type, body=schema)
-
 
 def start_index_transaction(es, index_name, epoch):
   '''
@@ -182,7 +200,6 @@ def start_index_transaction(es, index_name, epoch):
     ]
   })
 
-
 def rollback_index_transaction(es, index_name):
   '''
   Revert an in-progress index operation, restoring the index to it's original state.
@@ -204,8 +221,6 @@ def rollback_index_transaction(es, index_name):
   })
   es.indices.delete(index=spill)
 
-
-
 def commit_index_transaction(es, index_name):
   '''
   Commits an indexing operation.
@@ -224,6 +239,44 @@ def commit_index_transaction(es, index_name):
     ]
   })
   es.indices.delete(index_name + '.spill')
+
+def swap_index(es_host, alias_name, index_name):
+  ''' A function that will swap an index on an alias. If the alias does not
+      exist, it will make it and assign it to the index.
+
+      If the index does not exist, this function will fail.
+  '''
+  es = elasticsearch.Elasticsearch(es_host)
+  logging.info('Starting index swap for %s', alias_name)
+  assert es.indices.exists(index_name), \
+    'The index does not exist, it must be created in order to swap it \n'
+
+  if not es.indices.exists_alias(alias_name):
+    logging.info('Alias %s is not assigned to any index, assigning it to %s',
+                 alias_name,
+                 index_name)
+    es.indices.put_alias(index=index_name, name=alias_name)
+    return
+  else:
+    current = es.indices.get_alias(alias_name)
+    for key in current.keys():
+      current_index_name = key
+
+    logging.info('Alias %s assigned to %s, swapping it to %s',
+                 alias_name,
+                 current_index_name,
+                 index_name)
+    es.indices.update_aliases({
+      'actions' : [
+        { 'remove' : { 'alias' : alias_name, 'index' : current_index_name } },
+        { 'add' : {
+          'alias' : alias_name,
+          'index' : index_name,
+          }
+        }]
+    })
+    return
+
 
 class AlwaysRunTask(luigi.Task):
   '''
@@ -274,6 +327,28 @@ class LoadJSONMapper(parallel.Mapper):
         create_or_spill(es, self.index, self.data_type, json_batch)
         del json_batch[:]
     create_or_spill(es, self.index, self.data_type, json_batch)
+
+class ReloadJSONMapper(parallel.Mapper):
+  ''' A Mapper that is version agnostic, for the indexes that we do a swap on,
+      as opposed to a spill (which we do for versioning).
+  '''
+  def __init__(self,
+               es_host,
+               index,
+               data_type):
+    self.es_host = es_host
+    self.index = index
+    self.data_type = data_type
+
+  def map_shard(self, map_input, map_output):
+    es = elasticsearch.Elasticsearch(self.es_host)
+    json_batch = []
+    for key, doc in map_input:
+      json_batch.append(doc)
+      if len(json_batch) > DEFAULT_BATCH_SIZE:
+        create(es, self.index, self.data_type, json_batch)
+        del json_batch[:]
+    create(es, self.index, self.data_type, json_batch)
 
 def main(argv):
   FLAGS = gflags.FLAGS

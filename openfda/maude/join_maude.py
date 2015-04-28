@@ -4,11 +4,12 @@
     JSON file.
 '''
 import csv
-import datetime
 import logging
 import os
 from os.path import dirname, join
 import simplejson as json
+
+import arrow
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 ENUM_FILE = join(RUN_DIR, 'maude/data/enums.csv')
@@ -94,17 +95,16 @@ def _fix_date(input_date):
       Elasticsearch friendly.
       Returns the input_date if it is not a known format
   '''
-  if '/' in input_date:
-    try:
-      date = datetime.datetime.strptime(input_date, '%m/%d/%Y')
-      return date.strftime('%Y%m%d')
-    except:
-      logging.info('%s is a malformed date string', input_date)
-  if '-' in input_date:
-    try:
-      date = datetime.datetime.strptime(input_date.lower(), '%d-%b-%y')
-      return date.strftime('%Y%m%d')
-    except:
+  supported_formats = ['DD-MMM-YY', 
+    'YYYY/MM/DD HH:mm:ss.SSS', 
+    'MM/DD/YYYY', 
+    'YYYYMMDD']
+  # arrow needs 3 char months to be sentence case: e.g. Dec not DEC
+  formated_date = input_date.title()
+  try:
+    date = arrow.get(formated_date, supported_formats)
+    return date.format('YYYYMMDD')
+  except:
       logging.info('%s is a malformed date string', input_date)
   return input_date
 
@@ -136,40 +136,40 @@ def _joinable_dict(record_list, join_key_list):
   return joinable_dict
 
 def _split_keys(row, key_name, joinable_enum):
-    for pos, patient in enumerate(row['patient']):
-      value = _split_string(patient[key_name], ';')
-      transform = []
-      for split_value in value:
-        if split_value:
-          key = ':'.join([key_name, split_value])
-          if key in joinable_enum:
-            transform.append(joinable_enum[key][0]['code_desc'])
-          else:
-            transform.append(split_value)
-      sub_transform = []
-      for i, sub_value in enumerate(transform):
-        value = _split_string(sub_value, ',')
+  for pos, patient in enumerate(row['patient']):
+    value = _split_string(patient[key_name], ';')
+    transform = []
+    for split_value in value:
+      if split_value:
+        key = ':'.join([key_name, split_value])
+        if key in joinable_enum:
+          transform.append(joinable_enum[key][0]['code_desc'])
+        else:
+          transform.append(split_value)
+    sub_transform = []
+    for i, sub_value in enumerate(transform):
+      value = _split_string(sub_value, ',')
 
-        for split_sub_value in value:
-          if split_sub_value:
-            key = ':'.join([key_name, split_sub_value])
-            if key in joinable_enum:
-              sub_transform.append(joinable_enum[key][0]['code_desc'])
-            else:
-              sub_transform.append(split_sub_value)
-          transform[i] = ', '.join(sub_transform)
-      row['patient'][pos][key_name] = transform
+      for split_sub_value in value:
+        if split_sub_value:
+          key = ':'.join([key_name, split_sub_value])
+          if key in joinable_enum:
+            sub_transform.append(joinable_enum[key][0]['code_desc'])
+          else:
+            sub_transform.append(split_sub_value)
+        transform[i] = ', '.join(sub_transform)
+    row['patient'][pos][key_name] = transform
 
 def _split_multi_submit(row, key_name, joinable_enum):
-    value = _split_string(row[key_name], ',')
-    transform = []
-    for s in value:
-      key = ':'.join([key_name, s])
-      if key in joinable_enum:
-        transform.append(joinable_enum[key][0]['code_desc'])
-      else:
-        transform.append(s)
-      row[key_name] = transform
+  value = _split_string(row[key_name], ',')
+  transform = []
+  for s in value:
+    key = ':'.join([key_name, s])
+    if key in joinable_enum:
+      transform.append(joinable_enum[key][0]['code_desc'])
+    else:
+      transform.append(s)
+    row[key_name] = transform
 
 def _split_string(input_string, delimiter):
   if not input_string:
