@@ -21,7 +21,7 @@ import arrow
 import elasticsearch
 import luigi
 
-from openfda import parallel, index_util, elasticsearch_requests
+from openfda import parallel, config, index_util, elasticsearch_requests
 from openfda.annotation_table.pipeline import CombineHarmonization
 from openfda.faers import annotate
 from openfda.faers import xml_to_json
@@ -30,14 +30,13 @@ from openfda.index_util import AlwaysRunTask
 
 # this should be a symlink to wherever the real data directory is
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
-BASE_DIR = './data/'
+BASE_DIR = config.data_dir()
 FAERS_HISTORIC = ('http://www.fda.gov/Drugs/GuidanceCompliance'
   'RegulatoryInformation/Surveillance/AdverseDrugEffects/ucm083765.htm')
 FAERS_CURRENT = ('http://www.fda.gov/Drugs/GuidanceCompliance'
   'RegulatoryInformation/Surveillance/AdverseDrugEffects/ucm082193.htm')
 
 MAX_RECORDS_PER_FILE = luigi.IntParameter(-1, is_global=True)
-ES_HOST = luigi.Parameter('localhost:9200', is_global=1)
 
 class DownloadDataset(AlwaysRunTask):
   '''
@@ -48,6 +47,13 @@ class DownloadDataset(AlwaysRunTask):
                  self._faers_historic.find_all(href=re.compile('.*.zip'))]:
       for a in page:
         filename = a.text.split(u'\xa0')[0]
+        # FAERS XML/ASCII for 2014 Q3/Q4 have many strange issues. Sigh.
+        filename = filename.replace('Q', 'q')
+        filename = filename.replace(' q', 'q')
+        filename = filename.replace(' ', '_')
+        if '.zip' not in filename.lower():
+          filename += '.zip'
+
         url = 'http://www.fda.gov' + a['href']
         yield filename, url
 
@@ -126,15 +132,7 @@ class XML2JSON(luigi.Task):
   max_records_per_file = MAX_RECORDS_PER_FILE
 
   def requires(self):
-    if self.quarter == 'all':
-      quarters = []
-      now = arrow.now()
-      for year in range(2004, now.year):
-        for quarter in range(1, 5):
-          quarters.append(ExtractZip('%4dq%d' % (year, quarter)))
-      return quarters
-    else:
-      return [ExtractZip(self.quarter)]
+    return [ExtractZip(self.quarter)]
 
   def output(self):
     return luigi.LocalTarget(join(BASE_DIR, 'faers/json/', self.quarter))
@@ -163,7 +161,8 @@ class XML2JSON(luigi.Task):
       parallel.Collection.from_list(input_shards),
       xml_to_json.ExtractSafetyReportsMapper(),
       xml_to_json.MergeSafetyReportsReducer(),
-      self.output().path)
+      self.output().path,
+      num_shards=16)
 
     combined_counts = collections.defaultdict(int)
     for rc in report_counts:
@@ -193,51 +192,32 @@ class AnnotateJSON(luigi.Task):
       map_workers=16)
 
 
-class ResetElasticSearch(AlwaysRunTask):
-  es_host = ES_HOST
-  def _run(self):
-    es = elasticsearch.Elasticsearch(self.es_host)
-    elasticsearch_requests.load_mapping(
-      es, 'drugevent.base', 'safetyreport', './schemas/faers_mapping.json')
-
-
-class LoadJSON(AlwaysRunTask):
+class LoadJSONQuarter(index_util.LoadJSONBase):
   quarter = luigi.Parameter()
-  es_host = ES_HOST
+  index_name = 'drugevent'
+  type_name = 'safetyreport'
+  mapping_file = './schemas/faers_mapping.json'
+  docid_key='@case_number'
+  use_checksum = True
 
-  def __init__(self, *args, **kw):
-    AlwaysRunTask.__init__(self, *args, **kw)
-    self.epoch = time.time()
+  def _data(self):
+    return AnnotateJSON(self.quarter)
 
+
+class LoadJSON(luigi.WrapperTask):
+  quarter = luigi.Parameter()
   def requires(self):
-    return [ResetElasticSearch(), AnnotateJSON(self.quarter)]
-
-  def run(self):
-    es = elasticsearch.Elasticsearch(self.es_host)
-    index_util.start_index_transaction(es, 'drugevent', self.epoch)
-
-    parallel.mapreduce(
-      parallel.Collection.from_sharded(self.input()[1].path),
-      index_util.LoadJSONMapper(self.es_host,
-                                'drugevent',
-                                'safetyreport',
-                                self.epoch,
-                                docid_key='@case_number',
-                                version_key='@version'),
-      parallel.NullReducer(),
-      output_prefix='/tmp/loadjson.drugevent',
-      num_shards=1,
-      map_workers=1)
-
-    index_util.commit_index_transaction(es, 'drugevent')
+    if self.quarter == 'all':
+      now = arrow.now()
+      previous_task = None
+      for year in range(2004, now.year):
+        for quarter in range(1, 5):
+          task = LoadJSONQuarter(quarter='%4dq%d' % (year, quarter), previous_task=previous_task)
+          previous_task = task
+          yield task
+    else:
+      yield LoadJSONQuarter(quarter=self.quarter)
 
 
 if __name__ == '__main__':
-  logging.basicConfig(
-    stream=sys.stderr,
-    format='%(created)f %(filename)s:%(lineno)s [%(funcName)s] %(message)s',
-    level=logging.INFO)
-
-  # elasticsearch is too verbose by default (logs every successful request)
-  logging.getLogger('elasticsearch').setLevel(logging.WARN)
   luigi.run()

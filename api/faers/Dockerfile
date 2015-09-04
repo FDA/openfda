@@ -1,4 +1,4 @@
-FROM dockerfile/nodejs
+FROM  registry.hub.docker.com/node:0.10
 
 ADD . /app
 WORKDIR /app

@@ -11,6 +11,7 @@ import gflags
 import leveldb
 import sys
 
+import simplejson as json
 from openfda import app, parallel
 
 
@@ -20,6 +21,7 @@ gflags.DEFINE_string('start_key', None, 'First key to read.')
 gflags.DEFINE_string('end_key', None, 'Last key to read.')
 gflags.DEFINE_string('key', None, 'Print just this key.')
 gflags.DEFINE_boolean('key_only', False, 'Print only keys')
+gflags.DEFINE_boolean('json_value_out', False, 'Prints values as JSON')
 
 def main(argv):
   FLAGS = gflags.FLAGS
@@ -39,6 +41,7 @@ def main(argv):
 
   for (k, v) in db_iter:
     if FLAGS.key_only: print k
+    elif FLAGS.json_value_out: print k, json.loads(json.dumps(v))
     else: print k, v
 
 

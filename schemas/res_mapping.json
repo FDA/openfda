@@ -1,364 +1,348 @@
 {
   "enforcementreport": {
-    "dynamic": "strict",
     "_source": {
-      "includes": [
-        "*"
-      ],
       "excludes": [
         "openfda.*_exact"
+      ],
+      "includes": [
+        "*"
       ]
     },
+    "dynamic": "strict",
     "properties": {
-      "@version": {
-        "type": "double",
-        "null_value" : 0.0
+      "@checksum": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "@epoch": {
+        "null_value": 0,
+        "type": "double"
       },
       "@id": {
         "type": "string"
       },
-      "@epoch": {
-        "type": "double",
-        "null_value" : 0.0
-      },
-
       "@timestamp": {
-        "type": "date",
-        "format": "dateOptionalTime"
+        "format": "dateOptionalTime",
+        "type": "date"
       },
-      "product_type": {
-        "type": "multi_field",
+      "@version": {
+        "null_value": 0,
+        "type": "double"
+      },
+      "city": {
         "fields": {
-          "product_type": {
-            "type": "string",
-            "index": "analyzed"
-          },
           "exact": {
-            "type": "string",
-            "index": "not_analyzed"
+            "index": "not_analyzed",
+            "type": "string"
           }
-        }
+        },
+        "type": "string"
+      },
+      "classification": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "code_info": {
+        "index": "analyzed",
+        "type": "string"
+      },
+      "country": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "distribution_pattern": {
+        "index": "analyzed",
+        "type": "string"
       },
       "event_id": {
         "type": "long"
       },
-      "status": {
-        "type": "multi_field",
-        "fields": {
-          "status": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          }
-        }
-      },
-      "recalling_firm": {
-        "type": "multi_field",
-        "fields": {
-          "recalling_firm": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          }
-        }
-      },
-      "city": {
-        "type": "multi_field",
-        "fields": {
-          "city": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          }
-        }
-      },
-      "state": {
-        "type": "multi_field",
-        "fields": {
-          "state": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          }
-        }
-      },
-      "country": {
-        "type": "multi_field",
-        "fields": {
-          "country": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          }
-        }
-      },
-      "voluntary_mandated": {
-        "type": "multi_field",
-        "fields": {
-          "voluntary_mandated": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          }
-        }
-      },
       "initial_firm_notification": {
-        "type": "multi_field",
         "fields": {
-          "initial_firm_notification": {
-            "type": "string",
-            "index": "analyzed"
-          },
           "exact": {
-            "type": "string",
-            "index": "not_analyzed"
+            "index": "not_analyzed",
+            "type": "string"
           }
-        }
-      },
-      "distribution_pattern": {
-        "type": "string",
-        "index": "analyzed"
-      },
-      "classification": {
-        "type": "multi_field",
-        "fields": {
-          "classification": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          }
-        }
-      },
-      "product_description": {
-        "type": "string",
-        "index": "analyzed"
-      },
-      "code_info": {
-        "type": "string",
-        "index": "analyzed"
-      },
-      "product_quantity": {
-        "type": "string",
-        "index": "analyzed"
-      },
-      "reason_for_recall": {
-        "type": "string",
-        "index": "analyzed"
-      },
-      "recall_initiation_date": {
-        "type": "date",
-        "format": "basic_date||date"
-      },
-      "report_date": {
-        "type": "date",
-        "format": "basic_date||date"
+        },
+        "type": "string"
       },
       "openfda": {
         "properties": {
           "application_number": {
-            "type": "string",
-            "index": "analyzed"
+            "index": "analyzed",
+            "type": "string"
           },
           "application_number_exact": {
-            "type": "string",
-            "index": "not_analyzed"
+            "index": "not_analyzed",
+            "type": "string"
           },
           "brand_name": {
-            "type": "string",
-            "index": "analyzed"
+            "index": "analyzed",
+            "type": "string"
           },
           "brand_name_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "substance_name": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "substance_name_exact": {
-            "type": "string",
-            "index": "not_analyzed"
+            "index": "not_analyzed",
+            "type": "string"
           },
           "dosage_form": {
-            "type": "string",
-            "index": "analyzed"
+            "index": "analyzed",
+            "type": "string"
           },
           "dosage_form_exact": {
-            "type": "string",
-            "index": "not_analyzed"
+            "index": "not_analyzed",
+            "type": "string"
           },
           "generic_name": {
-            "type": "string",
-            "index": "analyzed"
+            "index": "analyzed",
+            "type": "string"
           },
           "generic_name_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "manufacturer_name": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "manufacturer_name_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "product_ndc": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "product_ndc_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "product_type": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "product_type_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "route": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "route_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "rxcui": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "rxcui_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "rxstring": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "rxstring_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "rxtty": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "rxtty_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "spl_id": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "spl_id_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "package_ndc": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "package_ndc_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "spl_set_id": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "spl_set_id_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "unii": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "unii_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "pharm_class_moa": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "pharm_class_moa_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "pharm_class_pe": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "pharm_class_pe_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "pharm_class_cs": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "pharm_class_cs_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "pharm_class_epc": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "pharm_class_epc_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "nui": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "nui_exact": {
-            "type": "string",
-            "index": "not_analyzed"
-          },
-          "upc": {
-            "type": "string",
-            "index": "analyzed"
-          },
-          "upc_exact": {
-            "type": "string",
-            "index": "not_analyzed"
+            "index": "not_analyzed",
+            "type": "string"
           },
           "is_original_packager": {
             "type": "boolean"
           },
           "is_original_packager_exact": {
             "type": "boolean"
+          },
+          "manufacturer_name": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "manufacturer_name_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "nui": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "nui_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "original_packager_product_ndc": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "original_packager_product_ndc_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "package_ndc": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "package_ndc_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "pharm_class_cs": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "pharm_class_cs_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "pharm_class_epc": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "pharm_class_epc_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "pharm_class_moa": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "pharm_class_moa_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "pharm_class_pe": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "pharm_class_pe_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "product_ndc": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "product_ndc_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "product_type": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "product_type_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "route": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "route_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "rxcui": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "rxcui_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "rxstring": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "rxstring_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "rxtty": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "rxtty_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "spl_id": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "spl_id_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "spl_set_id": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "spl_set_id_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "substance_name": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "substance_name_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "unii": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "unii_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "upc": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "upc_exact": {
+            "index": "not_analyzed",
+            "type": "string"
           }
         }
+      },
+      "product_description": {
+        "index": "analyzed",
+        "type": "string"
+      },
+      "product_quantity": {
+        "index": "analyzed",
+        "type": "string"
+      },
+      "product_type": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "reason_for_recall": {
+        "index": "analyzed",
+        "type": "string"
+      },
+      "recall_initiation_date": {
+        "format": "basic_date||date",
+        "type": "date"
+      },
+      "recall_number": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "recalling_firm": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "report_date": {
+        "format": "basic_date||date",
+        "type": "date"
+      },
+      "state": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "status": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "voluntary_mandated": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
       }
     }
   }

@@ -24,7 +24,7 @@ import arrow
 import elasticsearch
 import luigi
 
-from openfda import common, parallel, index_util, elasticsearch_requests
+from openfda import common, config, parallel, index_util, elasticsearch_requests
 from openfda.annotation_table.pipeline import CombineHarmonization
 from openfda.index_util import AlwaysRunTask
 from openfda.res import annotate
@@ -32,8 +32,6 @@ from openfda.res import extract
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 BASE_DIR = './data'
-
-ES_HOST = luigi.Parameter('localhost:9200', is_global=True)
 
 CURRENT_XML_BASE_URL = ('http://www.accessdata.fda.gov/scripts/'
                         'enforcement/enforce_rpt-Product-Tabs.cfm?'
@@ -157,7 +155,7 @@ class XML2JSONMapper(parallel.Mapper):
       if val['product-type'] == 'Drugs':
         val['upc'] = extract.extract_upc_from_recall(val)
         val['ndc'] = extract.extract_ndc_from_recall(val)
-      
+
       # Copy the recall-number attribute value to an actual field
       # The recall-number is not a reliable id, since it repeats
       val['recall-number'] = val['@id']
@@ -166,7 +164,7 @@ class XML2JSONMapper(parallel.Mapper):
       doc_id = self._hash(json.dumps(val, sort_keys=True))
       val['@id'] = doc_id
       val['@version'] = 1
-  
+
       # Only write out vals that have required keys and a meaningful date
       if set(logic_keys).issubset(val) and val['report-date'] != None:
         output.add(doc_id, val)
@@ -187,13 +185,13 @@ class XML2JSON(luigi.Task):
     input_dir = self.input().path
     for xml_filename in glob.glob('%(input_dir)s/*.xml' % locals()):
       parallel.mapreduce(
-        input_collection=parallel.Collection.from_glob(xml_filename,
-                                                       parallel.XMLDictInput),
+        parallel.Collection.from_glob(
+          xml_filename, parallel.XMLDictInput(depth=1)),
         mapper=XML2JSONMapper(),
         reducer=parallel.IdentityReducer(),
         output_prefix=self.output().path,
         num_shards=1,
-        map_workers=1)
+        map_workers=8)
 
 class AnnotateJSON(luigi.Task):
   batch = luigi.Parameter()
@@ -210,57 +208,27 @@ class AnnotateJSON(luigi.Task):
     harmonized_file = self.input()[1].path
 
     parallel.mapreduce(
-      input_collection=parallel.Collection.from_sharded(input_db),
+      parallel.Collection.from_sharded(input_db),
       mapper=annotate.AnnotateMapper(harmonized_file),
       reducer=parallel.IdentityReducer(),
       output_prefix=self.output().path,
-      num_shards=1,
+      num_shards=4,
       map_workers=1)
 
 
-class ResetElasticSearch(AlwaysRunTask):
-  es_host = ES_HOST
-  def _run(self):
-    es = elasticsearch.Elasticsearch(self.es_host)
-    elasticsearch_requests.load_mapping(
-      es, 'recall.base', 'enforcementreport', './schemas/res_mapping.json')
-
-
-class LoadJSON(luigi.Task):
-  ''' Load the annotated JSON documents into Elasticsearch
-  '''
+class LoadJSON(index_util.LoadJSONBase):
   batch = luigi.Parameter()
-  es_host = ES_HOST
-  epoch = time.time()
+  index_name = 'recall'
+  type_name = 'enforcementreport'
+  mapping_file = './schemas/res_mapping.json'
+  use_checksum = True
+  docid_key = '@id'
 
-  def requires(self):
-    return [ResetElasticSearch(), AnnotateJSON(self.batch)]
+  def _data(self):
+    return AnnotateJSON(self.batch)
 
-  def output(self):
-    output = self.input()[1].path.replace('annotated.db', 'load.done')
-    return luigi.LocalTarget(output)
 
-  def run(self):
-    output_file = self.output().path
-    input_file = self.input()[1].path
-    es = elasticsearch.Elasticsearch(self.es_host)
-    index_util.start_index_transaction(es, 'recall', self.epoch)
-    parallel.mapreduce(
-      input_collection=parallel.Collection.from_sharded(input_file),
-      mapper=index_util.LoadJSONMapper(self.es_host,
-                                       'recall',
-                                       'enforcementreport',
-                                       self.epoch,
-                                       docid_key='@id',
-                                       version_key='@version'),
-      reducer=parallel.NullReducer(),
-      output_prefix='/tmp/loadjson.recall',
-      num_shards=1,
-      map_workers=1)
-    index_util.commit_index_transaction(es, 'recall')
-    common.shell_cmd('touch %s', output_file)
-
-class RunWeeklyProcess(luigi.Task):
+class RunWeeklyProcess(luigi.WrapperTask):
   ''' Generates a date object that is passed through the pipeline tasks in order
       to generate and load JSON documents for the weekly enforcement reports.
 
@@ -272,6 +240,8 @@ class RunWeeklyProcess(luigi.Task):
   def requires(self):
     start = XML_START_DATE
     end = get_latest_date(RES_BASE_URL, CURRENT_XML_BASE_URL)
+    previous_task = None
+
     for batch_date in arrow.Arrow.range('week', start, end):
       # Handle annoying cases like July 5th, 2012 (it is +8)
       if batch_date == arrow.get(2012, 7, 4):
@@ -284,14 +254,10 @@ class RunWeeklyProcess(luigi.Task):
         batch = batch_date.replace(days=-1)
       else:
         batch = batch_date
-      yield LoadJSON(batch)
+
+      task = LoadJSON(batch=batch, previous_task=previous_task)
+      previous_task = task
+      yield task
 
 if __name__ == '__main__':
-  fmt_string = '%(created)f %(filename)s:%(lineno)s [%(funcName)s] %(message)s'
-  logging.basicConfig(stream=sys.stderr,
-                      format=fmt_string,
-                      level=logging.INFO)
-  # elasticsearch is too verbose by default (logs every successful request)
-  logging.getLogger('elasticsearch').setLevel(logging.WARN)
-
-  luigi.run(main_task_cls=RunWeeklyProcess)
+  luigi.run()

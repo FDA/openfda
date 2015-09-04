@@ -1,0 +1,115 @@
+{
+  "recall": {
+    "_source": {
+      "excludes": [
+        "*_exact"
+      ],
+      "includes": [
+        "*"
+      ]
+    },
+    "properties": {
+      "@checksum": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "event_date_terminated": {
+        "format": "basic_date||date",
+        "type": "date"
+      },
+      "firm_fei_number": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "product_code": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "product_res_number": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "pma_numbers": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "k_numbers": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "other_submission_description": {
+        "index": "analyzed",
+        "type": "string"
+      },
+      "res_event_number": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "root_cause_description": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "openfda": {
+        "properties": {
+          "device_class": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "device_name": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "fei_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "k_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "medical_specialty_description": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "pma_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "registration_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "regulation_number": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

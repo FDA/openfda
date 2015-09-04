@@ -1,0 +1,238 @@
+{
+  "device510k": {
+    "_source": {
+      "excludes": [
+        "*_exact"
+      ],
+      "includes": [
+        "*"
+      ]
+    },
+    "properties": {
+      "@checksum": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "address_1": {
+        "index": "analyzed",
+        "type": "string"
+      },
+      "address_2": {
+        "index": "analyzed",
+        "type": "string"
+      },
+      "advisory_committee": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "advisory_committee_description": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "applicant": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "city": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "clearance_type": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "contact": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "country_code": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "date_received": {
+        "format": "basic_date||date",
+        "type": "date"
+      },
+      "decision_code": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "decision_date": {
+        "format": "basic_date||date",
+        "type": "date"
+      },
+      "device_name": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "expedited_review_flag": {
+        "type": "string",
+        "fields" : {
+          "exact": { "index": "not_analyzed", "type": "string" }
+        }
+      },
+      "k_number": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "openfda": {
+        "properties": {
+          "device_class": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "device_name": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "fei_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "k_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "medical_specialty_description": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "pma_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "registration_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "regulation_number": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          }
+        }
+      },
+      "postal_code": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "product_code": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "review_advisory_committee": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "ssp_indicator": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "state": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "statement_or_summary": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "third_party_flag": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "zip": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      }
+    }
+  }
+}

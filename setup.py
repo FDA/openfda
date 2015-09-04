@@ -10,7 +10,7 @@ setuptools.setup(
   url='http://github.com/fda/openfda',
   install_requires=[
     'arrow',
-    'BeautifulSoup4',
+    'beautifulsoup4',
     'boto',
     'click',
     'elasticsearch',

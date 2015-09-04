@@ -10,7 +10,7 @@ ulimit -l unlimited
 (
 while true; do
   echo "Running command $*"
-  nohup $*
+  nohup $* 
   echo "Command exited with status $?"
   echo "Sleeping 10 seconds..."
   sleep 10

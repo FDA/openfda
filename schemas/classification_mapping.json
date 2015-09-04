@@ -1,0 +1,132 @@
+{
+  "classification": {
+    "_source": {
+      "excludes": [
+        "*_exact"
+      ],
+      "includes": [
+        "*"
+      ]
+    },
+    "properties": {
+      "@checksum": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "definition": {
+        "type": "string"
+      },
+      "device_class": {
+        "type": "string"
+      },
+      "device_name": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "gmp_exempt_flag": {
+        "type": "string"
+      },
+      "implant_flag": {
+        "type": "string"
+      },
+      "life_sustain_support_flag": {
+        "type": "string"
+      },
+      "medical_specialty": {
+        "type": "string"
+      },
+      "medical_specialty_description": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "openfda": {
+        "properties": {
+          "device_class": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "device_name": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "fei_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "k_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "medical_specialty_description": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "pma_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "registration_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "regulation_number": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          }
+        }
+      },
+      "product_code": {
+        "type": "string"
+      },
+      "regulation_number": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "review_code": {
+        "type": "string"
+      },
+      "review_panel": {
+        "type": "string"
+      },
+      "submission_type_id": {
+        "type": "string"
+      },
+      "third_party_flag": {
+        "type": "string"
+      },
+      "unclassified_reason": {
+        "type": "string"
+      }
+    }
+  }
+}

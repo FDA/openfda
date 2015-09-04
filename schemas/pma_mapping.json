@@ -1,0 +1,183 @@
+{
+  "pma": {
+    "properties": {
+      "@checksum": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "advisory_committee": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "advisory_committee_description": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "ao_statement": {
+        "index": "analyzed",
+        "type": "string"
+      },
+      "applicant": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "city": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "date_received": {
+        "format": "basic_date||date",
+        "type": "date"
+      },
+      "decision_code": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "decision_date": {
+        "format": "basic_date||date",
+        "type": "date"
+      },
+      "docket_number": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "fed_reg_notice_date": {
+        "format": "basic_date||date",
+        "type": "date"
+      },
+      "generic_name": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "openfda": {
+        "properties": {
+          "device_class": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "device_name": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "fei_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "k_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "medical_specialty_description": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "pma_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "registration_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "regulation_number": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          }
+        }
+      },
+      "pma_number": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "product_code": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "expedited_review_flag": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "state": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "street_1": {
+        "index": "analyzed",
+        "type": "string"
+      },
+      "street_2": {
+        "index": "analyzed",
+        "type": "string"
+      },
+      "supplement_number": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "supplement_reason": {
+        "index": "analyzed",
+        "type": "string"
+      },
+      "supplement_type": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "trade_name": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "zip": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "zip_ext": {
+        "index": "not_analyzed",
+        "type": "string"
+      }
+    }
+  }
+}

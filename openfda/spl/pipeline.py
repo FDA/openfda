@@ -17,7 +17,7 @@ import arrow
 import elasticsearch
 import luigi
 
-from openfda import common, elasticsearch_requests, index_util, parallel
+from openfda import config, common, elasticsearch_requests, index_util, parallel
 from openfda.annotation_table.pipeline import CombineHarmonization
 from openfda.index_util import AlwaysRunTask
 from openfda.spl import annotate
@@ -42,21 +42,28 @@ SPL_PROCESS_DIR = join(BASE_DIR, 'spl/batches')
 common.shell_cmd('mkdir -p %s', SPL_S3_LOCAL_DIR)
 common.shell_cmd('mkdir -p %s', SPL_PROCESS_DIR)
 
-ES_HOST = luigi.Parameter('localhost:9200', is_global=True)
-SPL_S3_PROFILE = luigi.Parameter(default='openfda', is_global=True)
-
-class SyncS3SPL(AlwaysRunTask):
-  profile = SPL_S3_PROFILE
+class SyncS3SPL(luigi.Task):
   bucket = SPL_S3_BUCKET
   local_dir = SPL_S3_LOCAL_DIR
 
+  def flag_file(self):
+    return os.path.join(self.local_dir, '.last_sync_time')
+
+  def complete(self):
+    'Only run S3 sync once per day.'
+    return os.path.exists(self.flag_file) and (
+        arrow.get(os.path.getmtime(self.flag_file)) > arrow.now().floor('day'))
+
   def _run(self):
     common.cmd(['aws',
-                '--profile=' + self.profile,
-                's3',
-                'sync',
+                '--profile=' + config.aws_profile(),
+                's3', 'sync',
                 self.bucket,
                 self.local_dir])
+
+    with open(self.flag_file(), 'w') as out_f:
+      out_f.write('')
+
 
 class CreateBatchFiles(AlwaysRunTask):
   batch_dir = SPL_BATCH_DIR
@@ -90,8 +97,9 @@ class CreateBatchFiles(AlwaysRunTask):
       unique_ids = list(set(ids))
       batch_out.write('\n'.join(unique_ids))
 
-class SPL2JSONMapper(parallel.Mapper):
+class SPL2JSON(parallel.MRTask):
   spl_path = SPL_S3_LOCAL_DIR
+  batch = luigi.Parameter()
 
   def map(self, _, value, output):
     value = value.strip()
@@ -106,9 +114,6 @@ class SPL2JSONMapper(parallel.Mapper):
     json_obj = json.loads(json_str)
     output.add(xml_file, json_obj)
 
-class SPL2JSON(luigi.Task):
-  batch = luigi.Parameter()
-
   def requires(self):
     return CreateBatchFiles()
 
@@ -117,12 +122,12 @@ class SPL2JSON(luigi.Task):
     dir_name = join(SPL_PROCESS_DIR, weekly)
     return luigi.LocalTarget(join(dir_name, 'json.db'))
 
-  def run(self):
-    parallel.mapreduce(
-      parallel.Collection.from_glob(self.batch, parallel.LineInput),
-      mapper=SPL2JSONMapper(),
-      reducer=parallel.IdentityReducer(),
-      output_prefix=self.output().path)
+  def num_shards(self):
+    return 8
+
+  def mapreduce_inputs(self):
+    return parallel.Collection.from_glob(self.batch, parallel.LineInput())
+
 
 class AnnotateJSON(luigi.Task):
   batch = luigi.Parameter()
@@ -139,73 +144,55 @@ class AnnotateJSON(luigi.Task):
     harmonized_file = self.input()[1].path
 
     parallel.mapreduce(
-      input_collection=parallel.Collection.from_sharded(input_db),
+      parallel.Collection.from_sharded(input_db),
       mapper=annotate.AnnotateMapper(harmonized_file),
       reducer=parallel.IdentityReducer(),
       output_prefix=self.output().path,
       num_shards=1,
-      map_workers=1)
+      map_workers=8)
 
-class ResetElasticSearch(AlwaysRunTask):
-  es_host = ES_HOST
 
-  def _run(self):
-    es = elasticsearch.Elasticsearch(self.es_host)
-    elasticsearch_requests.load_mapping(
-      es, 'druglabel.base', 'spl', './schemas/spl_mapping.json')
 
-class LoadJSON(luigi.Task):
-  batch = luigi.Parameter()
-  es_host = ES_HOST
-  epoch = time.time()
-
-  def requires(self):
-    return [ResetElasticSearch(), AnnotateJSON(self.batch)]
-
-  def output(self):
-    return luigi.LocalTarget(self.batch.replace('.ids', '.done')\
-                                       .replace('batch', 'complete'))
-
-  def run(self):
-    # Since we only iterate over dates in the umbrella process, we need to
-    # skip batch files that do not exist
-    output_file = self.output().path
-    if not os.path.exists(self.batch):
-      common.shell_cmd('touch %s', output_file)
-      return
-
-    input_file = self.input()[1].path
-    es = elasticsearch.Elasticsearch(self.es_host)
-    index_util.start_index_transaction(es, 'druglabel', self.epoch)
-    parallel.mapreduce(
-      input_collection=parallel.Collection.from_sharded(input_file),
-      mapper=index_util.LoadJSONMapper(self.es_host,
-                                       'druglabel',
-                                       'spl',
-                                       self.epoch,
-                                       docid_key='set_id',
-                                       version_key='version'),
-      reducer=parallel.NullReducer(),
-      output_prefix='/tmp/loadjson.druglabel',
-      num_shards=1,
-      map_workers=1)
-    index_util.commit_index_transaction(es, 'druglabel')
-    common.shell_cmd('touch %s', output_file)
-
-class ProcessBatch(luigi.Task):
+class PrepareBatch(luigi.Task):
+  ''' Prepares all of the pre-annoation steps. This task is called by the
+      weekly harmonization process.
+  '''
   def requires(self):
     start = arrow.get('20090601', 'YYYYMMDD').ceil('week')
     end = arrow.utcnow().ceil('week')
     for batch in arrow.Arrow.range('week', start, end):
       batch_file = join(SPL_BATCH_DIR, batch.format('YYYYMMDD') + '.ids')
-      yield LoadJSON(batch_file)
+      yield SPL2JSON(batch_file)
+
+  def output(self):
+    return self.input()
+
+  def run(self):
+    pass
+
+class LoadJSON(index_util.LoadJSONBase):
+  batch = luigi.Parameter()
+  index_name = 'druglabel'
+  type_name = 'spl'
+  mapping_file = './schemas/spl_mapping.json'
+  use_checksum = True
+  docid_key = 'set_id'
+
+  def _data(self):
+    return AnnotateJSON(self.batch)
+
+
+class ProcessBatch(luigi.WrapperTask):
+  def requires(self):
+    start = arrow.get('20090601', 'YYYYMMDD').ceil('week')
+    end = arrow.utcnow().ceil('week')
+    previous_task = None
+    for batch in arrow.Arrow.range('week', start, end):
+      batch_file = join(SPL_BATCH_DIR, batch.format('YYYYMMDD') + '.ids')
+      task = LoadJSON(batch=batch_file, previous_task=previous_task)
+      previous_task = task
+      yield task
+
 
 if __name__ == '__main__':
-  fmt_string = '%(created)f %(filename)s:%(lineno)s [%(funcName)s] %(message)s'
-  logging.basicConfig(stream=sys.stderr,
-                      format=fmt_string,
-                      level=logging.INFO)
-  # elasticsearch is too verbose by default (logs every successful request)
-  logging.getLogger('elasticsearch').setLevel(logging.WARN)
-
-  luigi.run(main_task_cls=ProcessBatch)
+  luigi.run()
