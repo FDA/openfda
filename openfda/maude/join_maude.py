@@ -95,9 +95,9 @@ def _fix_date(input_date):
       Elasticsearch friendly.
       Returns the input_date if it is not a known format
   '''
-  supported_formats = ['DD-MMM-YY', 
-    'YYYY/MM/DD HH:mm:ss.SSS', 
-    'MM/DD/YYYY', 
+  supported_formats = ['DD-MMM-YY',
+    'YYYY/MM/DD HH:mm:ss.SSS',
+    'MM/DD/YYYY',
     'YYYYMMDD']
   # arrow needs 3 char months to be sentence case: e.g. Dec not DEC
   formated_date = input_date.title()

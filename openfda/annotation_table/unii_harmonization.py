@@ -18,8 +18,21 @@ import fnmatch
 import os
 
 import extract_unii
-from openfda import parallel_runner
 import simplejson as json
+import multiprocessing
+
+def parallel_extract(files, worker):
+  manager = multiprocessing.Manager()
+  name_queue = manager.Queue()
+  pool = multiprocessing.Pool()
+  pool.map_async(worker, [(f, name_queue) for f in files])
+  pool.close()
+  pool.join()
+
+  rows = []
+  while not name_queue.empty():
+    rows.append(name_queue.get())
+  return rows
 
 
 def harmonization_extract_worker(args):
@@ -79,7 +92,7 @@ def harmonize_unii(out_file, product_file, class_index_dir):
     for filename in fnmatch.filter(filenames, '*.xml'):
       xmls.append(os.path.join(root, filename))
   # call async worker
-  rows = parallel_runner.parallel_extract(xmls, harmonization_extract_worker)
+  rows = parallel_extract(xmls, harmonization_extract_worker)
 
   combo = []
 

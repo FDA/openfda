@@ -2,12 +2,14 @@
 '''
 import logging
 import os
+import types
 from os.path import join, dirname
 
 import elasticsearch
-
 import simplejson as json
 
+METADATA_INDEX = 'openfdametadata'
+METADATA_TYPE = 'last_run'
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 INDEX_SETTINGS = join(RUN_DIR, 'schemas/indexing.json')
@@ -22,9 +24,12 @@ def clear_and_load(es, index_name, type_name, mapping_file):
   load_mapping(es, index_name, type_name, mapping_file)
 
 
-def load_mapping(es, index_name, type_name, mapping_file):
-  mapping = open(mapping_file, 'r').read().strip()
-  mapping_dict = json.loads(mapping)
+def load_mapping(es, index_name, type_name, mapping_file_or_dict):
+  if not isinstance(mapping_file_or_dict, types.DictType):
+    mapping = open(mapping_file_or_dict, 'r').read().strip()
+    mapping_dict = json.loads(mapping)
+  else:
+    mapping_dict = mapping_file_or_dict
 
   if es.indices.exists(index_name):
     logging.info('Index %s already exists, skipping creation.', index_name)
@@ -44,3 +49,25 @@ def load_mapping(es, index_name, type_name, mapping_file):
     logging.fatal('Something has gone wrong making the mapping for %s', type_name,
                    exc_info=1)
     raise
+
+def update_process_datetime(es, doc_id, timestamp):
+  ''' Updates the last_update_date for the document id passed into function.
+    The document id in will be the name of another index in the cluster.
+  '''
+  _map = {
+    'last_run': {
+      'properties': {
+         'last_update_date': {
+           'type': 'date',
+           'format': 'dateOptionalTime'
+         }
+      }
+    }
+  }
+
+  load_mapping(es, METADATA_INDEX, METADATA_TYPE, _map)
+  new_doc = { 'last_update_date': timestamp }
+  es.index(index=METADATA_INDEX,
+           doc_type=METADATA_TYPE,
+           id=doc_id,
+           body=new_doc)

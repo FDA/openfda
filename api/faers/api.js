@@ -1,16 +1,18 @@
 // OpenFDA APIs
 //
 
-var ejs = require('elastic.js');
 var elasticsearch = require('elasticsearch');
 var express = require('express');
 var moment = require('moment');
-var underscore = require('underscore');
+var _ = require('underscore');
+var request = require('request');
+
 var Stats = require('fast-stats').Stats;
 
 var api_request = require('./api_request.js');
 var elasticsearch_query = require('./elasticsearch_query.js');
 var logging = require('./logging.js');
+
 var META = {
   'disclaimer': 'openFDA is a beta research project and not for clinical ' +
                 'use. While we make every effort to ensure that data is ' +
@@ -54,27 +56,110 @@ var FIELDS_TO_REMOVE = [
 ];
 
 
+// TODO(hansnelsen): all these index data structures are becoming too much,
+//                   consolidate down to one and refactor the code accordingly.
 var ALL_ENFORCEMENT_INDEX = 'recall';
 var DEVICE_EVENT_INDEX = 'deviceevent';
+var DEVICE_CLASSIFICATION_INDEX = 'deviceclass';
+var DEVICE_REGISTRATION_INDEX = 'devicereglist';
+var DEVICE_CLEARANCE_INDEX = 'deviceclearance';
+var DEVICE_PMA_INDEX = 'devicepma';
+var DEVICE_RECALL_INDEX = 'devicerecall';
 var DRUG_EVENT_INDEX = 'drugevent';
 var DRUG_LABEL_INDEX = 'druglabel';
 var PROCESS_METADATA_INDEX = 'openfdametadata';
 
-var INDICES = {
-  'enforcement' : ALL_ENFORCEMENT_INDEX,
-  'device' : DEVICE_EVENT_INDEX,
-  'drug' : DRUG_EVENT_INDEX,
-  'label' : DRUG_LABEL_INDEX
-};
+// This data structure is the standard way to add an endpoint to the api, which
+// is to say, if there is a one-to-one mapping between an index and an endpoint,
+// use this data structure.
+// If there is a one-to-many relationship, then a custom function should be
+// built, such as EnforcementEndpoint, which allows the splitting of one index
+// (recall) across three endpoints by using a filtered search.
+//
+// {
+//   'index': DEVICE_EVENT_INDEX,
+//   'endpoint': 'device',
+//   'name': 'deviceevent'
+// }
+// Results in an endpoint: /device/event.json hitting /deviceevent/maude index.
+
+var ENDPOINTS = [
+  {
+    'index': DEVICE_EVENT_INDEX,
+    'endpoint': '/device/event.json',
+    'name': 'deviceevent',
+    'basic' : true
+  },
+  {
+    'index': DEVICE_RECALL_INDEX,
+    'endpoint': '/device/recall.json',
+    'name': 'devicerecall',
+    'basic' : true
+  },
+  {
+    'index': DEVICE_CLASSIFICATION_INDEX,
+    'endpoint': '/device/classification.json',
+    'name': 'deviceclass',
+    'basic' : true
+  },
+  {
+    'index': DEVICE_REGISTRATION_INDEX,
+    'endpoint': '/device/registrationlisting.json',
+    'name': 'devicereglist',
+    'basic' : true
+  },
+  {
+    'index': DEVICE_CLEARANCE_INDEX,
+    'endpoint': '/device/510k.json',
+    'name': 'deviceclearance',
+    'basic' : true
+  },
+  {
+    'index': DEVICE_PMA_INDEX,
+    'endpoint': '/device/pma.json',
+    'name': 'devicepma',
+    'basic' : true
+  },
+  {
+    'index': DRUG_EVENT_INDEX,
+    'endpoint': '/drug/event.json',
+    'name': 'drugevent',
+    'basic' : true
+  },
+  {
+    'index': DRUG_LABEL_INDEX,
+    'endpoint': '/drug/label.json',
+    'name': 'druglabel',
+    'basic' : true
+  },
+  {
+    'index': DRUG_LABEL_INDEX,
+    'endpoint': '/drug/label.json',
+    'name': 'druglabel',
+    'basic' : true
+  },
+  {
+    'index': ALL_ENFORCEMENT_INDEX,
+    'endpoint': '/drug/enforcement.json',
+    'name': 'recall'
+  },
+  {
+    'index': ALL_ENFORCEMENT_INDEX,
+    'endpoint': '/device/enforcement.json',
+    'name': 'recall'
+  },
+  {
+    'index': ALL_ENFORCEMENT_INDEX,
+    'endpoint': '/food/enforcement.json',
+    'name': 'recall'
+  },
+];
 
 // For each endpoint, we track the success/failure status for the
 // last REQUEST_HISTORY_LENGTH requests; this is used to determine
 // the green/yellow/red status for an endpoint.
-var REQUEST_HISTORY_LENGTH = 100;
+var REQUEST_HISTORY_LENGTH = 10;
 
-var app = express();
-
-app.disable('x-powered-by');
 
 // Set caching headers for Amazon Cloudfront
 CacheMiddleware = function(seconds) {
@@ -83,6 +168,57 @@ CacheMiddleware = function(seconds) {
     return next();
   };
 };
+
+// Tracks the health and latency of ES indices.
+var index_info = {};
+
+// Fetch index counts and last update times.
+//
+// This is run at startup and periodically during operation; the results
+// are returned with search requests and via the status API.
+var UpdateIndexInformation = function(client, index_info) {
+  console.log("Updating index information.");
+  client.search({
+    index: PROCESS_METADATA_INDEX,
+    type: 'last_run',
+    fields: 'last_update_date'
+  }).then(function(body) {
+    var util = require('util');
+    for (var i = 0; i < body.hits.hits.length; ++i) {
+      var hit = body.hits.hits[i];
+      var id = hit._id;
+      index_info[id].last_updated = hit.fields.last_update_date[0];
+    }
+  }, function (error) {
+    console.log('Failed to fetch index update times:: ', error.message);
+  });
+
+  // Fetch document counts
+  _.map(ENDPOINTS, function(endpoint) {
+    client
+      .count({ index: endpoint.index })
+      .then(function(endpoint, body) {
+        index_info[endpoint.index].document_count = body.count;
+      }.bind(null, endpoint));
+  });
+};
+
+var TestAvailability = function() {
+  _.map(ENDPOINTS, function(endpoint) {
+    request(endpoint.endpoint, function(error, response, body) {
+      var info = index_info[endpoint.index];
+      info.status.push(!error);
+    });
+  });
+};
+
+var ErrorTypes = {
+  NOT_FOUND: 'NOT_FOUND',
+  SERVER_ERROR: 'SERVER_ERROR'
+}
+
+var app = express();
+app.disable('x-powered-by');
 app.use(CacheMiddleware(60));
 
 // Use gzip compression
@@ -102,42 +238,25 @@ var client = new elasticsearch.Client({
   requestTimeout: 10000  // milliseconds
 });
 
-
-var index_info = {};
-for (var name in INDICES) {
-  index_info[INDICES[name]] = {
+// Initialize our index information.  This is returned by the status API.
+_.map(ENDPOINTS, function(endpoint) {
+  index_info[endpoint.index] = {
     last_updated: '2015-01-01',
     document_count: 1,
     latency: new Stats({ bucket_precision: 10, store_data: false }),
     status: []
   };
-};
-
-// Fetch index update times
-client.search({
-  index: PROCESS_METADATA_INDEX,
-  type: 'last_run',
-  fields: 'last_update_date'
-}).then(function(body) {
-  var util = require('util');
-  for (var i = 0; i < body.hits.hits.length; ++i) {
-    var hit = body.hits.hits[i];
-    index_info[hit._id].last_updated = hit.fields.last_update_date[0];
-  }
-}, function (error) {
-  console.log('Failed to fetch index update times:: ', error.message);
 });
 
-// Fetch document counts
-for (var name in INDICES) {
-  var index = INDICES[name];
-  client
-    .count({ index: index })
-    .then(function(index, body) {
-    index_info[index].document_count = body.count;
-  }.bind(null, index));
-}
+UpdateIndexInformation(client, index_info);
 
+// Fetch updated index information periodically
+setInterval(UpdateIndexInformation.bind(null, client, index_info),
+            5 * 60 * 1000 /* 5 minutes */);
+
+// Check API availability periodically
+setInterval(UpdateIndexInformation.bind(null, client, index_info),
+            60 * 1000 /* 60 seconds */);
 
 // Returns a JSON response indicating the status of each endpoint. The status
 // includes the last time the index was updated, a green/yellow/red "status"
@@ -147,9 +266,9 @@ app.get('/status', function(request, response) {
   // Allow the status page to get status info....
   response.setHeader('Access-Control-Allow-Origin', '*');
 
-  var res = [];
-  for (var name in INDICES) {
-    var index = INDICES[name];
+  var res = {};
+  _.map(ENDPOINTS, function(endpoint) {
+    var index = endpoint.index;
     var info = index_info[index];
     var errorCount = 0;
     for (var i = 0; i < info.status.length; ++i) {
@@ -157,10 +276,10 @@ app.get('/status', function(request, response) {
     }
 
     var status = 'GREEN';
-    if (errorCount > REQUEST_HISTORY_LENGTH / 50) {
+    if (errorCount > 1) {
       status = 'YELLOW';
     }
-    if (errorCount > REQUEST_HISTORY_LENGTH / 10) {
+    if (errorCount > 3) {
       status = 'RED';
     }
 
@@ -171,16 +290,17 @@ app.get('/status', function(request, response) {
       requestCount += buckets[i].count;
     }
 
-    res.push({
-      endpoint: index,
+    res[index] = {
+      endpoint: index, // yes, this should be endpoint, kept for compatibility with status page
       status: status,
       last_updated: info.last_updated,
       documents: info.document_count,
       requests: requestCount,
       latency: info.latency.amean(),
-    });
-  }
-  response.json(res);
+    };
+  });
+
+  response.json(_.values(res));
 });
 
 app.get('/healthcheck', function(request, response) {
@@ -241,10 +361,10 @@ TryToCheckApiParams = function(request, response) {
   }
 };
 
-TryToBuildElasticsearchParams = function(params, elasticsearch_index, response) {
+TryToBuildElasticsearchParams = function(params, es_index, response) {
   try {
     var es_query = elasticsearch_query.BuildQuery(params);
-    log.info(es_query.toString(), 'Elasticsearch Query');
+    log.info(es_query, 'Elasticsearch Query');
   } catch (e) {
     log.error(e);
     if (e.name == elasticsearch_query.ELASTICSEARCH_QUERY_ERROR) {
@@ -255,15 +375,15 @@ TryToBuildElasticsearchParams = function(params, elasticsearch_index, response) 
     return null;
   }
 
-  var index = elasticsearch_index;
+  var index = es_index;
   if (params.staging) {
-    index = elasticsearch_index + '.staging';
+    index = es_index + '.staging';
   }
   // Added sort by _id to ensure consistent results
   // across servers
   var es_search_params = {
-    index: elasticsearch_index,
-    body: es_query.toString(),
+    index: es_index,
+    body: es_query,
     sort: '_uid'
   };
 
@@ -275,30 +395,21 @@ TryToBuildElasticsearchParams = function(params, elasticsearch_index, response) 
   return es_search_params;
 };
 
-AddRequestStatus = function(index, success) {
-  var info = index_info[index];
-  info.status.push(success);
-  if (info.status.length > REQUEST_HISTORY_LENGTH) {
-    info.status.shift();
-  }
-};
-
 TrySearch = function(index, params, es_search_params, response) {
-  client.search(es_search_params).then(function(body) {
-    AddRequestStatus(index, true);
+  client.search(es_search_params)
+  .then(function(body) {
     if (body.hits.hits.length == 0) {
-      return ApiError(response, 'NOT_FOUND', 'No matches found!');
+      return ApiError(response, ErrorTypes.NOT_FOUND, 'No matches found!');
     }
 
     var requestTime = body.took;
     index_info[index].latency.push(requestTime);
 
     var response_json = {};
-    response_json.meta = underscore.clone(META);
-    // TODO(hansnelsen): Need to check this periodically (TTL) when we switch to
-    //                   an always-on approach to Elasticsearch and the API
+    response_json.meta = _.clone(META);
     response_json.meta.last_updated = index_info[index].last_updated;
 
+    // Search query
     if (!params.count) {
       response_json.meta.results = {
         'skip': params.skip,
@@ -322,39 +433,39 @@ TrySearch = function(index, params, es_search_params, response) {
         }
         response_json.results.push(result);
       }
-      response.json(HTTP_CODE.OK, response_json);
-
-    } else if (params.count) {
-      if (body.facets.count.terms) {
-        // Term facet count
-        if (body.facets.count.terms.length != 0) {
-          response_json.results = body.facets.count.terms;
-          response.json(HTTP_CODE.OK, response_json);
-        } else {
-          return ApiError(response, 'NOT_FOUND', 'Nothing to count');
-        }
-      } else if (body.facets.count.entries) {
-        // Date facet count
-        if (body.facets.count.entries.length != 0) {
-          for (i = 0; i < body.facets.count.entries.length; i++) {
-            var day = moment(body.facets.count.entries[i].time);
-            body.facets.count.entries[i].time = day.format('YYYYMMDD');
-          }
-          response_json.results = body.facets.count.entries;
-          response.json(HTTP_CODE.OK, response_json);
-        } else {
-          return ApiError(response, 'NOT_FOUND', 'Nothing to count');
-        }
-      } else {
-        return ApiError(response, 'NOT_FOUND', 'Nothing to count');
-      }
-    } else {
-      return ApiError(response, 'NOT_FOUND', 'No matches found!');
+      return response.json(HTTP_CODE.OK, response_json);
     }
+
+    // Count query
+    if (body.facets.count.terms) {
+      // Term facet count
+      if (body.facets.count.terms.length == 0) {
+        return ApiError(response, ErrorTypes.NOT_FOUND, 'Nothing to count');
+      }
+
+      response_json.results = body.facets.count.terms;
+      return response.json(HTTP_CODE.OK, response_json);
+    }
+
+    // Date facet count
+    if (body.facets.count.entries) {
+      if (body.facets.count.entries.length == 0) {
+        return ApiError(response, ErrorTypes.NOT_FOUND, 'Nothing to count');
+      }
+
+      for (i = 0; i < body.facets.count.entries.length; i++) {
+        var day = moment.utc(body.facets.count.entries[i].time);
+        body.facets.count.entries[i].time = day.format('YYYYMMDD');
+      }
+
+      response_json.results = body.facets.count.entries;
+      return response.json(HTTP_CODE.OK, response_json);
+    }
+
+    return ApiError(response, ErrorTypes.NOT_FOUND, 'Nothing to count');
   }, function(error) {
     log.error(error);
-    AddRequestStatus(index, false);
-    ApiError(response, 'SERVER_ERROR', 'Check your request and try again');
+    ApiError(response, ErrorTypes.SERVER_ERROR, 'Check your request and try again');
   });
 };
 
@@ -375,7 +486,7 @@ EnforcementEndpoint = function(noun) {
       product_type_filter += noun;
     }
 
-    if (params.search == undefined) {
+    if (!params.search) {
       params.search = product_type_filter;
     } else {
       params.search += ' AND ' + product_type_filter;
@@ -391,65 +502,39 @@ EnforcementEndpoint = function(noun) {
     TrySearch(index, params, es_search_params, response);
   });
 };
+
 EnforcementEndpoint('drug');
 EnforcementEndpoint('food');
 EnforcementEndpoint('device');
 
-app.get('/drug/event.json', function(request, response) {
-  LogRequest(request);
-  SetHeaders(response);
+BasicEndpoint = function(data) {
+  var endpoint = data['endpoint'];
+  var index = data['index'];
 
-  var params = TryToCheckApiParams(request, response);
-  if (params == null) {
-    return;
+  app.get(endpoint, function(request, response) {
+    LogRequest(request);
+    SetHeaders(response);
+
+    var params = TryToCheckApiParams(request, response);
+    if (params == null) {
+      return;
+    }
+
+    var es_search_params =
+      TryToBuildElasticsearchParams(params, index, response);
+    if (es_search_params == null) {
+      return;
+    }
+
+    TrySearch(index, params, es_search_params, response);
+  });
+};
+
+// Make all of the basic endpoints
+_.map(ENDPOINTS, function(endpoint) {
+  if (endpoint.basic) {
+    BasicEndpoint(endpoint);
   }
-
-  var index = DRUG_EVENT_INDEX;
-  var es_search_params =
-    TryToBuildElasticsearchParams(params, index, response);
-  if (es_search_params == null) {
-    return;
-  }
-
-  TrySearch(index, params, es_search_params, response);
-});
-
-app.get('/drug/label.json', function(request, response) {
-  LogRequest(request);
-  SetHeaders(response);
-
-  var params = TryToCheckApiParams(request, response);
-  if (params == null) {
-    return;
-  }
-
-  var index = DRUG_LABEL_INDEX;
-  var es_search_params =
-    TryToBuildElasticsearchParams(params, index, response);
-  if (es_search_params == null) {
-    return;
-  }
-
-  TrySearch(index, params, es_search_params, response);
-});
-
-app.get('/device/event.json', function(request, response) {
-  LogRequest(request);
-  SetHeaders(response);
-
-  var params = TryToCheckApiParams(request, response);
-  if (params == null) {
-    return;
-  }
-
-  var index = DEVICE_EVENT_INDEX;
-  var es_search_params =
-    TryToBuildElasticsearchParams(params, index, response);
-  if (es_search_params == null) {
-    return;
-  }
-
-  TrySearch(index, params, es_search_params, response);
 });
 
 // From http://strongloop.com/strongblog/

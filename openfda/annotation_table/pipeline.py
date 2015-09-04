@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 """
 Execution pipeline for generating the openfda harmonization json file
@@ -6,6 +6,7 @@ Execution pipeline for generating the openfda harmonization json file
 """
 
 from bs4 import BeautifulSoup
+import collections
 import glob
 import logging
 import luigi
@@ -17,25 +18,27 @@ import subprocess
 import sys
 import urllib2
 
-from openfda import common
-from openfda.annotation_table import combine_harmonization
-from openfda.annotation_table import rxnorm_harmonization
+import arrow
+import simplejson as json
+
+from openfda import common, config, parallel, spl
 from openfda.annotation_table import unii_harmonization
-from openfda.spl import process_barcodes
-from openfda.spl import spl_harmonization
+from openfda.index_util import AlwaysRunTask
+from openfda.spl import process_barcodes, extract
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
-BASE_DIR = './data/'
+data_dir = './data/harmonization'
+BATCH_DATE = arrow.utcnow().ceil('week').format('YYYYMMDD')
+BASE_DIR = join(data_dir, 'batches', BATCH_DATE)
+SPL_S3_DIR = './data/spl/s3_sync'
+TMP_DIR = './data/openfa-tmp'
 
+common.shell_cmd('mkdir -p %s', data_dir)
+common.shell_cmd('mkdir -p %s', BASE_DIR)
+common.shell_cmd('mkdir -p %s', TMP_DIR)
+
+SPL_SET_ID_INDEX = join(BASE_DIR,'spl_index.db')
 DAILYMED_PREFIX = 'ftp://public.nlm.nih.gov/nlmdata/.dailymed/'
-SPL_DOWNLOADS = [
-  DAILYMED_PREFIX + 'dm_spl_release_human_rx_part1.zip',
-  DAILYMED_PREFIX + 'dm_spl_release_human_rx_part2.zip',
-  DAILYMED_PREFIX + 'dm_spl_release_human_otc_part1.zip',
-  DAILYMED_PREFIX + 'dm_spl_release_human_otc_part2.zip',
-  DAILYMED_PREFIX + 'dm_spl_release_human_otc_part3.zip',
-  DAILYMED_PREFIX + 'dm_spl_release_homeopathic.zip'
-]
 
 PHARM_CLASS_DOWNLOAD = \
   DAILYMED_PREFIX + 'pharmacologic_class_indexing_spl_files.zip'
@@ -46,17 +49,15 @@ RXNORM_DOWNLOAD = \
 NDC_DOWNLOAD_PAGE = \
   'http://www.fda.gov/drugs/informationondrugs/ucm142438.htm'
 
-class DownloadSPL(luigi.Task):
-  def requires(self):
-    return []
-
-  def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'spl/raw'))
-
-  def run(self):
-    for url in SPL_DOWNLOADS:
-      filename = join(self.output().path, url.split('/')[-1])
-      common.download(url, filename)
+# The database names play a central role in terms of output and the joiner.
+# For instance: SPL_EXTRACT_DB is used as both an output of a download/json/etc
+# pipeline AND it is used as input into a join mapreduce() AND it is used
+# as a source identifier on a mapper output record for the actural JoinReducer.
+SPL_EXTRACT_DB = 'spl_extract.db'
+NDC_EXTRACT_DB = 'ndc.db'
+UNII_EXTRACT_DB = 'unii.db'
+RXNORM_EXTRACT_DB = 'rxnorm.db'
+UPC_EXTRACT_DB = 'upc.db'
 
 class DownloadNDC(luigi.Task):
   def requires(self):
@@ -67,7 +68,7 @@ class DownloadNDC(luigi.Task):
 
   def run(self):
     zip_url = None
-    soup = BeautifulSoup(urllib2.urlopen(NDC_DOWNLOAD_PAGE).read())
+    soup = BeautifulSoup(urllib2.urlopen(NDC_DOWNLOAD_PAGE).read(), 'lxml')
     for a in soup.find_all(href=re.compile('.*.zip')):
       if 'NDC Database File' in a.text:
         zip_url = 'http://www.fda.gov' + a['href']
@@ -77,7 +78,6 @@ class DownloadNDC(luigi.Task):
       logging.fatal('NDC database file not found!')
 
     common.download(zip_url, self.output().path)
-
 
 class DownloadUNII(luigi.Task):
   def requires(self):
@@ -171,89 +171,62 @@ class ExtractUNII(luigi.Task):
     os.system('mkdir -p %s' % output_dir)
     ExtractXMLFromNestedZip(zip_filename, output_dir)
 
+class RXNorm2JSONMapper(parallel.Mapper):
+  def map(self, key, value, output):
+    keepers = ['rxcui', 'rxstring', 'rxtty','setid', 'spl_version']
+    rename_map = {
+      'setid': 'spl_set_id'
+    }
+    def _cleaner(k, v):
+      k = k.lower()
+      if k in keepers:
+        if k in rename_map:
+          return (rename_map[k], v)
+        return (k, v)
+    new_value = common.transform_dict(value, _cleaner)
+    new_key = new_value['spl_set_id'] + ':'+ new_value['spl_version']
+    output.add(new_key, new_value)
 
-class ExtractSPL(luigi.Task):
-  def requires(self):
-    return DownloadSPL()
+class RXNormReducer(parallel.Reducer):
+  def reduce(self, key, values, output):
+    out = {}
+    out['spl_set_id'] = values[0]['spl_set_id']
+    out['spl_version'] = values[0]['spl_version']
+    out['rxnorm'] = []
+    for v in values:
+      out['rxnorm'].append({ 'rxcui' : v['rxcui'],
+                             'rxstring' : v['rxstring'],
+                             'rxtty' : v['rxtty'] })
+    output.put(key, out)
 
-  def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'spl/extracted'))
-
-  def run(self):
-    pool = multiprocessing.Pool(processes=8)
-
-    src_dir = self.input().path
-    for zip_filename in glob.glob(src_dir + '/*.[Zz][Ii][Pp]'):
-      zip_dir = basename(zip_filename).split('.')[0] + '_xml'
-      output_dir = join(self.output().path, zip_dir)
-      os.system('mkdir -p %s' % output_dir)
-      if 'otc' in zip_filename:
-        exclude_images = False
-      else:
-        exclude_images = True
-
-      pool.apply_async(ExtractXMLFromNestedZip,
-                       args=(zip_filename,
-                       output_dir,
-                       exclude_images))
-
-    pool.close()
-    pool.join()
-
-class ExtractUPCFromSPL(luigi.Task):
-  def requires(self):
-    return ExtractSPL()
-
-  def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'spl/upc_xml/otc-bars.xml'))
-
-  def run(self):
-    src_dir = self.input().path
-    output_file = self.output().path
-    os.system('mkdir -p %s' % dirname(self.output().path))
-    cmd = 'find %(src_dir)s -name "*.jpg" \
-                            -exec zbarimg -q --xml {} \; > \
-                          %(output_file)s' % locals()
-    os.system(cmd)
-
-
-class UpcXml2JSON(luigi.Task):
-  def requires(self):
-    return ExtractUPCFromSPL()
-
-  def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'spl/upc_json/otc-bars.json'))
-
-  def run(self):
-    src_file = self.input().path
-    output_file = self.output().path
-
-    os.system('mkdir -p %s' % dirname(self.output().path))
-    process_barcodes.XML2JSON(src_file, output_file)
-
-
-class RXNormHarmonizationJSON(luigi.Task):
+class RXNorm2JSON(luigi.Task):
+  ''' The Rxnorm data needs to be rolled up to the SPL_SET_ID level, so first
+      we clean the data and group it with a ListReducer.
+  '''
   def requires(self):
     return ExtractRXNorm()
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR,
-      'harmonization/rxnorm_extract.json'))
+    return luigi.LocalTarget(join(BASE_DIR, RXNORM_EXTRACT_DB))
 
   def run(self):
-    rxnorm_file = self.input().path
-    output_file = self.output().path
-    os.system('mkdir -p %s' % dirname(self.output().path))
-    rxnorm_harmonization.harmonize_rxnorm(rxnorm_file, output_file)
+    parallel.mapreduce(
+        parallel.Collection.from_glob(
+          self.input().path, parallel.CSVDictLineInput(delimiter='|')),
+        mapper=RXNorm2JSONMapper(),
+        reducer=RXNormReducer(),
+        output_prefix=self.output().path,
+        num_shards=10)
 
-
+# TODO(hansnelsen): refactor this task into a join reduction. Leaving it in
+#                   place for now since the logic is a bit harry. Ideally, we
+#                   go directly to leveldb, avoiding the JSON step.
 class UNIIHarmonizationJSON(luigi.Task):
   def requires(self):
     return [ExtractNDC(), ExtractUNII()]
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR,
-      'harmonization/unii_extract.json'))
+    return luigi.LocalTarget(join(BASE_DIR, 'unii_extract.json'))
 
   def run(self):
     ndc_file = self.input()[0].path
@@ -262,51 +235,362 @@ class UNIIHarmonizationJSON(luigi.Task):
     os.system('mkdir -p %s' % dirname(self.output().path))
     unii_harmonization.harmonize_unii(output_file, ndc_file, unii_dir)
 
-
-class SPLHarmonizationJSON(luigi.Task):
+class UNII2JSON(luigi.Task):
   def requires(self):
-    return ExtractSPL()
+    return UNIIHarmonizationJSON()
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR,
-      'harmonization/spl_extract.json'))
+    return luigi.LocalTarget(join(BASE_DIR, UNII_EXTRACT_DB))
 
   def run(self):
-    spl_path = self.input().path
-    output_file = self.output().path
-    os.system('mkdir -p %s' % dirname(self.output().path))
-    spl_harmonization.harmonize_spl(spl_path, output_file)
+    parallel.mapreduce(
+        parallel.Collection.from_glob(
+          self.input().path, parallel.JSONLineInput()),
+        mapper=parallel.IdentityMapper(),
+        reducer=parallel.IdentityReducer(),
+        output_prefix=self.output().path,
+        num_shards=1)
 
+
+class NDC2JSONMapper(parallel.Mapper):
+  rename_map = {
+    'PRODUCTID': 'id',
+    'APPLICATIONNUMBER': 'application_number',
+    'PRODUCTTYPENAME': 'product_type',
+    'NONPROPRIETARYNAME': 'generic_name',
+    'LABELERNAME': 'manufacturer_name',
+    'PROPRIETARYNAME': 'brand_name',
+    'PROPRIETARYNAMESUFFIX': 'brand_name_suffix',
+    'PRODUCTNDC': 'product_ndc',
+    'DOSAGEFORMNAME': 'dosage_form',
+    'ROUTENAME': 'route',
+    'SUBSTANCENAME': 'substance_name',
+  }
+
+  def map(self, key, value, output):
+    def _cleaner(k, v):
+      ''' Helper function to rename keys and purge any keys that are not in
+          the map.
+      '''
+      if k == 'PRODUCTID':
+        v = v.split('_')[1]
+      if k in self.rename_map:
+        return (self.rename_map[k], v)
+
+    new_value = common.transform_dict(value, _cleaner)
+    output.add(key, new_value)
+
+# TODO(hansnelsen): Refactor the UNII steps to not need NDC File. Once done,
+#                   Everything can use this step. As it stands now, it is only
+#                   used by the JoinAll() task.
+class NDC2JSON(luigi.Task):
+  def requires(self):
+    return ExtractNDC()
+
+  def output(self):
+    return luigi.LocalTarget(join(BASE_DIR, 'ndc', NDC_EXTRACT_DB))
+
+  def run(self):
+    parallel.mapreduce(
+        parallel.Collection.from_glob(
+          self.input().path, parallel.CSVDictLineInput(delimiter='\t')),
+        mapper=NDC2JSONMapper(),
+        reducer=parallel.IdentityReducer(),
+        output_prefix=self.output().path,
+        num_shards=1)
+
+class SPLSetIDMapper(parallel.Mapper):
+  ''' Creates an index that is used for both getting the latest version of the
+      SPL AND for mapping the id to set_id, so that there can be a single
+      reduction key (spl_set_id). The same SPL raw file is indexed twice, with
+      a different prefix and a different key, because different downstream
+      pipelines use different keys. We want to give all pipelines a way to get
+      an SPL_SET_ID.
+  '''
+  def map(self, key, value, output):
+    set_id, version, _id = value['set_id'], value['version'], value['id']
+
+    _index = {
+      '_version': version,
+      '_id': _id,
+      '_set_id': set_id,
+      '_key': key
+    }
+
+    output.add('_set_id:' + set_id, (version, _index))
+    output.add('_id:' + _id, (version, _index))
+
+class SPLSetIDIndex(luigi.Task):
+  ''' Creates an index used for SPL version resolution and ID/SET_ID mapping.
+      This task has a cross-dependency upon the SPL pipeline. It returns a list
+      of every json.db every made by the SPL pipeline.
+  '''
+  def requires(self):
+    from openfda.spl.pipeline import PrepareBatch
+    return PrepareBatch()
+
+  def output(self):
+    return luigi.LocalTarget(SPL_SET_ID_INDEX)
+
+  def run(self):
+    parallel.mapreduce(
+      parallel.Collection.from_sharded_list([batch.path for batch in self.input()]),
+      mapper=SPLSetIDMapper(),
+      reducer=parallel.ListReducer(),
+      output_prefix=self.output().path,
+      num_shards=16)
+
+class CurrentSPLMapper(parallel.Mapper):
+  def _extract(self, filename):
+    ''' Moving this code from the `spl_harmonization` file, since it is the
+        only part of that file that is needed now that we have converted to a
+        map reduction.`
+    '''
+    try:
+      tree = extract.parse_xml(filename)
+      harmonized = {}
+      harmonized['spl_set_id'] = spl.extract.extract_set_id(tree)
+      harmonized['id'] = spl.extract.extract_id(tree)
+      harmonized['spl_version'] = spl.extract.extract_version_number(tree)
+      harmonized['is_original_packager'] = \
+        spl.extract.is_original_packager(tree)
+      harmonized['spl_product_ndc'] = spl.extract.extract_product_ndcs(tree)
+      harmonized['original_packager_product_ndc'] = \
+        spl.extract.extract_original_packager_product_ndcs(tree)
+      harmonized['package_ndc'] = spl.extract.extract_package_ndcs(tree)
+      return harmonized
+    except:
+      logging.warn('ERROR processing SPL data: %s', filename)
+      return None
+
+  def map(self, key, value, output):
+    if '_set_id:' in key:
+      version, _index = sorted(value)[-1]
+      xml_file = _index['_key']
+      new_value = self._extract(xml_file)
+      if new_value is not None:
+        new_key = key.replace('_set_id:', '')
+        output.add(new_key, new_value)
+
+class GenerateCurrentSPLJSON(luigi.Task):
+  ''' All SPL files on S3 (IDs), we only want the most recent versions. This
+      task generates a spl_extract.db that is only the current version.
+  '''
+  def requires(self):
+    return SPLSetIDIndex()
+
+  def output(self):
+    return luigi.LocalTarget(join(BASE_DIR, SPL_EXTRACT_DB))
+
+  def run(self):
+    parallel.mapreduce(
+      parallel.Collection.from_sharded(self.input().path),
+      mapper=CurrentSPLMapper(),
+      reducer=parallel.IdentityReducer(),
+      output_prefix=self.output().path)
+
+class ExtractUPCFromSPL(luigi.Task):
+  ''' A task that will generate otc-bars.xml for ANY SPL IDs that does not have
+      one yet. There is a simple output file to represent that this process has
+      run for this batch cycle.
+  '''
+  def requires(self):
+    # Just need a task that forces an S3 sync, which GenerateCurrentSPLJSON does
+    return GenerateCurrentSPLJSON()
+
+  def output(self):
+    return luigi.LocalTarget(join(BASE_DIR, 'barcode_update.done'))
+
+  def run(self):
+    for filename in glob.glob(SPL_S3_DIR + '/*/*.xml'):
+      src_dir = dirname(filename)
+      barcode_target = join(src_dir, 'barcodes')
+      xml_out = join(barcode_target, 'otc-bars.xml')
+      json_out = xml_out.replace('.xml', '.json')
+
+      if not os.path.exists(xml_out):
+        common.shell_cmd('mkdir -p %s', barcode_target)
+        logging.info('Zbarimg on directory %s', src_dir)
+        cmd = 'find %(src_dir)s -name "*.jpg" -size +0\
+                                -exec zbarimg -q --xml {} \; > \
+                    %(xml_out)s' % locals()
+        os.system(cmd)
+
+      if common.is_older(json_out, xml_out):
+        logging.info('%s does not exist, producing...', json_out)
+        process_barcodes.XML2JSON(xml_out)
+      else:
+        logging.debug('%s already exists, skipping', xml_out)
+    common.shell_cmd('touch %s', self.output().path)
+
+class UpcMapper(parallel.Mapper):
+  def map(self, key, value, output):
+    if value is None: return
+    _id = value['id']
+    # otc-bars.json contains new-line delimited JSON strings.  we output each
+    # line along with it's id.
+    upc_json = join(SPL_S3_DIR, _id, 'barcodes/otc-bars.json')
+    if os.path.exists(upc_json):
+      upcs = open(upc_json, 'r')
+      for upc in upcs:
+        upc_dict = json.loads(upc)
+        output.add(upc_dict['id'], upc_dict)
+
+class UpcXml2JSON(luigi.Task):
+  def requires(self):
+    return [ExtractUPCFromSPL(), GenerateCurrentSPLJSON()]
+
+  def output(self):
+    return luigi.LocalTarget(join(BASE_DIR, UPC_EXTRACT_DB))
+
+  def run(self):
+    input_glob = glob.glob(SPL_S3_DIR + '/*/barcodes/otc-bars.json')
+    parallel.mapreduce(
+      parallel.Collection.from_sharded(self.input()[1].path),
+      mapper=UpcMapper(),
+      reducer=parallel.IdentityReducer(),
+      output_prefix=self.output().path)
+
+# The index key has a prefix to avoid collision, we need to data structure
+# that tells us which prefix maps to which database and which value to pull
+# out of that database in order to get the set_id from the index.
+# For instance NDC_EXTRACT_DB:
+#   If '_id', means we looking for an index key that starts with '_id:'
+#   If 'id', grab the id from the value in the map()
+#   We then concatenate these to find the index entry.
+#   Which then results in a spl_set_id, which is our new output key.
+ID_PREFIX_DB_MAP = {
+  SPL_EXTRACT_DB: ('_set_id', 'spl_set_id'),
+  NDC_EXTRACT_DB: ('_id', 'id'),
+  UNII_EXTRACT_DB: ('_id', 'spl_id'),
+  RXNORM_EXTRACT_DB: ('_set_id', 'spl_set_id'),
+  UPC_EXTRACT_DB: ('_id', 'id')
+}
+
+class JoinAllMapper(parallel.Mapper):
+  def __init__(self, index_db):
+    parallel.Mapper.__init__(self)
+    self.index_db = index_db
+
+  def map_shard(self, map_input, map_output):
+    self.filename = map_input.filename
+    return parallel.Mapper.map_shard(self, map_input, map_output)
+
+  def get_set_id(self, lookup_value):
+    ''' Helper function to pull the set_id from the first entry in the index.
+    '''
+    if lookup_value in self.index_db:
+      index = self.index_db[lookup_value]
+      set_id = index['_set_id']
+      return set_id
+    else:
+      return None
+
+  def map(self, key, value, output):
+    db_name = basename(dirname(self.filename))
+    prefix, lookup_key = ID_PREFIX_DB_MAP[db_name]
+    if not value: return
+    if not isinstance(value, list): value = [value]
+    for val in value:
+      lookup_value = prefix + ':' + val[lookup_key]
+      set_id = self.get_set_id(lookup_value)
+      if set_id:
+        output.add(set_id, (db_name, val))
+
+class JoinAllReducer(parallel.Reducer):
+  ''' A custom joiner for combining all of the data sources into a single
+      unique record.
+  '''
+  def _join(self, values):
+    # The mapper output values: (database_file, dictionary value)
+    # Each database_file lines up with an instance variable so that we can
+    # grab the appropriate data for the appropriate join.
+    intermediate = collections.defaultdict(list)
+    for row in values:
+      db_name, val = row
+      intermediate[db_name].append(val)
+
+    result = []
+    for ndc_row in intermediate[NDC_EXTRACT_DB]:
+      for spl_row in intermediate[SPL_EXTRACT_DB]:
+        result.append(dict(ndc_row.items() + spl_row.items()))
+
+    final_result = []
+
+    for row in result:
+      final = dict(row)
+
+      # If there is unii_indexing, there is only one record, so we make sure
+      # something is there and grab the first one.
+      final['unii_indexing'] = {}
+      unii_data = intermediate.get(UNII_EXTRACT_DB, None)
+      if unii_data:
+        final['unii_indexing'] = unii_data[0]['unii_indexing']
+
+      final['rxnorm'] = []
+      for row in intermediate.get(RXNORM_EXTRACT_DB, []):
+        for data in row['rxnorm']:
+          final['rxnorm'].append(data)
+
+      # TODO(hansnelsen): clean this up, it saves either a string or an empty
+      #                   list. It is bad, but it will require a refactor of
+      #                   annotation steps in each pipeline, so leaving it for
+      #                   now.
+      # If upc data exists, there is only one, so we make sure it is there and
+      # then grab the first one.
+      final['upc'] = []
+      upc_data = intermediate.get(UPC_EXTRACT_DB, None)
+      if upc_data:
+        final['upc'] = upc_data[0]['upc']
+
+      final_result.append(final)
+
+    return final_result
+
+  def reduce(self, key, values, output):
+    # we're writing to a JSONLine output, which ignores
+    # out key field and simply writes one value per line.
+    for row in self._join(values):
+      output.put(key, row)
+    else:
+      logging.warn('No data for key: %s', key)
 
 class CombineHarmonization(luigi.Task):
   def requires(self):
-    return [SPLHarmonizationJSON(), UNIIHarmonizationJSON(),
-            ExtractNDC(), RXNormHarmonizationJSON(),
-            UpcXml2JSON()]
+    return { 'ndc': NDC2JSON(),
+             'spl': GenerateCurrentSPLJSON(),
+             'unii': UNII2JSON(),
+             'rxnorm': RXNorm2JSON(),
+             'upc' : UpcXml2JSON(),
+             'setid': SPLSetIDIndex() }
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR,
-      'harmonization/harmonized.json'))
+    return luigi.LocalTarget(join(BASE_DIR, 'harmonized.json'))
 
   def run(self):
-    spl_file = self.input()[0].path
-    unii_file = self.input()[1].path
-    ndc_file = self.input()[2].path
-    rxnorm_file = self.input()[3].path
-    upc_file = self.input()[4].path
-    json_output_file = self.output().path
-    combine_harmonization.combine(ndc_file,
-                                  spl_file,
-                                  rxnorm_file,
-                                  unii_file,
-                                  upc_file,
-                                  json_output_file)
+    index_db = {}
+    setid_db = self.input()['setid'].path
+    logging.info('Joining data from setid DB: %s', setid_db)
+    db = parallel.ShardedDB.open(setid_db)
+    db_iter = db.range_iter(None, None)
 
+    for (key, val) in db_iter:
+      # Only need one entry from the index, pruning here to simplify mapper
+      # The index is also used to find the latest version of SPL, so it is a bit
+      # clunky to use in this particular case.
+      index_db[key] = val[0][1]
+
+    db_list = [
+      self.input()[db].path for db in ['ndc', 'spl', 'unii', 'rxnorm', 'upc']
+    ]
+
+    logging.info('DB %s', db_list)
+    parallel.mapreduce(
+      parallel.Collection.from_sharded_list(db_list),
+      mapper=JoinAllMapper(index_db=index_db),
+      reducer=JoinAllReducer(),
+      output_prefix=self.output().path,
+      output_format=parallel.JSONLineOutput())
 
 if __name__ == '__main__':
-  logging.basicConfig(
-    stream=sys.stderr,
-    format='%(created)f %(filename)s:%(lineno)s [%(funcName)s] %(message)s',
-    level=logging.DEBUG)
-
   luigi.run()

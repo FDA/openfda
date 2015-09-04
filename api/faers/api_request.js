@@ -37,6 +37,12 @@ exports.CheckParams = function(params) {
         message: 'Invalid skip parameter value.'
       };
     }
+    if (skip > 5000) {
+      throw {
+        name: API_REQUEST_ERROR,
+        message: 'Skip value must 5000 or less.'
+      }
+    }
     params.skip = skip;
   }
 
@@ -57,7 +63,7 @@ exports.CheckParams = function(params) {
     };
   }
 
-  // Do not allow ski param with count requests.
+  // Do not allow skip param with count requests.
   if (params.count && params.skip) {
     throw {
       name: API_REQUEST_ERROR,

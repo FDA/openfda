@@ -1,0 +1,403 @@
+{
+  "registration": {
+    "_source": {
+      "excludes": [
+        "*_exact"
+      ],
+      "includes": [
+        "*"
+      ]
+    },
+    "properties": {
+      "@checksum": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "establishment_type": {
+        "type": "string"
+      },
+      "establishment_type_exact": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "products": {
+        "properties": {
+          "created_date": {
+            "format": "basic_date||date",
+            "type": "date"
+          },
+          "exempt": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "pma_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "k_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "openfda": {
+            "properties": {
+              "device_class": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "device_name": {
+                "fields": {
+                  "exact": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                },
+                "type": "string"
+              },
+              "fei_number": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "k_number": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "medical_specialty_description": {
+                "fields": {
+                  "exact": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                },
+                "type": "string"
+              },
+              "pma_number": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "registration_number": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "regulation_number": {
+                "fields": {
+                  "exact": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                },
+                "type": "string"
+              }
+            }
+          },
+          "owner_operator_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "product_code": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      },
+      "proprietary_name": {
+        "type": "string"
+      },
+      "proprietary_name_exact": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "registration": {
+        "properties": {
+          "address_line_1": {
+            "type": "string"
+          },
+          "address_line_2": {
+            "type": "string"
+          },
+          "city": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "fei_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "initial_importer_flag": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "iso_country_code": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "name": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "owner_operator": {
+            "properties": {
+              "contact_address": {
+                "properties": {
+                  "address_1": {
+                    "type": "string"
+                  },
+                  "address_2": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "fields": {
+                      "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      }
+                    },
+                    "type": "string"
+                  },
+                  "iso_country_code": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "postal_code": {
+                    "fields": {
+                      "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      }
+                    },
+                    "type": "string"
+                  },
+                  "state_code": {
+                    "fields": {
+                      "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      }
+                    },
+                    "type": "string"
+                  },
+                  "state_province": {
+                    "fields": {
+                      "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      }
+                    },
+                    "type": "string"
+                  }
+                }
+              },
+              "firm_name": {
+                "fields": {
+                  "exact": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                },
+                "type": "string"
+              },
+              "official_correspondent": {
+                "properties": {
+                  "first_name": {
+                    "fields": {
+                      "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      }
+                    },
+                    "type": "string"
+                  },
+                  "last_name": {
+                    "fields": {
+                      "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      }
+                    },
+                    "type": "string"
+                  },
+                  "middle_initial": {
+                    "fields": {
+                      "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      }
+                    },
+                    "type": "string"
+                  },
+                  "phone_number": {
+                    "fields": {
+                      "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      }
+                    },
+                    "type": "string"
+                  },
+                  "subaccount_company_name": {
+                    "fields": {
+                      "exact": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      }
+                    },
+                    "type": "string"
+                  }
+                }
+              },
+              "owner_operator_number": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "postal_code": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "reg_expiry_date_year": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "registration_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "state_code": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "status_code": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "us_agent": {
+            "properties": {
+              "address_line_1": {
+                "type": "string"
+              },
+              "address_line_2": {
+                "type": "string"
+              },
+              "bus_phone_area_code": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "bus_phone_extn": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "bus_phone_num": {
+                "fields": {
+                  "exact": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                },
+                "type": "string"
+              },
+              "business_name": {
+                "fields": {
+                  "exact": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                },
+                "type": "string"
+              },
+              "city": {
+                "fields": {
+                  "exact": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                },
+                "type": "string"
+              },
+              "email_address": {
+                "fields": {
+                  "exact": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                },
+                "type": "string"
+              },
+              "fax_area_code": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "fax_num": {
+                "fields": {
+                  "exact": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                },
+                "type": "string"
+              },
+              "iso_country_code": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "name": {
+                "fields": {
+                  "exact": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                },
+                "type": "string"
+              },
+              "postal_code": {
+                "fields": {
+                  "exact": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                },
+                "type": "string"
+              },
+              "state_code": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "zip_code": {
+                "fields": {
+                  "exact": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                },
+                "type": "string"
+              }
+            }
+          },
+          "zip_code": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
