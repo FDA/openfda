@@ -25,7 +25,7 @@ from openfda import parallel, config, index_util, elasticsearch_requests
 from openfda.annotation_table.pipeline import CombineHarmonization
 from openfda.faers import annotate
 from openfda.faers import xml_to_json
-from openfda.index_util import AlwaysRunTask
+from openfda.tasks import AlwaysRunTask, DependencyTriggeredTask
 
 
 # this should be a symlink to wherever the real data directory is
@@ -148,7 +148,9 @@ class XML2JSON(luigi.Task):
       filenames.extend(glob.glob(input.path + sgml_path))
       filenames.extend(glob.glob(input.path + xml_path))
 
-    assert len(filenames) > 0, 'No files to process for quarter? %s' % self.quarter
+    if len(filenames) == 0:
+      logging.warn('No files to process for quarter? %s', self.quarter)
+      return
 
     input_shards = []
     for filename in filenames:
@@ -174,7 +176,7 @@ class XML2JSON(luigi.Task):
       print '>> ', timestamp, count
 
 
-class AnnotateJSON(luigi.Task):
+class AnnotateJSON(DependencyTriggeredTask):
   quarter = luigi.Parameter()
   def requires(self):
     return [CombineHarmonization(), XML2JSON(self.quarter)]
@@ -189,7 +191,7 @@ class AnnotateJSON(luigi.Task):
       annotate.AnnotateMapper(harmonized_file),
       parallel.IdentityReducer(),
       self.output().path,
-      map_workers=16)
+      map_workers=12)
 
 
 class LoadJSONQuarter(index_util.LoadJSONBase):
@@ -200,23 +202,29 @@ class LoadJSONQuarter(index_util.LoadJSONBase):
   docid_key='@case_number'
   use_checksum = True
 
+  # Optimize after all quarters are finished.
+  optimize_index = False
+
   def _data(self):
     return AnnotateJSON(self.quarter)
 
 
-class LoadJSON(luigi.WrapperTask):
+class LoadJSON(AlwaysRunTask):
   quarter = luigi.Parameter()
   def requires(self):
     if self.quarter == 'all':
       now = arrow.now()
       previous_task = None
-      for year in range(2004, now.year):
+      for year in range(2004, now.year + 1):
         for quarter in range(1, 5):
           task = LoadJSONQuarter(quarter='%4dq%d' % (year, quarter), previous_task=previous_task)
           previous_task = task
           yield task
     else:
       yield LoadJSONQuarter(quarter=self.quarter)
+
+  def _run(self):
+    index_util.optimize_index('drugevent', wait_for_merge=0)
 
 
 if __name__ == '__main__':

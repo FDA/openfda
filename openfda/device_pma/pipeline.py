@@ -22,12 +22,11 @@ from openfda import common, config, download_util, elasticsearch_requests, index
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
   DeviceAnnotateMapper)
 from openfda.device_pma import transform
-from openfda.index_util import AlwaysRunTask, ResetElasticSearch
+from openfda.tasks import AlwaysRunTask
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
-BASE_DIR = './data/'
 # A directory for holding files that track Task state
-META_DIR = join(BASE_DIR, 'device_pma/meta')
+META_DIR = config.data_dir('device_pma/meta')
 common.shell_cmd('mkdir -p %s', META_DIR)
 
 DEVICE_PMA_ZIP = 'http://www.accessdata.fda.gov/premarket/ftparea/pma.zip'
@@ -37,7 +36,7 @@ class DownloadPMA(luigi.Task):
     return []
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'device_pma/raw'))
+    return luigi.LocalTarget(config.data_dir('device_pma/raw'))
 
   def run(self):
     output_filename = join(self.output().path, DEVICE_PMA_ZIP.split('/')[-1])
@@ -51,7 +50,7 @@ class ExtractAndCleanDownloadsPMA(luigi.Task):
     return DownloadPMA()
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'device_pma/extracted'))
+    return luigi.LocalTarget(config.data_dir('device_pma/extracted'))
 
   def run(self):
     output_dir = self.output().path
@@ -71,7 +70,7 @@ class Pma2JSON(luigi.Task):
     return ExtractAndCleanDownloadsPMA()
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'device_pma', 'json.db'))
+    return luigi.LocalTarget(config.data_dir('device_pma/json.db'))
 
   def run(self):
     common.shell_cmd('mkdir -p %s', dirname(self.output().path))
@@ -101,7 +100,7 @@ class AnnotateDevice(luigi.Task):
     return [Harmonized2OpenFDA(), Pma2JSON()]
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'device_pma','annotate.db'))
+    return luigi.LocalTarget(config.data_dir('device_pma/annotate.db'))
 
   def run(self):
     harmonized_db = parallel.ShardedDB.open(self.input()[0].path).as_dict()
@@ -120,6 +119,7 @@ class LoadJSON(index_util.LoadJSONBase):
   mapping_file = './schemas/pma_mapping.json'
   data_source = AnnotateDevice()
   use_checksum = False
+  optimize_index = True
 
 
 if __name__ == '__main__':

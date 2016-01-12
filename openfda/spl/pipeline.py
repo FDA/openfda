@@ -19,25 +19,24 @@ import luigi
 
 from openfda import config, common, elasticsearch_requests, index_util, parallel
 from openfda.annotation_table.pipeline import CombineHarmonization
-from openfda.index_util import AlwaysRunTask
+from openfda.tasks import AlwaysRunTask
 from openfda.spl import annotate
 from openfda.parallel import IdentityReducer
 
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
-BASE_DIR = './data'
-META_DIR = join(BASE_DIR, 'spl/meta')
+META_DIR = config.data_dir('spl/meta')
 # Ensure meta directory is available for task tracking
 common.shell_cmd('mkdir -p %s', META_DIR)
 
 SPL_JS = join(RUN_DIR, 'spl/spl_to_json.js')
 LOINC = join(RUN_DIR, 'spl/data/sections.csv')
 
-SPL_S3_BUCKET = 's3://openfda.spl.data/data/'
-SPL_S3_LOCAL_DIR = join(BASE_DIR, 'spl/s3_sync')
+SPL_S3_BUCKET = 's3://openfda-data-spl/data/'
+SPL_S3_LOCAL_DIR = config.data_dir('spl/s3_sync')
 SPL_S3_CHANGE_LOG = join(SPL_S3_LOCAL_DIR, 'change_log/SPLDocuments.csv')
 SPL_BATCH_DIR = join(META_DIR, 'batch')
-SPL_PROCESS_DIR = join(BASE_DIR, 'spl/batches')
+SPL_PROCESS_DIR = config.data_dir('spl/batches')
 
 common.shell_cmd('mkdir -p %s', SPL_S3_LOCAL_DIR)
 common.shell_cmd('mkdir -p %s', SPL_PROCESS_DIR)
@@ -50,11 +49,14 @@ class SyncS3SPL(luigi.Task):
     return os.path.join(self.local_dir, '.last_sync_time')
 
   def complete(self):
-    'Only run S3 sync once per day.'
-    return os.path.exists(self.flag_file) and (
-        arrow.get(os.path.getmtime(self.flag_file)) > arrow.now().floor('day'))
+    # Only run S3 sync once per day.
+    if config.disable_downloads():
+      return True
 
-  def _run(self):
+    return os.path.exists(self.flag_file()) and (
+        arrow.get(os.path.getmtime(self.flag_file())) > arrow.now().floor('day'))
+
+  def run(self):
     common.cmd(['aws',
                 '--profile=' + config.aws_profile(),
                 's3', 'sync',
@@ -177,12 +179,13 @@ class LoadJSON(index_util.LoadJSONBase):
   mapping_file = './schemas/spl_mapping.json'
   use_checksum = True
   docid_key = 'set_id'
+  optimize_index = False
 
   def _data(self):
     return AnnotateJSON(self.batch)
 
 
-class ProcessBatch(luigi.WrapperTask):
+class ProcessBatch(AlwaysRunTask):
   def requires(self):
     start = arrow.get('20090601', 'YYYYMMDD').ceil('week')
     end = arrow.utcnow().ceil('week')
@@ -192,6 +195,9 @@ class ProcessBatch(luigi.WrapperTask):
       task = LoadJSON(batch=batch_file, previous_task=previous_task)
       previous_task = task
       yield task
+
+  def _run(self):
+    index_util.optimize_index('druglabel', wait_for_merge=0)
 
 
 if __name__ == '__main__':

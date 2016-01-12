@@ -4,22 +4,25 @@
 Helper functions for managing ElasticSearch indices.
 '''
 
+import contextlib
 import hashlib
 import logging
+import math
 import os
-from os.path import join
+from os.path import basename, join
 import sys
+import requests
 import time
-import yaml
 
 import arrow
 import elasticsearch
 import elasticsearch.helpers
-import gflags
 import luigi
-from gzip import GzipFile
+import czipfile as zipfile
 
-from openfda import app, config, elasticsearch_requests, parallel
+from openfda import config, elasticsearch_requests, parallel
+from openfda.common import BatchHelper
+from openfda.tasks import AlwaysRunTask
 
 try:
   import simplejson as json
@@ -27,48 +30,192 @@ except:
   print >>sys.stderr, 'Failed to import simplejson.  This might result in slowdowns.'
   import json
 
-DEFAULT_BATCH_SIZE=100
 
-def dump_index(es, index, target_dir, max_uncompressed_size=1e9):
-  '''
-  Dump the index `index` to disk as compressed JSON files.
+def optimize_index(index_name, wait_for_merge=1):
+  # elasticsearch client throws a timeout error when waiting for an optimize
+  # command to finish, so we use requests instead
+  logging.info('Optimizing: %s (this may take a while)', index_name)
+  resp = requests.post('http://%s/%s/_optimize?max_num_segments=1&wait_for_merge=%d' %
+    (config.es_host(), index_name, wait_for_merge), timeout=10000)
+  resp.raise_for_status()
 
-  The maximum _uncompressed_ size of each file is specified via
-  `max_uncompressed_size`.  Files are compressed via gzip, and
-  written as {0.json.gz, 1.json.gz....}
+
+def dump_index(es,
+               index,
+               endpoint,
+               target_dir,
+               cleaner=None,
+               query=None,
+               chunks=100000):
   '''
-  # fetch the total number of documents from the index, for logging
-  total_docs = es.indices.stats(index=index)['indices'].values()[0]['total']['docs']['count']
+  Dump the index `index` to disk as compressed JSON files. If a query is passed
+  into the function, then it is filters out those records before the dump. If
+  chunks is passed into the function, then a new file is written for every
+  chunk.
+  '''
+  endpoint_list = endpoint[1:].split('/')
+  update_date = arrow.utcnow().format('YYYY-MM-DD')
+
+  def _write_chunk(target_file, data):
+    ''' Helper function for writing out zip file chunks.
+    '''
+    file_to_zip = basename(target_file).replace('.zip', '')
+    with contextlib.closing(zipfile.ZipFile(target_file, 'w')) as out_f:
+      zip_info = zipfile.ZipInfo(file_to_zip, time.localtime()[0:6])
+      zip_info.external_attr = 0777 << 16L
+      zip_info.compress_type = zipfile.ZIP_DEFLATED
+      out_f.writestr(zip_info, json.dumps(data, indent=2) + '\n')
+
+  def _make_file_name(target_dir, idx, total):
+    ''' Helper function for making uniform file names.
+    '''
+    prefix = '-'.join(endpoint_list)
+    return join(target_dir, prefix + '-%04d-of-%04d.json.zip' % (idx, total))
+
+  def _make_display_name(endpoint, name):
+    ''' Isolating the thorny naming logic for the display name in a helper
+        function. The naming is solely present for url cleanliness.
+        Possible outputs (examples):
+          No partition and no shards: `Device pma data`
+          No partition but sharded: `Device pma (part 1 of 2)`
+          Partition but no shards: `2014 Q1 (all)`
+          Partition with shards: `2014 Q1 (part 1 of 2)`
+    '''
+    partition = ''
+    parts = name.split('/')
+    file_name = parts[-1]
+    pieces = file_name.split('-of-')
+    part, total = int(pieces[0][-4:]), int(pieces[1][:4])
+    part_text = ' (all)'
+
+    if len(parts) > 1:
+      partition = ' '.join(parts[0:-1])
+
+    # Currently only support quartly partitions, so we can safely split on `q`
+    if partition:
+      if 'q' in partition:
+        partition = ' q'.join(partition.split('q'))
+        partition = ' {partition}'.format(partition=partition).title()
+      elif 'all' in partition.lower():
+        partition = 'All other data'
+
+    if total > 1:
+      part_text = ' (part {part} of {total})'.format(**locals())
+    elif total == 1 and not partition:
+      part_text = ' data'
+
+    if partition:
+      endpoint = ''
+
+    return '{endpoint}{partition}{part_text}'.format(**locals()).strip()
+
+  def _make_partition(file_name, endpoint, total):
+    ''' Helper function for making the partition object that is appended to
+        manifest.partitions list.
+    '''
+    # http://download.open.fda.gov/device/event/1992q4/device-event-0001-of-0001.json.zip
+    # Sometimes the filename includes a partition, so we take everything after
+    # the endpoint and not just the basename
+    name = file_name.split(endpoint)[-1]
+    url = 'http://download.open.fda.gov' + endpoint + name
+    file_size = os.path.getsize(file_name)/1024/1024.0
+
+    return {
+      'display_name': _make_display_name(endpoint, name),
+      'file': url,
+      'size_mb': '%0.2f' % file_size,
+      'records': total
+    }
+
+  # Fetch the total number of documents for the query
+  # This is used for both logging and the skip and limit values which are
+  # added to the dump as to simulate the API output.
+  total_docs = es.count(index=index, body=query)
+  total_docs = total_docs['count']
+  total_zips = int(math.ceil(total_docs * 1.0/chunks))
+  domain, subdomain = endpoint_list
+
+  # Tracking data structure that will eventually be written to ES for the
+  # downloads API.
+  manifest = {
+    domain: {
+      subdomain: {
+        'export_date': update_date,
+        'total_records': total_docs,
+        'partitions': []
+      }
+    }
+  }
+
+  # All files are wrapped in the API format, so that the data interface remains
+  # constant between the API results and the download results.
+  disclaimer = ('openFDA is a beta research project and not for clinical use. '
+                'While we make every effort to ensure that data is accurate, '
+                'you should assume all results are unvalidated.')
+
+  return_dict = {
+    'meta': {
+      'disclaimer': disclaimer,
+      'license': 'http://open.fda.gov/license',
+      'last_updated': update_date,
+      'results': {
+        'skip': 0,
+        'limit': chunks,
+        'total': total_docs
+      }
+    },
+    'results': []
+  }
 
   logging.info('Dumping %s (%d documents) to %s', index, total_docs, target_dir)
   os.system('mkdir -p "%s"' % target_dir)
-  lines = []
   docs_written = 0
-  num_bytes = 0
-  file_idx = 0
+  file_idx = 1
 
-  target_file = join(target_dir, '%05d.json.gz' % file_idx)
-  out_f = os.popen('pigz -c > "%s"' % target_file, 'w', 1048576)
+  target_file = _make_file_name(target_dir, file_idx, total_zips)
 
-  for result in elasticsearch.helpers.scan(es, query={}, raise_on_error=True, index=index):
-    doc_data = json.dumps(result['_source']) + '\n'
-    out_f.write(doc_data)
+  results = []
+  for result in elasticsearch.helpers.scan(es,
+                                           query=query,
+                                           raise_on_error=True,
+                                           index=index):
 
-    docs_written += 1
-    num_bytes += len(doc_data)
-    if docs_written % 10000 == 0:
-      logging.info('Writing %20s, %.2f%% done', index, 100. * docs_written / total_docs)
+    # Grab a response from ES and clean it with the callback passed into the
+    # main function. This is so we can avoid exposing internal keys in the
+    # exported data.
+    source_data = json.loads(json.dumps(result['_source']), object_hook=cleaner)
+    results.append(source_data)
+    docs_written = len(results)
 
-    if num_bytes > max_uncompressed_size:
-      out_f.close()
+    # Write out a new file everytime we have fetched a chunks' worth.
+    if docs_written % chunks == 0:
+      chunks_written = int(return_dict['meta']['results']['skip'] + chunks)
+      total_written = (chunks_written * 1.0)/total_docs
+      logging.info('Writing %20s, %.2f%% done', index, 100. * total_written)
+      return_dict['results'] = results
 
-      logging.info('Wrote %s (%d MB)', target_file, num_bytes / 1e6)
+      _write_chunk(target_file, return_dict)
+      manifest[domain][subdomain]['partitions'].append(
+        _make_partition(target_file, endpoint, len(results))
+      )
+
+      results = []
+      return_dict['meta']['results']['skip'] += chunks
       file_idx += 1
-      target_file = join(target_dir, '%05d.json.gz' % file_idx)
-      out_f = os.popen('pigz -c > "%s"' % target_file, 'w')
-      num_bytes = 0
+      target_file = _make_file_name(target_dir, file_idx, total_zips)
 
-  out_f.close()
+  # Take care of any final results
+  if results:
+    return_dict['results'] = results
+    return_dict['meta']['results']['limit'] = len(results)
+    _write_chunk(target_file, return_dict)
+    manifest[domain][subdomain]['partitions'].append(
+      _make_partition(target_file, endpoint, len(results))
+    )
+
+  # Write out manifest file that will feed into the downloads API
+  with open(join(target_dir, 'manifest.json'), 'w') as manifest_out:
+    json.dump(manifest, manifest_out)
 
 
 def index_without_checksum(es, index, doc_type, batch):
@@ -84,11 +231,13 @@ def index_without_checksum(es, index, doc_type, batch):
                           '_type' : doc_type,
                           '_source' : doc })
 
-  create_count, errors = elasticsearch.helpers.bulk(es, create_batch, raise_on_exception=False)
+  create_count, errors = elasticsearch.helpers.bulk(es, create_batch,
+      raise_on_error=False,
+      raise_on_exception=False)
   for item in errors:
     create_resp = item['create']
     if create_resp['status'] >= 400:
-      logging.warn('Unexpected conflict in creating documents: %s', create_resp)
+      logging.error('Unexpected conflict in creating documents: %s', create_resp)
 
   logging.info('%s create batch complete: %s created %s errors',
                index, create_count, len(errors))
@@ -159,7 +308,9 @@ def index_with_checksum(es, index, doc_type, batch):
         '_type' : doc_type,
         '_source' : doc })
 
-  index_count, errors = elasticsearch.helpers.bulk(es, index_batch, raise_on_exception=False)
+  index_count, errors = elasticsearch.helpers.bulk(es, index_batch,
+      raise_on_error=False,
+      raise_on_exception=False)
 
   for item in errors:
     update_resp = item['index']
@@ -167,6 +318,14 @@ def index_with_checksum(es, index, doc_type, batch):
 
   logging.info('%s update batch complete: %s total, %s indexed, %s skipped, %s errors',
                index, len(index_batch) + skipped, len(index_batch), skipped, len(errors))
+
+
+def get_mapping(es, index):
+  ''' Get the Elasticsearch mapping for an index.
+  '''
+  indices = es.indices
+
+  return indices.get_mapping(index=index)
 
 
 def copy_mapping(es, source_index, target_index):
@@ -187,46 +346,6 @@ def copy_mapping(es, source_index, target_index):
 
   for doc_type, schema in mapping[source_index]['mappings'].items():
     idx.put_mapping(index=target_index, doc_type=doc_type, body=schema)
-
-
-class AlwaysRunTask(luigi.Task):
-  '''
-  A task that should always run once.
-
-  This is generally used for tasks that are idempotent, and for which the
-  "done" state is difficult to determine: e.g. initializing an index, or
-  downloading files.
-
-  N.B. Luigi creates *new instances* of tasks when performing completeness
-  checks.  This means we can't store our completeness as a local boolean,
-  and instead have to use a file on disk as a flag.
-
-  To allow subclasses to use `output` normally, we don't use an `output` file
-  here and instead manage completion manually.
-  '''
-  nonce_timestamp = luigi.Parameter(default=arrow.utcnow().format('YYYY-MM-DD-HH-mm-ss'))
-
-  def __init__(self, *args, **kw):
-    luigi.Task.__init__(self, *args, **kw)
-
-  def requires(self):
-    return []
-
-  def _nonce_file(self):
-    import hashlib
-    digest = hashlib.sha1(repr(self)).hexdigest()
-    return '/tmp/always-run-task/%s-%s' % (self.nonce_timestamp, digest)
-
-  def output(self):
-    return luigi.LocalTarget(self._nonce_file())
-
-  def run(self):
-    self._run()
-
-    os.system('mkdir -p "/tmp/always-run-task"')
-    with open(self._nonce_file(), 'w') as nonce_file:
-      nonce_file.write('finished.')
-
 
 
 class ResetElasticSearch(AlwaysRunTask):
@@ -251,37 +370,6 @@ class ResetElasticSearch(AlwaysRunTask):
                                           self.target_index_name,
                                           self.target_type_name,
                                           self.target_mapping_file)
-
-class BatchHelper(object):
-  '''
-  Convenience class for batching operations.
-
-  When more than `batch_size` operations have been added to the batch, `fn`
-  will be invoked with `args` and `kw`.  The actual data must be expected
-  via the `batch` argument.
-
-  Call `flush()` when no more documents will be added.
-  '''
-  def __init__(self, fn, *args, **kw):
-    self._fn = fn
-    self._args = args
-    self._kw = kw
-    self._batch = []
-
-  def flush(self):
-    self._fn(*self._args, batch=self._batch, **self._kw)
-    del self._batch[:]
-
-  def add(self, obj):
-    self._batch.append(obj)
-    if len(self._batch) > DEFAULT_BATCH_SIZE:
-      self.flush()
-
-  def __enter__(self):
-    return self
-
-  def __exit__(self, type, value, traceback):
-    self.flush()
 
 
 class LoadJSONMapper(parallel.Mapper):
@@ -338,6 +426,9 @@ class LoadJSONBase(AlwaysRunTask):
   'The number of processes to use when loading JSON into ES'
   load_json_workers = luigi.Parameter(default=4)
 
+  'Should we optimize the index after adding documents.'
+  optimize_index = False
+
   def _data(self):
     '''
     Return a task that supplies the data files to load into ES.
@@ -388,6 +479,7 @@ class LoadJSONBase(AlwaysRunTask):
       reducer=parallel.IdentityReducer(),
       output_format=parallel.NullOutput(),
       map_workers=self.load_json_workers,
+      num_shards=1,
       output_prefix=config.tmp_dir('%s/load-json' % self.index_name)
     )
 
@@ -396,36 +488,6 @@ class LoadJSONBase(AlwaysRunTask):
       config.es_client(), self.index_name, arrow.utcnow().format('YYYY-MM-DD')
     )
 
-class OptimizeIndex(AlwaysRunTask):
-  index_name = luigi.Parameter()
-  def _run(self):
-    logging.info('Optimizing %s', self.index_name)
-    es = config.es_client()
-    es.indices.optimize(
-      index=self.index_name,
-      max_num_segments=1
-    )
-
-def main(argv):
-  FLAGS = gflags.FLAGS
-  es = elasticsearch.Elasticsearch(FLAGS.host)
-  if FLAGS.operation == 'rollback':
-    rollback_index_transaction(es, FLAGS.index)
-  elif FLAGS.operation == 'commit':
-    commit_index_transaction(es, FLAGS.index)
-  elif FLAGS.operation == 'dump_index':
-    dump_index(es, FLAGS.index, FLAGS.dump_directory)
-  else:
-    raise Exception, 'Unknown operation: %s' % FLAGS.operation
-
-
-if __name__ == '__main__':
-  gflags.DEFINE_string('dump_directory', '/tmp/index-data',
-                       'Location to write exported index data.')
-  gflags.DEFINE_string('host', 'http://localhost:9200', 'ElasticSearch host.')
-  gflags.DEFINE_string('index', None, 'Index to operate on.')
-  gflags.DEFINE_enum('operation', None, ['rollback', 'commit', 'dump_index'], 'Operation to perform')
-  gflags.MarkFlagAsRequired('index')
-  gflags.MarkFlagAsRequired('operation')
-
-  app.run()
+    # optimize index, if requested
+    if self.optimize_index:
+      optimize_index(self.index_name, wait_for_merge=False)

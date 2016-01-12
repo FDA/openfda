@@ -1,0 +1,106 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "properties": {
+    "address_1": {
+      "type": "string"
+    },
+    "address_2": {
+      "type": "string"
+    },
+    "advisory_committee": {
+      "type": "string"
+    },
+    "advisory_committee_description": {
+      "type": "string"
+    },
+    "applicant": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "clearance_type": {
+      "type": "string"
+    },
+    "contact": {
+      "type": "string"
+    },
+    "country_code": {
+      "type": "string"
+    },
+    "date_received": {
+      "type": "string",
+      "format": "date"
+    },
+    "decision_code": {
+      "type": "string"
+    },
+    "decision_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "decision_description": {
+      "type": "string"
+    },
+    "device_name": {
+      "type": "string"
+    },
+    "expedited_review_flag": {
+      "type": "string"
+    },
+    "k_number": {
+      "type": "string"
+    },
+    "openfda": {
+      "properties": {
+        "device_class": {
+          "type": "string"
+        },
+        "device_name": {
+          "type": "string"
+        },
+        "fei_number": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "medical_specialty_description": {
+          "type": "string"
+        },
+        "registration_number": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "regulation_number": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "postal_code": {
+      "type": "string"
+    },
+    "product_code": {
+      "type": "string"
+    },
+    "review_advisory_committee": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "statement_or_summary": {
+      "type": "string"
+    },
+    "third_party_flag": {
+      "type": "string"
+    },
+    "zip_code": {
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

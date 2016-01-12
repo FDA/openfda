@@ -1,0 +1,213 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "properties": {
+    "establishment_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "k_number": {
+      "type": "string"
+    },
+    "pma_number": {
+      "type": "string"
+    },
+    "products": {
+      "items": {
+        "properties": {
+          "created_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "exempt": {
+            "type": "string"
+          },
+          "openfda": {
+            "properties": {
+              "device_class": {
+                "type": "string"
+              },
+              "device_name": {
+                "type": "string"
+              },
+              "medical_specialty_description": {
+                "type": "string"
+              },
+              "regulation_number": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "owner_operator_number": {
+            "type": "string"
+          },
+          "product_code": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "proprietary_name": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "registration": {
+      "properties": {
+        "address_line_1": {
+          "type": "string"
+        },
+        "address_line_2": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "fei_number": {
+          "type": "string"
+        },
+        "initial_importer_flag": {
+          "type": "string"
+        },
+        "iso_country_code": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "owner_operator": {
+          "properties": {
+            "contact_address": {
+              "properties": {
+                "address_1": {
+                  "type": "string"
+                },
+                "address_2": {
+                  "type": "string"
+                },
+                "city": {
+                  "type": "string"
+                },
+                "iso_country_code": {
+                  "type": "string"
+                },
+                "postal_code": {
+                  "type": "string"
+                },
+                "state_code": {
+                  "type": "string"
+                },
+                "state_province": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "firm_name": {
+              "type": "string"
+            },
+            "official_correspondent": {
+              "properties": {
+                "first_name": {
+                  "type": "string"
+                },
+                "last_name": {
+                  "type": "string"
+                },
+                "middle_initial": {
+                  "type": "string"
+                },
+                "phone_number": {
+                  "type": "string"
+                },
+                "subaccount_company_name": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "owner_operator_number": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "postal_code": {
+          "type": "string"
+        },
+        "reg_expiry_date_year": {
+          "type": "string"
+        },
+        "registration_number": {
+          "type": "string"
+        },
+        "state_code": {
+          "type": "string"
+        },
+        "status_code": {
+          "type": "string"
+        },
+        "us_agent": {
+          "properties": {
+            "address_line_1": {
+              "type": "string"
+            },
+            "address_line_2": {
+              "type": "string"
+            },
+            "bus_phone_area_code": {
+              "type": "string"
+            },
+            "bus_phone_extn": {
+              "type": "string"
+            },
+            "bus_phone_num": {
+              "type": "string"
+            },
+            "business_name": {
+              "type": "string"
+            },
+            "city": {
+              "type": "string"
+            },
+            "email_address": {
+              "type": "string"
+            },
+            "fax_area_code": {
+              "type": "string"
+            },
+            "fax_num": {
+              "type": "string"
+            },
+            "iso_country_code": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "postal_code": {
+              "type": "string"
+            },
+            "state_code": {
+              "type": "string"
+            },
+            "zip_code": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "zip_code": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    }
+  },
+  "type": "object"
+}

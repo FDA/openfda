@@ -426,8 +426,9 @@
               "reactionmeddrapt": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "index": "analyzed",
+                    "type": "string",
+                    "analyzer": "uppercase_not_tokenized"
                   }
                 },
                 "type": "string"

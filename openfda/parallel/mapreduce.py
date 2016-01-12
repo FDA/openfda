@@ -24,6 +24,7 @@ from .inputs import MRInput, LevelDBInput, FilenameInput
 from .outputs import MROutput, LevelDBOutput
 from .mapper import Mapper
 from .reducer import Reducer
+from . import watchdog
 
 try:
   from setproctitle import setproctitle
@@ -33,9 +34,19 @@ except:
 
 logger = logging.getLogger('mapreduce')
 
-class WrappedException(object):
+class WrappedException(Exception):
   def __init__(self):
     self.exception_message = traceback.format_exc()
+
+
+class MRException(Exception):
+  def __init__(self, msg, child_message=None):
+    Exception.__init__(self, msg)
+    self._child_message = child_message
+
+  def __str__(self):
+    return '%s.  Child exception was:\n-- %s' % (
+        self.message, self._child_message.replace('\n', '\n-- '))
 
 
 class _MapperOutput(object):
@@ -69,7 +80,9 @@ class Collection(object):
     self.splits = []
     for f in filenames:
       assert os.path.exists(f), 'Missing input: %s' % f
-      self.splits.extend(mr_input.compute_splits(f))
+      self.splits.extend(
+        mr_input.compute_splits(f, desired_splits=multiprocessing.cpu_count())
+      )
 
   def __repr__(self):
     return 'Collection(%d items)' % len(self.splits)
@@ -111,25 +124,27 @@ class Counters(object):
 
 
 def _run_mapper(mapper, shuffle_queues, split):
-  try:
-    setproctitle('python -- Mapper.%s' % split)
-    map_output = _MapperOutput(shuffle_queues)
-    map_input = split.mr_input.create_reader(split)
-    return mapper.map_shard(map_input, map_output)
-  except:
-    print >> sys.stderr, 'Error running mapper (%s, %s)' % (mapper, split)
-    return WrappedException()
+  with watchdog.Watchdog():
+    try:
+      setproctitle('python -- Mapper.%s' % split)
+      map_output = _MapperOutput(shuffle_queues)
+      map_input = split.mr_input.create_reader(split)
+      return mapper.map_shard(map_input, map_output)
+    except:
+      print >> sys.stderr, 'Error running mapper (%s, %s)' % (mapper, split)
+      return WrappedException()
 
 
 def _run_reducer(reducer, queue, tmp_prefix, output_format, output_tmp, i, num_shards):
-  try:
-    setproctitle('python -- Reducer.%s-of-%s' % (i, num_shards))
-    reducer.initialize(queue, tmp_prefix, output_format, output_tmp, i, num_shards)
-    reducer.shuffle()
-    return reducer.reduce_finished()
-  except:
-    print >> sys.stderr, 'Error running reducer (%s)' % reducer
-    return WrappedException()
+  with watchdog.Watchdog():
+    try:
+      setproctitle('python -- Reducer.%s-of-%s' % (i, num_shards))
+      reducer.initialize(queue, tmp_prefix, output_format, output_tmp, i, num_shards)
+      reducer.shuffle()
+      return reducer.reduce_finished()
+    except:
+      print >> sys.stderr, 'Error running reducer (%s)' % reducer
+      return WrappedException()
 
 
 def mapreduce(
@@ -150,7 +165,7 @@ def mapreduce(
   # Managers "manage" the queues used by the mapper and reducers to communicate
   # A single manager ends up being a processing bottleneck; hence we shard the
   # queues across a number of managers.
-  managers = [multiprocessing.Manager() for i in range(multiprocessing.cpu_count())]
+  managers = [multiprocessing.Manager() for i in range(max(map_workers, num_shards))]
   shuffle_queues = [managers[i % len(managers)].Queue(1000) for i in range(num_shards)]
 
   mapper_pool = multiprocessing.Pool(processes=map_workers)
@@ -204,7 +219,8 @@ def mapreduce(
         if isinstance(result, WrappedException):
           logger.error('Caught exception during mapper execution.')
           logger.error('%s', result.exception_message)
-          raise Exception('Mapreduce failed.')
+          raise MRException('Mapper %d failed.' % i,
+              child_message=result.exception_message)
         else:
           logger.info('Finished mapper: %d', i)
       time.sleep(0.1)
@@ -226,7 +242,8 @@ def mapreduce(
       if isinstance(result, WrappedException):
         logger.info('Caught exception during reducer execution.')
         logger.info('%s', result.exception_message)
-        raise Exception('Mapreduce failed.')
+        raise MRException('Reducer %d failed.' % i,
+            child_message=result.exception_message)
 
       reduce_outputs.append(result)
 

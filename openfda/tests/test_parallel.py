@@ -10,6 +10,10 @@ class KeyMapper(parallel.Mapper):
   def map(self, key, value, output):
     output.add(key, key)
 
+class BadMapper(parallel.Mapper):
+  def map(self, key, value, output):
+    raise Exception('I crashed!')
+
 class ParallelTest(unittest.TestCase):
   def make_files(self, input_prefix, data, input_format):
     os.system('mkdir -p "%s"' % input_prefix)
@@ -36,6 +40,7 @@ class ParallelTest(unittest.TestCase):
     parallel.mapreduce(source,
                        mapper=mapper,
                        reducer=reducer,
+                       map_workers=1,
                        output_format=output_format,
                        output_prefix=output_prefix,
                        num_shards=num_shards)
@@ -98,7 +103,6 @@ class ParallelTest(unittest.TestCase):
 
     for i in range(10):
       key, value = results[i]
-      assert key == str(i), (i, results[i])
       assert value == 'test-line', (i, results[i])
 
   def test_sum(self):
@@ -108,11 +112,19 @@ class ParallelTest(unittest.TestCase):
       ['\n'.join([str(i) for i in range(100)]) for i in range(10)],
       reducer=parallel.SumReducer())
 
-    results = dict(results)
+    results = set(dict(results).values())
     for i in range(100):
-      assert str(i) in results, str(i)
-      value = results[str(i)]
-      self.assertEqual(value, i * 10.0)
+      assert i * 10 in results
+      results.remove(i * 10)
+    assert len(results) == 0, 'Unexpected output: %s' % results
+
+  def test_exception(self):
+    with self.assertRaises(parallel.MRException) as ctx:
+      self.run_mr(
+          '/tmp/test-bad-mapper',
+          ['hello' for i in range(10)],
+          mapper=BadMapper())
+
 
 def main(argv):
   unittest.main(argv=argv)

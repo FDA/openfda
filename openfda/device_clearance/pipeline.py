@@ -22,12 +22,11 @@ from openfda import download_util
 from openfda.device_clearance import transform
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
   DeviceAnnotateMapper)
-from openfda.index_util import AlwaysRunTask, ResetElasticSearch
+from openfda.tasks import AlwaysRunTask
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
-BASE_DIR = './data/'
 # A directory for holding files that track Task state
-META_DIR = join(BASE_DIR, '510k/meta')
+META_DIR = config.data_dir('510k/meta')
 common.shell_cmd('mkdir -p %s', META_DIR)
 
 
@@ -44,7 +43,7 @@ class Download_510K(luigi.Task):
     return []
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, '510k/raw'))
+    return luigi.LocalTarget(config.data_dir('510k/raw'))
 
   def run(self):
     output_dir = self.output().path
@@ -61,7 +60,7 @@ class ExtractAndCleanDownloads510k(luigi.Task):
     return Download_510K()
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, '510k/extracted'))
+    return luigi.LocalTarget(config.data_dir('510k/extracted'))
 
   def run(self):
     output_dir = self.output().path
@@ -80,16 +79,14 @@ class Clearance2JSON(parallel.MRTask):
   def requires(self):
     return ExtractAndCleanDownloads510k()
 
-  def output_format(self):
-    return parallel.JSONLineOutput()
-
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, '510k', 'json.db'))
+    return luigi.LocalTarget(config.data_dir('510k', 'json.db'))
 
   def mapreduce_inputs(self):
     input_files = glob.glob(self.input().path + '/*.txt')
     return parallel.Collection.from_glob(
       input_files, parallel.CSVDictLineInput(delimiter='|', strip_str='\0'))
+
 
 class ClearanceAnnotateMapper(DeviceAnnotateMapper):
   def filter(self, data):
@@ -109,7 +106,7 @@ class AnnotateDevice(luigi.Task):
     return [Harmonized2OpenFDA(), Clearance2JSON()]
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, '510k','annotate.db'))
+    return luigi.LocalTarget(config.data_dir('510k','annotate.db'))
 
   def run(self):
     harmonized_db = parallel.ShardedDB.open(self.input()[0].path).as_dict()
@@ -128,7 +125,7 @@ class LoadJSON(index_util.LoadJSONBase):
   mapping_file = './schemas/clearance_mapping.json'
   data_source = AnnotateDevice()
   use_checksum = False
-
+  optimize_index = True
 
 if __name__ == '__main__':
   luigi.run()

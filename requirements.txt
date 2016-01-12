@@ -1,6 +1,7 @@
 backports.ssl-match-hostname==3.4.0.2
 beautifulsoup4==4.4.0
 certifi==2015.4.28
+czipfile==1.0.0
 docutils==0.12
 elasticsearch==1.6.0
 Jinja2==2.8

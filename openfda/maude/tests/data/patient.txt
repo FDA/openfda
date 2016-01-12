@@ -1,3 +1,6 @@
 mdr_report_key|patient_sequence_number|date_received|sequence_number_treatment|sequence_number_outcome
-538836|1|01-AUG-04||1,L;2,R;
-1511544|1|08-OCT-09||1,O;
+538836|1|08/01/2004||1. L; 2. R
+1511544|1|10/08/2009||1. O
+1511543|1|10/08/2009||1. H
+1511542|1|10/07/2009||1. H
+1511541|1|10/06/2009||
