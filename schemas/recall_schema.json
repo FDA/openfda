@@ -1,0 +1,209 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "properties": {
+    "city": {
+      "type": "string"
+    },
+    "classification": {
+      "type": "string"
+    },
+    "code_info": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "distribution_pattern": {
+      "type": "string"
+    },
+    "event_id": {
+      "type": "string",
+      "format": "int64"
+    },
+    "initial_firm_notification": {
+      "type": "string"
+    },
+    "openfda": {
+      "properties": {
+        "application_number": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "brand_name": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dosage_form": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "generic_name": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "is_original_packager": {
+          "type": "boolean"
+        },
+        "manufacturer_name": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "nui": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "original_packager_product_ndc": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "package_ndc": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pharm_class_cs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pharm_class_epc": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pharm_class_moa": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pharm_class_pe": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "product_ndc": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "product_type": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "route": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "rxcui": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "rxstring": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "rxtty": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "spl_id": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "spl_set_id": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "substance_name": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "unii": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "upc": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "product_description": {
+      "type": "string"
+    },
+    "product_quantity": {
+      "type": "string"
+    },
+    "product_type": {
+      "type": "string"
+    },
+    "reason_for_recall": {
+      "type": "string"
+    },
+    "recall_initiation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "recall_number": {
+      "type": "string"
+    },
+    "recalling_firm": {
+      "type": "string"
+    },
+    "report_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "state": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "voluntary_mandated": {
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

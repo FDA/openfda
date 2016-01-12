@@ -2,6 +2,7 @@ import cPickle
 import csv
 import leveldb
 import logging
+import os
 import simplejson as json
 import xmltodict
 
@@ -46,7 +47,7 @@ class MRInput(object):
       for count, (k, v) in enumerate(self.entries()):
         yield k, v
 
-  def compute_splits(self, filename):
+  def compute_splits(self, filename, desired_splits):
     '''
     The default behavior for splitting files is to have one split per file.
     '''
@@ -82,10 +83,35 @@ class XMLDictInput(MRInput):
 
 
 class LineInput(MRInput):
+  def compute_splits(self, filename, desired_splits):
+    '''
+    The default behavior for splitting files is to have one split per file.
+    '''
+    file_len = os.path.getsize(filename)
+    split_size = max(1, file_len / desired_splits)
+    splits = []
+    last_pos = 0
+
+    with open(filename, 'r') as f:
+      while f.tell() < file_len:
+        f.seek(split_size, 1)
+        f.readline()
+        splits.append(
+          FileSplit(filename, self, last_pos, f.tell()))
+        last_pos = f.tell()
+
+    return splits
+
   class Reader(MRInput.Reader):
     def entries(self):
-      for idx, line in enumerate(open(self.filename)):
-        yield str(idx), line.rstrip()
+      f = open(self.filename)
+      f.seek(self.start_pos)
+      while f.tell() < self.end_pos:
+        line = f.readline()
+        if not line:
+          return
+
+        yield str(f.tell()), line.rstrip()
 
 
 class FilenameInput(MRInput):

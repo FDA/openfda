@@ -10,34 +10,33 @@ import collections
 import glob
 import logging
 import luigi
-import multiprocessing
 import os
 from os.path import basename, dirname, join
 import re
 import subprocess
-import sys
 import urllib2
+import urlparse
 
 import arrow
 import simplejson as json
 
+from openfda.tasks import DependencyTriggeredTask
 from openfda import common, config, parallel, spl
 from openfda.annotation_table import unii_harmonization
-from openfda.index_util import AlwaysRunTask
 from openfda.spl import process_barcodes, extract
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
-data_dir = './data/harmonization'
+data_dir = config.data_dir('harmonization')
 BATCH_DATE = arrow.utcnow().ceil('week').format('YYYYMMDD')
-BASE_DIR = join(data_dir, 'batches', BATCH_DATE)
-SPL_S3_DIR = './data/spl/s3_sync'
-TMP_DIR = './data/openfa-tmp'
+BASE_DIR = config.data_dir('harmonization/batches/%s' % BATCH_DATE)
+SPL_S3_DIR = config.data_dir('spl/s3_sync')
+TMP_DIR = config.tmp_dir()
 
 common.shell_cmd('mkdir -p %s', data_dir)
 common.shell_cmd('mkdir -p %s', BASE_DIR)
 common.shell_cmd('mkdir -p %s', TMP_DIR)
 
-SPL_SET_ID_INDEX = join(BASE_DIR,'spl_index.db')
+SPL_SET_ID_INDEX = join(BASE_DIR, 'spl_index.db')
 DAILYMED_PREFIX = 'ftp://public.nlm.nih.gov/nlmdata/.dailymed/'
 
 PHARM_CLASS_DOWNLOAD = \
@@ -59,6 +58,7 @@ UNII_EXTRACT_DB = 'unii.db'
 RXNORM_EXTRACT_DB = 'rxnorm.db'
 UPC_EXTRACT_DB = 'upc.db'
 
+
 class DownloadNDC(luigi.Task):
   def requires(self):
     return []
@@ -71,13 +71,14 @@ class DownloadNDC(luigi.Task):
     soup = BeautifulSoup(urllib2.urlopen(NDC_DOWNLOAD_PAGE).read(), 'lxml')
     for a in soup.find_all(href=re.compile('.*.zip')):
       if 'NDC Database File' in a.text:
-        zip_url = 'http://www.fda.gov' + a['href']
+        zip_url = urlparse.urljoin('http://www.fda.gov', a['href'])
         break
 
     if not zip_url:
       logging.fatal('NDC database file not found!')
 
     common.download(zip_url, self.output().path)
+
 
 class DownloadUNII(luigi.Task):
   def requires(self):
@@ -106,6 +107,7 @@ def list_zip_files_in_zip(zip_filename):
                                   grep zip | \
                                   awk '{print $4}'" % zip_filename,
                                   shell=True).strip().split('\n')
+
 
 def ExtractXMLFromNestedZip(zip_filename, output_dir, exclude_images=True):
   for child_zip_filename in list_zip_files_in_zip(zip_filename):
@@ -171,6 +173,7 @@ class ExtractUNII(luigi.Task):
     os.system('mkdir -p %s' % output_dir)
     ExtractXMLFromNestedZip(zip_filename, output_dir)
 
+
 class RXNorm2JSONMapper(parallel.Mapper):
   def map(self, key, value, output):
     keepers = ['rxcui', 'rxstring', 'rxtty','setid', 'spl_version']
@@ -187,6 +190,7 @@ class RXNorm2JSONMapper(parallel.Mapper):
     new_key = new_value['spl_set_id'] + ':'+ new_value['spl_version']
     output.add(new_key, new_value)
 
+
 class RXNormReducer(parallel.Reducer):
   def reduce(self, key, values, output):
     out = {}
@@ -198,6 +202,7 @@ class RXNormReducer(parallel.Reducer):
                              'rxstring' : v['rxstring'],
                              'rxtty' : v['rxtty'] })
     output.put(key, out)
+
 
 class RXNorm2JSON(luigi.Task):
   ''' The Rxnorm data needs to be rolled up to the SPL_SET_ID level, so first
@@ -234,6 +239,7 @@ class UNIIHarmonizationJSON(luigi.Task):
     output_file = self.output().path
     os.system('mkdir -p %s' % dirname(self.output().path))
     unii_harmonization.harmonize_unii(output_file, ndc_file, unii_dir)
+
 
 class UNII2JSON(luigi.Task):
   def requires(self):
@@ -299,6 +305,7 @@ class NDC2JSON(luigi.Task):
         output_prefix=self.output().path,
         num_shards=1)
 
+
 class SPLSetIDMapper(parallel.Mapper):
   ''' Creates an index that is used for both getting the latest version of the
       SPL AND for mapping the id to set_id, so that there can be a single
@@ -307,6 +314,10 @@ class SPLSetIDMapper(parallel.Mapper):
       pipelines use different keys. We want to give all pipelines a way to get
       an SPL_SET_ID.
   '''
+  def __init__(self, index_db):
+    parallel.Mapper.__init__(self)
+    self.index_db = index_db
+
   def map(self, key, value, output):
     set_id, version, _id = value['set_id'], value['version'], value['id']
 
@@ -317,8 +328,12 @@ class SPLSetIDMapper(parallel.Mapper):
       '_key': key
     }
 
-    output.add('_set_id:' + set_id, (version, _index))
-    output.add('_id:' + _id, (version, _index))
+    # Limiting the output to the known universe of SPL IDs that exist in the
+    # main join file (NDC).
+    if _id in self.index_db:
+      output.add('_set_id:' + set_id, (version, _index))
+      output.add('_id:' + _id, (version, _index))
+
 
 class SPLSetIDIndex(luigi.Task):
   ''' Creates an index used for SPL version resolution and ID/SET_ID mapping.
@@ -327,18 +342,31 @@ class SPLSetIDIndex(luigi.Task):
   '''
   def requires(self):
     from openfda.spl.pipeline import PrepareBatch
-    return PrepareBatch()
+    return [PrepareBatch(), NDC2JSON()]
 
   def output(self):
     return luigi.LocalTarget(SPL_SET_ID_INDEX)
 
   def run(self):
+    ndc_spl_id_index = {}
+    ndc_db = self.input()[1].path
+    logging.info('Joining data from NDC DB: %s', ndc_db)
+    db = parallel.ShardedDB.open(ndc_db)
+    db_iter = db.range_iter(None, None)
+
+    # We want each SPL ID that is in the NDC file so that we always use the
+    # same SPL file for both ID and SET_ID based joins.
+    for (key, val) in db_iter:
+      ndc_spl_id_index[val['id']] = True
+
+
     parallel.mapreduce(
-      parallel.Collection.from_sharded_list([batch.path for batch in self.input()]),
-      mapper=SPLSetIDMapper(),
+      parallel.Collection.from_sharded_list([batch.path for batch in self.input()[0]]),
+      mapper=SPLSetIDMapper(index_db=ndc_spl_id_index),
       reducer=parallel.ListReducer(),
       output_prefix=self.output().path,
       num_shards=16)
+
 
 class CurrentSPLMapper(parallel.Mapper):
   def _extract(self, filename):
@@ -372,6 +400,7 @@ class CurrentSPLMapper(parallel.Mapper):
         new_key = key.replace('_set_id:', '')
         output.add(new_key, new_value)
 
+
 class GenerateCurrentSPLJSON(luigi.Task):
   ''' All SPL files on S3 (IDs), we only want the most recent versions. This
       task generates a spl_extract.db that is only the current version.
@@ -388,6 +417,7 @@ class GenerateCurrentSPLJSON(luigi.Task):
       mapper=CurrentSPLMapper(),
       reducer=parallel.IdentityReducer(),
       output_prefix=self.output().path)
+
 
 class ExtractUPCFromSPL(luigi.Task):
   ''' A task that will generate otc-bars.xml for ANY SPL IDs that does not have
@@ -423,6 +453,7 @@ class ExtractUPCFromSPL(luigi.Task):
         logging.debug('%s already exists, skipping', xml_out)
     common.shell_cmd('touch %s', self.output().path)
 
+
 class UpcMapper(parallel.Mapper):
   def map(self, key, value, output):
     if value is None: return
@@ -435,6 +466,7 @@ class UpcMapper(parallel.Mapper):
       for upc in upcs:
         upc_dict = json.loads(upc)
         output.add(upc_dict['id'], upc_dict)
+
 
 class UpcXml2JSON(luigi.Task):
   def requires(self):
@@ -467,6 +499,7 @@ ID_PREFIX_DB_MAP = {
   UPC_EXTRACT_DB: ('_id', 'id')
 }
 
+
 class JoinAllMapper(parallel.Mapper):
   def __init__(self, index_db):
     parallel.Mapper.__init__(self)
@@ -489,13 +522,18 @@ class JoinAllMapper(parallel.Mapper):
   def map(self, key, value, output):
     db_name = basename(dirname(self.filename))
     prefix, lookup_key = ID_PREFIX_DB_MAP[db_name]
-    if not value: return
+    if not value:
+      logging.warn('Bad value for map input: %s, %s', db_name, key)
+      return
     if not isinstance(value, list): value = [value]
     for val in value:
       lookup_value = prefix + ':' + val[lookup_key]
       set_id = self.get_set_id(lookup_value)
       if set_id:
         output.add(set_id, (db_name, val))
+      else:
+        logging.warn('Missing set id for %s', lookup_value)
+
 
 class JoinAllReducer(parallel.Reducer):
   ''' A custom joiner for combining all of the data sources into a single
@@ -553,9 +591,10 @@ class JoinAllReducer(parallel.Reducer):
     for row in self._join(values):
       output.put(key, row)
     else:
-      logging.warn('No data for key: %s', key)
+      logging.warn('No data for key: %s, values: %s', key, values)
 
-class CombineHarmonization(luigi.Task):
+
+class CombineHarmonization(DependencyTriggeredTask):
   def requires(self):
     return { 'ndc': NDC2JSON(),
              'spl': GenerateCurrentSPLJSON(),
@@ -581,7 +620,7 @@ class CombineHarmonization(luigi.Task):
       index_db[key] = val[0][1]
 
     db_list = [
-      self.input()[db].path for db in ['ndc', 'spl', 'unii', 'rxnorm', 'upc']
+      self.input()[_db].path for _db in ['ndc', 'spl', 'unii', 'rxnorm', 'upc']
     ]
 
     logging.info('DB %s', db_list)

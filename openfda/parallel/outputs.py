@@ -39,6 +39,9 @@ class MROutput(object):
 
   def finalize(self, tmp_dir, final_dir):
     logger.info('Moving results from %s -> %s', tmp_dir, final_dir)
+    if os.path.exists(final_dir):
+      logger.warn('Replace existing output directory.')
+      subprocess.check_output('rm -rf "%s" % final_dir', shell=True)
     subprocess.check_output('mv "%s" "%s"' % (tmp_dir, final_dir), shell=True)
 
 

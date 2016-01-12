@@ -14,18 +14,13 @@ import re
 import sys
 import urllib2
 
-import arrow
-import elasticsearch
 import luigi
-import requests
-import simplejson as json
 
-from openfda import common, config, parallel, index_util, elasticsearch_requests
+from openfda import common, config, parallel, index_util
 from openfda import download_util
-from openfda.index_util import AlwaysRunTask, ResetElasticSearch
 from openfda.maude import join_maude
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
-  DeviceAnnotateMapper)
+                                                   DeviceAnnotateMapper)
 
 # Exceed default field_size limit, need to set to sys.maxsize
 csv.field_size_limit(sys.maxsize)
@@ -42,21 +37,23 @@ IGNORE_FILES = ['problem', 'add', 'change']
 
 
 DEVICE_DOWNLOAD_PAGE = ('http://www.fda.gov/MedicalDevices/'
-                       'DeviceRegulationandGuidance/PostmarketRequirements/'
-                       'ReportingAdverseEvents/ucm127891.htm')
+                        'DeviceRegulationandGuidance/PostmarketRequirements/'
+                        'ReportingAdverseEvents/ucm127891.htm')
 
 DEVICE_CLASS_DOWNLOAD = ('http://www.fda.gov/MedicalDevices/'
                          'DeviceRegulationandGuidance/Overview/'
                          'ClassifyYourDevice/ucm051668.htm')
 
 # patient and text records are missing header rows
-PATIENT_KEYS = ['mdr_report_key',
+PATIENT_KEYS = [
+  'mdr_report_key',
   'patient_sequence_number',
   'date_received',
   'sequence_number_treatment',
   'sequence_number_outcome']
 
-TEXT_KEYS = ['mdr_report_key',
+TEXT_KEYS = [
+  'mdr_report_key',
   'mdr_text_key',
   'text_type_code',
   'patient_sequence_number',
@@ -143,6 +140,7 @@ MDR_KEYS = [
   'event_location',
   'report_to_manufacturer',
   'date_report_to_manufacturer',
+  'date_manufacturer_received',
   'manufacturer_name',
   'manufacturer_address_1',
   'manufacturer_address_2',
@@ -180,7 +178,6 @@ MDR_KEYS = [
   'manufacturer_g1_country',
   'manufacturer_g1_postal_code',
   'source_type',
-  'date_manufacturer_received',
   'device_date_of_manufacturer',
   'single_use_flag',
   'remedial_action',
@@ -188,6 +185,7 @@ MDR_KEYS = [
   'removal_correction_number',
   'event_type'
 ]
+
 
 class DownloadDeviceEvents(luigi.Task):
   def requires(self):
@@ -209,6 +207,7 @@ class DownloadDeviceEvents(luigi.Task):
       filename = zip_url.split('/')[-1]
       common.download(zip_url, join(self.output().path, filename))
 
+
 class ExtractAndCleanDownloadsMaude(luigi.Task):
   ''' Unzip each of the download files and remove all the non-UTF8 characters.
       Unzip -p streams the data directly to iconv which then writes to disk.
@@ -228,6 +227,7 @@ class ExtractAndCleanDownloadsMaude(luigi.Task):
                                       'ISO-8859-1//TRANSLIT',
                                       'UTF-8',
                                       'txt')
+
 
 class PartionEventData(luigi.Task):
   ''' The historic files are not balanced (patient and text are split by year)
@@ -318,6 +318,7 @@ class PartionEventData(luigi.Task):
                      len(rows))
         csv_writer.writerows(rows)
 
+
 class JoinPartitions(luigi.Task):
   def requires(self):
     return PartionEventData()
@@ -355,6 +356,7 @@ class JoinPartitions(luigi.Task):
 
     pool.close()
     pool.join()
+
 
 class MaudeAnnotationMapper(DeviceAnnotateMapper):
   def filter(self, data, lookup=None):
@@ -416,23 +418,13 @@ class AnnotateReport(luigi.Task):
       num_shards=10,
       map_workers=5)
 
+
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'deviceevent'
   type_name = 'maude'
   mapping_file = 'schemas/maude_mapping.json'
   data_source = AnnotateReport()
-
-  def _run(self):
-   json_dir = self.input()['data'].path
-   input_glob = glob.glob(json_dir + '/*.json')
-   for file_name in input_glob:
-     logging.info('Running file %s', file_name)
-     parallel.mapreduce(
-       parallel.Collection.from_glob(file_name, parallel.JSONLineInput()),
-       mapper=index_util.ReloadJSONMapper(config.es_host(), self.index_name, 'maude'),
-       reducer=parallel.IdentityReducer(),
-       output_format=parallel.NullOutput(),
-       output_prefix='/tmp/loadjson.' + self.index_name)
+  optimize_index = True
 
 if __name__ == '__main__':
   luigi.run()

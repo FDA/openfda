@@ -26,12 +26,11 @@ import luigi
 
 from openfda import common, config, parallel, index_util, elasticsearch_requests
 from openfda.annotation_table.pipeline import CombineHarmonization
-from openfda.index_util import AlwaysRunTask
-from openfda.res import annotate
-from openfda.res import extract
+from openfda.common import download_to_file_with_retry
+from openfda.tasks import AlwaysRunTask
+from openfda.res import annotate, extract
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
-BASE_DIR = './data'
 
 CURRENT_XML_BASE_URL = ('http://www.accessdata.fda.gov/scripts/'
                         'enforcement/enforce_rpt-Product-Tabs.cfm?'
@@ -79,31 +78,6 @@ CROSSOVER_XML_URL = ('http://www.accessdata.fda.gov/scripts/'
                      'enforcement/enforce_rpt-Event-Tabs.cfm?'
                      'action=Expand+Index&w=WEEK&lang=eng&xml')
 
-def random_sleep():
-  # Give the FDA webservers a break between requests
-  sleep_seconds = random.randint(1, 2)
-  logging.info('Sleeping %d seconds' % sleep_seconds)
-  time.sleep(sleep_seconds)
-
-def download_to_file_with_retry(url, output_file):
-  logging.info('Downloading: ' + url)
-  url_open = None
-  # Retry up to 25 times before failing
-  for i in range(25):
-    try:
-      random_sleep()
-      url_open = urllib2.urlopen(url, timeout=5)
-      break
-    except socket.timeout:
-      logging.info('Timeout trying %s, retrying...', url)
-      continue
-  try:
-    content = url_open.read()
-    output_file.write(content)
-    return
-  except:
-    logging.fatal('Count not fetch in twenty five tries: ' + url)
-
 class DownloadXMLReports(luigi.Task):
   batch = luigi.Parameter()
 
@@ -111,8 +85,7 @@ class DownloadXMLReports(luigi.Task):
     return []
 
   def output(self):
-    batch_str = self.batch.strftime('%Y%m%d')
-    return luigi.LocalTarget(join(BASE_DIR, 'res/batches', batch_str))
+    return luigi.LocalTarget(config.data_dir('res/batches/%s' % self.batch.strftime('%Y%m%d')))
 
   def run(self):
     output_dir = self.output().path
@@ -124,8 +97,7 @@ class DownloadXMLReports(luigi.Task):
       url = CURRENT_XML_BASE_URL
     url = url.replace('WEEK', date.strftime('%m%d%Y'))
     file_name = 'enforcementreport.xml'
-    xml_filepath = '%(output_dir)s/%(file_name)s' % locals()
-    xml_file = open(xml_filepath, 'w')
+    xml_file = '%(output_dir)s/%(file_name)s' % locals()
     download_to_file_with_retry(url, xml_file)
 
 
@@ -212,7 +184,7 @@ class AnnotateJSON(luigi.Task):
       mapper=annotate.AnnotateMapper(harmonized_file),
       reducer=parallel.IdentityReducer(),
       output_prefix=self.output().path,
-      num_shards=4,
+      num_shards=1,
       map_workers=1)
 
 
@@ -222,13 +194,14 @@ class LoadJSON(index_util.LoadJSONBase):
   type_name = 'enforcementreport'
   mapping_file = './schemas/res_mapping.json'
   use_checksum = True
+  optimize_index = False
   docid_key = '@id'
 
   def _data(self):
     return AnnotateJSON(self.batch)
 
 
-class RunWeeklyProcess(luigi.WrapperTask):
+class RunWeeklyProcess(AlwaysRunTask):
   ''' Generates a date object that is passed through the pipeline tasks in order
       to generate and load JSON documents for the weekly enforcement reports.
 
@@ -258,6 +231,9 @@ class RunWeeklyProcess(luigi.WrapperTask):
       task = LoadJSON(batch=batch, previous_task=previous_task)
       previous_task = task
       yield task
+
+  def _run(self):
+    index_util.optimize_index('recall', wait_for_merge=0)
 
 if __name__ == '__main__':
   luigi.run()

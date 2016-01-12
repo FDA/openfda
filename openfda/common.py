@@ -8,14 +8,47 @@ import subprocess
 import logging
 import re
 import sys
+import time
 
 from threading import Thread
-# Default subnet to use for VPC instances
-GATEWAY_SUBNET = 'subnet-75be9c5d'
 
-INSTANCE_TAGS = {
-  'fda-project': 'openfda',
-}
+DEFAULT_BATCH_SIZE=100
+
+class BatchHelper(object):
+  '''
+  Convenience class for batching operations.
+
+  When more than `batch_size` operations have been added to the batch, `fn`
+  will be invoked with `args` and `kw`.  The actual data must be expected
+  via the `batch` argument.
+  '''
+  def __init__(self, fn, *args, **kw):
+    self._fn = fn
+    self._args = args
+    self._kw = kw
+    self._batch = []
+    self._count = 0
+    self._start_time = time.time()
+
+  def flush(self):
+    self._fn(*self._args, batch=self._batch, **self._kw)
+    del self._batch[:]
+
+  def add(self, obj):
+    self._batch.append(obj)
+    self._count += 1
+    if len(self._batch) > DEFAULT_BATCH_SIZE:
+      self.flush()
+
+  def __enter__(self):
+    return self
+
+  def __exit__(self, type, value, traceback):
+    self.flush()
+    elapsed = time.time() - self._start_time
+    logging.info('BatchHelper: %d operations in %.2f seconds, %.2f docs/s',
+        self._count, elapsed, self._count / elapsed)
+
 
 # Because a.b.c is easier than a['b']['c']
 # This extends dict to allow for easy json.dump action.
@@ -91,7 +124,7 @@ def _checked_subprocess(*args, **kw):
   stdout.join()
   stderr.join()
   if status_code != 0:
-    raise ProcessException(code, stdout.output(), stderr.output())
+    raise ProcessException(status_code, stdout.output(), stderr.output())
 
   return stdout.output()
 
@@ -107,10 +140,6 @@ def shell_cmd(fmt, *args):
       cmd = fmt
 
   return _checked_subprocess(cmd, shell=True)
-
-def download(url, output_filename):
-  shell_cmd('mkdir -p %s', dirname(output_filename))
-  shell_cmd("curl -f '%s' > '%s'", url, output_filename)
 
 def transform_dict(coll, transform_fn):
   '''Recursively call `tranform_fn` for each key and value in `coll`
@@ -134,11 +163,25 @@ def transform_dict(coll, transform_fn):
 
 def is_older(a, b):
   'Returns true if file `a` is older than `b`, or `a` does not exist.'
+  if not os.path.exists(a):
+    return True
+
   if not os.path.exists(b):
     logging.warn('Trying to compare against non-existent test file %s', b)
     return True
 
-  return not os.path.exists(a) or (os.path.getmtime(a) < os.path.getmtime(b))
+  return (os.path.getmtime(a) < os.path.getmtime(b))
+
+def is_newer(a, b):
+  'Returns true if file `a` is newer than `b`, or `b` does not exist.'
+  if not os.path.exists(a):
+    return False
+
+  if not os.path.exists(b):
+    logging.warn('Trying to compare against non-existent test file %s', b)
+    return True
+
+  return (os.path.getmtime(a) >= os.path.getmtime(b))
 
 def get_k_number(data):
   if re.match(r'^(K|BK|DEN)', data):
@@ -147,3 +190,21 @@ def get_k_number(data):
 def get_p_number(data):
   if re.match(r'^(P|N|D[0-9]|BP|H)', data):
     return data
+
+def download(url, output_filename):
+  logging.info('Downloading: ' + url)
+  shell_cmd('mkdir -p %s', dirname(output_filename))
+  shell_cmd("curl -f '%s' > '%s.tmp'", url, output_filename)
+  os.rename(output_filename + '.tmp', output_filename)
+
+def download_to_file_with_retry(url, output_file):
+  for i in range(25):
+    try:
+      download(url, output_file)
+      return
+    except:
+      logging.info('Timeout trying %s, retrying...', url)
+      time.sleep(5)
+      continue
+
+  raise Exception('Fetch of %s failed.' % url)

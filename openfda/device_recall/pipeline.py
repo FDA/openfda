@@ -18,19 +18,16 @@ import requests
 import simplejson as json
 
 from openfda import common, config, elasticsearch_requests, index_util, parallel
-from openfda import process_metadata
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
   DeviceAnnotateMapper)
-from openfda.index_util import AlwaysRunTask, ResetElasticSearch
+from openfda.tasks import AlwaysRunTask
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
-BASE_DIR = './data/'
-# A directory for holding files that track Task state
-META_DIR = join(BASE_DIR, 'device_recall/meta')
+META_DIR = config.data_dir('device_recall/meta')
 common.shell_cmd('mkdir -p %s', META_DIR)
 
 DEVICE_RECALL_BUCKET = 's3://openfda-device-recalls/'
-DEVICE_RECALL_LOCAL_DIR = join(BASE_DIR, 'device_recall/s3_sync')
+DEVICE_RECALL_LOCAL_DIR = config.data_dir('device_recall/s3_sync')
 
 class SyncS3DeviceRecall(AlwaysRunTask):
   bucket = DEVICE_RECALL_BUCKET
@@ -105,7 +102,7 @@ class CSV2JSON(parallel.MRTask):
     return SyncS3DeviceRecall()
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'device_recall', 'json.db'))
+    return luigi.LocalTarget(config.data_dir('device_recall/json.db'))
 
   def mapreduce_inputs(self):
     input_files = glob.glob(self.input_dir + '/*.csv')
@@ -165,7 +162,7 @@ class AnnotateDevice(luigi.Task):
     return [Harmonized2OpenFDA(), CSV2JSON()]
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'device_recall', 'annotate.db'))
+    return luigi.LocalTarget(config.data_dir('device_recall/annotate.db'))
 
   def run(self):
     harmonized_db = parallel.ShardedDB.open(self.input()[0].path).as_dict()
@@ -184,6 +181,7 @@ class LoadJSON(index_util.LoadJSONBase):
   mapping_file = './schemas/device_recall_mapping.json'
   data_source = AnnotateDevice()
   use_checksum = False
+  optimize_index = True
 
 
 if __name__ == '__main__':

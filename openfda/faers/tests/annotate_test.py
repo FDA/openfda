@@ -35,6 +35,11 @@ class AnnotateUnitTest(unittest.TestCase):
     self.maxDiff = None
     self.assertDictEqual(expected, event)
 
+  def test_normalization(self):
+    self.assertEqual(annotate.normalize_product_name('HUMIRa.'), 'humira')
+    self.assertEqual(annotate.normalize_product_name('HUMIRA'), 'humira')
+    self.assertEqual(annotate.normalize_product_name('FOLIC ACID'), 'folic acid')
+
 
 if __name__ == '__main__':
   unittest.main()

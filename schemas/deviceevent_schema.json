@@ -1,0 +1,472 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "properties": {
+    "adverse_event_flag": {
+      "type": "string"
+    },
+    "date_facility_aware": {
+        "type": "string",
+        "format": "date"
+    },
+    "date_manufacturer_received": {
+      "type": "string",
+      "format": "date"
+    },
+    "date_of_event": {
+      "type": "string",
+      "format": "date"
+    },
+    "date_received": {
+      "type": "string",
+      "format": "date"
+    },
+    "date_report": {
+      "type": "string",
+      "format": "date"
+    },
+    "date_report_to_fda": {
+      "type": "string",
+      "format": "date"
+    },
+    "date_report_to_manufacturer": {
+      "type": "string",
+      "format": "date"
+    },
+    "device": {
+      "items": {
+        "properties": {
+          "baseline_510_k__exempt_flag": {
+            "type": ["string", "null"]
+          },
+          "baseline_510_k__flag": {
+            "type": ["string", "null"]
+          },
+          "baseline_510_k__number": {
+            "type": ["string", "null"]
+          },
+          "baseline_brand_name": {
+            "type": ["string", "null"]
+          },
+          "baseline_catalog_number": {
+            "type": ["string", "null"]
+          },
+          "baseline_date_ceased_marketing": {
+            "type": ["string", "null"],
+            "format": "date"
+          },
+          "baseline_date_first_marketed": {
+            "type": ["string", "null"],
+            "format": "date"
+          },
+          "baseline_device_family": {
+            "type": ["string", "null"]
+          },
+          "baseline_generic_name": {
+            "type": ["string", "null"]
+          },
+          "baseline_model_number": {
+            "type": ["string", "null"]
+          },
+          "baseline_other_id_number": {
+            "type": ["string", "null"]
+          },
+          "baseline_pma_flag": {
+            "type": ["string", "null"]
+          },
+          "baseline_pma_number": {
+            "type": ["string", "null"]
+          },
+          "baseline_preamendment_flag": {
+            "type": ["string", "null"]
+          },
+          "baseline_shelf_life_contained": {
+            "type": ["string", "null"]
+          },
+          "baseline_shelf_life_in_months": {
+            "type": ["string", "null"]
+          },
+          "baseline_transitional_flag": {
+            "type": ["string", "null"]
+          },
+          "brand_name": {
+            "type": "string"
+          },
+          "catalog_number": {
+            "type": "string"
+          },
+          "date_received": {
+            "type": "string",
+            "format": "date"
+          },
+          "date_removed_flag": {
+            "type": "string"
+          },
+          "date_returned_to_manufacturer": {
+            "type": "string",
+            "format": "date"
+          },
+          "device_age_text": {
+            "type": "string"
+          },
+          "device_availability": {
+            "type": "string"
+          },
+          "device_evaluated_by_manufacturer": {
+            "type": "string"
+          },
+          "device_event_key": {
+            "type": "string"
+          },
+          "device_operator": {
+            "type": "string"
+          },
+          "device_report_product_code": {
+            "type": "string"
+          },
+          "device_sequence_number": {
+            "type": "string"
+          },
+          "expiration_date_of_device": {
+            "type": "string",
+            "format": "date"
+          },
+          "generic_name": {
+            "type": "string"
+          },
+          "implant_flag": {
+            "type": "string"
+          },
+          "lot_number": {
+            "type": "string"
+          },
+          "manufacturer_d_address_1": {
+            "type": "string"
+          },
+          "manufacturer_d_address_2": {
+            "type": "string"
+          },
+          "manufacturer_d_city": {
+            "type": "string"
+          },
+          "manufacturer_d_country": {
+            "type": "string"
+          },
+          "manufacturer_d_name": {
+            "type": "string"
+          },
+          "manufacturer_d_postal_code": {
+            "type": "string"
+          },
+          "manufacturer_d_state": {
+            "type": "string"
+          },
+          "manufacturer_d_zip_code": {
+            "type": "string"
+          },
+          "manufacturer_d_zip_code_ext": {
+            "type": "string"
+          },
+          "model_number": {
+            "type": "string"
+          },
+          "openfda": {
+            "properties": {
+              "device_class": {
+                "type": "string"
+              },
+              "device_name": {
+                "type": "string"
+              },
+              "fei_number": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "medical_specialty_description": {
+                "type": "string"
+              },
+              "registration_number": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "regulation_number": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "type": "object"
+          },
+          "other_id_number": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "device_date_of_manufacturer": {
+      "type": "string",
+      "format": "date"
+    },
+    "distributor_address_1": {
+      "type": "string"
+    },
+    "distributor_address_2": {
+      "type": "string"
+    },
+    "distributor_city": {
+      "type": "string"
+    },
+    "distributor_name": {
+      "type": "string"
+    },
+    "distributor_state": {
+      "type": "string"
+    },
+    "distributor_zip_code": {
+      "type": "string"
+    },
+    "distributor_zip_code_ext": {
+      "type": "string"
+    },
+    "event_key": {
+      "type": "string"
+    },
+    "event_location": {
+      "type": "string"
+    },
+    "event_type": {
+      "type": "string"
+    },
+    "expiration_date_of_device": {
+      "type": "string",
+      "format": "date"
+    },
+    "health_professional": {
+      "type": "string"
+    },
+    "initial_report_to_fda": {
+      "type": "string"
+    },
+    "manufacturer_address_1": {
+      "type": "string"
+    },
+    "manufacturer_address_2": {
+      "type": "string"
+    },
+    "manufacturer_city": {
+      "type": "string"
+    },
+    "manufacturer_contact_address_1": {
+      "type": "string"
+    },
+    "manufacturer_contact_address_2": {
+      "type": "string"
+    },
+    "manufacturer_contact_area_code": {
+      "type": "string"
+    },
+    "manufacturer_contact_city": {
+      "type": "string"
+    },
+    "manufacturer_contact_country": {
+      "type": "string"
+    },
+    "manufacturer_contact_exchange": {
+      "type": "string"
+    },
+    "manufacturer_contact_extension": {
+      "type": "string"
+    },
+    "manufacturer_contact_f_name": {
+      "type": "string"
+    },
+    "manufacturer_contact_l_name": {
+      "type": "string"
+    },
+    "manufacturer_contact_pcity": {
+      "type": "string"
+    },
+    "manufacturer_contact_pcountry": {
+      "type": "string"
+    },
+    "manufacturer_contact_phone_number": {
+      "type": "string"
+    },
+    "manufacturer_contact_plocal": {
+      "type": "string"
+    },
+    "manufacturer_contact_postal_code": {
+      "type": "string"
+    },
+    "manufacturer_contact_state": {
+      "type": "string"
+    },
+    "manufacturer_contact_t_name": {
+      "type": "string"
+    },
+    "manufacturer_contact_zip_code": {
+      "type": "string"
+    },
+    "manufacturer_contact_zip_ext": {
+      "type": "string"
+    },
+    "manufacturer_country": {
+      "type": "string"
+    },
+    "manufacturer_g1_address_1": {
+      "type": "string"
+    },
+    "manufacturer_g1_address_2": {
+      "type": "string"
+    },
+    "manufacturer_g1_city": {
+      "type": "string"
+    },
+    "manufacturer_g1_country": {
+      "type": "string"
+    },
+    "manufacturer_g1_name": {
+      "type": "string"
+    },
+    "manufacturer_g1_postal_code": {
+      "type": "string"
+    },
+    "manufacturer_g1_state": {
+      "type": "string"
+    },
+    "manufacturer_g1_zip_code": {
+      "type": "string"
+    },
+    "manufacturer_g1_zip_code_ext": {
+      "type": "string"
+    },
+    "manufacturer_link_flag": {
+      "type": "string"
+    },
+    "manufacturer_name": {
+      "type": "string"
+    },
+    "manufacturer_postal_code": {
+      "type": "string"
+    },
+    "manufacturer_state": {
+      "type": "string"
+    },
+    "manufacturer_zip_code": {
+      "type": "string"
+    },
+    "manufacturer_zip_code_ext": {
+      "type": "string"
+    },
+    "mdr_report_key": {
+      "type": "string"
+    },
+    "mdr_text": {
+      "items": {
+        "properties": {
+          "date_report": {
+            "type": "string",
+            "format": "date"
+          },
+          "mdr_text_key": {
+            "type": "string"
+          },
+          "patient_sequence_number": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "text_type_code": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "number_devices_in_event": {
+      "type": "string"
+    },
+    "number_patients_in_event": {
+      "type": "string"
+    },
+    "patient": {
+      "items": {
+        "properties": {
+          "date_received": {
+            "type": "string",
+            "format": "date"
+          },
+          "patient_sequence_number": {
+            "type": "string"
+          },
+          "sequence_number_outcome": {
+            "type": "array"
+          },
+          "sequence_number_treatment": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "previous_use_code": {
+      "type": "string"
+    },
+    "product_problem_flag": {
+      "type": "string"
+    },
+    "remedial_action": {
+      "type": "string"
+    },
+    "removal_correction_number": {
+      "type": "string"
+    },
+    "report_date": {
+        "type": "string",
+        "format": "date"
+    },
+    "report_number": {
+      "type": "string"
+    },
+    "report_source_code": {
+      "type": "string"
+    },
+    "report_to_fda": {
+      "type": "string"
+    },
+    "report_to_manufacturer": {
+      "type": "string"
+    },
+    "reporter_occupation_code": {
+      "type": "string"
+    },
+    "reprocessed_and_reused_flag": {
+      "type": "string"
+    },
+    "single_use_flag": {
+      "type": "string"
+    },
+    "source_type": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "type_of_report": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "type": "object"
+}

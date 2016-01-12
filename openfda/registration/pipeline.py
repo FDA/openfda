@@ -64,15 +64,15 @@ import urllib2
 
 from openfda import common, config, elasticsearch_requests, index_util, parallel
 from openfda import download_util
-from openfda.index_util import AlwaysRunTask, ResetElasticSearch
+from openfda.tasks import AlwaysRunTask
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
   DeviceAnnotateMapper)
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
-BASE_DIR = './data/registration'
+BASE_DIR = config.data_dir('registration')
 common.shell_cmd('mkdir -p %s', BASE_DIR)
 # A directory for holding files that track Task state
-META_DIR = join(BASE_DIR, 'meta')
+META_DIR = config.data_dir('registration/meta')
 common.shell_cmd('mkdir -p %s', META_DIR)
 
 DEVICE_REG_PAGE = ('http://www.fda.gov/MedicalDevices/'
@@ -80,7 +80,7 @@ DEVICE_REG_PAGE = ('http://www.fda.gov/MedicalDevices/'
                    'RegistrationandListing/ucm134495.htm')
 
 S3_BUCKET = 's3://openfda-data-reglist/'
-S3_LOCAL_DIR = join(BASE_DIR, 's3_sync')
+S3_LOCAL_DIR = config.data_dir('registration/s3_sync')
 
 common.shell_cmd('mkdir -p %s', S3_LOCAL_DIR)
 
@@ -136,7 +136,9 @@ def remap_supplemental_files(original, supplemental, output_file):
 
   combined.drop('premarket_submission_number', axis=1, inplace=True)
 
-  combined.to_csv(output_file, sep='|')
+  # to_csv() will prepend an extra delimiter to the CSV header row unless you
+  # specifiy `index=False`
+  combined.to_csv(output_file, sep='|', index=False)
 
   return
 
@@ -165,7 +167,7 @@ class DownloadDeviceRegistrationAndListings(luigi.Task):
     return []
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'raw'))
+    return luigi.LocalTarget(config.data_dir('registration/raw'))
 
   def run(self):
     zip_urls = []
@@ -186,7 +188,7 @@ class ExtractAndCleanDownloadsReg(luigi.Task):
     return [DownloadDeviceRegistrationAndListings(), SyncS3()]
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'extracted'))
+    return luigi.LocalTarget(config.data_dir('registration/extracted'))
 
   def run(self):
     output_dir = self.output().path
@@ -231,7 +233,7 @@ class TXT2JSON(luigi.Task):
     return ExtractAndCleanDownloadsReg()
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'json.db'))
+    return luigi.LocalTarget(config.data_dir('registration/json.db'))
 
   def run(self):
     input_dir = self.input().path
@@ -295,7 +297,7 @@ class JoinOwnerOperator(luigi.Task):
     return TXT2JSON()
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'owner_operator.db'))
+    return luigi.LocalTarget(config.data_dir('registration/owner_operator.db'))
 
   def run(self):
     tables = ['owner_operator', 'contact_addresses', 'official_correspondent']
@@ -363,7 +365,7 @@ class JoinRegistration(luigi.Task):
     return [TXT2JSON(), JoinOwnerOperator()]
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'registration.db'))
+    return luigi.LocalTarget(config.data_dir('registration/registration.db'))
 
   def run(self):
     tables = ['intermediate_owner_operator', 'registration', 'us_agent']
@@ -401,7 +403,7 @@ class JoinEstablishmentTypes(luigi.Task):
     return TXT2JSON()
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'establishment_listing.db'))
+    return luigi.LocalTarget(config.data_dir('registration/establishment_listing.db'))
 
   def run(self):
     tables = ['listing_estabtypes', 'estabtypes']
@@ -436,7 +438,7 @@ class JoinListings(luigi.Task):
     return TXT2JSON()
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'registration_listing.db'))
+    return luigi.LocalTarget(config.data_dir('registration/registration_listing.db'))
 
   def run(self):
     tables = [
@@ -544,7 +546,7 @@ class JoinAll(luigi.Task):
     return [JoinListings(), JoinEstablishmentTypes(), JoinRegistration()]
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'final.db'))
+    return luigi.LocalTarget(config.data_dir('registration/final.db'))
 
   def run(self):
     tables = [
@@ -611,7 +613,7 @@ class AnnotateDevice(luigi.Task):
     return [Harmonized2OpenFDA(), JoinAll()]
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'annotate.db'))
+    return luigi.LocalTarget(config.data_dir('registration/annotate.db'))
 
   def run(self):
     harmonized_db = parallel.ShardedDB.open(self.input()[0].path).as_dict()
@@ -630,6 +632,7 @@ class LoadJSON(index_util.LoadJSONBase):
   mapping_file = './schemas/registration_mapping.json'
   data_source = AnnotateDevice()
   use_checksum = False
+  optimize_index = True
 
 
 if __name__ == '__main__':

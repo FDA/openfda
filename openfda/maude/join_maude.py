@@ -16,7 +16,8 @@ ENUM_FILE = join(RUN_DIR, 'maude/data/enums.csv')
 
 # Need a list of date fields for fixing dates and removing date keys
 # that are not populated
-DATE_KEYS = ['date_received',
+DATE_KEYS = [
+  'date_received',
   'baseline_date_first_marketed',
   'date_returned_to_manufacturer',
   'date_report_to_fda',
@@ -28,7 +29,8 @@ DATE_KEYS = ['date_received',
   'report_date',
   'date_report',
   'date_manufacturer_received',
-  'date_of_event']
+  'date_of_event'
+  ]
 
 # split these keys in an array on ';'
 SPLIT_KEYS = ['sequence_number_treatment', 'sequence_number_outcome']
@@ -50,7 +52,7 @@ def _bad_record(row):
   '''
   found = False
   for key, value in row.items():
-    if key == None or value == None:
+    if key == None:
       found = True
       return found
     else:

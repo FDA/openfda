@@ -18,16 +18,15 @@ import luigi
 import requests
 import simplejson as json
 
-from openfda import common, elasticsearch_requests, index_util, parallel
+from openfda import common, config, index_util, parallel
 from openfda import device_common, download_util
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
   DeviceAnnotateMapper)
-from openfda.index_util import AlwaysRunTask, ResetElasticSearch
+from openfda.tasks import AlwaysRunTask
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
-BASE_DIR = './data/'
 # A directory for holding files that track Task state
-META_DIR = join(BASE_DIR, 'classification/meta')
+META_DIR = config.data_dir('classification/meta')
 common.shell_cmd('mkdir -p %s', META_DIR)
 
 
@@ -40,7 +39,7 @@ class DownloadFoiClass(luigi.Task):
     return []
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'classification/raw'))
+    return luigi.LocalTarget(config.data_dir('classification/raw'))
 
   def run(self):
     output_filename = join(self.output().path, DEVICE_CLASS_ZIP.split('/')[-1])
@@ -54,7 +53,7 @@ class ExtractAndCleanDownloadsClassification(luigi.Task):
     return DownloadFoiClass()
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'classification/extracted'))
+    return luigi.LocalTarget(config.data_dir('classification/extracted'))
 
   def run(self):
     output_dir = self.output().path
@@ -101,7 +100,7 @@ class Classification2JSON(luigi.Task):
     return ExtractAndCleanDownloadsClassification()
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'classification', 'json.db'))
+    return luigi.LocalTarget(config.data_dir('classification/json.db'))
 
   def run(self):
     common.shell_cmd('mkdir -p %s', dirname(self.output().path))
@@ -120,7 +119,7 @@ class AnnotateDevice(luigi.Task):
     return [Harmonized2OpenFDA(), Classification2JSON()]
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'classification','annotate.db'))
+    return luigi.LocalTarget(config.data_dir('classification/annotate.db'))
 
   def run(self):
     harmonized_db = parallel.ShardedDB.open(self.input()[0].path).as_dict()
@@ -139,6 +138,7 @@ class LoadJSON(index_util.LoadJSONBase):
   mapping_file = './schemas/classification_mapping.json'
   data_source = AnnotateDevice()
   use_checksum = False
+  optimize_index = True
 
 
 if __name__ == '__main__':

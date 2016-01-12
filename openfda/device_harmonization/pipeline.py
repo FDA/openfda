@@ -35,12 +35,11 @@ import sys
 import luigi
 import simplejson as json
 
-from openfda import common, parallel
+from openfda import common, config, parallel
 from openfda.parallel import mapreduce, Collection, Mapper, PivotReducer
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
-BASE_DIR = './data'
-DATA_DIR = join(BASE_DIR, 'device_harmonization')
+DATA_DIR = config.data_dir('device_harmonization')
 common.shell_cmd('mkdir -p %s', DATA_DIR)
 
 PLUCK_MAP = {
@@ -98,6 +97,7 @@ PLUCK_MAP = {
   ]
 }
 
+
 def pluck(pluck_list, data):
   ''' A helper function for extracting a specific subset of keys from a
       dictionary.
@@ -113,6 +113,7 @@ def pluck(pluck_list, data):
     result[new_key] = data.get_nested(key)
   return result
 
+
 class JoinMapper(Mapper):
   ''' A mapper that extracts the `product_code` from each input and streams
       out the value with `product_code` as the key. Each value object is
@@ -121,7 +122,7 @@ class JoinMapper(Mapper):
   '''
   def map_shard(self, map_input, map_output):
     self.filename = map_input.filename
-    self.table =  basename(dirname(dirname(self.filename)))
+    self.table = basename(dirname(dirname(self.filename)))
 
     assert (self.table in PLUCK_MAP), \
       'Could not find %s in PLUCK_MAP' % self.table
@@ -149,6 +150,7 @@ class JoinMapper(Mapper):
         if new_key:
           output.add(new_key, (self.table, pluck(self.pluck_list, val)))
 
+
 class DeviceAnnotateMapper(parallel.Mapper):
   def __init__(self, harmonized_db):
     parallel.Mapper.__init__(self)
@@ -172,13 +174,13 @@ class DeviceAnnotateMapper(parallel.Mapper):
     for key, val in harmonized.items():
       if key == 'classification':
         try:
-          for k,v in val[0].items():
+          for k, v in val[0].items():
             result[k] = v
         except IndexError:
           continue
       else:
         for row in val:
-          for k,v in row.items():
+          for k, v in row.items():
             result[k].add(v)
 
     return {k:list(v) if isinstance(v, set) else v for k, v in result.items()}
@@ -223,6 +225,7 @@ class DeviceAnnotateMapper(parallel.Mapper):
       new_value = self.harmonize(val)
       output.add(self.filename + ':' + key, new_value)
 
+
 class DeviceHarmonization(luigi.Task):
   ''' There will be some namespace collision since the inputs come from the
       files listed below and the output of this process will be consumed by
@@ -250,6 +253,7 @@ class DeviceHarmonization(luigi.Task):
       reducer=PivotReducer(),
       output_prefix=self.output().path,
       num_shards=10)
+
 
 class Harmonized2OpenFDAMapper(parallel.Mapper):
   ''' A simple mapper that strips out all unwanted keys from the harmonized.db
@@ -283,7 +287,7 @@ class Harmonized2OpenFDAMapper(parallel.Mapper):
     ''' A helper function for extracting a specific subset of keys from a
         dictionary.
     '''
-    return {k:v for k, v in data.items() if k in self.openfda_map[table]}
+    return {k: v for k, v in data.items() if k in self.openfda_map[table]}
 
   def map(self, key, value, output):
     new_value = collections.defaultdict(list)
@@ -291,6 +295,7 @@ class Harmonized2OpenFDAMapper(parallel.Mapper):
       for row in rows:
         new_value[table_name].append(self.openfda_pluck(table_name, row))
     output.add(key, new_value)
+
 
 class Harmonized2OpenFDA(luigi.Task):
    def requires(self):
@@ -301,10 +306,10 @@ class Harmonized2OpenFDA(luigi.Task):
 
    def run(self):
      mapreduce(Collection.from_sharded(self.input().path),
-      mapper=Harmonized2OpenFDAMapper(),
-      reducer=parallel.IdentityReducer(),
-      output_prefix=self.output().path,
-      num_shards=1)
+       mapper=Harmonized2OpenFDAMapper(),
+       reducer=parallel.IdentityReducer(),
+       output_prefix=self.output().path,
+       num_shards=1)
 
 if __name__ == '__main__':
   luigi.run()

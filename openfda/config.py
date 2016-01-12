@@ -21,13 +21,23 @@ class FDAConfig(luigi.WrapperTask):
   tmp_dir = Parameter(default='./data/openfda-tmp')
   es_host = Parameter(default='localhost:9200')
   aws_profile = luigi.Parameter(default='openfda')
+  disable_downloads = luigi.Parameter(default=False)
 
   snapshot_path = luigi.Parameter(default='elasticsearch-snapshots/es-1.7')
   snapshot_bucket = luigi.Parameter(default='openfda-prod')
 
+
+class Context(object):
+  def __init__(self, path=''):
+    self._path = path
+
+  def path(self, path=None):
+    return os.path.join(FDAConfig().data_dir, self._path, path)
+
 def snapshot_path(): return FDAConfig().snapshot_path
 def snapshot_bucket(): return FDAConfig().snapshot_bucket
 def es_host(): return FDAConfig().es_host
+def disable_downloads(): return FDAConfig().disable_downloads
 
 def es_client(host=None):
   import elasticsearch
@@ -36,11 +46,11 @@ def es_client(host=None):
 
   return elasticsearch.Elasticsearch(host)
 
-def data_dir(subdirectory=''):
-  return os.path.join(FDAConfig().data_dir, subdirectory)
+def data_dir(*subdirs):
+  return os.path.join(FDAConfig().data_dir, *subdirs)
 
-def tmp_dir(subdirectory=''):
-  return os.path.join(FDAConfig().tmp_dir, subdirectory)
+def tmp_dir(*subdirs):
+  return os.path.join(FDAConfig().tmp_dir, *subdirs)
 
 def aws_profile():
   return FDAConfig().aws_profile

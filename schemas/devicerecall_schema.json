@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "properties": {
+    "event_date_terminated": {
+      "type": "string",
+      "format": "date"
+    },
+    "firm_fei_number": {
+      "type": "string"
+    },
+    "k_numbers": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "openfda": {
+      "properties": {
+        "device_class": {
+          "type": "string"
+        },
+        "device_name": {
+          "type": "string"
+        },
+        "fei_number": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "medical_specialty_description": {
+          "type": "string"
+        },
+        "registration_number": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "regulation_number": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "other_submission_description": {
+      "type": "string"
+    },
+    "pma_numbers": {
+      "type": "array"
+    },
+    "product_code": {
+      "type": "string"
+    },
+    "product_res_number": {
+      "type": "string"
+    },
+    "res_event_number": {
+      "type": "string"
+    },
+    "root_cause_description": {
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

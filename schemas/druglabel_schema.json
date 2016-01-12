@@ -1,0 +1,1196 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "properties": {
+    "abuse": {
+     "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "abuse_table": {
+     "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "accessories": {
+     "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "accessories_table": {
+     "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "active_ingredient": {
+     "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "active_ingredient_table": {
+     "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "adverse_reactions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "alarms": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "alarms_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "animal_pharmacology_and_or_toxicology": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "ask_doctor": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "ask_doctor_or_pharmacist": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "ask_doctor_or_pharmacist_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "ask_doctor_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "assembly_or_installation_instructions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "assembly_or_installation_instructions_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "boxed_warning": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "boxed_warning_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "calibration_instructions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "calibration_instructions_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "carcinogenesis_and_mutagenesis_and_impairment_of_fertility": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "carcinogenesis_and_mutagenesis_and_impairment_of_fertility_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "cleaning": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "cleaning_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "clinical_pharmacology": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "clinical_pharmacology_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "clinical_studies": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "clinical_studies_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "compatible_accessories": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "compatible_accessories_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "components": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "components_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "contraindications": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "contraindications_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "controlled_substance": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "controlled_substance_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "dependence": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "dependence_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "description": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "description_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "diagram_of_device": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "diagram_of_device_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "disposal_and_waste_handling": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "disposal_and_waste_handling_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "do_not_use": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "do_not_use_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "dosage_and_administration": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "dosage_and_administration_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "dosage_forms_and_strengths": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "dosage_forms_and_strengths_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "drug_abuse_and_dependence": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "drug_abuse_and_dependence_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "drug_and_or_laboratory_test_interactions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "drug_and_or_laboratory_test_interactions_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "drug_interactions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "drug_interactions_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "effective_time": {
+      "type": "string",
+      "format": "date"
+    },
+    "environmental_warning": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "environmental_warning_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "food_safety_warning": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "food_safety_warning_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "general_precautions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "general_precautions_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "geriatric_use": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "geriatric_use_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "guaranteed_analysis_of_feed": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "guaranteed_analysis_of_feed_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "health_care_provider_letter": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "health_care_provider_letter_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "health_claim": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "health_claim_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "how_supplied": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "how_supplied_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "id": {
+      "type": "string"
+    },
+    "inactive_ingredient": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "inactive_ingredient_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "indications_and_usage": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "indications_and_usage_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "information_for_owners_or_caregivers": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "information_for_owners_or_caregivers_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "information_for_patients": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "information_for_patients_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "instructions_for_use": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "instructions_for_use_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "intended_use_of_the_device": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "intended_use_of_the_device_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "keep_out_of_reach_of_children": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "keep_out_of_reach_of_children_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "labor_and_delivery": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "labor_and_delivery_table": {
+      "type": "string"
+      },
+      "type": "array"
+    },
+    "laboratory_tests": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "laboratory_tests_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "mechanism_of_action": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "mechanism_of_action_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "microbiology": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "microbiology_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "nonclinical_toxicology": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "nonclinical_toxicology_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "nonteratogenic_effects": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "nonteratogenic_effects_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "nursing_mothers": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "nursing_mothers_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "openfda": {
+      "properties": {
+        "application_number": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "brand_name": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "dosage_form": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "generic_name": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "is_original_packager": {
+          "type": "boolean"
+        },
+        "manufacturer_name": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "nui": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "original_packager_product_ndc": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "package_ndc": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pharm_class_cs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pharm_class_epc": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pharm_class_moa": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pharm_class_pe": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "product_ndc": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "product_type": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "route": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "rxcui": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "rxstring": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "rxtty": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "spl_id": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "spl_set_id": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "substance_name": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "unii": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "upc": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "other_safety_information": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "other_safety_information_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "overdosage": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "overdosage_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "package_label_principal_display_panel": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "package_label_principal_display_panel_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "patient_medication_information": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "patient_medication_information_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pediatric_use": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pediatric_use_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pharmacodynamics": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pharmacodynamics_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pharmacogenomics": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pharmacogenomics_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pharmacokinetics": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pharmacokinetics_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "precautions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "precautions_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pregnancy": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pregnancy_or_breast_feeding": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pregnancy_or_breast_feeding_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "pregnancy_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "purpose": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "purpose_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "questions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "questions_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "recent_major_changes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "recent_major_changes_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "references": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "references_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "residue_warning": {
+     "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "residue_warning_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "risks": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "risks_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "route": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "route_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "safe_handling_warning": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "safe_handling_warning_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "set_id": {
+      "type": "string"
+    },
+    "spl_indexing_data_elements": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "spl_indexing_data_elements_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "spl_medguide": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "spl_medguide_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "spl_patient_package_insert": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "spl_patient_package_insert_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "spl_product_data_elements": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "spl_product_data_elements_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "spl_unclassified_section": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "spl_unclassified_section_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "statement_of_identity": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "statement_of_identity_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "stop_use": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "stop_use_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "storage_and_handling": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "storage_and_handling_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "summary_of_safety_and_effectiveness": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "summary_of_safety_and_effectiveness_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "teratogenic_effects": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "teratogenic_effects_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "troubleshooting": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "troubleshooting_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "use_in_specific_populations": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "use_in_specific_populations_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "user_safety_warnings": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "user_safety_warnings_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "version": {
+      "type": "string"
+    },
+    "veterinary_indications": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "veterinary_indications_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "warnings_and_cautions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "warnings_and_cautions_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "warnings_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "when_using": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "when_using_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    }
+  },
+  "type": "object"
+}

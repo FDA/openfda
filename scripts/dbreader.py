@@ -9,6 +9,7 @@ between start_key and end_key are printed, one per line.
 
 import gflags
 import leveldb
+import os
 import sys
 
 import simplejson as json
@@ -21,6 +22,7 @@ gflags.DEFINE_string('start_key', None, 'First key to read.')
 gflags.DEFINE_string('end_key', None, 'Last key to read.')
 gflags.DEFINE_string('key', None, 'Print just this key.')
 gflags.DEFINE_boolean('key_only', False, 'Print only keys')
+gflags.DEFINE_boolean('value_only', False, 'Print only values')
 gflags.DEFINE_boolean('json_value_out', False, 'Prints values as JSON')
 
 def main(argv):
@@ -29,9 +31,11 @@ def main(argv):
     FLAGS.start_key = FLAGS.end_key = FLAGS.key
 
   if FLAGS.level_db:
+    assert os.path.exists(FLAGS.level_db)
     ldb = leveldb.LevelDB(FLAGS.level_db)
     db_iter = ldb.RangeIter(FLAGS.start_key, FLAGS.end_key)
   elif FLAGS.sharded_db:
+    assert os.path.exists(FLAGS.sharded_db)
     db = parallel.ShardedDB.open(FLAGS.sharded_db)
     db_iter = db.range_iter(FLAGS.start_key, FLAGS.end_key)
   else:
@@ -40,8 +44,10 @@ def main(argv):
     sys.exit(1)
 
   for (k, v) in db_iter:
+    if FLAGS.json_value_out: v = json.dumps(v, indent=2, sort_keys=True)
+
     if FLAGS.key_only: print k
-    elif FLAGS.json_value_out: print k, json.loads(json.dumps(v))
+    elif FLAGS.value_only: print v
     else: print k, v
 
 

@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "properties": {
+    "definition": {
+      "type": "string"
+    },
+    "device_class": {
+      "type": "string"
+    },
+    "device_name": {
+      "type": "string"
+    },
+    "gmp_exempt_flag": {
+      "type": "string"
+    },
+    "implant_flag": {
+      "type": "string"
+    },
+    "life_sustain_support_flag": {
+      "type": "string"
+    },
+    "medical_specialty": {
+      "type": "string"
+    },
+    "medical_specialty_description": {
+      "type": "string"
+    },
+    "openfda": {
+      "properties": {
+        "fei_number": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "registration_number": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "type": "object"
+    },
+    "product_code": {
+      "type": "string"
+    },
+    "regulation_number": {
+      "type": "string"
+    },
+    "review_code": {
+      "type": "string"
+    },
+    "review_panel": {
+      "type": "string"
+    },
+    "submission_type_id": {
+      "type": "string"
+    },
+    "third_party_flag": {
+      "type": "string"
+    },
+    "unclassified_reason": {
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

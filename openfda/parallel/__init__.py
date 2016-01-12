@@ -1,4 +1,4 @@
-from .mapreduce import Collection, mapreduce
+from .mapreduce import Collection, mapreduce, MRException
 from .mapper import Mapper, IdentityMapper
 from .reducer import Reducer, IdentityReducer, ListReducer, NullReducer, SumReducer, PivotReducer, pivot_values
 from .outputs import MROutput, LevelDBOutput, JSONLineOutput, JSONOutput, NullOutput

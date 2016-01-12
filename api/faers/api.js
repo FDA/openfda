@@ -6,6 +6,7 @@ var express = require('express');
 var moment = require('moment');
 var _ = require('underscore');
 var request = require('request');
+var url = require('url');
 
 var Stats = require('fast-stats').Stats;
 
@@ -13,6 +14,8 @@ var api_request = require('./api_request.js');
 var elasticsearch_query = require('./elasticsearch_query.js');
 var logging = require('./logging.js');
 
+// This META object is duplicated in the python export code. If this changes,
+// please update the openfda/index_util.py as well.
 var META = {
   'disclaimer': 'openFDA is a beta research project and not for clinical ' +
                 'use. While we make every effort to ensure that data is ' +
@@ -31,9 +34,12 @@ var HTTP_CODE = {
 // Internal fields to remove from ES drugevent objects before serving
 // via the API.
 var FIELDS_TO_REMOVE = [
+  '@checksum',
+  '@id',
   '@timestamp',
   '@case_number',
   '@version',
+  '@epoch',
 
   // MAUDE fields to remove
   'baseline_510_k_exempt_flag',
@@ -68,6 +74,7 @@ var DEVICE_RECALL_INDEX = 'devicerecall';
 var DRUG_EVENT_INDEX = 'drugevent';
 var DRUG_LABEL_INDEX = 'druglabel';
 var PROCESS_METADATA_INDEX = 'openfdametadata';
+var EXPORT_DATA_INDEX = 'openfdadata';
 
 // This data structure is the standard way to add an endpoint to the api, which
 // is to say, if there is a one-to-one mapping between an index and an endpoint,
@@ -153,6 +160,12 @@ var ENDPOINTS = [
     'endpoint': '/food/enforcement.json',
     'name': 'recall'
   },
+  {
+    'index': EXPORT_DATA_INDEX,
+    'endpoint': '/download.json',
+    'name': 'openfdadata',
+    'download': true
+  }
 ];
 
 // For each endpoint, we track the success/failure status for the
@@ -250,13 +263,9 @@ _.map(ENDPOINTS, function(endpoint) {
 
 UpdateIndexInformation(client, index_info);
 
-// Fetch updated index information periodically
-setInterval(UpdateIndexInformation.bind(null, client, index_info),
-            5 * 60 * 1000 /* 5 minutes */);
-
 // Check API availability periodically
 setInterval(UpdateIndexInformation.bind(null, client, index_info),
-            60 * 1000 /* 60 seconds */);
+            60 * 1000 /* 1 minute */);
 
 // Returns a JSON response indicating the status of each endpoint. The status
 // includes the last time the index was updated, a green/yellow/red "status"
@@ -443,7 +452,13 @@ TrySearch = function(index, params, es_search_params, response) {
         return ApiError(response, ErrorTypes.NOT_FOUND, 'Nothing to count');
       }
 
-      response_json.results = body.facets.count.terms;
+      // We add 1000 to the limit on all count queries in order to overcome
+      // inaccurate results in the tail of the result, as such, we need to lop
+      // off any results beyond the amount requested in the params.limit.
+      var count_result = body.facets.count.terms;
+      response_json.results = (count_result.length > params.limit) ?
+                               count_result.slice(0, params.limit) :
+                               count_result;
       return response.json(HTTP_CODE.OK, response_json);
     }
 
@@ -469,17 +484,46 @@ TrySearch = function(index, params, es_search_params, response) {
   });
 };
 
+GetDownload = function(response) {
+  console.log("Getting download information...");
+  var index = EXPORT_DATA_INDEX;
+
+  client.get({
+    index: index,
+    type: 'downloads',
+    id: 'current',
+  }).then(function(body) {
+    if (!body) {
+      return ApiError(response, ErrorTypes.NOT_FOUND, 'No matches found!');
+    }
+
+    var response_json = {};
+
+    response_json.meta = _.clone(META);
+    response_json.meta.last_updated = index_info[index].last_updated;
+
+    response_json.results = body._source ? _.clone(body._source) : {};
+
+    return response.json(HTTP_CODE.OK, response_json);
+
+  }, function (error) {
+    console.log('Failed to fetch index update times:: ', error.message);
+    ApiError(response, ErrorTypes.SERVER_ERROR, 'Check your request and try again');
+  });
+};
+
+
 EnforcementEndpoint = function(noun) {
   app.get('/' + noun + '/enforcement.json', function(request, response) {
     LogRequest(request);
     SetHeaders(response);
 
     var params = TryToCheckApiParams(request, response);
-    if (params == null) {
+    if (params === null) {
       return;
     }
 
-    var product_type_filter = 'product_type:'
+    var product_type_filter = 'product_type:';
     if (noun == 'drug' || noun == 'device') {
       product_type_filter += noun + 's';
     } else if (noun == 'food') {
@@ -495,7 +539,7 @@ EnforcementEndpoint = function(noun) {
     var index = ALL_ENFORCEMENT_INDEX;
     var es_search_params =
       TryToBuildElasticsearchParams(params, index, response);
-    if (es_search_params == null) {
+    if (es_search_params === null) {
       return;
     }
 
@@ -516,13 +560,13 @@ BasicEndpoint = function(data) {
     SetHeaders(response);
 
     var params = TryToCheckApiParams(request, response);
-    if (params == null) {
+    if (params === null) {
       return;
     }
 
     var es_search_params =
       TryToBuildElasticsearchParams(params, index, response);
-    if (es_search_params == null) {
+    if (es_search_params === null) {
       return;
     }
 
@@ -534,6 +578,27 @@ BasicEndpoint = function(data) {
 _.map(ENDPOINTS, function(endpoint) {
   if (endpoint.basic) {
     BasicEndpoint(endpoint);
+  }
+});
+
+// Take endpoint config object and a prune boolean. If boolean is true, then
+// we only want the specific endpoint's download data.
+DownloadEndpoint = function(data, prune) {
+  var endpoint = data['endpoint'];
+  var index = data['index'];
+
+  app.get(endpoint, function(request, response) {
+    LogRequest(request);
+    SetHeaders(response);
+
+    GetDownload(response);
+  });
+};
+
+// Make the download endpoint
+_.map(ENDPOINTS, function(endpoint) {
+  if (endpoint.download) {
+    DownloadEndpoint(endpoint, false);
   }
 });
 

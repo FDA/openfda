@@ -1,0 +1,206 @@
+{
+  "downloads": {
+    "dynamic": "strict",
+    "properties": {
+      "device": {
+        "properties": {
+          "enforcement": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                  }
+                }
+            }
+          },
+          "event": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                  }
+                }
+            }
+          },
+          "classification": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                  }
+                }
+            }
+          },
+          "pma": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                  }
+                }
+            }
+          },
+          "recall": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                  }
+                }
+            }
+          },
+          "510k": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                  }
+                }
+            }
+          },
+          "registrationlisting": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                  }
+                }
+            }
+          }
+        }
+      },
+      "food": {
+        "properties": {
+          "enforcement": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "drug": {
+        "properties": {
+          "enforcement": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                }
+              }
+            }
+          },
+          "event": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                }
+              }
+            }
+          },
+          "label": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

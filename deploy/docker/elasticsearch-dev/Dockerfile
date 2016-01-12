@@ -34,7 +34,6 @@ ADD logging.yml /elasticsearch/config/logging.yml
 EXPOSE 9200
 EXPOSE 9300
 
-# Give ES more memory
 ENV ES_HEAP_SIZE 15g
 ENV MAX_LOCKED_MEMORY unlimited
 

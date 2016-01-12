@@ -20,7 +20,7 @@ cluster.routing.allocation.node_concurrent_recoveries: 32
 indices.recovery.max_bytes_per_sec: 1000mb
 indices.store.throttle.max_bytes_per_sec: 1000mb
 indices.recovery.concurrent_streams: 16
-indices.store.throttle.type: none 
+indices.store.throttle.type: none
 index.merge.policy.max_merge_at_once : 128
 index.merge.policy.max_merge_at_once_explicit : 128
 index.merge.scheduler.max_thread_count: 32
@@ -30,4 +30,3 @@ discovery.type: zen
 discovery.zen.minimum_master_nodes: 0
 discovery.zen.ping.timeout: 1s
 discovery.zen.ping.multicast.enabled: false
-
