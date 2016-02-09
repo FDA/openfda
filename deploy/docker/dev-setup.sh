@@ -37,8 +37,8 @@ sudo mount /dev/xvdf /media/ebs
 sudo chmod 777 /media/ebs
 
 (
-  git clone git@github.com:iodine/openfda-internal
-  cd openfda-internal
+  git clone git@github.com:FDA/openfda
+  cd openfda
   ./bootstrap.sh
   ln -s /media/ebs ./data
 )
