@@ -12,7 +12,8 @@ import time
 
 from threading import Thread
 
-DEFAULT_BATCH_SIZE=100
+DEFAULT_BATCH_SIZE = 100
+
 
 class BatchHelper(object):
   '''
@@ -72,6 +73,7 @@ class ObjectDict(dict):
         raise
     return result
 
+
 def dict_to_obj(d):
   """Create a readonly view of a dictionary as ObjectDicts"""
   if isinstance(d, dict):
@@ -80,6 +82,7 @@ def dict_to_obj(d):
     return [dict_to_obj(v) for v in d]
   else:
     return d
+
 
 class ProcessException(Exception):
   def __init__(self, code, stdout, stderr):
@@ -90,6 +93,7 @@ class ProcessException(Exception):
   def __repr__(self):
     return 'ProcessException(\ncode=%s\nstderr=\n%s\nstdout=\n%s\n)' % (
       self.code, self.stderr, self.stdout)
+
 
 class TeeStream(Thread):
   def __init__(self, input_stream, output_stream=sys.stdout, prefix=''):
@@ -128,9 +132,11 @@ def _checked_subprocess(*args, **kw):
 
   return stdout.output()
 
+
 def cmd(args):
   print 'Running: ', ' '.join(args)
   return _checked_subprocess(args)
+
 
 def shell_cmd(fmt, *args):
   print 'Running: %s: %s' % (fmt, args)
@@ -140,6 +146,7 @@ def shell_cmd(fmt, *args):
       cmd = fmt
 
   return _checked_subprocess(cmd, shell=True)
+
 
 def transform_dict(coll, transform_fn):
   '''Recursively call `tranform_fn` for each key and value in `coll`
@@ -161,6 +168,7 @@ def transform_dict(coll, transform_fn):
       for fk, fv in transformed: res[fk] = fv
   return res
 
+
 def is_older(a, b):
   'Returns true if file `a` is older than `b`, or `a` does not exist.'
   if not os.path.exists(a):
@@ -171,6 +179,7 @@ def is_older(a, b):
     return True
 
   return (os.path.getmtime(a) < os.path.getmtime(b))
+
 
 def is_newer(a, b):
   'Returns true if file `a` is newer than `b`, or `b` does not exist.'
@@ -183,19 +192,22 @@ def is_newer(a, b):
 
   return (os.path.getmtime(a) >= os.path.getmtime(b))
 
+
 def get_k_number(data):
   if re.match(r'^(K|BK|DEN)', data):
     return data
+
 
 def get_p_number(data):
   if re.match(r'^(P|N|D[0-9]|BP|H)', data):
     return data
 
+
 def download(url, output_filename):
-  logging.info('Downloading: ' + url)
   shell_cmd('mkdir -p %s', dirname(output_filename))
   shell_cmd("curl -f '%s' > '%s.tmp'", url, output_filename)
   os.rename(output_filename + '.tmp', output_filename)
+
 
 def download_to_file_with_retry(url, output_file):
   for i in range(25):
@@ -208,3 +220,41 @@ def download_to_file_with_retry(url, output_file):
       continue
 
   raise Exception('Fetch of %s failed.' % url)
+
+
+def strip_unicode(raw_str, remove_crlf = False):
+  # http://stackoverflow.com/questions/10993612/python-removing-xa0-from-string
+  a_str = raw_str
+  if remove_crlf:
+    a_str = a_str.replace(u'\x13', '')\
+                 .replace(u'\x0A', '')
+
+  return a_str.replace(u'\xa0', ' ')\
+                .replace(u'\u2013', '-')\
+                .replace(u'\xae', ' ')\
+                .replace(u'\u201c', '')\
+                .replace(u'\u201d', '')
+
+
+def extract_date(date_str):
+  '''
+  Will transform a timestamp string to valid date string in YYYY-MM-DD format.
+  :param date_str: A string having timestamp in YYYYMMDDhhmmss
+  :return: a date string
+  '''
+  if not date_str:
+    return '1900-01-01'
+
+  year = date_str[0:4]
+  month = date_str[4:6]
+  day = date_str[6:8]
+
+
+  if 1900 >= int(year) or 2050 < int(year):
+    year = "1900"
+  if 0 >= int(month) or 12 < int(month):
+    month = "01"
+  if 0 >= int(day) or 12 < int(day):
+    day = "01"
+
+  return year + '-' + month + '-' + day

@@ -122,12 +122,46 @@
                   }
                 }
             }
+          },
+          "udi": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                  }
+                }
+            }
           }
         }
       },
       "food": {
         "properties": {
           "enforcement": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                }
+              }
+            }
+          },
+          "event": {
             "properties": {
               "total_records": { "type": "integer" },
               "export_date": {

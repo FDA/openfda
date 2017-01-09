@@ -56,7 +56,17 @@ var DATE_FIELDS = [
 
   // Device PMA
   'decision_date',
-  'fed_reg_notice_date'
+  'fed_reg_notice_date',
+
+  // Device UDI
+  'package_discontinue_date',
+  'publish_date',
+  'commercial_distribution_end_date',
+  'identifiers.package_discontinue_date',
+
+  // Food Events
+  'date_created',
+  'date_started'
 ];
 
 // Fields which should be rewritten from field.exact to field_exact
@@ -136,7 +146,9 @@ EXACT_FIELDS = [
   'patient.drug.openfda.route',
   'patient.drug.openfda.product_type',
   'patient.drug.openfda.unii',
-  'patient.drug.openfda.pharm_class_epc'
+  'patient.drug.openfda.pharm_class_epc',
+  'outcomes', // Food Event
+  'reactions'
 ];
 
 exports.SupportedQueryString = function(query) {

@@ -33,12 +33,12 @@ Example new record:
 Note: It appears that the historic RES HTML is hand coded into the FDA CMS. The HTML structure has changed over the years. Thus
 """
 
-from bs4 import BeautifulSoup
-
 import datetime
 import logging
 import re
 import simplejson
+from bs4 import BeautifulSoup
+from openfda.common import strip_unicode
 
 SECTION_MAPPING = {
   'PRODUCT': 'product-description',
@@ -63,13 +63,6 @@ CLASSIFICATIONS = [
   'III'
 ]
 
-def strip_unicode(raw_str):
-  # http://stackoverflow.com/questions/10993612/python-removing-xa0-from-string
-  return raw_str.replace(u'\xa0', ' ')\
-                .replace(u'\u2013', '-')\
-                .replace(u'\xae', ' ')\
-                .replace(u'\u201c', '')\
-                .replace(u'\u201d', '')
 
 def scrape_report(html):
   soup = BeautifulSoup(html)

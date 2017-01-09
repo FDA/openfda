@@ -8,11 +8,11 @@
       "type": "string"
     },
     "duplicate": {
-      "type": "integer",
+      "type": "string",
       "format": "int32"
     },
     "fulfillexpeditecriteria": {
-      "type": "integer",
+      "type": "string",
       "format": "int32"
     },
     "occurcountry": {
@@ -31,8 +31,9 @@
                 "properties": {
                   "activesubstancename": {
                     "type": "string"
-                  },
-                }
+                  }
+                },
+                "type": "object"
               },
               "drugadditional": {
                 "type": "string",
@@ -48,11 +49,11 @@
                 "type": "string"
               },
               "drugcharacterization": {
-                "type": "integer",
+                "type": "string",
                 "format": "int32"
               },
               "drugcumulativedosagenumb": {
-                "type": "number",
+                "type": "string",
                 "format": "float"
               },
               "drugcumulativedosageunit": {
@@ -75,15 +76,15 @@
                 "type": "string"
               },
               "drugintervaldosagedefinition": {
-                "type": "integer",
+                "type": "string",
                 "format": "int32"
               },
               "drugintervaldosageunitnumb": {
-                "type": "integer",
+                "type": "string",
                 "format": "int32"
               },
               "drugrecurreadministration": {
-                "type": "integer",
+                "type": "string",
                 "format": "int32"
               },
               "drugrecurrence": {
@@ -94,7 +95,7 @@
                 }
               },
               "drugseparatedosagenumb": {
-                "type": "integer",
+                "type": "string",
                 "format": "int32"
               },
               "drugstartdate": {
@@ -132,9 +133,6 @@
                       "type": "string"
                     },
                     "type": "array"
-                  },
-                  "dosage_form": {
-                    "type": "string"
                   },
                   "generic_name": {
                     "items": {
@@ -208,18 +206,6 @@
                     },
                     "type": "array"
                   },
-                  "rxstring": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array"
-                  },
-                  "rxtty": {
-                    "items": {
-                      "type": "string"
-                    },
-                    "type": "array"
-                  },
                   "spl_id": {
                     "items": {
                       "type": "string"
@@ -253,7 +239,7 @@
           "type": "array"
         },
         "patientagegroup": {
-          "type": "integer",
+          "type": "string",
           "format": "int32"
         },
         "patientdeath": {
@@ -268,18 +254,18 @@
           }
         },
         "patientonsetage": {
-          "type": "number",
+          "type": "string",
           "format": "float"
         },
         "patientonsetageunit": {
           "type": "string"
         },
         "patientsex": {
-          "type": "integer",
+          "type": "string",
           "format": "int32"
         },
         "patientweight": {
-          "type": "number",
+          "type": "string",
           "format": "float"
         },
         "reaction": {
@@ -292,7 +278,7 @@
                 "type": "string"
               },
               "reactionoutcome": {
-                "type": "integer",
+                "type": "string",
                 "format": "int32"
               }
             },
@@ -347,7 +333,7 @@
           "type": "string"
         },
         "receivertype": {
-          "type": "integer",
+          "type": "string",
           "format": "int32"
         }
       }
@@ -363,14 +349,14 @@
         }
       },
       "reporttype": {
-        "type": "integer",
+        "type": "string",
         "format": "int32"
       },
     "safetyreportid": {
       "type": "string"
     },
     "safetyreportversion": {
-      "type": "integer",
+      "type": "string",
       "format": "int32"
     },
     "sender": {
@@ -379,38 +365,38 @@
           "type": "string"
         },
         "sendertype": {
-          "type": "integer",
+          "type": "string",
           "format": "int32"
         }
       },
       "type": "object"
     },
     "serious": {
-      "type": "integer",
+      "type": "string",
       "format": "int32"
     },
     "seriousnesscongenitalanomali": {
-      "type": "integer",
+      "type": "string",
       "format": "int32"
     },
     "seriousnessdeath": {
-      "type": "integer",
+      "type": "string",
       "format": "int32"
     },
     "seriousnessdisabling": {
-      "type": "integer",
+      "type": "string",
       "format": "int32"
     },
     "seriousnesshospitalization": {
-      "type": "integer",
+      "type": "string",
       "format": "int32"
     },
     "seriousnesslifethreatening": {
-      "type": "integer",
+      "type": "string",
       "format": "int32"
     },
     "seriousnessother": {
-      "type": "integer",
+      "type": "string",
       "format": "int32"
     },
     "transmissiondate": {

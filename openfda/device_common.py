@@ -17,6 +17,7 @@ MED_SPECIALTY_ADVISORY_COMMITTEE = {
   'HO':'General Hospital',
   'HE':'Hematology',
   'IM':'Immunology',
+  'MG':'Medical Genetics',
   'MI':'Microbiology',
   'NE':'Neurology',
   'OB':'Obstetrics/Gynecology',

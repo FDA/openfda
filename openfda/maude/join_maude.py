@@ -24,7 +24,7 @@ DATE_KEYS = [
   'baseline_date_ceased_marketing',
   'date_report_to_manufacturer',
   'expiration_date_of_device',
-  'device_date_of_manufacture',
+  'device_date_of_manufacturer',
   'date_facility_aware',
   'report_date',
   'date_report',

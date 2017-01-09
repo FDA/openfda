@@ -48,7 +48,7 @@ def assert_count_contains(query, expected_terms):
 def fetch(query):
   print 'Fetching %s' % query
   data = requests.get(ENDPOINT + query).json()
-  return data['meta'], data['results']
+  return data.get('meta'), data.get('results')
 
 def fetch_counts(query):
   meta, results = fetch(query)

@@ -44,7 +44,7 @@ def es_client(host=None):
   if host is None:
     host = es_host()
 
-  return elasticsearch.Elasticsearch(host)
+  return elasticsearch.Elasticsearch(host, timeout=120)
 
 def data_dir(*subdirs):
   return os.path.join(FDAConfig().data_dir, *subdirs)

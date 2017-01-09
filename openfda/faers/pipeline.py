@@ -50,7 +50,8 @@ class DownloadDataset(AlwaysRunTask):
         # FAERS XML/ASCII for 2014 Q3/Q4 have many strange issues. Sigh.
         filename = filename.replace('Q', 'q')
         filename = filename.replace(' q', 'q')
-        filename = filename.replace(' ', '_')
+        filename = filename.replace(' .', '')
+        filename = filename.strip().replace(' ', '_')
         if '.zip' not in filename.lower():
           filename += '.zip'
 
@@ -62,15 +63,15 @@ class DownloadDataset(AlwaysRunTask):
       return
 
     for i in range(10):
-      logging.info('Downloading: ' + url)
-      cmd = "curl '%s' > '%s'" % (url, target_name)
-      subprocess.check_call(cmd, shell=True)
       try:
+        logging.info('Downloading: ' + url)
+        cmd = "curl '%s' > '%s'" % (url, target_name)
+        subprocess.check_call(cmd, shell=True)
         subprocess.check_call('unzip -t %s' % target_name, shell=True)
         return
       except:
-        logging.info('Problem with zip %s, retrying...' % target_name)
-    logging.fatal('Zip File: %s is not valid, stop all processing')
+        logging.info('Problem while unzipping[download URL:%s, zip file:%s], retrying...' , url, target_name)
+    logging.fatal('Zip File: %s from URL :%s is not valid, stop all processing', target_name, url)
 
   def output(self):
     return luigi.LocalTarget(join(BASE_DIR, 'faers/raw'))
@@ -140,6 +141,8 @@ class XML2JSON(luigi.Task):
   def run(self):
     # AERS_SGML_2007q4.ZIP has files in sqml
 
+    os.system('mkdir -p "%s"' % self.output().path)
+
     filenames = []
     for input in self.input():
       sgml_path = '/s[gq]ml/*.SGM'
@@ -190,8 +193,7 @@ class AnnotateJSON(DependencyTriggeredTask):
       parallel.Collection.from_sharded(self.input()[1].path),
       annotate.AnnotateMapper(harmonized_file),
       parallel.IdentityReducer(),
-      self.output().path,
-      map_workers=12)
+      self.output().path)
 
 
 class LoadJSONQuarter(index_util.LoadJSONBase):

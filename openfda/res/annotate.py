@@ -2,7 +2,7 @@
 
 import re
 import simplejson as json
-
+import arrow
 from openfda import parallel
 
 def read_json_file(json_file):
@@ -94,13 +94,6 @@ def _insert_or_update(recall, code_type, code_value):
         recall['openfda']['upc'] = [code_value]
         recall['openfda']['upc_exact'] = [code_value]
 
-# TODO(hansnelsen): add to a common library, since the date formats should be
-# similar across all annotations. Also needs to handle different input date
-# formats
-def _format_date(input_date, separator=''):
-  (month, day, year) = input_date.split('/')
-  return year + separator + month + separator + day
-
 # TODO(hansnelsen): Looks very similiar to the code in faers/annotate.py, we
 # should consider refactoring this into a general piece of code for generating
 # a de-duped list for each key in the openfda dict. Note: this openfda record
@@ -178,11 +171,8 @@ def AnnotateEvent(recall, harmonized_dict):
   friendly and the naming conventions line up with the API standard
   '''
   AnnotateRecall(recall, harmonized_dict)
-  recall['@timestamp'] = _format_date(recall['report-date'], separator='-')
-  recall['report-date'] = _format_date(recall['report-date'])
-  if 'recall-initiation-date' in recall:
-    recall['recall-initiation-date'] = \
-          _format_date(recall['recall-initiation-date'])
+  recall['@timestamp'] = arrow.get(recall['report-date']).format('YYYY-MM-DD')
+
   for key, value in recall.items():
     if '-' in key:
       new_name = key.replace('-', '_')

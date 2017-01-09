@@ -278,6 +278,11 @@ class NDC2JSONMapper(parallel.Mapper):
       ''' Helper function to rename keys and purge any keys that are not in
           the map.
       '''
+      # See https://github.com/FDA/openfda-dev/issues/6
+      # Handle bad Unicode characters that may come fron NDC product.txt.
+      if isinstance(v, str):
+        v = unicode(v, 'utf8', 'ignore').encode()
+
       if k == 'PRODUCTID':
         v = v.split('_')[1]
       if k in self.rename_map:

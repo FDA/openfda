@@ -1,3 +1,7 @@
+''' A set of input classes used by the mapreduce() function to parse, split and
+    stream data to Mapper. The input types are built out organically as needed
+    by the different data source on the openFDA project: XML, CSV, and JSON.
+'''
 import cPickle
 import csv
 import leveldb
@@ -160,7 +164,7 @@ class CSVDictLineInput(MRInput):
 
   class Reader(MRInput.Reader):
     def entries(self):
-      fh = open(self.filename)
+      fh = open(self.filename, 'rU')
       if self.strip_str:
         # Some source files have null bytes that need to be stripped first
         fh = (s.replace(self.strip_str, '') for s in fh)
@@ -173,6 +177,29 @@ class CSVDictLineInput(MRInput):
 
       for idx, line in enumerate(dict_reader):
         yield str(idx), line
+
+
+class CSVLineInput(MRInput):
+  ''' A plain csv reader for when there are no headers in the source files.
+      CSVDictLineInput should be used in cases where there are headers to
+      convert directly into a dictionary.
+  '''
+  def __init__(self, delimiter, quoting):
+    MRInput.__init__(self)
+    self.delimiter = delimiter
+    self.quoting = quoting
+
+  def create_reader(self, split):
+    return CSVLineInput.Reader(split, delimiter=self.delimiter, quoting=self.quoting)
+
+  class Reader(MRInput.Reader):
+    def entries(self):
+      fh = open(self.filename)
+      reader = csv.reader(fh, delimiter=self.delimiter, quoting=self.quoting)
+
+      for idx, line in enumerate(reader):
+        yield str(idx), line
+
 
 class LevelDBInput(MRInput):
   class Reader(MRInput.Reader):

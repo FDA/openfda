@@ -85,7 +85,6 @@ PLUCK_MAP = {
     'proprietary_name',
     'establishment_type',
     'product_code',
-    'exempt',
     'created_date',
     'registration.owner_operator.firm_name',
     'registration.registration_number',
@@ -110,7 +109,10 @@ def pluck(pluck_list, data):
   data = common.ObjectDict(data)
   for key in pluck_list:
     new_key = key.split('.')[-1]
-    result[new_key] = data.get_nested(key)
+    try:
+      result[new_key] = data.get_nested(key)
+    except:
+      logging.warn('Could not get key: '+key)
   return result
 
 
@@ -220,6 +222,7 @@ class DeviceAnnotateMapper(parallel.Mapper):
     return result
 
   def map(self, key, value, output):
+    if not value: return
     if not isinstance(value, list): value = [value]
     for val in value:
       new_value = self.harmonize(val)

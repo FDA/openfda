@@ -2,6 +2,7 @@
 
 import simplejson as json
 from openfda import parallel
+from openfda import common
 
 def read_json_file(json_file):
   '''
@@ -112,7 +113,7 @@ def AnnotateLabel(label, harmonized_dict):
   openfda = {}
   spl_set_id = label['set_id']
   date = label['effective_time']
-  label['@timestamp'] = date[0:4] + '-' + date[4:6] + '-' + date[6:8]
+  label['@timestamp'] = common.extract_date(date)
   if spl_set_id in harmonized_dict:
     AddHarmonizedRowToOpenfda(openfda, harmonized_dict[spl_set_id][0])
   openfda_lists = {}

@@ -1,0 +1,11 @@
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/fd5ccac9-a54a-4284-80c8-a5f035c5d9e6/Ephed 60 Front.jpg'>
+<index num='0'>
+<symbol type='EAN-13' quality='187'><data><![CDATA[0098443601700]]></data></symbol>
+</index>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/fd5ccac9-a54a-4284-80c8-a5f035c5d9e6/Ephed 60 Back.jpg'>
+</source>
+</barcodes>

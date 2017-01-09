@@ -14,3 +14,11 @@ tmp/
 openfda/annotation_table/data/
 openfda/faers/data/
 openfda/res/data/
+/data/
+/.idea
+api/faers/.idea
+openfda/log_parsers/aws_logs
+openfda/log_parsers/aws_logs_stats
+logs
+api/.idea
+watchdog

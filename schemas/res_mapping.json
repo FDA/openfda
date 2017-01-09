@@ -29,6 +29,28 @@
         "null_value": 0,
         "type": "double"
       },
+      "address_1": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "address_2": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "center_classification_date": {
+        "format": "basic_date||date",
+        "type": "date"
+      },
       "city": {
         "fields": {
           "exact": {
@@ -74,6 +96,10 @@
             "type": "string"
           }
         },
+        "type": "string"
+      },
+      "more_code_info": {
+        "index": "analyzed",
         "type": "string"
       },
       "openfda": {
@@ -274,6 +300,10 @@
         "index": "analyzed",
         "type": "string"
       },
+      "postal_code": {
+        "index": "analyzed",
+        "type": "string"
+      },
       "product_quantity": {
         "index": "analyzed",
         "type": "string"
@@ -334,6 +364,10 @@
           }
         },
         "type": "string"
+      },
+      "termination_date": {
+        "format": "basic_date||date",
+        "type": "date"
       },
       "voluntary_mandated": {
         "fields": {

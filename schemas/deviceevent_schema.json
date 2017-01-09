@@ -36,57 +36,57 @@
       "items": {
         "properties": {
           "baseline_510_k__exempt_flag": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "baseline_510_k__flag": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "baseline_510_k__number": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "baseline_brand_name": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "baseline_catalog_number": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "baseline_date_ceased_marketing": {
-            "type": ["string", "null"],
+            "type": "string",
             "format": "date"
           },
           "baseline_date_first_marketed": {
-            "type": ["string", "null"],
+            "type": "string",
             "format": "date"
           },
           "baseline_device_family": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "baseline_generic_name": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "baseline_model_number": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "baseline_other_id_number": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "baseline_pma_flag": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "baseline_pma_number": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "baseline_preamendment_flag": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "baseline_shelf_life_contained": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "baseline_shelf_life_in_months": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "baseline_transitional_flag": {
-            "type": ["string", "null"]
+            "type": "string"
           },
           "brand_name": {
             "type": "string"
@@ -408,7 +408,7 @@
             "type": "string"
           },
           "sequence_number_outcome": {
-            "type": "array"
+            "type": "string"
           },
           "sequence_number_treatment": {
             "type": "string"
