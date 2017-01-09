@@ -9,17 +9,17 @@ openFDA is a research project to provide open APIs, raw data downloads, document
 
 # Contents
 
-This repository contains the code which powers the `api.fda.gov/drug/event.json` end point:
+This repository contains the code which powers all of the `api.fda.gov` end points:
 
-* A python pipeline written with [Luigi](https://github.com/spotify/luigi) for processing the public [AERS SGML](http://www.fda.gov/Drugs/GuidanceComplianceRegulatoryInformation/Surveillance/AdverseDrugEffects/ucm083765.htm) and [FAERS XML](http://www.fda.gov/Drugs/GuidanceComplianceRegulatoryInformation/Surveillance/AdverseDrugEffects/ucm082193.htm) Quarterly Data Extracts into an Adverse Event JSON format that can be loaded into Elasticsearch. This process includes de-duping follow-up reports and adding an `openfda` section to the drug section of the JSON containing additional drug information from other data sources (including FDA, NLM and VA).
+* Python pipelines written with [Luigi](https://github.com/spotify/luigi) for processing public FDA data sets (drugs, foods, and medical devices) into a JSON format that can be loaded into Elasticsearch. 
 
-* An [Elasticsearch](http://www.elasticsearch.org/) schema for the Adverse Event JSON format.
+* [Elasticsearch](http://www.elasticsearch.org/) schemas for the available data sets.
 
-* A [Node.js](https://github.com/joyent/node) API Server written with [Express](http://expressjs.com/), [Elasticsearch.js](http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/) and [Elastic.js](http://www.fullscale.co/elasticjs/) that communicates with Elasticsearch and provides the `api.fda.gov/drug/event.json` interface (documented in detail at http://open.fda.gov).
+* A [Node.js](https://github.com/joyent/node) API Server written with [Express](http://expressjs.com/), [Elasticsearch.js](http://www.elasticsearch.org/guide/en/elasticsearch/client/javascript-api/current/) and [Elastic.js](http://www.fullscale.co/elasticjs/) that communicates with Elasticsearch and provides the `api.fda.gov` JSON interface (documented in detail at http://open.fda.gov).
 
 # Prerequisites
 
-* Elasticsearch 1.2.0 or later
+* Elasticsearch 1.7.0 or later
 * Python 2.7.*
 * Node 0.10.*
 
