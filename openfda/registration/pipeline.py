@@ -88,6 +88,14 @@ REMAPPED_FILES = {
  'registration_listing.txt': 'remapped_registration_listing.txt',
  }
 
+# TODO(hansnelsen): analyze and add the following files to the pipeline, schema,
+#                   es mapping, documentation.
+# For now, we will just exclude them.
+EXCLUDED_FILES = [
+  'Manu_ID_by_Imp.txt',
+  'Non_Reg_Imp_ID_by_Manu.txt',
+  'Reg_Imp_ID_by_Manu.txt'
+]
 
 # TODO(hansnelsen): copied from spl/pipeline.py, consolidate to a common place.
 #                   This version has been slightly altered, so we will need to
@@ -184,6 +192,14 @@ class ExtractAndCleanDownloadsReg(luigi.Task):
   ''' Unzip each of the download files and remove all the non-UTF8 characters.
       Unzip -p streams the data directly to iconv which then writes to disk.
   '''
+  # These files have floats, e.g. 123.0 instead of 123, on the join keys, which
+  # causes problems downstream.
+  problem_files = [
+    'registration_listing.txt',
+    'remapped_registration_listing.txt',
+    'Listing_Proprietary_Name.txt'
+  ]
+
   def requires(self):
     return [DownloadDeviceRegistrationAndListings(), SyncS3()]
 
@@ -204,6 +220,15 @@ class ExtractAndCleanDownloadsReg(luigi.Task):
     remap_supplemental_files(join(output_dir, file_name),
                              join(supplemental_dir, file_name),
                              output_file)
+
+    # There are a handful of files with floats for keys
+    # This step can be removed once it is fixed on the source system.
+    for fix_file in self.problem_files:
+      with open(join(output_dir, fix_file), 'r') as needs_fixing:
+        lines = needs_fixing.readlines()
+      with open(join(output_dir, fix_file), 'w') as gets_fixing:
+        for line in lines:
+          gets_fixing.write(re.sub(r'\.0', '', line))
 
 class TXT2JSONMapper(parallel.Mapper):
   def map_shard(self, map_input, map_output):
@@ -247,6 +272,8 @@ class TXT2JSON(luigi.Task):
     inputs = []
     for input_file in glob.glob(input_dir + '/*.txt'):
       if basename(input_file) in REMAPPED_FILES:
+        continue
+      if basename(input_file) in EXCLUDED_FILES:
         continue
       header_key = basename(input_file)
       fieldnames = NEEDS_HEADERS.get(header_key, None)

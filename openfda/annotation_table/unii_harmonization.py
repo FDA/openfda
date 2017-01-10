@@ -77,12 +77,13 @@ def harmonize_unii(out_file, product_file, class_index_dir):
     this_spl_id = row['PRODUCTID'].split('_')[1]
     this_substance = row['SUBSTANCENAME']
 
-    if this_spl_id in ndc_dict:
-      tmp_substance = [s.lstrip() for s in this_substance.split(';')]
-      ndc_dict[this_spl_id] = set(tmp_substance + ndc_dict[this_spl_id])
-      ndc_dict[this_spl_id] = list(ndc_dict[this_spl_id])
-    else:
-      ndc_dict[this_spl_id] = [s.lstrip() for s in this_substance.split(';')]
+    if this_substance.strip() != '':
+      if this_spl_id in ndc_dict:
+        tmp_substance = [s.lstrip() for s in this_substance.split(';')]
+        ndc_dict[this_spl_id] = set(tmp_substance + ndc_dict[this_spl_id])
+        ndc_dict[this_spl_id] = list(ndc_dict[this_spl_id])
+      else:
+        ndc_dict[this_spl_id] = [s.lstrip() for s in this_substance.split(';')]
 
 
 
@@ -104,9 +105,9 @@ def harmonize_unii(out_file, product_file, class_index_dir):
     # Loop handles the many-to-many relationship of ingredients to products.
   unii_pivot = {}
   for key, value in ndc_dict.iteritems():
-    for substance_list in value:
+    for substance_name in value:
       for unii_extract_dict in rows:
-        if unii_extract_dict[0]['name'] in substance_list:
+        if unii_extract_dict[0]['name'].lower() == substance_name.lower():
           if key in unii_pivot:
             unii_pivot[key].append(unii_extract_dict[0])
           else:

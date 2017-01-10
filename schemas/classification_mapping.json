@@ -55,15 +55,6 @@
             "index": "not_analyzed",
             "type": "string"
           },
-          "device_name": {
-            "fields": {
-              "exact": {
-                "index": "not_analyzed",
-                "type": "string"
-              }
-            },
-            "type": "string"
-          },
           "fei_number": {
             "index": "not_analyzed",
             "type": "string"
@@ -72,30 +63,12 @@
             "index": "not_analyzed",
             "type": "string"
           },
-          "medical_specialty_description": {
-            "fields": {
-              "exact": {
-                "index": "not_analyzed",
-                "type": "string"
-              }
-            },
-            "type": "string"
-          },
           "pma_number": {
             "index": "not_analyzed",
             "type": "string"
           },
           "registration_number": {
             "index": "not_analyzed",
-            "type": "string"
-          },
-          "regulation_number": {
-            "fields": {
-              "exact": {
-                "index": "not_analyzed",
-                "type": "string"
-              }
-            },
             "type": "string"
           }
         }

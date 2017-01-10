@@ -36,7 +36,7 @@ def optimize_index(index_name, wait_for_merge=1):
   # command to finish, so we use requests instead
   logging.info('Optimizing: %s (this may take a while)', index_name)
   resp = requests.post('http://%s/%s/_optimize?max_num_segments=1&wait_for_merge=%d' %
-    (config.es_host(), index_name, wait_for_merge), timeout=10000)
+    (config.es_host(), index_name, wait_for_merge), timeout=100000)
   resp.raise_for_status()
 
 
@@ -60,11 +60,15 @@ def dump_index(es,
     ''' Helper function for writing out zip file chunks.
     '''
     file_to_zip = basename(target_file).replace('.zip', '')
-    with contextlib.closing(zipfile.ZipFile(target_file, 'w')) as out_f:
-      zip_info = zipfile.ZipInfo(file_to_zip, time.localtime()[0:6])
-      zip_info.external_attr = 0777 << 16L
-      zip_info.compress_type = zipfile.ZIP_DEFLATED
-      out_f.writestr(zip_info, json.dumps(data, indent=2) + '\n')
+    try:
+      with contextlib.closing(zipfile.ZipFile(target_file, 'w')) as out_f:
+        zip_info = zipfile.ZipInfo(file_to_zip, time.localtime()[0:6])
+        zip_info.external_attr = 0777 << 16L
+        zip_info.compress_type = zipfile.ZIP_DEFLATED
+        out_f.writestr(zip_info, json.dumps(data, indent=2) + '\n')
+    except:
+      logging.error("Failed to write a chunk to: "+target_file)
+      raise
 
   def _make_file_name(target_dir, idx, total):
     ''' Helper function for making uniform file names.
@@ -149,14 +153,28 @@ def dump_index(es,
 
   # All files are wrapped in the API format, so that the data interface remains
   # constant between the API results and the download results.
-  disclaimer = ('openFDA is a beta research project and not for clinical use. '
-                'While we make every effort to ensure that data is accurate, '
-                'you should assume all results are unvalidated.')
+  disclaimer = ('Do not rely on openFDA to make decisions regarding medical care. '
+                'While we make every effort to ensure that data is accurate, you '
+                'should assume all results are unvalidated. We may limit or otherwise '
+                'restrict your access to the API in line with our Terms of Service.')
+
+  # Bespoke disclaimer for caers API, if there are any more of these, then they
+  # should be externalized
+  caers_disclaimer = ('Do not rely on openFDA to make decisions regarding '
+    'medical care. While we make every effort to ensure that data is accurate, '
+    'you should assume all results are unvalidated. We may limit or otherwise '
+    'restrict your access to the API in line with our Terms of Service. '
+    'Submission of an adverse event report does not constitute an admission '
+    'that a product caused or contributed to an event. The information in '
+    'these reports has not been scientifically or otherwise verified as to a '
+    'cause and effect relationship and cannot be used to estimate incidence '
+    '(occurrence rate) or to estimate risk.')
 
   return_dict = {
     'meta': {
-      'disclaimer': disclaimer,
-      'license': 'http://open.fda.gov/license',
+      'disclaimer': caers_disclaimer if index == 'foodevent' else disclaimer,
+      'terms': 'https://open.fda.gov/terms/',
+      'license': 'https://open.fda.gov/license/',
       'last_updated': update_date,
       'results': {
         'skip': 0,
@@ -178,6 +196,7 @@ def dump_index(es,
   for result in elasticsearch.helpers.scan(es,
                                            query=query,
                                            raise_on_error=True,
+                                           scroll='30m',
                                            index=index):
 
     # Grab a response from ES and clean it with the callback passed into the
@@ -359,7 +378,7 @@ class ResetElasticSearch(AlwaysRunTask):
   def _run(self):
     logging.info('Create index and loading mapping: %s/%s',
                  self.target_index_name, self.target_type_name)
-    es = elasticsearch.Elasticsearch(self.target_host)
+    es = elasticsearch.Elasticsearch(self.target_host, timeout=120)
     if self.delete_index:
       elasticsearch_requests.clear_and_load(es,
                                         self.target_index_name,
@@ -381,7 +400,7 @@ class LoadJSONMapper(parallel.Mapper):
     self.es_host = es_host
 
   def _map_incremental(self, map_input):
-    es = elasticsearch.Elasticsearch(self.es_host)
+    es = elasticsearch.Elasticsearch(self.es_host, timeout=120)
     with BatchHelper(index_with_checksum, es, self.index_name, self.type_name) as helper:
       for key, doc in map_input:
         assert self.docid_key in doc, 'Document is missing id field: %s' % json.dumps(doc, indent=2)
@@ -389,7 +408,7 @@ class LoadJSONMapper(parallel.Mapper):
         helper.add((doc_id, doc))
 
   def _map_non_incremental(self, map_input):
-    es = elasticsearch.Elasticsearch(self.es_host)
+    es = elasticsearch.Elasticsearch(self.es_host, timeout=120)
     with BatchHelper(index_without_checksum, es, self.index_name, self.type_name) as helper:
       for key, doc in map_input:
         helper.add(doc)
@@ -491,3 +510,9 @@ class LoadJSONBase(AlwaysRunTask):
     # optimize index, if requested
     if self.optimize_index:
       optimize_index(self.index_name, wait_for_merge=False)
+
+
+    # update metadata index again. Trying to solve mystery of missing "last_update_date" entries...
+    elasticsearch_requests.update_process_datetime(
+      config.es_client(), self.index_name, arrow.utcnow().format('YYYY-MM-DD')
+    )

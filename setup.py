@@ -19,6 +19,8 @@ setuptools.setup(
     'luigi',
     'lxml',
     'nose',
+    'mock',
+    'coverage',
     'python-gflags',
     'pyyaml',
     'pyelasticsearch',

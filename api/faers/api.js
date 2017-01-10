@@ -6,7 +6,9 @@ var express = require('express');
 var moment = require('moment');
 var _ = require('underscore');
 var request = require('request');
+var querystring = require('querystring');
 var url = require('url');
+var cache = require('apicache').middleware;
 
 var Stats = require('fast-stats').Stats;
 
@@ -17,12 +19,26 @@ var logging = require('./logging.js');
 // This META object is duplicated in the python export code. If this changes,
 // please update the openfda/index_util.py as well.
 var META = {
-  'disclaimer': 'openFDA is a beta research project and not for clinical ' +
-                'use. While we make every effort to ensure that data is ' +
-                'accurate, you should assume all results are unvalidated.',
-  'license': 'http://open.fda.gov/license',
+  'disclaimer': 'Do not rely on openFDA to make decisions regarding medical care. ' +
+                'While we make every effort to ensure that data is accurate, you ' +
+                'should assume all results are unvalidated. We may limit or otherwise ' +
+                'restrict your access to the API in line with our Terms of Service.',
+  'terms': 'https://open.fda.gov/terms/',
+  'license': 'https://open.fda.gov/license/',
   'last_updated': '2014-05-29'
 };
+
+// TODO(hansnelsen): If there are more bespoke disclaimers, externalize this
+//                   text in a yaml that maps the text to an index.
+var CAERS_DISCLAIMER = 'Do not rely on openFDA to make decisions regarding ' +
+  'medical care. While we make every effort to ensure that data is accurate, ' +
+  'you should assume all results are unvalidated. We may limit or otherwise ' +
+  'restrict your access to the API in line with our Terms of Service. ' +
+  'Submission of an adverse event report does not constitute an admission ' +
+  'that a product caused or contributed to an event. The information in ' +
+  'these reports has not been scientifically or otherwise verified as to a ' +
+  'cause and effect relationship and cannot be used to estimate incidence ' +
+  '(occurrence rate) or to estimate risk.'
 
 var HTTP_CODE = {
   OK: 200,
@@ -71,8 +87,10 @@ var DEVICE_REGISTRATION_INDEX = 'devicereglist';
 var DEVICE_CLEARANCE_INDEX = 'deviceclearance';
 var DEVICE_PMA_INDEX = 'devicepma';
 var DEVICE_RECALL_INDEX = 'devicerecall';
+var DEVICE_UDI_INDEX = 'deviceudi';
 var DRUG_EVENT_INDEX = 'drugevent';
 var DRUG_LABEL_INDEX = 'druglabel';
+var FOOD_EVENT_INDEX = 'foodevent';
 var PROCESS_METADATA_INDEX = 'openfdametadata';
 var EXPORT_DATA_INDEX = 'openfdadata';
 
@@ -128,6 +146,12 @@ var ENDPOINTS = [
     'basic' : true
   },
   {
+    'index': DEVICE_UDI_INDEX,
+    'endpoint': '/device/udi.json',
+    'name': 'deviceudi',
+    'basic' : true
+  },
+  {
     'index': DRUG_EVENT_INDEX,
     'endpoint': '/drug/event.json',
     'name': 'drugevent',
@@ -143,6 +167,12 @@ var ENDPOINTS = [
     'index': DRUG_LABEL_INDEX,
     'endpoint': '/drug/label.json',
     'name': 'druglabel',
+    'basic' : true
+  },
+  {
+    'index': FOOD_EVENT_INDEX,
+    'endpoint': '/food/event.json',
+    'name': 'foodevent',
     'basic' : true
   },
   {
@@ -166,6 +196,25 @@ var ENDPOINTS = [
     'name': 'openfdadata',
     'download': true
   }
+];
+
+var VALID_URLS = [
+  'api.fda.gov/drug/',
+  'api.fda.gov/food/',
+  'api.fda.gov/device/',
+  'api.fda.gov/drug/event.json',
+  'api.fda.gov/drug/label.json',
+  'api.fda.gov/drug/enforcement.json',
+  'api.fda.gov/device/510k.json',
+  'api.fda.gov/device/event.json',
+  'api.fda.gov/device/enforcement.json',
+  'api.fda.gov/device/udi.json',
+  'api.fda.gov/device/recall.json',
+  'api.fda.gov/device/classification.json',
+  'api.fda.gov/device/registrationlisting.json',
+  'api.fda.gov/device/pma.json',
+  'api.fda.gov/food/enforcement.json',
+  'api.fda.gov/food/event.json'
 ];
 
 // For each endpoint, we track the success/failure status for the
@@ -261,6 +310,7 @@ _.map(ENDPOINTS, function(endpoint) {
   };
 });
 
+
 UpdateIndexInformation(client, index_info);
 
 // Check API availability periodically
@@ -310,6 +360,104 @@ app.get('/status', function(request, response) {
   });
 
   response.json(_.values(res));
+});
+
+// endpoint for the API statistics page - cached in memory for 1 hour.
+app.get('/usage.json', cache('1 hour'), function(req, res) {
+
+  var end_at = req.query.start_at|| moment().format("YYYY-MM-DD");
+  var start_at = req.query.end_at|| moment().subtract(30, 'day').format("YYYY-MM-DD");
+  var prefix = req.query.prefix || '0/';
+  var params = querystring.stringify({
+      start_at: start_at,
+      end_at: end_at,
+      interval: 'day',
+      prefix: prefix,
+      query: {"condition":"AND","rules":[{"field":"gatekeeper_denied_code","id":"gatekeeper_denied_code","input":"select" ,"operator":"is_null","type":"string","value":null}]}
+    });
+
+  //NEVER expose this key to public
+  var options = {
+    method: "GET",
+    url: "https://api.data.gov/api-umbrella/v1/analytics/drilldown.json?" + params,
+    headers: {
+      "X-Api-Key": process.env.API_UMBRELLA_KEY,
+      "X-Admin-Auth-Token": process.env.API_UMBRELLA_ADMIN_TOKEN
+    }
+  }
+
+
+  request(options, function (error, response, body) {
+      usage = {
+        table:[],
+        stats :[],
+        others:[],
+        lastThirtyDayUsage: 0,
+        indexInfo:{}
+      };
+      _.each(ENDPOINTS, function(endpoint) {
+          var info = index_info[endpoint.index];
+          usage.indexInfo[endpoint.name] = info.document_count || 10;
+      });
+
+      if (!error && response.statusCode == 200) {
+          var data = JSON.parse(body);
+          if (data.results) {
+            var unwanted = 0;
+            _.map(data.results, function(result){
+                if (VALID_URLS.indexOf(result.path) > -1) {
+                  usage.table.push(result);
+                } else {
+                  unwanted+= result.hits;
+                  usage.others.push(result);
+                }
+
+            });
+
+            if (unwanted > 0) {
+              usage.table.push({
+                "depth": 1,
+                "path": "others",
+                "terminal": true,
+                "descendent_prefix": "2/api.fda.gov/drug/",
+                "hits": unwanted
+              });
+            }
+
+            _.each(usage.table, function(row){
+              usage.lastThirtyDayUsage += row.hits;
+            });
+
+          }
+          if (data.hits_over_time) {
+
+              _.each(data.hits_over_time.rows, function(row){
+
+                var stat = {totalCount: 0, paths:[]};
+                usage.stats.push(stat);
+
+                for (var i =0; i < row.c.length; i++) {
+                  if (i === 0) {
+                   stat.day = row.c[i].f;
+                  } else {
+                    stat.totalCount += row.c[i].v;
+                    stat.paths.push({path: data.hits_over_time.cols[i].label, count: row.c[i].v});
+                  }
+                }
+
+              });
+          }
+      } else {
+        log.error(error);
+        log.error("The response is :");
+        log.error(response);
+      }
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader('Cache-Control', 'public, max-age=' + 43200); //cache for 12 hours
+      res.json(usage);
+
+  });
+
 });
 
 app.get('/healthcheck', function(request, response) {
@@ -416,6 +564,11 @@ TrySearch = function(index, params, es_search_params, response) {
 
     var response_json = {};
     response_json.meta = _.clone(META);
+
+    if (index === 'foodevent') {
+      response_json.meta.disclaimer = CAERS_DISCLAIMER
+    }
+
     response_json.meta.last_updated = index_info[index].last_updated;
 
     // Search query

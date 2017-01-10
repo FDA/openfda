@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+    <device xmlns="http://www.fda.gov/cdrh/gudid" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            deviceid="00844588018923">
+        <deviceRecordStatus>Published</deviceRecordStatus>
+        <devicePublishDate>2015-09-24</devicePublishDate>
+        <deviceCommDistributionEndDate>2018-09-24</deviceCommDistributionEndDate>
+        <deviceCommDistributionStatus>In Commercial Distribution</deviceCommDistributionStatus>
+        <identifiers>
+            <identifier>
+                <deviceId>00844588018923</deviceId>
+                <deviceIdType>Primary</deviceIdType>
+                <deviceIdIssuingAgency>GS1</deviceIdIssuingAgency>
+                <containsDINumber/>
+                <pkgQuantity/>
+                <pkgDiscontinueDate/>
+                <pkgStatus/>
+                <pkgType/>
+            </identifier>
+            <identifier>
+                <deviceId>00844868017264</deviceId>
+                <deviceIdType>Package</deviceIdType>
+                <deviceIdIssuingAgency>GS1</deviceIdIssuingAgency>
+                <containsDINumber>00844868017288</containsDINumber>
+                <pkgQuantity>25</pkgQuantity>
+                <pkgDiscontinueDate>2015-11-11</pkgDiscontinueDate>
+                <pkgStatus>Not in Commercial Distribution</pkgStatus>
+                <pkgType>case</pkgType>
+            </identifier>
+        </identifiers>
+        <brandName>CS2 Acet. Cup Sys. - VitalitE</brandName>
+        <versionModelNumber>1107-0-3258</versionModelNumber>
+        <catalogNumber>1107-0-3258</catalogNumber>
+        <companyName>CONSENSUS ORTHOPEDICS, INC.</companyName>
+        <deviceCount>1</deviceCount>
+        <deviceDescription>Acet. Insert, VitalitE</deviceDescription>
+        <DMExempt>true</DMExempt>
+        <premarketExempt>false</premarketExempt>
+        <deviceHCTP>false</deviceHCTP>
+        <deviceKit>false</deviceKit>
+        <deviceCombinationProduct>true</deviceCombinationProduct>
+        <singleUse>true</singleUse>
+        <lotBatch>true</lotBatch>
+        <serialNumber>false</serialNumber>
+        <manufacturingDate>false</manufacturingDate>
+        <expirationDate>true</expirationDate>
+        <donationIdNumber>false</donationIdNumber>
+        <labeledContainsNRL>false</labeledContainsNRL>
+        <labeledNoNRL>true</labeledNoNRL>
+        <MRISafetyStatus>Labeling does not contain MRI Safety Information</MRISafetyStatus>
+        <rx>true</rx>
+        <otc>false</otc>
+        <contacts>
+            <customerContact>
+                <phone>+1(916)355-7100</phone>
+                <phoneExtension>ext555</phoneExtension>
+                <email>fang.wei@fda.hhs.gov</email>
+            </customerContact>
+            <customerContact>
+                <phone>+1 (555) 555-5555</phone>
+                <phoneExtension/>
+                <email>jdoe@example.com</email>
+            </customerContact>
+        </contacts>
+        <gmdnTerms>
+            <gmdn>
+                <gmdnPTName>Non-constrained polyethylene acetabular liner</gmdnPTName>
+                <gmdnPTDefinition>A sterile, implantable component of a two-piece acetabulum prosthesis that is inserted
+                    into an acetabular shell prosthesis to provide the articulating surface with a femoral head
+                    prosthesis as part of a total hip arthroplasty (THA). It is made of polyethylene (includes hylamer,
+                    cross-linked polyethylene), and does not include a stabilizing component to limit the range of
+                    motion of the hip.
+                </gmdnPTDefinition>
+            </gmdn>
+            <gmdn>
+                <gmdnPTName>Bone-screw internal spinal fixation system, non-sterile</gmdnPTName>
+                <gmdnPTDefinition>An assembly of non-sterile implantable devices intended to provide immobilization and
+                    stabilization of spinal segments in the treatment of various spinal instabilities or deformities,
+                    also used as an adjunct to spinal fusion [e.g., for degenerative disc disease (DDD)]. Otherwise
+                    known as a pedicle screw instrumentation system, it typically consists of a combination of anchors
+                    (e.g., bolts, hooks, pedicle screws or other types), interconnection mechanisms (incorporating nuts,
+                    screws, sleeves, or bolts), longitudinal members (e.g., plates, rods, plate/rod combinations),
+                    and/or transverse connectors. Non-sterile disposable devices associated with implantation may be
+                    included.
+                </gmdnPTDefinition>
+            </gmdn>
+        </gmdnTerms>
+        <productCodes>
+            <fdaProductCode>
+                <productCode>OQG</productCode>
+                <productCodeName>Hip Prosthesis, semi-constrained, cemented, metal/polymer, + additive, porous,
+                    uncemented
+                </productCodeName>
+            </fdaProductCode>
+            <fdaProductCode>
+                <productCode>MAX</productCode>
+                <productCodeName>Intervertebral fusion device with bone graft, lumbar</productCodeName>
+            </fdaProductCode>
+        </productCodes>
+        <deviceSizes>
+            <deviceSize>
+                <sizeType>Outer Diameter</sizeType>
+                <size>
+                    <unit>Millimeter</unit>
+                    <value>32/6</value>
+                </size>
+                <sizeText>Size test here</sizeText>
+            </deviceSize>
+            <deviceSize>
+                <sizeType>Device Size Text, specify</sizeType>
+                <size>
+                    <unit></unit>
+                    <value></value>
+                </size>
+                <sizeText>SPACER LAT PEEK 8° 40L X 18W X 10H</sizeText>
+            </deviceSize>
+        </deviceSizes>
+        <environmentalConditions>
+            <storageHandling>
+                <storageHandlingType>Storage Environment Temperature</storageHandlingType>
+                <storageHandlingHigh>
+                    <unit>Degrees Celsius</unit>
+                    <value>8</value>
+                </storageHandlingHigh>
+                <storageHandlingLow>
+                    <unit>Degrees Celsius</unit>
+                    <value>-30</value>
+                </storageHandlingLow>
+                <storageHandlingSpecialConditionText/>
+            </storageHandling>
+            <storageHandling>
+                <storageHandlingType>Special Storage Condition, Specify</storageHandlingType>
+                <storageHandlingHigh>
+                    <unit></unit>
+                    <value></value>
+                </storageHandlingHigh>
+                <storageHandlingLow>
+                    <unit></unit>
+                    <value></value>
+                </storageHandlingLow>
+                <storageHandlingSpecialConditionText>This device must be stored in a dry location away from temperature
+                    extremes
+                </storageHandlingSpecialConditionText>
+            </storageHandling>
+        </environmentalConditions>
+        <sterilization>
+            <deviceSterile>false</deviceSterile>
+            <sterilizationPriorToUse>true</sterilizationPriorToUse>
+            <methodTypes>
+                <sterilizationMethod>Moist Heat or Steam Sterilization</sterilizationMethod>
+            </methodTypes>
+        </sterilization>
+        <deviceId>00844588018923</deviceId>
+        <feis xmlns="">
+            <fei>3001451451</fei>
+            <fei>12223430908</fei>
+        </feis>
+        <premarketSubmissions xmlns="">
+            <premarketSubmission>
+                <submissionNumber>K094035</submissionNumber>
+                <supplementNumber>000</supplementNumber>
+                <submissionType>PMN</submissionType>
+            </premarketSubmission>
+            <premarketSubmission>
+                <submissionNumber>P950002</submissionNumber>
+                <supplementNumber>001</supplementNumber>
+                <submissionType>PMA</submissionType>
+            </premarketSubmission>
+        </premarketSubmissions>
+    </device>
+</data>

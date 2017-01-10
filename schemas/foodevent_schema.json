@@ -1,0 +1,62 @@
+{
+  "type": "object",
+  "properties": {
+    "consumer": {
+      "properties": {
+        "age": {
+          "type": "string"
+        },
+        "age_unit": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "date_created": {
+      "format": "date",
+      "type": "string"
+    },
+    "date_started": {
+      "format": "date",
+      "type": "string"
+    },
+    "outcomes": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "products": {
+      "items": {
+        "properties": {
+          "industry_code": {
+            "type": "string"
+          },
+          "industry_name": {
+            "type": "string"
+          },
+          "name_brand": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "reactions": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "report_number": {
+      "type": "string"
+    }
+  }
+}

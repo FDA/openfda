@@ -531,7 +531,8 @@
       "type": "array"
     },
     "labor_and_delivery_table": {
-      "type": "string"
+      "items": {
+        "type": "string"
       },
       "type": "array"
     },

@@ -58,7 +58,8 @@ class SyncS3SPL(luigi.Task):
 
   def run(self):
     common.cmd(['aws',
-                '--profile=' + config.aws_profile(),
+                '--cli-read-timeout=3600',
+		'--profile=' + config.aws_profile(),
                 's3', 'sync',
                 self.bucket,
                 self.local_dir])
@@ -112,9 +113,17 @@ class SPL2JSON(parallel.MRTask):
     spl_js = SPL_JS
     loinc = LOINC
     cmd = 'node %(spl_js)s %(xml_file)s %(loinc)s' % locals()
-    json_str = os.popen(cmd).read()
-    json_obj = json.loads(json_str)
-    output.add(xml_file, json_obj)
+    json_str = ''
+    try:
+      json_str = os.popen(cmd).read()
+      json_obj = json.loads(json_str)
+      output.add(xml_file, json_obj)
+    except:
+      logging.error('Unable to convert SPL XML to JSON: %s', xml_file)
+      logging.error('cmd: %s', cmd)
+      logging.error('json: %s', json_str)
+      logging.error(sys.exc_info()[0])
+      raise
 
   def requires(self):
     return CreateBatchFiles()
@@ -150,8 +159,7 @@ class AnnotateJSON(luigi.Task):
       mapper=annotate.AnnotateMapper(harmonized_file),
       reducer=parallel.IdentityReducer(),
       output_prefix=self.output().path,
-      num_shards=1,
-      map_workers=8)
+      num_shards=1)
 
 
 

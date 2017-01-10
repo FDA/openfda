@@ -13,12 +13,13 @@ import luigi
 import simplejson as json
 
 
-from openfda import common, config, index_util, elasticsearch_requests
+from openfda import common, config, index_util, elasticsearch_requests, parallel
+from openfda.tasks import AlwaysRunTask
+
 
 RUN_DIR = dirname(dirname(dirname(os.path.abspath(__file__))))
 BASE_DIR = os.path.abspath(join(RUN_DIR, './data/export/'))
 SCHEMA_DIR = os.path.abspath(join(RUN_DIR, './schemas/'))
-S3_BASE_BUCKET = 's3://download.open.fda.gov/'
 
 
 # Export output is spoken in the language of the API, meaning that the directory
@@ -30,12 +31,14 @@ ENDPOINT_INDEX_MAP = {
   '/drug/enforcement': 'recall',
   '/device/enforcement': 'recall',
   '/food/enforcement': 'recall',
+  '/food/event': 'foodevent',
   '/device/event': 'deviceevent',
   '/device/classification': 'deviceclass',
   '/device/510k': 'deviceclearance',
   '/device/pma': 'devicepma',
   '/device/recall': 'devicerecall',
-  '/device/registrationlisting': 'devicereglist'
+  '/device/registrationlisting': 'devicereglist',
+  '/device/udi': 'deviceudi'
 }
 
 # A data structure that helps generate a distinct dataset from a shared index.
@@ -68,15 +71,16 @@ RANGE_ENDPOINT_MAP = {
   '/device/event': {
     'date_key': 'date_received',
     'start_date': '1991-10-01',
-    'end_date': '2016-01-01'
+    'end_date': '2016-08-01'
   },
 }
 
 DEFAULT_CHUNKS = 250000
 CUSTOM_CHUNKS = {
   '/drug/label': 20000,
-  '/drug/event': 80000,
-  '/device/event': 100000
+  '/drug/event': 20000,
+  '/device/event': 100000,
+  '/device/udi': 100000
 }
 
 
@@ -163,7 +167,7 @@ def pairwise(iterable):
 
 def walk_glob(file_pattern, crawl_dir):
   # The directory layout is variable, depending upon the existence of
-  # partitions, so we hve to walk everything from this point down.
+  # partitions, so we have to walk everything from this point down.
   results = []
 
   def _callback(args, dirpath, filenames):
@@ -266,34 +270,17 @@ def omit_internal_keys(data):
   return common.transform_dict(data, basic_cleaner)
 
 
-class ExportIndex(luigi.Task):
+class MakeExportBatches(AlwaysRunTask):
   date_str = luigi.Parameter()
-  index_name = luigi.Parameter()
-
-  def get_schemafile(self):
-    return join(SCHEMA_DIR, self.index_name + '_schema.json')
-
-  def get_endpoints(self):
-    return [k for k, v in ENDPOINT_INDEX_MAP.items() if v == self.index_name]
 
   def requires(self):
     return []
 
   def output(self):
-    target_dir = join(BASE_DIR, self.date_str)
-    endpoints = self.get_endpoints()
-    # Some indices support multiple endpoints, so this needs to be a list of
-    # outputs.
-    return [luigi.LocalTarget(join(target_dir, ep[1:])) for ep in endpoints]
+    return luigi.LocalTarget(join(BASE_DIR, 'batches', self.date_str))
 
-
-  def run(self):
-    schema_file = self.get_schemafile()
-    assert os.path.exists(schema_file), 'No schema file available for index %s' % self.index_name
-
-    es_client = elasticsearch.Elasticsearch(config.es_host())
-
-    endpoints = self.get_endpoints()
+  def _run(self):
+    common.shell_cmd('mkdir -p %s', self.output().path)
     # Get all of the endpoints served by this index
     # Create an `EndpointExport` object for each endpoint in order to export
     # each endpoint properly.
@@ -302,8 +289,8 @@ class ExportIndex(luigi.Task):
     #   date range based (quarterly output)
     #   filter based (index serves many endpoints)
     #   vanilla (endpoint is 1 to 1 with index and it is exported all at once)
-    endpoint_batches = []
-    for endpoint in endpoints:
+    for endpoint, index_name in ENDPOINT_INDEX_MAP.items():
+      endpoint_batches = []
       chunks = CUSTOM_CHUNKS.get(endpoint, DEFAULT_CHUNKS)
       if endpoint in RANGE_ENDPOINT_MAP:
         params = RANGE_ENDPOINT_MAP[endpoint]
@@ -318,65 +305,106 @@ class ExportIndex(luigi.Task):
       else:
         endpoint_batches.append(EndpointExport(endpoint, chunks=chunks))
 
-    # Dump each of the `EndpointExport` objects in the list
-    for ep in endpoint_batches:
-      # The output_dir will be the same for all outputs, once you factor out
-      # the endpoint, so we can safely look at the first one only.
-      output_dir = dirname(dirname(self.output()[0].path))
-      endpoint_dir = join(output_dir, ep.endpoint[1:])
-      index_util.dump_index(
-        es_client,
-        ep.index_name,
-        ep.endpoint,
-        join(endpoint_dir, ep.partition),
-        cleaner=omit_internal_keys,
-        query=ep.query,
-        chunks=ep.chunks
-      )
-      common.shell_cmd('cp %s %s', schema_file, endpoint_dir)
+      # This is a hack to overcome the shortcoming of the parallel library of
+      # only having one mapper process for a tiny, single file input. Since we
+      # want to execute these endpoint batches in parallel, we write each task
+      # to its own file. It will create a mapper for each file.
+      for ep in endpoint_batches:
+        partition = ep.partition if ep.partition else 'all'
+
+        if 'enforcement' in ep.endpoint:
+          partition = ep.endpoint.replace('enforcement', '').replace('/', '')
+
+        output_dir = join(self.output().path, index_name)
+        common.shell_cmd('mkdir -p %s', output_dir)
+        file_name = join(output_dir, partition + '.json')
+
+        with open(file_name, 'w') as json_out:
+          json_dict = json.dumps(ep.__dict__)
+          json_out.write(json_dict + '\n')
+
+
+class ParallelExportMapper(parallel.Mapper):
+  def __init__(self, output_dir):
+    self.output_dir = output_dir
+
+  def map(self, key, value, output):
+    es_client = elasticsearch.Elasticsearch(config.es_host())
+    ep = common.ObjectDict(value)
+    schema_file = join(SCHEMA_DIR, ep.index_name + '_schema.json')
+    endpoint_dir = join(self.output_dir, ep.endpoint[1:])
+    target_dir = join(endpoint_dir, ep.partition)
+    common.shell_cmd('mkdir -p %s', target_dir)
+    index_util.dump_index(es_client,
+                          ep.index_name,
+                          ep.endpoint,
+                          target_dir,
+                          cleaner=omit_internal_keys,
+                          query=ep.query,
+                          chunks=ep.chunks)
+    # Copy the current JSON schema to the zip location so that it is included
+    # in the sync to s3
+    common.shell_cmd('cp %s %s', schema_file, endpoint_dir)
+
+
+class ParallelExport(luigi.Task):
+  date_str = luigi.Parameter()
+
+  def requires(self):
+    return MakeExportBatches(date_str=self.date_str)
+
+  def output(self):
+    target_dir = join(BASE_DIR, self.date_str)
+    return luigi.LocalTarget(target_dir)
+
+  def run(self):
+    common.shell_cmd('mkdir -p %s', join(BASE_DIR, 'tmp'))
+    files = glob.glob(self.input().path + '/*/*.json')
+    parallel.mapreduce(
+      parallel.Collection.from_glob(files, parallel.JSONLineInput()),
+      mapper=ParallelExportMapper(output_dir=self.output().path),
+      reducer=parallel.NullReducer(),
+      output_prefix=join(BASE_DIR, 'tmp'),
+      output_format=parallel.NullOutput(),
+      map_workers=10)
 
 
 class CopyIndexToS3(luigi.Task):
   date_str = luigi.Parameter()
-  index_name = luigi.Parameter()
+  download_bucket = luigi.Parameter()
 
   def requires(self):
-    return ExportIndex(index_name=self.index_name, date_str=self.date_str)
+    return ParallelExport(date_str=self.date_str)
 
   def output(self):
-    return [
-      luigi.LocalTarget(join(export_path.path, '.s3_sync_done'))
-      for export_path in self.input()
-    ]
+    return luigi.LocalTarget(join(self.input().path, '.s3_sync_done'))
 
   def run(self):
     sync_path = join(BASE_DIR, self.date_str)
-    target_bucket = S3_BASE_BUCKET + '%s/' % self.date_str
-    for data_path in self.output():
-      s3_cmd = [
-        'aws',
-        '--profile',
-        config.aws_profile(),
-        's3',
-        'sync',
-        sync_path,
-        target_bucket,
-        '--exclude "*"',
-        '--include "*.zip"',
-        '--include "*schema.json"']
+    target_bucket =  's3://%s/%s/' % (self.download_bucket, self.date_str)
+    s3_cmd = [
+      'aws',
+      '--profile',
+      config.aws_profile(),
+      's3',
+      'sync',
+      sync_path,
+      target_bucket,
+      '--exclude "*"',
+      '--include "*.zip"',
+      '--include "*schema.json"']
 
-      common.shell_cmd(' '.join(s3_cmd))
-      common.shell_cmd('touch %s', data_path.path)
+    common.shell_cmd(' '.join(s3_cmd))
+    common.shell_cmd('touch %s', self.output().path)
 
 
 class CombineManifests(luigi.Task):
   date_str = luigi.Parameter()
+  download_bucket = luigi.Parameter()
 
   def requires(self):
-    return [
-      CopyIndexToS3(date_str=self.date_str, index_name=name)
-      for name in set(ENDPOINT_INDEX_MAP.values())
-    ]
+    return CopyIndexToS3(date_str=self.date_str,
+                         download_bucket=self.download_bucket)
 
   def output(self):
     target_dir = join(BASE_DIR, self.date_str, 'manifest/final_manifest.json')
@@ -418,6 +446,7 @@ class CombineManifests(luigi.Task):
 
 class LoadDownloadJSON(index_util.LoadJSONBase):
   date_str = luigi.Parameter()
+  download_bucket = luigi.Parameter(default='download.open.fda.gov')
 
   index_name = 'openfdadata'
   type_name = 'downloads'
@@ -427,7 +456,8 @@ class LoadDownloadJSON(index_util.LoadJSONBase):
 
   def _data(self):
     if not self.data_source:
-      self.data_source = CombineManifests(date_str=self.date_str)
+      self.data_source = CombineManifests(date_str=self.date_str,
+                                          download_bucket=self.download_bucket)
     return self.data_source
 
   def _run(self):

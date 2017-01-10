@@ -1,4 +1,6 @@
 import cPickle
+import collections
+import io
 import multiprocessing
 import os
 import logging
@@ -41,7 +43,7 @@ class MROutput(object):
     logger.info('Moving results from %s -> %s', tmp_dir, final_dir)
     if os.path.exists(final_dir):
       logger.warn('Replace existing output directory.')
-      subprocess.check_output('rm -rf "%s" % final_dir', shell=True)
+      subprocess.check_output('rm -rf "%s"' % final_dir, shell=True)
     subprocess.check_output('mv "%s" "%s"' % (tmp_dir, final_dir), shell=True)
 
 
@@ -113,11 +115,23 @@ class JSONLineOutput(MROutput):
   class Writer(MROutput.Writer):
     def __init__(self, filename):
       MROutput.Writer.__init__(self, filename)
-      self.output_file = open(filename, 'w')
+      # convert to io.open() to support unicode writes
+      self.output_file = io.open(filename, 'w')
 
     def put(self, key, value):
-      self.output_file.write(json.dumps(value))
-      self.output_file.write('\n')
+      # add recursive decoder to prevent unicode errors on writes.
+      def _convert(data):
+        if isinstance(data, basestring):
+	  return data.decode('utf-8', 'replace')
+	elif isinstance(data, collections.Mapping):
+	  return dict(map(_convert, data.items()))
+	elif isinstance(data, collections.Iterable):
+	  return type(data)(map(_convert, data))
+	else:
+	  return data
+
+      json_str = json.dumps(_convert(value), ensure_ascii=False, encoding='utf-8')
+      self.output_file.write(unicode(json_str + '\n'))
 
     def flush(self):
       logger.info('Flushing: %s', self.filename)

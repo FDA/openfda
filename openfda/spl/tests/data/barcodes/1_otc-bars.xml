@@ -1,0 +1,25 @@
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/b8cd1d5a-9d3b-465e-9e5b-2f67af8dbeb2/b8cd1d5a-9d3b-465e-9e5b-2f67af8dbeb2-03.jpg'>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/b8cd1d5a-9d3b-465e-9e5b-2f67af8dbeb2/b8cd1d5a-9d3b-465e-9e5b-2f67af8dbeb2-04.jpg'>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/b8cd1d5a-9d3b-465e-9e5b-2f67af8dbeb2/b8cd1d5a-9d3b-465e-9e5b-2f67af8dbeb2-05.jpg'>
+<index num='0'>
+<symbol type='I2/5' quality='11'><data><![CDATA[5887i]]></data></symbol>
+<symbol type='CODE-128' quality='21'><data><![CDATA[561968]]></data></symbol>
+<symbol type='EAN-13' quality='247'><data><![CDATA[0361570045106]]></data></symbol>
+</index>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/b8cd1d5a-9d3b-465e-9e5b-2f67af8dbeb2/b8cd1d5a-9d3b-465e-9e5b-2f67af8dbeb2-01.jpg'>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/b8cd1d5a-9d3b-465e-9e5b-2f67af8dbeb2/b8cd1d5a-9d3b-465e-9e5b-2f67af8dbeb2-02.jpg'>
+</source>
+</barcodes>

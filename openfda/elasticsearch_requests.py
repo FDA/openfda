@@ -67,6 +67,7 @@ def update_process_datetime(es, doc_id, timestamp):
 
   load_mapping(es, METADATA_INDEX, METADATA_TYPE, _map)
   new_doc = { 'last_update_date': timestamp }
+  logging.info("Updating last_update_date -  [index=%s, type=%s, id=%s, time=%s]", METADATA_INDEX, METADATA_TYPE, doc_id, timestamp)
   es.index(index=METADATA_INDEX,
            doc_type=METADATA_TYPE,
            id=doc_id,

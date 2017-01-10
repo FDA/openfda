@@ -239,14 +239,6 @@
                     "index": "not_analyzed",
                     "type": "string"
                   },
-                  "dosage_form": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "dosage_form_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
-                  },
                   "generic_name": {
                     "index": "analyzed",
                     "type": "string"
@@ -340,22 +332,6 @@
                     "type": "string"
                   },
                   "rxcui_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
-                  },
-                  "rxstring": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "rxstring_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
-                  },
-                  "rxtty": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "rxtty_exact": {
                     "index": "not_analyzed",
                     "type": "string"
                   },

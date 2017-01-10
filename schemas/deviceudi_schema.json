@@ -1,0 +1,817 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "properties": {
+    "identifiers": {
+      "items": {
+        "properties": {
+          "id": {
+            "description": "An identifier for a medical device that meets the requirements to uniquely identify a device through its distribution and use. Identifier types include Primary DI, Secondary DI, Direct Marking DI, Unit of Use DI, Package DI, or Previous DI.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Indicates whether the identifier is the Primary, Secondary, Direct Marking, Unit of Use, Package, or Previous DI.",
+            "type": "string"
+          },
+          "issuing_agency": {
+            "description": "Organization accredited by FDA to operate a system for the issuance of UDIs",
+            "type": "string",
+            "possible_values": {
+              "type": "one_of",
+              "value": [
+                {
+                  "GS1": "GS1"
+                },
+                {
+                  "ICCBBA": "ICCBBA"
+                },
+                {
+                  "HIBCC": "HIBCC"
+                },
+                {
+                  "NDC/NHRIC": "NDC/NHRIC"
+                }
+              ]
+            }
+          },
+          "unit_of_use_id": {
+            "description": "An identifier assigned to an individual medical device when a UDI is not labeled on the individual device at the level of its unit of use. Its purpose is to associate the use of a device to/on a patient. Unit of Use DI is an identifier used by hospital staff and Materials Management to account for a single device when the UDI is labeled on a higher level of packaging. The Unit of Use DI does not appear on the label. Data type and field length are determined by the individual Issuing Agency structure.",
+            "type": "string"
+          },
+          "quantity_per_package": {
+            "description": "The number of packages with the same Primary DI or Package DI within a given packaging configuration.",
+            "type": "integer"
+          },
+          "package_discontinue_date": {
+            "description": "Indicates the date this particular package configuration is discontinued by the Labeler or removed from the marketplace.",
+            "type": "date",
+            "format": "date"
+          },
+          "package_status": {
+            "description": "Indicates whether the package is in commercial distribution as defined under 21 CFR 807.3(b).",
+            "type": "string",
+            "possible_values": {
+              "type": "one_of",
+              "value": [
+                {
+                  "In Commercial Distribution": " In Commercial Distribution"
+                },
+                {
+                  "Not in Commercial Distribution": " Not in Commercial Distribution"
+                }
+              ]
+            }
+          },
+          "package_type": {
+            "description": "The type of packaging used for the device.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "record_status": {
+      "description": "Indicates the status of the DI Record.",
+      "type": "string",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "Published": "Published"
+          },
+          {
+            "Unpublished": "Unpublished"
+          },
+          {
+            "Deactivated": "Deactivated"
+          }
+        ]
+      }
+    },
+    "publish_date": {
+      "description": "Indicates the date the DI Record gets published and is available via Public Search.",
+      "type": "date",
+      "format": "date"
+    },
+    "commercial_distribution_end_date": {
+      "description": "Indicates the date the device is no longer held or offered for sale. See 21 CFR 807.3(b) for exceptions. The device may or may not still be available for purchase in the marketplace.",
+      "type": "date",
+      "format": "date"
+    },
+    "commercial_distribution_status": {
+      "type": "string",
+      "description": "Indicates whether the device is in commercial distribution as defined under 21 CFR 807.3(b).",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "In Commercial Distribution": "In Commercial Distribution"
+          },
+          {
+            "Not in Commercial Distribution": "Not in Commercial Distribution"
+          }
+        ]
+      }
+    },
+    "brand_name": {
+      "type": "string",
+      "description": "The Proprietary/Trade/Brand name of the medical device as used in device labeling or in the catalog. This information may 1) be on a label attached to a durable device, 2) be on a package of a disposable device, or 3) appear in labeling materials of an implantable device. The brand name is the name that is typically registered with USPTO and have the ® and/or TM symbol."
+    },
+    "version_or_model_number": {
+      "description": "The version or model found on the device label or accompanying packaging used to identify a category or design of a device. The version or model identifies all devices that have specifications, performance, size, and composition within limits set by the labeler.",
+      "type": "string"
+    },
+    "catalog_number": {
+      "description": "The catalog, reference, or product number found on the device label or accompanying packaging to identify a particular product.",
+      "type": "string"
+    },
+    "company_name": {
+      "description": "Company name associated with the labeler DUNS Number entered in the DI Record.",
+      "type": "string"
+    },
+    "device_count_in_base_package": {
+      "description": "Number of medical devices in the base package.",
+      "type": "integer"
+    },
+    "device_description": {
+      "description": "Additional relevant information about the device that is not already captured as a distinct GUDID data attribute.",
+      "type": "string"
+    },
+    "is_direct_marking_exempt": {
+      "description": "The device is exempt from Direct Marking requirements under 21 CFR 801.45.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "is_pm_exempt": {
+      "description": "Indicates whether the device is exempt from premarket notification requirements.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "is_hct_p": {
+      "description": "Indicates that the product contains or consists of human cells or tissues that are intended for implantation, transplantation, infusion, or transfer into a human recipient as defined under 21 CFR 1271.3.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "is_kit": {
+      "description": "Indicates that the device is a convenience, combination, in vitro diagnostic (IVD), or medical procedure kit. Kits are a collection of products, including medical devices, that are packaged together to achieve a common intended use and are being distributed as a medical device.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "is_combination_product": {
+      "description": "Indicates that the product is comprised of two or more regulated products that are physically, chemically, or otherwise combined or mixed and produced as a single entity; packaged together as a single package; or packaged separately for the intended use together as defined under 21 CFR 3.2(e). At least one of the products in the combination product must be a device in this case.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "is_single_use": {
+      "description": "Indicates that the device is intended for one use or on a single patient during a single procedure.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "has_lot_or_batch_number": {
+      "description": "The number assigned to one or more device(s) that consist of a single type, model, class, size, composition, or software version that are manufactured under essentially the same conditions and that are intended to have uniform characteristics and quality within specified limits. This number is required to be part of the UDI when included on the label in order to provide the means to track the device back to its manufacturing source or otherwise allow the history of the device manufacturing, packaging, labeling, distribution and use to be determined.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "has_serial_number": {
+      "description": "The number that allows for the identification of a device, indicating its position within a series. This number is required to be part of the UDI when included on the label in order to provide the means to track the device back to its manufacturing source or otherwise allow the history of the device manufacturing, packaging, labeling, distribution and use to be determined.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "has_manufacturing_date": {
+      "description": "The date on which a device is manufactured.This date is required to be part of the UDI when included on the label in order to provide the means to track the device back to its manufacturing source or otherwise allow the history of the device manufacturing, packaging, labeling, distribution and use to be determined.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "has_expiration_date": {
+      "description": "The date by which the label of a device states the device must or should be used. This date is required to be part of the UDI when included on the label in order to provide the means to track the device back to its manufacturing source or otherwise allow the history of the device manufacturing, packaging, labeling, distribution and use to be determined.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "has_donation_id_number": {
+      "description": "The Donation Identification Number is applicable to devices that are also regulated as HCT/Ps and is a number that is assigned to each donation.This number/code is required to be part of the UDI when included on the label in order to provide the means to track the device back to its manufacturing source or otherwise allow the history of the device manufacturing, packaging, labeling, distribution and use to be determined.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "is_labeled_as_nrl": {
+      "description": "Indicates that natural rubber latex was used as materials in the manufacture of the medical product and container and the device labeling contains this information. Only applicable to devices not subject to the requirements under 21 CFR 801.437. Not all medical products that are NOT made with natural rubber latex will be marked.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "is_labeled_as_no_nrl": {
+      "description": "Indicates that natural rubber latex was used as materials in the manufacture of the medical product and container and the device labeling contains this information. Only applicable to devices not subject to the requirements under 21 CFR 801.437. Not all medical products that are made with natural rubber latex will be marked.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "is_rx": {
+      "description": "Indicates whether the device requires a prescription.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "is_otc": {
+      "description": "Indicates whether the device is Over-the-Counter.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "true": "true"
+          },
+          {
+            "false": "false"
+          }
+        ]
+      }
+    },
+    "mri_safety": {
+      "description": "Indicates the MRI Safety Information, if any, that is present in the device labeling. Please see the ASTM F2503-13 standard for more information.",
+      "type": "string",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "MR Safe": "MR Safe"
+          },
+          {
+            "MR Unsafe": "MR Unsafe"
+          },
+          {
+            "MR Conditional": "MR Conditional"
+          },
+          {
+            "Labeling does not contain MRI Safety Information": "Labeling does not contain MRI Safety Information"
+          }
+        ]
+      }
+    },
+    "customer_contacts": {
+      "items": {
+        "properties": {
+          "phone": {
+            "description": "Phone number for the customer contact; to be used by patients and consumers for device-related questions.",
+            "type": "string"
+          },
+          "ext": {
+            "description": "Phone number extension for the customer contact.",
+            "type": "string"
+          },
+          "email": {
+            "description": "Email for the Customer contact; to be used by patients and consumers for device-related questions.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "gmdn_terms": {
+      "items": {
+        "properties": {
+          "name": {
+            "description": "Name of the common device type associated with the GMDN Preferred Term Code/FDA PT Code.",
+            "type": "string"
+          },
+          "definition": {
+            "description": "Definition of the common device type associated with the GMDN Preferred Term Code/FDA PT Code.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "product_codes": {
+      "items": {
+        "properties": {
+          "code": {
+            "description": "A three-letter identifier assigned to a device category",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name associated with the three-letter Product Code",
+            "type": "string"
+          },
+          "openfda": {
+            "properties": {
+              "device_class": {
+                "description": "A risk based classification system for all medical devices ((Federal Food, Drug, and Cosmetic Act, section 513).",
+                "type": "string",
+                "possible_values": {
+                  "type": "one_of",
+                  "value": [
+                    {
+                      "1": "Class I (low to moderate risk): general controls"
+                    },
+                    {
+                      "2": "Class II (moderate to high risk): general controls and special controls"
+                    },
+                    {
+                      "3": "Class III (high risk): general controls and Premarket Approval (PMA)"
+                    },
+                    {
+                      "U": "Unclassified"
+                    },
+                    {
+                      "N": "Not classified"
+                    },
+                    {
+                      "F": "HDE"
+                    }
+                  ]
+                }
+              },
+              "device_name": {
+                "description": "This is the proprietary name, or trade name, of the cleared device.",
+                "type": "string"
+              },
+              "medical_specialty_description": {
+                "description": "Regulation Medical Specialty is assigned based on the regulation (e.g. 21 CFR Part 888 is Orthopedic Devices) which is why Class 3 devices lack the “Regulation Medical Specialty” field.",
+                "type": "string"
+              },
+              "regulation_number": {
+                "description": "The classification regulation in the Code of Federal Regulations (CFR) under which the device is identified, described, and formally classified (Code of Federal regulations Title 21, 862.00 through 892.00). The classification regulation covers various aspects of design, clinical evaluation, manufacturing, packaging, labeling, and postmarket surveillance of the specific medical device.",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "device_sizes": {
+      "items": {
+        "properties": {
+          "unit": {
+            "description": "The unit of measure associated with each clinically relevant size.",
+            "type": "string",
+            "possible_values": {
+              "type": "one_of",
+              "value": [
+                {
+                  "Centimeter": "Centimeter"
+                },
+                {
+                  "Meter": "Meter"
+                },
+                {
+                  "millibar": "millibar"
+                }
+              ]
+            }
+          },
+          "value": {
+            "description": "Numeric value for the clinically relevant size measurement of the medical device.",
+            "type": "string"
+          },
+          "type": {
+            "description": "Dimension type for the clinically relevant measurement of the medical device.",
+            "type": "string",
+            "possible_values": {
+              "type": "one_of",
+              "value": [
+                {
+                  "Circumference": "Circumference"
+                },
+                {
+                  "Depth; Device Size Text, specify;": "Depth; Device Size Text, specify;"
+                },
+                {
+                  "Catheter Gauge": "Catheter Gauge"
+                },
+                {
+                  "Outer Diameter": "Outer Diameter"
+                },
+                {
+                  "Height": "Height"
+                },
+                {
+                  "Length": "Length"
+                },
+                {
+                  "Lumen/Inner Diameter": "Lumen/Inner Diameter"
+                },
+                {
+                  "Needle Gauge": "Needle Gauge"
+                },
+                {
+                  "Total Volume": "Total Volume"
+                },
+                {
+                  "Width": "Width"
+                },
+                {
+                  "Weight": "Weight"
+                },
+                {
+                  "Pressure": "Pressure"
+                },
+                {
+                  "Pore Size": "Pore Size"
+                },
+                {
+                  "Area/Surface Area": "Area/Surface Area"
+                },
+                {
+                  "Angle": "Angle"
+                }
+              ]
+            }
+          },
+          "text": {
+            "description": "Additional undefined device size not represented in the GUDID Size Type LOV.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "storage": {
+      "items": {
+        "properties": {
+          "type": {
+            "description": "Indicates storage and handling requirements for the device including temperature, humidity, and atmospheric pressure.",
+            "type": "string",
+            "possible_values": {
+              "type": "one_of",
+              "value": [
+                {
+                  "Handling Environment Atmospheric Pressure": "Handling Environment Atmospheric Pressure"
+                },
+                {
+                  "Handling Environment Humidity": "Handling Environment Humidity"
+                },
+                {
+                  "Handling Environment Temperature": "Handling Environment Temperature"
+                },
+                {
+                  "Special Storage Conditions": "Special Storage Conditions"
+                },
+                {
+                  "Storage Environment Atmospheric Pressure": "Storage Environment Atmospheric Pressure"
+                },
+                {
+                  "Storage Environment Humidity": "Storage Environment Humidity"
+                },
+                {
+                  "Storage Environment Temperature": "Storage Environment Temperature"
+                }
+              ]
+            }
+          },
+          "high": {
+            "properties": {
+              "unit": {
+                "description": "The high value unit of measure associated with the storage and handling conditions.",
+                "type": "string",
+                "possible_values": {
+                  "type": "one_of",
+                  "value": [
+                    {
+                      "Degrees Celsius": "Degrees Celsius"
+                    },
+                    {
+                      "Degrees Fahrenheit": "Degrees Fahrenheit"
+                    },
+                    {
+                      "Degrees Kelvin": "Degrees Kelvin"
+                    },
+                    {
+                      "Kilo Pascal": "Kilo Pascal"
+                    },
+                    {
+                      "Percent (%) Relative Humidity, Millibar": "Percent (%) Relative Humidity, Millibar"
+                    }
+                  ]
+                }
+              },
+              "value": {
+                "description": "Indicates the high value for storage and handling requirements.",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "low": {
+            "properties": {
+              "unit": {
+                "description": "The low value unit of measure associated with the storage and handling conditions.",
+                "type": "string"
+              },
+              "value": {
+                "description": "Indicates the low value for storage and handling requirements.",
+                "type": "string",
+                "possible_values": {
+                  "type": "one_of",
+                  "value": [
+                    {
+                      "Degrees Celsius": "Degrees Celsius"
+                    },
+                    {
+                      "Degrees Fahrenheit": "Degrees Fahrenheit"
+                    },
+                    {
+                      "Degrees Kelvin": "Degrees Kelvin"
+                    },
+                    {
+                      "Kilo Pascal": "Kilo Pascal"
+                    },
+                    {
+                      "Percent (%) Relative Humidity, Millibar": "Percent (%) Relative Humidity, Millibar"
+                    }
+                  ]
+                }
+              }
+            },
+            "type": "object"
+          },
+          "special_conditions": {
+            "description": "Indicates any special storage requirements for the device.",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    },
+    "sterilization": {
+      "properties": {
+        "is_sterile": {
+          "description": "Indicates that the device is packaged as sterile.",
+          "type": "boolean",
+          "possible_values": {
+            "type": "one_of",
+            "value": [
+              {
+                "true": "true"
+              },
+              {
+                "false": "false"
+              }
+            ]
+          }
+        },
+        "is_sterilization_prior_use": {
+          "description": "Indicates that the device requires sterilization prior to use.",
+          "type": "boolean",
+          "possible_values": {
+            "type": "one_of",
+            "value": [
+              {
+                "true": "true"
+              },
+              {
+                "false": "false"
+              }
+            ]
+          }
+        },
+        "sterilization_methods": {
+          "description": "Indicates the method(s) of sterilization that can be used for this device.",
+          "type": "string",
+          "possible_values": {
+            "type": "one_of",
+            "value": [
+              {
+                "Chlorine Dioxide": "Chlorine Dioxide"
+              },
+              {
+                "Dry Heat Sterilization": "Dry Heat Sterilization"
+              },
+              {
+                "Ethylene Oxide": "Ethylene Oxide"
+              },
+              {
+                "High Intensity Light or Pulse Light": "High Intensity Light or Pulse Light"
+              },
+              {
+                "High-level Disinfectant": "High-level Disinfectant"
+              },
+              {
+                "Hydrogen Peroxide": "Hydrogen Peroxide"
+              },
+              {
+                "Liquid Chemical": "Liquid Chemical"
+              },
+              {
+                "Microwave Radiation": "Microwave Radiation"
+              },
+              {
+                "Moist Heat or Steam Sterilization": "Moist Heat or Steam Sterilization"
+              },
+              {
+                "Nitrogen Dioxide": "Nitrogen Dioxide"
+              },
+              {
+                "Ozone": "Ozone"
+              },
+              {
+                "Peracetic Acid": "Peracetic Acid"
+              },
+              {
+                "Radiation Sterilization": "Radiation Sterilization"
+              },
+              {
+                "Sound Waves": "Sound Waves"
+              },
+              {
+                "Supercritical Carbon Dioxide": "Supercritical Carbon Dioxide"
+              },
+              {
+                "Ultraviolet Light": "Ultraviolet Light"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "fei_number": {
+      "description": "Number assigned by FDA during Registration and Listing to all devices in commercial distribution, regardless of pre-market authorization requirements per 21 CFR 807.28(f).",
+      "type": "string"
+    },
+    "pma_submissions": {
+      "items": {
+        "properties": {
+          "submission_number": {
+            "description": "Number associated with the regulatory decision regarding the applicant’s legal right to market a medical device for the following submission types: 510(k), PMA, PDP, HDE, BLA, and NDA.",
+            "type": "string"
+          },
+          "supplement_number": {
+            "description": "Number assigned by FDA to a supplemental application for approval of a change in a medical device with an approved PMA.",
+            "type": "string"
+          },
+          "submission_type": {
+            "description": "Indicates the premarket submission type.",
+            "type": "string",
+            "possible_values": {
+              "type": "one_of",
+              "value": [
+                {
+                  "510(k)": "510(k)"
+                },
+                {
+                  "PMA": "PMA"
+                },
+                {
+                  "PDP": "PDP"
+                },
+                {
+                  "HDE": "HDE"
+                },
+                {
+                  "BLA": "BLA"
+                },
+                {
+                  "NDA": "NDA"
+                }
+              ]
+            }
+          }
+        },
+        "type": "object"
+      },
+      "type": "array"
+    }
+  },
+  "type": "object"
+}

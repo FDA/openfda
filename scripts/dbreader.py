@@ -33,11 +33,17 @@ def main(argv):
   if FLAGS.level_db:
     assert os.path.exists(FLAGS.level_db)
     ldb = leveldb.LevelDB(FLAGS.level_db)
-    db_iter = ldb.RangeIter(FLAGS.start_key, FLAGS.end_key)
+    if FLAGS.start_key and FLAGS.end_key:
+      db_iter = ldb.RangeIter(FLAGS.start_key, FLAGS.end_key)
+    else:
+      db_iter = ldb.RangeIter()
   elif FLAGS.sharded_db:
     assert os.path.exists(FLAGS.sharded_db)
     db = parallel.ShardedDB.open(FLAGS.sharded_db)
-    db_iter = db.range_iter(FLAGS.start_key, FLAGS.end_key)
+    if FLAGS.start_key and FLAGS.end_key:
+      db_iter = db.range_iter(FLAGS.start_key, FLAGS.end_key)
+    else:
+      db_iter = db.__iter__()
   else:
     print 'Must specify --level_db or --sharded_db'
     print FLAGS.GetHelp()

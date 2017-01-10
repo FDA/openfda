@@ -1,0 +1,76 @@
+{
+  "rareport": {
+    "_source": {
+      "excludes": [
+        "*_exact"
+      ],
+      "includes": [
+        "*"
+      ]
+    },
+    "properties": {
+      "consumer": {
+        "properties": {
+          "age": {"type": "string"},
+          "age_unit": {"type": "string"},
+          "gender": {"type": "string"}
+        }
+      },
+      "date_created": {
+        "format": "basic_date||date",
+        "type": "date"
+      },
+      "date_started": {
+        "format": "basic_date||date",
+        "type": "date"
+      },
+      "outcomes": {
+        "type": "string"
+      },
+      "outcomes_exact": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "products": {
+        "properties": {
+          "industry_code": {"type": "string"},
+          "industry_name": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "name_brand": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "role": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          }
+        }
+      },
+      "reactions": {
+        "type": "string"
+      },
+      "reactions_exact": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "report_number": {"type": "string"}
+    }
+  }
+}
