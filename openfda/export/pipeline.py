@@ -63,15 +63,21 @@ FILTERED_ENPOINT_MAP = {
 # structure tells us the data range, the key to query as well as the chunk size
 # to use for a larger payload.
 RANGE_ENDPOINT_MAP = {
+  # The end_date should be set to the date of the latest data availability
+  # If you do not set this correctly, too much data collects in the `All other data` zip files
+  # Check here for drug event:
+  # https://www.fda.gov/drugs/guidancecomplianceregulatoryinformation/surveillance/adversedrugeffects/ucm082193.htm
   '/drug/event': {
     'date_key': '@timestamp',
     'start_date': '2004-01-01',
-    'end_date': '2016-01-01'
+    'end_date': '2017-04-01'
   },
+  # Check here for device event:
+  # https://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/PostmarketRequirements/ReportingAdverseEvents/ucm127891.htm
   '/device/event': {
     'date_key': 'date_received',
     'start_date': '1991-10-01',
-    'end_date': '2016-08-01'
+    'end_date': '2017-07-01'
   },
 }
 
