@@ -21,7 +21,7 @@ def p(obj):
 
 
 def test_fresh_index():
-  if 'TRAVIS' in os.environ:
+  if 'CI' in os.environ:
     raise SkipTest
   es = elasticsearch.Elasticsearch(ES_HOST)
   try:
@@ -48,7 +48,7 @@ def test_fresh_index():
     assert docs[i] == doc, (p(docs[i]), p(fetched))
 
 def test_replace_some_docs():
-  if 'TRAVIS' in os.environ:
+  if 'CI' in os.environ:
     raise SkipTest
   es = elasticsearch.Elasticsearch(ES_HOST)
   test_fresh_index()
