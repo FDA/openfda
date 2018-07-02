@@ -86,8 +86,17 @@ class CreateBatchFiles(AlwaysRunTask):
 
     for row in change_log:
       spl_id, spl_type, spl_date = row
-      # Only grab the human labels for this index
-      if spl_type.lower().find('human') != -1:
+
+      # Only grab the human and ceullar therapy labels for this index
+      valid_types = ['cellular therapy', 'human']
+      is_valid = False
+      for valid_type in valid_types:
+        if spl_type.lower().find(valid_type) != -1:
+          is_valid = True
+          break
+
+      # only process valid document types
+      if is_valid:
         # All blank dates to be treated as the week of June 1, 2009
         if not spl_date:
           spl_date = '20090601120000'
