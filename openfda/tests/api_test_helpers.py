@@ -57,7 +57,7 @@ def fetch_counts(query):
 def not_circle(fn):
   'Skip this test when running under CI.'
   def _fn(*args, **kw):
-    if 'CIRCLECI' in os.environ:
+    if 'TRAVIS' in os.environ:
       raise SkipTest
     fn(*args, **kw)
 
