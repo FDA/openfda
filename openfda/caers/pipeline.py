@@ -1,20 +1,14 @@
 import csv
-import collections
-import glob
+import re
 import logging
 import os
-from os.path import basename, dirname, join
-import re
-import sys
+from os.path import dirname, join
 
 import arrow
-import elasticsearch
+import datetime
 import luigi
-import simplejson as json
-import urllib2
 
-from openfda import common, config, elasticsearch_requests, index_util, parallel
-from openfda.tasks import AlwaysRunTask
+from openfda import common, config, index_util, parallel
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 BASE_DIR = config.data_dir('caers')
@@ -32,18 +26,18 @@ logging.info(S3_LOCAL_DIR, 'dir')
 common.shell_cmd('mkdir -p %s', S3_LOCAL_DIR)
 
 RENAME_MAP = {
-  'RA_Report #': 'report_number',
-  'RA_CAERS Created Date': 'date_created',
-  'AEC_Event Start Date': 'date_started',
-  'PRI_Product Role': 'role',
-  'PRI_Reported Brand/Product Name': 'name_brand',
-  'PRI_FDA Industry Code': 'industry_code',
-  'PRI_FDA Industry Name': 'industry_name',
-  'CI_Age at Adverse Event': 'age',
-  'CI_Age Unit': 'age_unit',
-  'CI_Gender': 'gender',
-  'AEC_One Row Outcomes': 'outcomes',
-  'SYM_One Row Coded Symptoms': 'reactions'
+  'Report #': 'report_number',
+  'Created Date': 'date_created',
+  'Event Start Date': 'date_started',
+  'Product Role': 'role',
+  'Reported Brand/Product Name': 'name_brand',
+  'Industry Code': 'industry_code',
+  'Industry Name': 'industry_name',
+  'Age at Adverse Event': 'age',
+  'Age Unit': 'age_unit',
+  'Sex': 'gender',
+  'One Row Outcomes': 'outcomes',
+  'One Row Symptoms': 'reactions'
 }
 
 # Lists of keys used by the cleaner function in the CSV2JSONMapper() and the
@@ -98,9 +92,15 @@ class CSV2JSONMapper(parallel.Mapper):
     if v is None:
       return (k, None)
 
+    if isinstance(v, str):
+      v = unicode(v, 'utf8', 'ignore').encode().strip()
+
     if k in DATES:
       if v:
-        v = arrow.get(v).format('YYYYMMDD')
+        try:
+          v = datetime.datetime.strptime(re.sub(r'-(\d\d)$', r'-20\1', v), "%d-%b-%Y").strftime("%Y%m%d")
+        except ValueError:
+          logging.warn('Unparseable date: ' + v)
       else:
         return None
 
@@ -118,6 +118,11 @@ class CSV2JSONMapper(parallel.Mapper):
 
 
 class CSV2JSONReducer(parallel.Reducer):
+  def merge_two_dicts(self, x, y):
+    z = x.copy()  # start with x's keys and values
+    z.update(y)  # modifies z with y's keys and values & returns None
+    return z
+
   def _transform(self, value):
     ''' Takes several rows for the same report_number and merges them into
         a single report object, which is the final JSON representation,
@@ -138,7 +143,7 @@ class CSV2JSONReducer(parallel.Reducer):
     track_consumer = []
     for row in value:
       product = {k:v for k, v in row.items() if k in PRODUCTS}
-      consumer = {k:v for k, v in row.items() if k in CONSUMER}
+      consumer = {k:v for k, v in row.items() if k in CONSUMER and v}
       reactions = row.get('reactions', []).split(',')
       outcomes = row.get('outcomes', []).split(',')
 
@@ -149,27 +154,21 @@ class CSV2JSONReducer(parallel.Reducer):
         result['date_started'] = row['date_started']
 
       result['products'].append(product)
+      result['consumer'] = self.merge_two_dicts(result.get('consumer', {}), consumer)
 
-      # The design assumes that the same consumer present in each report, so
-      # fail if that assumption is not true
-      previous_consumer = result.get('consumer', {})
-      if previous_consumer:
-        assert consumer == previous_consumer, \
-          'There are none-matching consumers for the same report_number %s' % \
-            row['report_number']
-      result['consumer'] = consumer
-      
       # Eliminating duplicate reactions
       for reaction in reactions:
         reaction = reaction.strip()
-        result['reactions'][reaction] = True
-        result['reactions_exact'][reaction] = True
-      
+        if reaction:
+          result['reactions'][reaction] = True
+          result['reactions_exact'][reaction] = True
+
       # Eliminating duplicate outcomes
       for outcome in outcomes:
         outcome = outcome.strip()
-        result['outcomes'][outcome] = True
-        result['outcomes_exact'][outcome] = True
+        if outcome:
+          result['outcomes'][outcome] = True
+          result['outcomes_exact'][outcome] = True
 
     # Now that each list is unique, revert to list of strings
     result['reactions'] = result['reactions'].keys()

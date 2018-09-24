@@ -14,6 +14,6 @@ pyelasticsearch==1.4
 python-dateutil==2.4.2
 PyYAML==3.11
 tornado==4.2.1
-urllib3==1.11
+urllib3==1.22
 wheel==0.24.0
 luigi==2.1.1

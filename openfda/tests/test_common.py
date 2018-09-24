@@ -1,3 +1,5 @@
+import random
+import string
 import unittest
 from openfda import common
 class TestCommonMethods(unittest.TestCase):
@@ -13,3 +15,15 @@ class TestCommonMethods(unittest.TestCase):
     assert common.extract_date("18001132") == '1900-11-01'
     assert common.extract_date("") == '1900-01-01'
     assert common.extract_date(None) == '1900-01-01'
+
+  def test_shell_cmd(self):
+    tmpFile = '/tmp/'+(''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32)))
+    common.shell_cmd('touch %(tmpFile)s' % locals())
+    assert len(common.shell_cmd('ls %(tmpFile)s' % locals())) > 0
+    assert common.shell_cmd('ls %(tmpFile)s' % locals()).startswith(tmpFile)
+
+  def test_shell_cmd_quiet(self):
+    tmpFile = '/tmp/'+(''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32)))
+    common.shell_cmd_quiet('touch %(tmpFile)s' % locals())
+    assert common.shell_cmd_quiet('ls %(tmpFile)s' % locals()).startswith(tmpFile)
+

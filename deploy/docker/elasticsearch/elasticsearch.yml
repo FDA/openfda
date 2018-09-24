@@ -9,16 +9,17 @@ path.work: /data0/es-work
 path.logs: /data0/es-log
 
 bootstrap.mlockall: true
+bootstrap.system_call_filter: false
 
-network.bind_host: 0.0.0.0
+network.host: 0.0.0.0
 
 cluster.routing.allocation.node_initial_primaries_recoveries: 32
 cluster.routing.allocation.node_concurrent_recoveries: 32
 
 indices.recovery.max_bytes_per_sec: 1000mb
-indices.store.throttle.max_bytes_per_sec: 1000mb
 indices.recovery.concurrent_streams: 16
 
+index.max_result_window: 25100
 
 cloud.aws.region: ${AWS_REGION}
 discovery.type: ec2

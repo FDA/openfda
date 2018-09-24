@@ -121,7 +121,7 @@ def dump_index(es,
     # Sometimes the filename includes a partition, so we take everything after
     # the endpoint and not just the basename
     name = file_name.split(endpoint)[-1]
-    url = 'http://download.open.fda.gov' + endpoint + name
+    url = 'https://download.open.fda.gov' + endpoint + name
     file_size = os.path.getsize(file_name)/1024/1024.0
 
     return {
@@ -510,9 +510,3 @@ class LoadJSONBase(AlwaysRunTask):
     # optimize index, if requested
     if self.optimize_index:
       optimize_index(self.index_name, wait_for_merge=False)
-
-
-    # update metadata index again. Trying to solve mystery of missing "last_update_date" entries...
-    elasticsearch_requests.update_process_datetime(
-      config.es_client(), self.index_name, arrow.utcnow().format('YYYY-MM-DD')
-    )

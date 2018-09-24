@@ -29,9 +29,10 @@ def parallel_extract(files, worker):
   pool.close()
   pool.join()
 
-  rows = []
+  rows = {}
   while not name_queue.empty():
-    rows.append(name_queue.get())
+    harm_row = name_queue.get()
+    rows[harm_row["name"].lower()] = harm_row
   return rows
 
 
@@ -41,8 +42,6 @@ def harmonization_extract_worker(args):
   try:
     tree = extract_unii.parse_xml(filename)
     harmonized = {}
-    unii_list = []
-    intermediate = []
 
     harmonized['unii'] = extract_unii.extract_unii(tree)
     harmonized['set_id'] = extract_unii.extract_set_id(tree)
@@ -55,15 +54,13 @@ def harmonization_extract_worker(args):
     # print intermediate
     header = ['number', 'name']
     harmonized['va'] = [dict(zip(header, s)) for s in intermediate]
-    # unii_list[harmonized['unii_name']] = harmonized
-    unii_list.append(harmonized)
-    name_queue.put(unii_list)
+    name_queue.put(harmonized)
   except Exception as inst:
     print filename + 'has a problem'
     print inst
 
 
-def harmonize_unii(out_file, product_file, class_index_dir):
+def harmonize_unii(out_file, product_file, unii_file, class_index_dir):
   out = open(out_file, 'w')
   meta_file = csv.DictReader(open(product_file, 'rb'), delimiter='\t')
 
@@ -87,36 +84,43 @@ def harmonize_unii(out_file, product_file, class_index_dir):
 
 
 
-  xmls = []
+  pharma_xmls = []
   # Grab all of the xml files
   for root, _, filenames in os.walk(class_index_dir):
     for filename in fnmatch.filter(filenames, '*.xml'):
-      xmls.append(os.path.join(root, filename))
+      pharma_xmls.append(os.path.join(root, filename))
+
   # call async worker
-  rows = parallel_extract(xmls, harmonization_extract_worker)
+  pharma_rows = parallel_extract(pharma_xmls, harmonization_extract_worker)
+
+  unii_rows = extract_unii.extract_unii_dict(extract_unii.parse_xml(unii_file))
 
   combo = []
 
-    # Loop over ndc_dict, split its key, look for each token as a separate
-    # UNII element, if it is one, then add it to the unii_info dict for this
-    # loop cycle, once done with all of the tokenized keys, then loop over each
-    # set_id in the ndc_dict value list and push a combine record onto the
-    # list that will be the output.
-    # Loop handles the many-to-many relationship of ingredients to products.
+  # Loop over ndc_dict, split its key, look for each token as a separate
+  # UNII element, if it is one, then add it to the unii_info dict for this
+  # loop cycle, once done with all of the tokenized keys, then loop over each
+  # set_id in the ndc_dict value list and push a combine record onto the
+  # list that will be the output.
+  # Loop handles the many-to-many relationship of ingredients to products.
   unii_pivot = {}
   for key, value in ndc_dict.iteritems():
     for substance_name in value:
-      for unii_extract_dict in rows:
-        if unii_extract_dict[0]['name'].lower() == substance_name.lower():
-          if key in unii_pivot:
-            unii_pivot[key].append(unii_extract_dict[0])
-          else:
-            unii_pivot[key] = [unii_extract_dict[0]]
+      if substance_name.lower() in pharma_rows:
+        if key in unii_pivot:
+          unii_pivot[key].append(pharma_rows[substance_name.lower()])
+        else:
+          unii_pivot[key] = [pharma_rows[substance_name.lower()]]
+      elif substance_name.lower() in unii_rows:
+        if key in unii_pivot:
+          unii_pivot[key].append(unii_rows[substance_name.lower()])
+        else:
+          unii_pivot[key] = [unii_rows[substance_name.lower()]]
 
   for key, value in unii_pivot.iteritems():
     output_dict = {}
     output_dict['spl_id'] = key
-    output_dict['unii_indexing'] = value[0]
+    output_dict['unii_indexing'] = value
     combo.append(output_dict)
 
   for row in combo:

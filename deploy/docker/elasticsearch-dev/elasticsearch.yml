@@ -9,10 +9,12 @@ index.number_of_replicas: 0
 path.data: /data0/elasticsearch/data
 path.work: /data0/elasticsearch/work
 path.logs: /data0/elasticsearch/log
+path.repo: /data0/elasticsearch/snapshots
 
 bootstrap.mlockall: true
+bootstrap.system_call_filter: false
 
-network.host: 127.0.0.1
+network.host: 0.0.0.0
 
 cluster.routing.allocation.node_initial_primaries_recoveries: 32
 cluster.routing.allocation.node_concurrent_recoveries: 32

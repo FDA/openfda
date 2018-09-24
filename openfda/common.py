@@ -5,6 +5,7 @@ import os
 import cStringIO
 from os.path import basename, dirname, join
 import subprocess
+import requests
 import logging
 import re
 import sys
@@ -96,11 +97,12 @@ class ProcessException(Exception):
 
 
 class TeeStream(Thread):
-  def __init__(self, input_stream, output_stream=sys.stdout, prefix=''):
+  def __init__(self, quiet, input_stream, output_stream=sys.stdout, prefix=''):
     Thread.__init__(self)
     self._output = cStringIO.StringIO()
     self.output_stream = output_stream
     self.input_stream = input_stream
+    self.quiet = quiet
     self.prefix = prefix
 
   def run(self):
@@ -108,20 +110,21 @@ class TeeStream(Thread):
       line = self.input_stream.read()
       if not line:
         return
-      self.output_stream.write(self.prefix + line)
+      if not self.quiet:
+        self.output_stream.write(self.prefix + line)
       self._output.write(line)
 
   def output(self):
     return self._output.getvalue()
 
 
-def _checked_subprocess(*args, **kw):
+def _checked_subprocess(quiet=False, *args, **kw):
   kw['stderr'] = subprocess.PIPE
   kw['stdout'] = subprocess.PIPE
 
   proc = subprocess.Popen(*args, **kw)
-  stdout = TeeStream(proc.stdout, prefix='OUT: ')
-  stderr = TeeStream(proc.stderr, prefix='ERR: ')
+  stdout = TeeStream(quiet, proc.stdout, prefix='OUT: ')
+  stderr = TeeStream(quiet, proc.stderr, prefix='ERR: ')
   stdout.start()
   stderr.start()
   status_code = proc.wait()
@@ -135,17 +138,25 @@ def _checked_subprocess(*args, **kw):
 
 def cmd(args):
   print 'Running: ', ' '.join(args)
-  return _checked_subprocess(args)
+  return _checked_subprocess(False, args)
 
 
 def shell_cmd(fmt, *args):
+  cmd = _format_cmd(args, fmt)
+  return _checked_subprocess(False, cmd, shell=True)
+
+def shell_cmd_quiet(fmt, *args):
+  cmd = _format_cmd(args, fmt)
+  return _checked_subprocess(True, cmd, shell=True)
+
+
+def _format_cmd(args, fmt):
   print 'Running: %s: %s' % (fmt, args)
   if len(args) > 0:
-      cmd = fmt % args
+    cmd = fmt % args
   else:
-      cmd = fmt
-
-  return _checked_subprocess(cmd, shell=True)
+    cmd = fmt
+  return cmd
 
 
 def transform_dict(coll, transform_fn):
@@ -205,8 +216,14 @@ def get_p_number(data):
 
 def download(url, output_filename):
   shell_cmd('mkdir -p %s', dirname(output_filename))
-  shell_cmd("curl -f '%s' > '%s.tmp'", url, output_filename)
+  shell_cmd("curl -fL '%s' > '%s.tmp'", url, output_filename)
   os.rename(output_filename + '.tmp', output_filename)
+
+def download_requests(url, output_filename):
+  shell_cmd('mkdir -p %s', dirname(output_filename))
+  r = requests.get(url)
+  with open(output_filename, 'wb') as output_file:
+    output_file.write(r.content)
 
 
 def download_to_file_with_retry(url, output_file):

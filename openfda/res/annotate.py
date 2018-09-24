@@ -131,23 +131,26 @@ def AddHarmonizedRowToOpenfda(openfda, row):
   _add_field(openfda, 'upc', row['upc'])
 
   if row['unii_indexing'] != []:
-    for key, value in row['unii_indexing'].items():
-      if key == 'unii':
-        _add_field(openfda, 'unii', value)
-      if key == 'va':
-        for this_item in value:
-          for va_key, va_value in this_item.items():
-            if va_key == 'name':
-              if va_value.find('[MoA]') != -1:
-                _add_field(openfda, 'pharm_class_moa', va_value)
-              if va_value.find('[Chemical/Ingredient]') != -1:
-                _add_field(openfda, 'pharm_class_cs', va_value)
-              if va_value.find('[PE]') != -1:
-                _add_field(openfda, 'pharm_class_pe', va_value)
-              if va_value.find('[EPC]') != -1:
-                _add_field(openfda, 'pharm_class_epc', va_value)
-            if va_key == 'number':
-              _add_field(openfda, 'nui', va_value)
+    unii_list = []
+    for unii_row in row['unii_indexing']:
+      for key, value in unii_row.items():
+        if key == 'unii':
+          unii_list.append(value)
+        if key == 'va':
+          for this_item in value:
+            for va_key, va_value in this_item.items():
+              if va_key == 'name':
+                if va_value.find('[MoA]') != -1:
+                  _add_field(openfda, 'pharm_class_moa', va_value)
+                if va_value.find('[Chemical/Ingredient]') != -1:
+                  _add_field(openfda, 'pharm_class_cs', va_value)
+                if va_value.find('[PE]') != -1:
+                  _add_field(openfda, 'pharm_class_pe', va_value)
+                if va_value.find('[EPC]') != -1:
+                  _add_field(openfda, 'pharm_class_epc', va_value)
+              if va_key == 'number':
+                _add_field(openfda, 'nui', va_value)
+    _add_field(openfda, 'unii', unii_list)
 
 def AnnotateRecall(recall, harmonized_dict):
   openfda = {}

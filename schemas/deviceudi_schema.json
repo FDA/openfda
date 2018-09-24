@@ -88,6 +88,27 @@
         ]
       }
     },
+    "public_version_status": {
+      "type": "string",
+      "description": "Definition forthcoming."
+    },
+    "public_device_record_key": {
+      "type": "string",
+      "description": "Current enhancements will allow the Primary DI to change after the DI record has been released to the public. To ensure records can be linked and managed, a record key will be provided; Unique alphanumeric value, auto generated."
+    },
+    "public_version_number": {
+      "type": "string",
+      "description": "Auto assigned version number, assigned just before file generation; All existing records will have version 1 assigned."
+    },
+    "public_version_date": {
+      "description": "Auto assigned the day file is generated with Time Stamp; All existing records will have first date assigned the day download file is generated with this data element.",
+      "type": "date",
+      "format": "date"
+    },
+    "labeler_duns_number": {
+      "type": "string",
+      "description": "The DUNS Number is a unique nine-digit identifier for businesses. It is used to establish a D&B® business credit file, which is often referenced by lenders and potential business partners to help predict the reliability and/or financial stability of the company in question."
+    },
     "publish_date": {
       "description": "Indicates the date the DI Record gets published and is available via Public Search.",
       "type": "date",
@@ -769,7 +790,7 @@
       "description": "Number assigned by FDA during Registration and Listing to all devices in commercial distribution, regardless of pre-market authorization requirements per 21 CFR 807.28(f).",
       "type": "string"
     },
-    "pma_submissions": {
+    "premarket_submissions": {
       "items": {
         "properties": {
           "submission_number": {

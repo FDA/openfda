@@ -85,7 +85,7 @@
         "type": "string"
       },
       "date_received": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "decision_code": {
@@ -98,7 +98,7 @@
         "type": "string"
       },
       "decision_date": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "device_name": {

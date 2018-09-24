@@ -29,7 +29,7 @@ RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 META_DIR = config.data_dir('device_pma/meta')
 common.shell_cmd('mkdir -p %s', META_DIR)
 
-DEVICE_PMA_ZIP = 'http://www.accessdata.fda.gov/premarket/ftparea/pma.zip'
+DEVICE_PMA_ZIP = 'https://www.accessdata.fda.gov/premarket/ftparea/pma.zip'
 
 class DownloadPMA(luigi.Task):
   def requires(self):

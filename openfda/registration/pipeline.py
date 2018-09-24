@@ -75,7 +75,7 @@ common.shell_cmd('mkdir -p %s', BASE_DIR)
 META_DIR = config.data_dir('registration/meta')
 common.shell_cmd('mkdir -p %s', META_DIR)
 
-DEVICE_REG_PAGE = ('http://www.fda.gov/MedicalDevices/'
+DEVICE_REG_PAGE = ('https://www.fda.gov/MedicalDevices/'
                    'DeviceRegulationandGuidance/HowtoMarketYourDevice/'
                    'RegistrationandListing/ucm134495.htm')
 

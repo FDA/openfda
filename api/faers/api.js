@@ -8,6 +8,7 @@ var _ = require('underscore');
 var request = require('request');
 var querystring = require('querystring');
 var url = require('url');
+var Promise = require('bluebird');
 var cache = require('apicache').middleware;
 
 var Stats = require('fast-stats').Stats;
@@ -91,6 +92,7 @@ var DEVICE_UDI_INDEX = 'deviceudi';
 var DRUG_EVENT_INDEX = 'drugevent';
 var DRUG_LABEL_INDEX = 'druglabel';
 var FOOD_EVENT_INDEX = 'foodevent';
+var OTHER_NSDE_INDEX = 'othernsde';
 var PROCESS_METADATA_INDEX = 'openfdametadata';
 var EXPORT_DATA_INDEX = 'openfdadata';
 
@@ -110,27 +112,9 @@ var EXPORT_DATA_INDEX = 'openfdadata';
 
 var ENDPOINTS = [
   {
-    'index': DEVICE_EVENT_INDEX,
-    'endpoint': '/device/event.json',
-    'name': 'deviceevent',
-    'basic' : true
-  },
-  {
-    'index': DEVICE_RECALL_INDEX,
-    'endpoint': '/device/recall.json',
-    'name': 'devicerecall',
-    'basic' : true
-  },
-  {
     'index': DEVICE_CLASSIFICATION_INDEX,
     'endpoint': '/device/classification.json',
     'name': 'deviceclass',
-    'basic' : true
-  },
-  {
-    'index': DEVICE_REGISTRATION_INDEX,
-    'endpoint': '/device/registrationlisting.json',
-    'name': 'devicereglist',
     'basic' : true
   },
   {
@@ -140,9 +124,32 @@ var ENDPOINTS = [
     'basic' : true
   },
   {
+    'index': ALL_ENFORCEMENT_INDEX,
+    'endpoint': '/device/enforcement.json',
+    'name': 'deviceenforcement'
+  },
+  {
+    'index': DEVICE_EVENT_INDEX,
+    'endpoint': '/device/event.json',
+    'name': 'deviceevent',
+    'basic' : true
+  },
+  {
     'index': DEVICE_PMA_INDEX,
     'endpoint': '/device/pma.json',
     'name': 'devicepma',
+    'basic' : true
+  },
+  {
+    'index': DEVICE_RECALL_INDEX,
+    'endpoint': '/device/recall.json',
+    'name': 'devicerecall',
+    'basic' : true
+  },
+  {
+    'index': DEVICE_REGISTRATION_INDEX,
+    'endpoint': '/device/registrationlisting.json',
+    'name': 'devicereglist',
     'basic' : true
   },
   {
@@ -150,6 +157,11 @@ var ENDPOINTS = [
     'endpoint': '/device/udi.json',
     'name': 'deviceudi',
     'basic' : true
+  },
+  {
+    'index': ALL_ENFORCEMENT_INDEX,
+    'endpoint': '/drug/enforcement.json',
+    'name': 'drugenforcement'
   },
   {
     'index': DRUG_EVENT_INDEX,
@@ -164,10 +176,9 @@ var ENDPOINTS = [
     'basic' : true
   },
   {
-    'index': DRUG_LABEL_INDEX,
-    'endpoint': '/drug/label.json',
-    'name': 'druglabel',
-    'basic' : true
+    'index': ALL_ENFORCEMENT_INDEX,
+    'endpoint': '/food/enforcement.json',
+    'name': 'foodenforcement'
   },
   {
     'index': FOOD_EVENT_INDEX,
@@ -176,19 +187,10 @@ var ENDPOINTS = [
     'basic' : true
   },
   {
-    'index': ALL_ENFORCEMENT_INDEX,
-    'endpoint': '/drug/enforcement.json',
-    'name': 'recall'
-  },
-  {
-    'index': ALL_ENFORCEMENT_INDEX,
-    'endpoint': '/device/enforcement.json',
-    'name': 'recall'
-  },
-  {
-    'index': ALL_ENFORCEMENT_INDEX,
-    'endpoint': '/food/enforcement.json',
-    'name': 'recall'
+    'index': OTHER_NSDE_INDEX,
+    'endpoint': '/other/nsde.json',
+    'name': 'othernsde',
+    'basic' : true
   },
   {
     'index': EXPORT_DATA_INDEX,
@@ -202,6 +204,7 @@ var VALID_URLS = [
   'api.fda.gov/drug/',
   'api.fda.gov/food/',
   'api.fda.gov/device/',
+  'api.fda.gov/other/',
   'api.fda.gov/drug/event.json',
   'api.fda.gov/drug/label.json',
   'api.fda.gov/drug/enforcement.json',
@@ -214,7 +217,8 @@ var VALID_URLS = [
   'api.fda.gov/device/registrationlisting.json',
   'api.fda.gov/device/pma.json',
   'api.fda.gov/food/enforcement.json',
-  'api.fda.gov/food/event.json'
+  'api.fda.gov/food/event.json',
+  'api.fda.gov/other/nsde.json'
 ];
 
 // For each endpoint, we track the success/failure status for the
@@ -243,6 +247,7 @@ var UpdateIndexInformation = function(client, index_info) {
   client.search({
     index: PROCESS_METADATA_INDEX,
     type: 'last_run',
+    size: 20,
     fields: 'last_update_date'
   }).then(function(body) {
     var util = require('util');
@@ -281,7 +286,40 @@ var ErrorTypes = {
 
 var app = express();
 app.disable('x-powered-by');
-app.use(CacheMiddleware(60));
+
+//Middleware to trim extra spaces from api urls.
+var trim_middleware = function(req, res, next) {
+  req.url = req.url.trim().replace(/\%20$/, "")
+  req.originalUrl = req.originalUrl.trim().replace(/\%20$/, "")
+
+  if (!_.isEmpty(req.query)) {
+    req.query = _.object(_.map(req.query, function (value, key) {
+      if (typeof(value)=="string") {
+        return [key, value.trim().replace(/\%20$/, "")];
+      }
+      else {
+        return value
+      }
+    }));
+  }
+
+  if (!_.isEmpty(req._parsedUrl)) {
+    req._parsedUrl = _.mapObject(req._parsedUrl, function (value, key) {
+      if (typeof(value)=="string") {
+        return value.trim().replace(/\%20$/, "");
+      }
+      else {
+        return value
+      }
+    })
+  }
+  next();
+}
+
+app.use(trim_middleware);
+
+// Set global cache-control header to 1 hour.
+app.use(CacheMiddleware(3600));
 
 // Use gzip compression
 app.use(express.compress());
@@ -321,12 +359,15 @@ setInterval(UpdateIndexInformation.bind(null, client, index_info),
 // includes the last time the index was updated, a green/yellow/red "status"
 // field indicating the recent health of the endpoint, the number of requests to
 // the endpoint, and the average latency of the endpoint in milliseconds.
-app.get('/status', function(request, response) {
+app.get('/status', function(req, response) {
   // Allow the status page to get status info....
   response.setHeader('Access-Control-Allow-Origin', '*');
 
-  var res = {};
-  _.map(ENDPOINTS, function(endpoint) {
+  var filtered_endpoints = ENDPOINTS.filter(function(item) {
+    return item.download!=true
+  })
+
+  Promise.all(filtered_endpoints.map(function(endpoint) {
     var index = endpoint.index;
     var info = index_info[index];
     var errorCount = 0;
@@ -338,28 +379,64 @@ app.get('/status', function(request, response) {
     if (errorCount > 1) {
       status = 'YELLOW';
     }
+
     if (errorCount > 3) {
       status = 'RED';
     }
 
     var requestCount = 0;
     var buckets = info.latency.distribution();
+
     for (var i = 0; i < buckets.length; ++i) {
       if (!buckets[i]) { continue; }
-      requestCount += buckets[i].count;
+        requestCount += buckets[i].count;
     }
 
-    res[index] = {
-      endpoint: index, // yes, this should be endpoint, kept for compatibility with status page
-      status: status,
-      last_updated: info.last_updated,
-      documents: info.document_count,
-      requests: requestCount,
-      latency: info.latency.amean(),
-    };
-  });
+    return new Promise(function(resolve, reject) {
+      request('http://localhost:8000'+endpoint.endpoint, function(error, response, body) {
+        if (error) {
+          reject(error)
+        } else {
+          try {
+            resolve(JSON.parse(body).meta.results.total)
+          } catch(err) {
+            reject(err)
+          }
+        }
+      })
 
-  response.json(_.values(res));
+    }).then(function(document) {
+      return new Promise(function(resolve, reject) {
+        try {
+          resolve({
+            endpoint: endpoint.name,
+            status: status,
+            last_updated: info.last_updated,
+            documents: document,
+            requests: requestCount,
+            latency: info.latency.amean()
+          })
+        } catch(err) {
+          reject(err)
+        }
+      }).then(function(promised_status_object) {
+        return promised_status_object
+      }).catch(function(err) {
+        log.error("Encountered error: ", err)
+      });
+
+    }).catch(function(err) {
+      log.error("Encountered error: ", err)
+    })
+
+  })).then(function(status_object) {
+    response.json(status_object.filter(function(item) {
+      return item!=undefined
+    }))
+
+  }).catch(function(err) {
+    log.error("Encountered error: ", err)
+  });
 });
 
 // endpoint for the API statistics page - cached in memory for 1 hour.
@@ -388,65 +465,92 @@ app.get('/usage.json', cache('1 hour'), function(req, res) {
 
 
   request(options, function (error, response, body) {
-      usage = {
+
+    var indexInfo = {}
+    var filtered_endpoints = ENDPOINTS.filter(function(item) {
+      indexInfo[item.name] = 0
+      return item.download!=true
+    })
+
+    Promise.all(filtered_endpoints.map(function(endpoint) {
+      var index = endpoint.index;
+      var info = index_info[index];
+      return new Promise(function (resolve, reject) {
+        request('http://localhost:8000' + endpoint.endpoint, function (error, response, body) {
+          if (error) {
+            reject(error)
+          } else {
+            try {
+              resolve(JSON.parse(body).meta.results.total)
+            } catch (err) {
+              reject(err)
+            }
+          }
+        })
+
+      }).then(function (document) {
+        indexInfo[endpoint.name] = document || 10
+
+      }).catch(function(err) {
+        log.error("Usage encountered error on : ", endpoint.name, ": ", err)
+      })
+
+    })).then(function () {
+      var usage = {
         table:[],
         stats :[],
         others:[],
         lastThirtyDayUsage: 0,
-        indexInfo:{}
+        indexInfo: indexInfo
       };
-      _.each(ENDPOINTS, function(endpoint) {
-          var info = index_info[endpoint.index];
-          usage.indexInfo[endpoint.name] = info.document_count || 10;
-      });
 
       if (!error && response.statusCode == 200) {
-          var data = JSON.parse(body);
-          if (data.results) {
-            var unwanted = 0;
-            _.map(data.results, function(result){
-                if (VALID_URLS.indexOf(result.path) > -1) {
-                  usage.table.push(result);
-                } else {
-                  unwanted+= result.hits;
-                  usage.others.push(result);
-                }
-
-            });
-
-            if (unwanted > 0) {
-              usage.table.push({
-                "depth": 1,
-                "path": "others",
-                "terminal": true,
-                "descendent_prefix": "2/api.fda.gov/drug/",
-                "hits": unwanted
-              });
+        var data = JSON.parse(body);
+        if (data.results) {
+          var unwanted = 0;
+          _.map(data.results, function(result){
+            if (VALID_URLS.indexOf(result.path) > -1) {
+              usage.table.push(result);
+            } else {
+              unwanted+= result.hits;
+              usage.others.push(result);
             }
 
-            _.each(usage.table, function(row){
-              usage.lastThirtyDayUsage += row.hits;
+          });
+
+          if (unwanted > 0) {
+            usage.table.push({
+              "depth": 1,
+              "path": "others",
+              "terminal": true,
+              "descendent_prefix": "2/api.fda.gov/drug/",
+              "hits": unwanted
             });
-
           }
-          if (data.hits_over_time) {
 
-              _.each(data.hits_over_time.rows, function(row){
+          _.each(usage.table, function(row){
+            usage.lastThirtyDayUsage += row.hits;
+          });
 
-                var stat = {totalCount: 0, paths:[]};
-                usage.stats.push(stat);
+        }
+        if (data.hits_over_time) {
 
-                for (var i =0; i < row.c.length; i++) {
-                  if (i === 0) {
-                   stat.day = row.c[i].f;
-                  } else {
-                    stat.totalCount += row.c[i].v;
-                    stat.paths.push({path: data.hits_over_time.cols[i].label, count: row.c[i].v});
-                  }
-                }
+          _.each(data.hits_over_time.rows, function(row){
 
-              });
-          }
+            var stat = {totalCount: 0, paths:[]};
+            usage.stats.push(stat);
+
+            for (var i =0; i < row.c.length; i++) {
+              if (i === 0) {
+               stat.day = row.c[i].f;
+              } else {
+                stat.totalCount += row.c[i].v;
+                stat.paths.push({path: data.hits_over_time.cols[i].label, count: row.c[i].v});
+              }
+            }
+
+          });
+        }
       } else {
         log.error(error);
         log.error("The response is :");
@@ -456,6 +560,10 @@ app.get('/usage.json', cache('1 hour'), function(req, res) {
       res.setHeader('Cache-Control', 'public, max-age=' + 43200); //cache for 12 hours
       res.json(usage);
 
+    }).catch(function (err) {
+      log.error("Usage encountered error: ", err)
+    })
+
   });
 
 });
@@ -463,10 +571,11 @@ app.get('/usage.json', cache('1 hour'), function(req, res) {
 app.get('/healthcheck', function(request, response) {
   client.cluster.health({
     index: DRUG_EVENT_INDEX,
-    timeout: 1000 * 60,
+    timeout: '60s',
     waitForStatus: 'yellow'
   }, function(error, health_response, status) {
     health_json = JSON.stringify(health_response, undefined, 2);
+    response.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
     if (error != undefined) {
       response.send(500, 'NAK.\n' + error + '\n');
     } else if (health_response['status'] == 'red') {
@@ -477,11 +586,13 @@ app.get('/healthcheck', function(request, response) {
   });
 });
 
-ApiError = function(response, code, message) {
+ApiError = function(response, code, message, details) {
   error_response = {};
   error_response.error = {};
   error_response.error.code = code;
   error_response.error.message = message;
+  if (details)
+    error_response.error.details = details;
   response.json(HTTP_CODE[code], error_response);
 };
 
@@ -521,6 +632,7 @@ TryToCheckApiParams = function(request, response) {
 TryToBuildElasticsearchParams = function(params, es_index, response) {
   try {
     var es_query = elasticsearch_query.BuildQuery(params);
+    var es_sort = elasticsearch_query.BuildSort(params);
     log.info(es_query, 'Elasticsearch Query');
   } catch (e) {
     log.error(e);
@@ -536,12 +648,12 @@ TryToBuildElasticsearchParams = function(params, es_index, response) {
   if (params.staging) {
     index = es_index + '.staging';
   }
-  // Added sort by _id to ensure consistent results
+  // Added default sort by _uid to ensure consistent results
   // across servers
   var es_search_params = {
     index: es_index,
     body: es_query,
-    sort: '_uid'
+    sort: es_sort || '_uid'
   };
 
   if (!params.count) {
@@ -555,8 +667,8 @@ TryToBuildElasticsearchParams = function(params, es_index, response) {
 TrySearch = function(index, params, es_search_params, response) {
   client.search(es_search_params)
   .then(function(body) {
-    if (body.hits.hits.length == 0) {
-      return ApiError(response, ErrorTypes.NOT_FOUND, 'No matches found!');
+    if (body.hits.hits.length == 0 && !(params.limit === 0 && body.hits.total > 0)) {
+        return ApiError(response, ErrorTypes.NOT_FOUND, 'No matches found!');
     }
 
     var requestTime = body.took;
@@ -599,16 +711,20 @@ TrySearch = function(index, params, es_search_params, response) {
     }
 
     // Count query
-    if (body.facets.count.terms) {
-      // Term facet count
-      if (body.facets.count.terms.length == 0) {
+    if (body.aggregations.count && body.aggregations.count.buckets) {
+      if (body.aggregations.count.buckets.length == 0) {
         return ApiError(response, ErrorTypes.NOT_FOUND, 'Nothing to count');
       }
 
       // We add 1000 to the limit on all count queries in order to overcome
       // inaccurate results in the tail of the result, as such, we need to lop
       // off any results beyond the amount requested in the params.limit.
-      var count_result = body.facets.count.terms;
+      var count_result = body.aggregations.count.buckets.map((bucket) => {
+          return {
+              term: bucket.key,
+              count: bucket.doc_count
+          }
+      });
       response_json.results = (count_result.length > params.limit) ?
                                count_result.slice(0, params.limit) :
                                count_result;
@@ -616,24 +732,24 @@ TrySearch = function(index, params, es_search_params, response) {
     }
 
     // Date facet count
-    if (body.facets.count.entries) {
-      if (body.facets.count.entries.length == 0) {
+    if (body.aggregations.histogram && body.aggregations.histogram.buckets) {
+      if (body.aggregations.histogram.buckets.length == 0) {
         return ApiError(response, ErrorTypes.NOT_FOUND, 'Nothing to count');
       }
 
-      for (i = 0; i < body.facets.count.entries.length; i++) {
-        var day = moment.utc(body.facets.count.entries[i].time);
-        body.facets.count.entries[i].time = day.format('YYYYMMDD');
-      }
-
-      response_json.results = body.facets.count.entries;
+      response_json.results = body.aggregations.histogram.buckets.map((bucket) => {
+          return {
+              time: bucket.key_as_string,
+              count: bucket.doc_count
+          };
+      });
       return response.json(HTTP_CODE.OK, response_json);
     }
 
     return ApiError(response, ErrorTypes.NOT_FOUND, 'Nothing to count');
   }, function(error) {
     log.error(error);
-    ApiError(response, ErrorTypes.SERVER_ERROR, 'Check your request and try again');
+    ApiError(response, ErrorTypes.SERVER_ERROR, 'Check your request and try again', error.message);
   });
 };
 

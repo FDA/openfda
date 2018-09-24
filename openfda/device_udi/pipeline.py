@@ -73,6 +73,11 @@ class XML2JSONMapper(parallel.Mapper):
     # Changing names to match the openFDA naming standard
     # key = source name, value = replacement name
     RENAME_MAP = {
+      "publicDeviceRecordKey": "public_device_record_key",
+      "publicVersionStatus": "public_version_status",
+      "publicVersionNumber": "public_version_number",
+      "publicVersionDate": "public_version_date",
+      "dunsNumber": "labeler_duns_number",
       "deviceRecordStatus": "record_status",
       "devicePublishDate": "publish_date",
       "deviceCommDistributionEndDate": "commercial_distribution_end_date",
@@ -137,7 +142,7 @@ class XML2JSONMapper(parallel.Mapper):
       "storageHandlingSpecialConditionText": "special_conditions",
       "sterilizationMethod": "sterilization_method",
       "feis": "fei_number",
-      "premarketSubmissions": "pma_submissions",
+      "premarketSubmissions": "premarket_submissions",
       "submissionNumber": "submission_number",
       "supplementNumber": "supplement_number",
       "submissionType": "submission_type",
@@ -146,7 +151,7 @@ class XML2JSONMapper(parallel.Mapper):
 
     IGNORE = ['@xmlns']
 
-    FLATTEN = ["customer_contacts", "device_sizes", "gmdn_terms", "identifiers", "pma_submissions",
+    FLATTEN = ["customer_contacts", "device_sizes", "gmdn_terms", "identifiers", "premarket_submissions",
                "product_codes", "storage", "fei_number", "sterilization_methods"]
 
     logging.info('Extracting devices from %s...', map_input.filename)

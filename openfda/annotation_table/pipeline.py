@@ -16,6 +16,7 @@ import re
 import subprocess
 import urllib2
 import urlparse
+import requests
 
 import arrow
 import simplejson as json
@@ -45,8 +46,12 @@ PHARM_CLASS_DOWNLOAD = \
 RXNORM_DOWNLOAD = \
   DAILYMED_PREFIX + 'rxnorm_mappings.zip'
 
+UNII_DOWNLOAD = \
+  'https://www.fda.gov/downloads/ForIndustry/DataStandards/StructuredProductLabeling/UCM363354.zip'
+
 NDC_DOWNLOAD_PAGE = \
-  'http://www.fda.gov/drugs/informationondrugs/ucm142438.htm'
+  'https://www.fda.gov/drugs/informationondrugs/ucm142438.htm'
+
 
 # The database names play a central role in terms of output and the joiner.
 # For instance: SPL_EXTRACT_DB is used as both an output of a download/json/etc
@@ -71,7 +76,7 @@ class DownloadNDC(luigi.Task):
     soup = BeautifulSoup(urllib2.urlopen(NDC_DOWNLOAD_PAGE).read(), 'lxml')
     for a in soup.find_all(href=re.compile('.*.zip')):
       if 'NDC Database File' in a.text:
-        zip_url = urlparse.urljoin('http://www.fda.gov', a['href'])
+        zip_url = urlparse.urljoin('https://www.fda.gov', a['href'])
         break
 
     if not zip_url:
@@ -80,15 +85,25 @@ class DownloadNDC(luigi.Task):
     common.download(zip_url, self.output().path)
 
 
+class DownloadPharmaClass(luigi.Task):
+  def requires(self):
+    return []
+
+  def output(self):
+    return luigi.LocalTarget(join(BASE_DIR, 'pharma_class/raw/pharmacologic_class.zip'))
+
+  def run(self):
+    common.download(PHARM_CLASS_DOWNLOAD, self.output().path)
+
 class DownloadUNII(luigi.Task):
   def requires(self):
     return []
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'unii/raw/pharmacologic_class.zip'))
+    return luigi.LocalTarget(join(BASE_DIR, 'unii/raw/unii.zip'))
 
   def run(self):
-    common.download(PHARM_CLASS_DOWNLOAD, self.output().path)
+    common.download_requests(UNII_DOWNLOAD, self.output().path)
 
 
 class DownloadRXNorm(luigi.Task):
@@ -160,18 +175,33 @@ class ExtractRXNorm(luigi.Task):
     os.system(cmd)
 
 
-class ExtractUNII(luigi.Task):
+class ExtractPharmaClass(luigi.Task):
   def requires(self):
-    return DownloadUNII()
+    return DownloadPharmaClass()
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'unii/extracted'))
+    return luigi.LocalTarget(join(BASE_DIR, 'pharma_class/extracted'))
 
   def run(self):
     zip_filename = self.input().path
     output_dir = self.output().path
     os.system('mkdir -p %s' % output_dir)
     ExtractXMLFromNestedZip(zip_filename, output_dir)
+
+class ExtractUNII(luigi.Task):
+  def requires(self):
+    return DownloadUNII()
+
+  def output(self):
+    return luigi.LocalTarget(join(BASE_DIR, 'unii/extracted/unii.xml'))
+
+  def run(self):
+    zip_filename = self.input().path
+    output_filename = self.output().path
+    os.system('mkdir -p %s' % dirname(output_filename))
+    cmd = 'unzip -p %(zip_filename)s unii.xml > \
+                    %(output_filename)s' % locals()
+    os.system(cmd)
 
 
 class RXNorm2JSONMapper(parallel.Mapper):
@@ -228,17 +258,18 @@ class RXNorm2JSON(luigi.Task):
 #                   go directly to leveldb, avoiding the JSON step.
 class UNIIHarmonizationJSON(luigi.Task):
   def requires(self):
-    return [ExtractNDC(), ExtractUNII()]
+    return [ExtractNDC(), ExtractPharmaClass(), ExtractUNII()]
 
   def output(self):
     return luigi.LocalTarget(join(BASE_DIR, 'unii_extract.json'))
 
   def run(self):
     ndc_file = self.input()[0].path
-    unii_dir = self.input()[1].path
+    pharma_class_dir = self.input()[1].path
+    unii_dir = self.input()[2].path
     output_file = self.output().path
     os.system('mkdir -p %s' % dirname(self.output().path))
-    unii_harmonization.harmonize_unii(output_file, ndc_file, unii_dir)
+    unii_harmonization.harmonize_unii(output_file, ndc_file, unii_dir, pharma_class_dir)
 
 
 class UNII2JSON(luigi.Task):
@@ -291,6 +322,7 @@ class NDC2JSONMapper(parallel.Mapper):
     new_value = common.transform_dict(value, _cleaner)
     output.add(key, new_value)
 
+
 # TODO(hansnelsen): Refactor the UNII steps to not need NDC File. Once done,
 #                   Everything can use this step. As it stands now, it is only
 #                   used by the JoinAll() task.
@@ -324,20 +356,23 @@ class SPLSetIDMapper(parallel.Mapper):
     self.index_db = index_db
 
   def map(self, key, value, output):
-    set_id, version, _id = value['set_id'], value['version'], value['id']
+    set_id, version, _id = value.get('set_id'), value.get('version'), value.get('id')
 
-    _index = {
-      '_version': version,
-      '_id': _id,
-      '_set_id': set_id,
-      '_key': key
-    }
+    if set_id is None:
+      logging.warn('SPLSetIDMapper encountered a blank SPL Set ID!')
+    else:
+      _index = {
+        '_version': version,
+        '_id': _id,
+        '_set_id': set_id,
+        '_key': key
+      }
 
-    # Limiting the output to the known universe of SPL IDs that exist in the
-    # main join file (NDC).
-    if _id in self.index_db:
-      output.add('_set_id:' + set_id, (version, _index))
-      output.add('_id:' + _id, (version, _index))
+      # Limiting the output to the known universe of SPL IDs that exist in the
+      # main join file (NDC).
+      if _id in self.index_db:
+        output.add('_set_id:' + set_id, (version, _index))
+        output.add('_id:' + _id, (version, _index))
 
 
 class SPLSetIDIndex(luigi.Task):
@@ -596,17 +631,18 @@ class JoinAllReducer(parallel.Reducer):
     for row in self._join(values):
       output.put(key, row)
     else:
-      logging.warn('No data for key: %s, values: %s', key, values)
+      logging.warn('No data for key: %s', key)
 
 
 class CombineHarmonization(DependencyTriggeredTask):
   def requires(self):
-    return { 'ndc': NDC2JSON(),
-             'spl': GenerateCurrentSPLJSON(),
-             'unii': UNII2JSON(),
-             'rxnorm': RXNorm2JSON(),
-             'upc' : UpcXml2JSON(),
-             'setid': SPLSetIDIndex() }
+    return {'ndc': NDC2JSON(),
+            'spl': GenerateCurrentSPLJSON(),
+            'unii': UNII2JSON(),
+            'rxnorm': RXNorm2JSON(),
+            'upc': UpcXml2JSON(),
+            'setid': SPLSetIDIndex()
+            }
 
   def output(self):
     return luigi.LocalTarget(join(BASE_DIR, 'harmonized.json'))

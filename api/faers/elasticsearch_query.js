@@ -1,6 +1,7 @@
 // Elasticsearch Query Builder
 
 var ejs = require('elastic.js');
+var escape = require('escape-html');
 
 var ELASTICSEARCH_QUERY_ERROR = 'ElasticsearchQueryError';
 
@@ -23,6 +24,7 @@ var DATE_FIELDS = [
   'drugstartdate',
   'drugenddate',
   'patient.patientdeath.patientdeathdate',
+  'patientdeathdate',
   'receiptdate',
   'receivedate',
   'transmissiondate',
@@ -30,6 +32,8 @@ var DATE_FIELDS = [
   // RES
   'report_date',
   'recall_initiation_date',
+  'center_classification_date',
+  'termination_date',
 
   // SPL
   'effective_time',
@@ -47,9 +51,11 @@ var DATE_FIELDS = [
   'baseline_date_ceased_marketing',
   'baseline_date_first_marketed',
   'expiration_date_of_device',
+  'device_date_of_manufacturere',
+
 
   // R&L
-  'created_date',
+  'products.created_date',
 
   // Device Recall
   'event_date_terminated',
@@ -61,12 +67,20 @@ var DATE_FIELDS = [
   // Device UDI
   'package_discontinue_date',
   'publish_date',
+  'public_version_date',
   'commercial_distribution_end_date',
   'identifiers.package_discontinue_date',
+  'package_discontinue_date',
 
   // Food Events
   'date_created',
-  'date_started'
+  'date_started',
+
+  // NSDE
+  'marketing_start_date',
+  'marketing_end_date'
+
+
 ];
 
 // Fields which should be rewritten from field.exact to field_exact
@@ -151,6 +165,8 @@ EXACT_FIELDS = [
   'reactions'
 ];
 
+exports.ELASTICSEARCH_QUERY_ERROR = ELASTICSEARCH_QUERY_ERROR;
+
 exports.SupportedQueryString = function(query) {
   var supported_query_re = new RegExp(SUPPORTED_QUERY_RE);
   return supported_query_re.test(query);
@@ -170,6 +186,26 @@ exports.ReplaceExact = function(search_or_count) {
   return search_or_count;
 };
 
+exports.BuildSort = function(params) {
+    var sort = '';
+    if (params.sort) {
+        if (!exports.SupportedQueryString(params.sort)) {
+            throw {
+                name: ELASTICSEARCH_QUERY_ERROR,
+                message: 'Sort not supported: ' + escape(params.sort)
+            };
+        }
+        if (params.sort.indexOf('exact') == -1 && !DATE_FIELDS.find(f => params.sort.split(':')[0].endsWith(f))) {
+            throw {
+                name: ELASTICSEARCH_QUERY_ERROR,
+                message: 'Sorting allowed by exact or date fields only: ' + escape(params.sort.split(':')[0])
+            };
+        }
+        sort = exports.ReplaceExact(params.sort);
+    }
+
+    return sort;
+};
 exports.BuildQuery = function(params) {
   q = ejs.Request();
 
@@ -182,7 +218,7 @@ exports.BuildQuery = function(params) {
     if (!exports.SupportedQueryString(params.search)) {
       throw {
         name: ELASTICSEARCH_QUERY_ERROR,
-        message: 'Search not supported: ' + params.search
+        message: 'Search not supported: ' + escape(params.search)
       };
     }
     q.query(ejs.QueryStringQuery(exports.ReplaceExact(params.search)));
@@ -190,8 +226,10 @@ exports.BuildQuery = function(params) {
 
   if (params.count) {
     if (DATE_FIELDS.indexOf(params.count) != -1) {
-      q.facet(ejs.DateHistogramFacet('count').
-        field(params.count).interval('day').order('time'));
+      //q.facet(ejs.DateHistogramFacet('count').
+      //  field(params.count).interval('day').order('time'));
+        q.agg(ejs.DateHistogramAggregation('histogram').field(params.count).interval('day')
+            .order('_key', 'asc').format('yyyyMMdd').minDocCount(1));
     } else {
       // Adding 1000 extra to limit since we are using estimates rather than
       // actual counts. It turns out that the tail of estimates starts to
@@ -200,8 +238,9 @@ exports.BuildQuery = function(params) {
       // the limit, this number will need to be increased. We currently only
       // allow a max limit of 1k, so this setting is overkill.
       var limit = parseInt(params.limit) + 1000;
-      q.facet(ejs.TermsFacet('count').
-        fields([exports.ReplaceExact(params.count)]).size(limit));
+      //q.facet(ejs.TermsFacet('count').
+      //  fields([exports.ReplaceExact(params.count)]).size(limit));
+      q.agg(ejs.TermsAggregation('count').field(exports.ReplaceExact(params.count)).size(limit));
     }
   }
 

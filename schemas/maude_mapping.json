@@ -26,31 +26,31 @@
         "type": "string"
       },
       "date_facility_aware": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "date_manufacturer_received": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "date_of_event": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "date_received": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "date_report": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "date_report_to_fda": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "date_report_to_manufacturer": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "device": {
@@ -144,11 +144,11 @@
             "type": "string"
           },
           "baseline_date_ceased_marketing": {
-            "format": "basic_date||date",
+            "format": "basic_date||date||epoch_millis",
             "type": "date"
           },
           "baseline_date_first_marketed": {
-            "format": "basic_date||date",
+            "format": "basic_date||date||epoch_millis",
             "type": "date"
           },
           "baseline_device_family": {
@@ -260,7 +260,7 @@
             "type": "string"
           },
           "date_received": {
-            "format": "basic_date||date",
+            "format": "basic_date||date||epoch_millis",
             "type": "date"
           },
           "date_removed_flag": {
@@ -273,7 +273,7 @@
             "type": "string"
           },
           "date_returned_to_manufacturer": {
-            "format": "basic_date||date",
+            "format": "basic_date||date||epoch_millis",
             "type": "date"
           },
           "device_age_text": {
@@ -340,7 +340,7 @@
             "type": "string"
           },
           "expiration_date_of_device": {
-            "format": "basic_date||date",
+            "format": "basic_date||date||epoch_millis",
             "type": "date"
           },
           "generic_name": {
@@ -472,7 +472,7 @@
         }
       },
       "device_date_of_manufacturere": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "distributor_address_1": {
@@ -928,7 +928,7 @@
       "mdr_text": {
         "properties": {
           "date_report": {
-            "format": "basic_date||date",
+            "format": "basic_date||date||epoch_millis",
             "type": "date"
           },
           "mdr_text_key": {
@@ -990,7 +990,7 @@
       "patient": {
         "properties": {
           "date_received": {
-            "format": "basic_date||date",
+            "format": "basic_date||date||epoch_millis",
             "type": "date"
           },
           "patient_sequence_number": {
@@ -1038,6 +1038,15 @@
         },
         "type": "string"
       },
+      "product_problems": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
       "remedial_action": {
         "index": "analyzed",
         "type": "string"
@@ -1056,7 +1065,7 @@
         "type": "string"
       },
       "report_date": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "report_number": {

@@ -43,7 +43,7 @@
             "type": "integer"
           },
           "package_discontinue_date": {
-            "format": "basic_date||date",
+            "format": "basic_date||date||epoch_millis",
             "type": "date"
           },
           "package_status": {
@@ -60,16 +60,36 @@
           }
         }
       },
+      "public_version_status": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "public_device_record_key": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "public_version_number": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "public_version_date": {
+        "format": "basic_date||date||epoch_millis",
+        "type": "date"
+      },
+      "labeler_duns_number": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
       "record_status": {
         "index": "not_analyzed",
         "type": "string"
       },
       "publish_date": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "commercial_distribution_end_date": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "commercial_distribution_status": {
@@ -347,7 +367,7 @@
         "index": "not_analyzed",
         "type": "string"
       },
-      "pma_submissions": {
+      "premarket_submissions": {
         "properties": {
           "submission_number": {
             "index": "not_analyzed",

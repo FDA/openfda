@@ -26,6 +26,31 @@ exports.testTooBigSearchLimit = function(test) {
   test.done();
 };
 
+exports.testZeroLimit = function (test) {
+    var request = 'search=foo&limit=0';
+    var params = querystring.parse(request);
+    var cleanedParams = api_request.CheckParams(params);
+    test.equal(0, cleanedParams.limit);
+    test.done();
+};
+
+exports.testNonNumericSkip = function(test) {
+    var request = 'search=foo&skip=501k';
+    var params = querystring.parse(request);
+    apiRequestError(test, params);
+
+    test.done();
+};
+
+exports.testNonNumericLimit = function(test) {
+    var request = 'search=foo&limit=501k';
+    var params = querystring.parse(request);
+    apiRequestError(test, params);
+
+    test.done();
+};
+
+
 exports.testTooBigCountLimit = function(test) {
   var request = 'search=foo&count=foo&limit=1001';
   var params = querystring.parse(request);
@@ -47,6 +72,14 @@ apiRequestValid = function(test, params) {
   test.doesNotThrow(function() { api_request.CheckParams(params) },
                     api_request.API_REQUEST_ERROR,
                     'Should be valid: ' + JSON.stringify(params));
+};
+
+exports.testSort = function(test) {
+    var request = 'search=foo&sort=receiptdate';
+    var params = querystring.parse(request);
+    apiRequestValid(test, params);
+
+    test.done();
 };
 
 exports.testMaxLimit = function(test) {

@@ -1,10 +1,12 @@
 import collections
 import json
 import requests
+import os
 from nose.tools import assert_greater, assert_greater_equal, eq_, ok_
 from unittest.case import SkipTest
+import logging
 
-ENDPOINT = 'http://localhost:8000'
+ENDPOINT = os.getenv('OPENFDA_ENDPOINT_URL', 'http://localhost:8000')
 Count = collections.namedtuple('Count', ['term', 'count'])
 
 class CountList(list):
@@ -45,10 +47,31 @@ def assert_count_contains(query, expected_terms):
       query, term, '\n'.join(count_terms)
     )
 
+def assert_unii(query, expected_result):
+  meta, results = fetch(query)
+  unii_list = []
+  if 'openfda' in results[0].keys():
+    for result in results[0]['openfda']['unii']:
+      unii_list.append(result.encode('ascii', 'ignore'))
+  elif 'patient' in results[0].keys():
+    for result in results[0]['patient']['drug'][0]['openfda']['unii']:
+      unii_list.append(result.encode('ascii', 'ignore'))
+  eq_(unii_list, expected_result)
+
 def fetch(query):
   print 'Fetching %s' % query
   data = requests.get(ENDPOINT + query).json()
   return data.get('meta'), data.get('results')
+
+def expect_error(query):
+  print 'Fetching %s' % query
+  data = requests.get(ENDPOINT + query).json()
+  return data.get('error')
+
+def json(query):
+  print 'Getting %s' % query
+  data = requests.get(ENDPOINT + query).json()
+  return data
 
 def fetch_counts(query):
   meta, results = fetch(query)

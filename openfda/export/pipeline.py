@@ -2,11 +2,8 @@
 import collections
 from itertools import tee, izip
 import glob
-import logging
 import os.path
 from os.path import dirname, join, basename
-import sys
-
 import arrow
 import elasticsearch
 import luigi
@@ -38,7 +35,8 @@ ENDPOINT_INDEX_MAP = {
   '/device/pma': 'devicepma',
   '/device/recall': 'devicerecall',
   '/device/registrationlisting': 'devicereglist',
-  '/device/udi': 'deviceudi'
+  '/device/udi': 'deviceudi',
+  '/other/nsde': 'othernsde'
 }
 
 # A data structure that helps generate a distinct dataset from a shared index.
@@ -70,21 +68,21 @@ RANGE_ENDPOINT_MAP = {
   '/drug/event': {
     'date_key': '@timestamp',
     'start_date': '2004-01-01',
-    'end_date': '2017-04-01'
+    'end_date': '2018-07-01'
   },
   # Check here for device event:
   # https://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/PostmarketRequirements/ReportingAdverseEvents/ucm127891.htm
   '/device/event': {
     'date_key': 'date_received',
     'start_date': '1991-10-01',
-    'end_date': '2017-07-01'
+    'end_date': '2018-04-01'
   },
 }
 
 DEFAULT_CHUNKS = 250000
 CUSTOM_CHUNKS = {
   '/drug/label': 20000,
-  '/drug/event': 20000,
+  '/drug/event': 12000,
   '/device/event': 100000,
   '/device/udi': 100000
 }
@@ -335,7 +333,7 @@ class ParallelExportMapper(parallel.Mapper):
     self.output_dir = output_dir
 
   def map(self, key, value, output):
-    es_client = elasticsearch.Elasticsearch(config.es_host())
+    es_client = elasticsearch.Elasticsearch(config.es_host(), timeout=120)
     ep = common.ObjectDict(value)
     schema_file = join(SCHEMA_DIR, ep.index_name + '_schema.json')
     endpoint_dir = join(self.output_dir, ep.endpoint[1:])
@@ -478,7 +476,7 @@ class LoadDownloadJSON(index_util.LoadJSONBase):
 
     es_client = elasticsearch.Elasticsearch(config.es_host())
 
-    # We put the same docuemnt into the index twice.
+    # We put the same document into the index twice.
     # Once with a key as its date
     # Once with a key of `current`
     # The API will serve the current key as its default response.
