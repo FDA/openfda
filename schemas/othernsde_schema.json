@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "properties": {
+    "package_ndc": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "package_ndc11": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "marketing_category": {
+      "type": "string"
+    },
+    "marketing_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "marketing_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "billing_unit": {
+      "type": "string"
+    },
+    "proprietary_name": {
+      "type": "string"
+    },
+    "dosage_form": {
+      "type": "string"
+    },
+    "application_number_or_citation": {
+      "type": "string"
+    },
+    "product_type": {
+      "type": "string"
+    }
+  }
+}

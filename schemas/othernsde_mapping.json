@@ -1,0 +1,82 @@
+{
+  "othernsde": {
+    "_source": {
+      "excludes": [
+        "*_exact"
+      ],
+      "includes": [
+        "*"
+      ]
+    },
+    "properties": {
+      "package_ndc": {
+        "index": "analyzed",
+        "type": "string"
+      },
+      "package_ndc_exact": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "package_ndc11": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "package_ndc11_exact": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "marketing_category": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "marketing_category_exact": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "marketing_start_date": {
+        "format": "basic_date||date||epoch_millis",
+        "type": "date"
+      },
+      "marketing_end_date": {
+        "format": "basic_date||date||epoch_millis",
+        "type": "date"
+      },
+      "billing_unit": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "billing_unit_exact": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "proprietary_name": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "proprietary_name_exact": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "dosage_form": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "dosage_form_exact": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "application_number_or_citation": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "product_type": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "product_type_exact": {
+        "index": "not_analyzed",
+        "type": "string"
+      }
+    }
+  }
+}
