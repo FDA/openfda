@@ -4,13 +4,8 @@ python:
 before_install:
   - npm install -g grunt-cli
 install:
-  - pip install -U -r requirements.txt
   - python setup.py develop
   - pushd api/faers && npm install && popd
-services:
-  - elasticsearch
-before_script:
-  - sleep 10
 script:
   - python setup.py test
   - pushd api/faers && npm test && popd

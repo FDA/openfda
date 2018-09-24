@@ -5,36 +5,30 @@ Pipeline for converting AERS and FAERS data in JSON and
 importing into Elasticsearch.
 """
 
-from bs4 import BeautifulSoup
 import collections
 import glob
 import logging
 import os
-from os.path import join, dirname
 import re
 import subprocess
-import sys
-import time
 import urllib2
+from os.path import join, dirname
 
 import arrow
-import elasticsearch
 import luigi
+from bs4 import BeautifulSoup
 
-from openfda import parallel, config, index_util, elasticsearch_requests
+from openfda import common, parallel, config, index_util
 from openfda.annotation_table.pipeline import CombineHarmonization
 from openfda.faers import annotate
 from openfda.faers import xml_to_json
 from openfda.tasks import AlwaysRunTask, DependencyTriggeredTask
 
-
 # this should be a symlink to wherever the real data directory is
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 BASE_DIR = config.data_dir()
-FAERS_HISTORIC = ('http://www.fda.gov/Drugs/GuidanceCompliance'
-  'RegulatoryInformation/Surveillance/AdverseDrugEffects/ucm083765.htm')
-FAERS_CURRENT = ('http://www.fda.gov/Drugs/GuidanceCompliance'
-  'RegulatoryInformation/Surveillance/AdverseDrugEffects/ucm082193.htm')
+FAERS_HISTORIC = 's3://openfda-data-faers-historical'
+FAERS_CURRENT = 'https://fis.fda.gov/extensions/FPD-QDE-FAERS/FPD-QDE-FAERS.html'
 
 MAX_RECORDS_PER_FILE = luigi.IntParameter(-1, is_global=True)
 
@@ -43,20 +37,10 @@ class DownloadDataset(AlwaysRunTask):
   This task downloads all datasets that have not yet been fetched.
   '''
   def _fetch(self):
-    for page in [self._faers_current.find_all(href=re.compile('.*.zip')),
-                 self._faers_historic.find_all(href=re.compile('.*.zip'))]:
+    for page in [self._faers_current.find_all(href=re.compile('.*.zip'))]:
       for a in page:
-        filename = a.text.split(u'\xa0')[0]
-        # FAERS XML/ASCII for 2014 Q3/Q4 have many strange issues. Sigh.
-        filename = filename.replace('Q', 'q')
-        filename = filename.replace(' q', 'q')
-        filename = filename.replace(' .', '')
-        filename = filename.strip().replace(' ', '_')
-        if '.zip' not in filename.lower():
-          filename += '.zip'
-
-        url = 'http://www.fda.gov' + a['href']
-        yield filename, url
+        filename = a['href'].split('/')[-1]
+        yield filename, a['href']
 
   def _download_with_retry(self, url, target_name):
     if os.path.exists(target_name):
@@ -78,10 +62,7 @@ class DownloadDataset(AlwaysRunTask):
 
   def _run(self):
     os.system('mkdir -p "%s"' % self.output().path)
-
     self._faers_current = BeautifulSoup(urllib2.urlopen(FAERS_CURRENT).read())
-    self._faers_historic = BeautifulSoup(urllib2.urlopen(FAERS_HISTORIC).read())
-
     for filename, url in list(self._fetch()):
       target_name = join(BASE_DIR, 'faers/raw', filename)
       self._download_with_retry(url, target_name)

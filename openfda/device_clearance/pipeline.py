@@ -30,7 +30,7 @@ META_DIR = config.data_dir('510k/meta')
 common.shell_cmd('mkdir -p %s', META_DIR)
 
 
-CLEARED_DEVICE_URL = 'http://www.accessdata.fda.gov/premarket/ftparea/'
+CLEARED_DEVICE_URL = 'https://www.accessdata.fda.gov/premarket/ftparea/'
 CLEARED_DEV_ZIPS = [CLEARED_DEVICE_URL + 'pmn96cur.zip',
   CLEARED_DEVICE_URL + 'pmn9195.zip',
   CLEARED_DEVICE_URL + 'pmn8690.zip',

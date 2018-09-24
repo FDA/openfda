@@ -69,6 +69,13 @@ class UDIPipelineTests(unittest.TestCase):
 
       eq_("Published", json["record_status"])
       eq_("2015-09-24", json["publish_date"])
+
+      eq_("New", json["public_version_status"])
+      eq_("33e1d2ec-8555-43d0-8421-b208e7185d06", json["public_device_record_key"])
+      eq_("1", json["public_version_number"])
+      eq_("2017-12-19", json["public_version_date"])
+      eq_("123456789", json["labeler_duns_number"])
+
       eq_("2018-09-24", json["commercial_distribution_end_date"])
       eq_("In Commercial Distribution", json["commercial_distribution_status"])
       eq_("CS2 Acet. Cup Sys. - VitalitE", json["brand_name"])
@@ -144,12 +151,12 @@ class UDIPipelineTests(unittest.TestCase):
 
       eq_(["3001451451", "12223430908"], json["fei_number"])
 
-      eq_("K094035", json["pma_submissions"][0]["submission_number"])
-      eq_("000", json["pma_submissions"][0]["supplement_number"])
-      eq_("PMN", json["pma_submissions"][0]["submission_type"])
-      eq_("P950002", json["pma_submissions"][1]["submission_number"])
-      eq_("001", json["pma_submissions"][1]["supplement_number"])
-      eq_("PMA", json["pma_submissions"][1]["submission_type"])
+      eq_("K094035", json["premarket_submissions"][0]["submission_number"])
+      eq_("000", json["premarket_submissions"][0]["supplement_number"])
+      eq_("PMN", json["premarket_submissions"][0]["submission_type"])
+      eq_("P950002", json["premarket_submissions"][1]["submission_number"])
+      eq_("001", json["premarket_submissions"][1]["supplement_number"])
+      eq_("PMA", json["premarket_submissions"][1]["submission_type"])
 
     map_output = MagicMock()
     map_output.add = add_fn

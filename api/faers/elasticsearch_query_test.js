@@ -93,6 +93,30 @@ exports.testSupportedQueryString_Supported = function(test) {
   test.done();
 };
 
+exports.testBuildSort = function (test) {
+    test.equal(elasticsearch_query.BuildSort({}), '')
+    test.equal(elasticsearch_query.BuildSort({sort: 'report_date'}), 'report_date')
+    test.equal(elasticsearch_query.BuildSort({sort: 'report_date:asc'}), 'report_date:asc')
+    test.equal(elasticsearch_query.BuildSort({sort: 'report_date:desc'}), 'report_date:desc')
+    test.throws(function () {
+            elasticsearch_query.BuildSort({sort: 'report_date,receiptdate'})
+        },
+        elasticsearch_query.ELASTICSEARCH_QUERY_ERROR);
+    test.throws(function () {
+            elasticsearch_query.BuildSort({sort: 'id'})
+        },
+        elasticsearch_query.ELASTICSEARCH_QUERY_ERROR);
+    test.throws(function () {
+            elasticsearch_query.BuildSort({sort: 'openfda.brand_name'})
+        },
+        elasticsearch_query.ELASTICSEARCH_QUERY_ERROR);
+    test.doesNotThrow(function () {
+            elasticsearch_query.BuildSort({sort: 'openfda.brand_name.exact'})
+        },
+        elasticsearch_query.ELASTICSEARCH_QUERY_ERROR);
+    test.done();
+}
+
 exports.testReplaceExact = function(test) {
   // patient.drug.openfda section, exact but no value
   test.ok(elasticsearch_query.ReplaceExact(
@@ -148,6 +172,3 @@ exports.testReplaceExact = function(test) {
 
   test.done();
 };
-
-
-

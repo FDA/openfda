@@ -52,6 +52,14 @@ def extract_set_id(tree):
   return first_match_or_empty_string(
     tree.getroot().xpath('/document/setId/@root'))
 
+def extract_unii_dict(tree):
+  """Extracts the name and UNII from unii.xml"""
+  unii_rows = {}
+  root = tree.getroot()
+  for child in root.iter('choice'):
+    unii_rows[child.find('label').text.lower()] = {'va': [], 'name': child.find('label').text, 'set_id': '', 'unii': child.find('value').text}
+  return unii_rows
+
 def extract_unii(tree):
   """Extracts the UNII from Pharmalogical Indexing XML"""
   unii_xpath = '//id[@root="%s"]/@extension' % UNII_OID

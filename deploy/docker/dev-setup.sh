@@ -16,7 +16,7 @@ sudo apt-get -y install python-pip python-dev npm libxslt1-dev python-lxml
 sudo apt-get -y install git
 sudo apt-get -y install xfsprogs
 sudo apt-get -y install unzip
-sudo apt-get -y install zbar-tools
+sudo apt-get -y install zbar-tools gnumeric
 
 sudo pip install awscli
 
@@ -37,8 +37,8 @@ sudo mount /dev/xvdf /media/ebs
 sudo chmod 777 /media/ebs
 
 (
-  git clone git@github.com:FDA/openfda
-  cd openfda
+  git clone git@github.com:iodine/openfda-internal
+  cd openfda-internal
   ./bootstrap.sh
   ln -s /media/ebs ./data
 )

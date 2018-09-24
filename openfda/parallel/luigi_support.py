@@ -20,6 +20,9 @@ class MRTask(luigi.Task, Mapper, Reducer):
   def num_shards(self):
     return None
 
+  def map_workers(self):
+    return None
+
   def output_format(self):
     return LevelDBOutput()
 
@@ -30,5 +33,6 @@ class MRTask(luigi.Task, Mapper, Reducer):
      reducer=self,
      output_prefix=self.output().path,
      output_format=self.output_format(),
-     num_shards=self.num_shards()
+     num_shards=self.num_shards(),
+     map_workers=self.map_workers()
     )

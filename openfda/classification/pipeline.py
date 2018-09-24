@@ -30,7 +30,7 @@ META_DIR = config.data_dir('classification/meta')
 common.shell_cmd('mkdir -p %s', META_DIR)
 
 
-DEVICE_CLASS_ZIP = ('http://www.accessdata.fda.gov/premarket/'
+DEVICE_CLASS_ZIP = ('https://www.accessdata.fda.gov/premarket/'
                     'ftparea/foiclass.zip')
 
 

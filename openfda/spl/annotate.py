@@ -3,6 +3,7 @@
 import simplejson as json
 from openfda import parallel
 from openfda import common
+from openfda.spl.fix_date import validate_date
 
 def read_json_file(json_file):
   '''
@@ -91,31 +92,39 @@ def AddHarmonizedRowToOpenfda(openfda, row):
   _add_field(openfda, 'upc', row['upc'])
 
   if row['unii_indexing'] != []:
-    for key, value in row['unii_indexing'].items():
-      if key == 'unii':
-        _add_field(openfda, 'unii', value)
-      if key == 'va':
-        for this_item in value:
-          for va_key, va_value in this_item.items():
-            if va_key == 'name':
-              if va_value.find('[MoA]') != -1:
-                _add_field(openfda, 'pharm_class_moa', va_value)
-              if va_value.find('[Chemical/Ingredient]') != -1:
-                _add_field(openfda, 'pharm_class_cs', va_value)
-              if va_value.find('[PE]') != -1:
-                _add_field(openfda, 'pharm_class_pe', va_value)
-              if va_value.find('[EPC]') != -1:
-                _add_field(openfda, 'pharm_class_epc', va_value)
-            if va_key == 'number':
-              _add_field(openfda, 'nui', va_value)
+    unii_list = []
+    for unii_row in row['unii_indexing']:
+      for key, value in unii_row.items():
+        if key == 'unii':
+          unii_list.append(value)
+        if key == 'va':
+          for this_item in value:
+            for va_key, va_value in this_item.items():
+              if va_key == 'name':
+                if va_value.find('[MoA]') != -1:
+                  _add_field(openfda, 'pharm_class_moa', va_value)
+                if va_value.find('[Chemical/Ingredient]') != -1:
+                  _add_field(openfda, 'pharm_class_cs', va_value)
+                if va_value.find('[PE]') != -1:
+                  _add_field(openfda, 'pharm_class_pe', va_value)
+                if va_value.find('[EPC]') != -1:
+                  _add_field(openfda, 'pharm_class_epc', va_value)
+              if va_key == 'number':
+                _add_field(openfda, 'nui', va_value)
+    _add_field(openfda, 'unii', unii_list)
+
+
 # TODO(hansnelsen): change name of AnnotateLabel to annotate_label
 def AnnotateLabel(label, harmonized_dict):
   openfda = {}
-  spl_set_id = label['set_id']
-  date = label['effective_time']
-  label['@timestamp'] = common.extract_date(date)
-  if spl_set_id in harmonized_dict:
-    AddHarmonizedRowToOpenfda(openfda, harmonized_dict[spl_set_id][0])
+  spl_set_id = label.get('set_id')
+  date = label.get('effective_time')
+  label['@timestamp'] = validate_date(common.extract_date(date))
+
+  if spl_set_id != None:
+    if spl_set_id in harmonized_dict:
+      AddHarmonizedRowToOpenfda(openfda, harmonized_dict[spl_set_id][0])
+
   openfda_lists = {}
   for field, value in openfda.items():
     openfda_lists[field] = [s for s in value.keys()]

@@ -9,6 +9,8 @@ import glob
 import logging
 import os
 from os.path import basename, join, dirname
+
+import multiprocessing
 import simplejson as json
 import sys
 import time
@@ -115,9 +117,12 @@ class SPL2JSON(parallel.MRTask):
     cmd = 'node %(spl_js)s %(xml_file)s %(loinc)s' % locals()
     json_str = ''
     try:
-      json_str = os.popen(cmd).read()
+      json_str = common.shell_cmd_quiet(cmd)
       json_obj = json.loads(json_str)
-      output.add(xml_file, json_obj)
+      if not json_obj.get('set_id'):
+        logging.error('SPL file has no set_id: %s', xml_file)
+      else:
+        output.add(xml_file, json_obj)
     except:
       logging.error('Unable to convert SPL XML to JSON: %s', xml_file)
       logging.error('cmd: %s', cmd)

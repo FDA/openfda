@@ -2,6 +2,12 @@
 <data>
     <device xmlns="http://www.fda.gov/cdrh/gudid" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             deviceid="00844588018923">
+
+        <publicDeviceRecordKey>33e1d2ec-8555-43d0-8421-b208e7185d06</publicDeviceRecordKey>
+        <publicVersionStatus>New</publicVersionStatus>
+        <publicVersionNumber>1</publicVersionNumber>
+        <publicVersionDate>2017-12-19</publicVersionDate>
+        <dunsNumber>123456789</dunsNumber>
         <deviceRecordStatus>Published</deviceRecordStatus>
         <devicePublishDate>2015-09-24</devicePublishDate>
         <deviceCommDistributionEndDate>2018-09-24</deviceCommDistributionEndDate>

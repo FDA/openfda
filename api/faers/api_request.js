@@ -1,8 +1,10 @@
 // FAERS API Request Helpers
 
 var underscore = require('underscore');
+var escape = require('escape-html');
 
-var EXPECTED_PARAMS = ['search', 'count', 'limit', 'skip'];
+var EXPECTED_PARAMS = ['search', 'count', 'limit', 'skip', 'sort'],
+    maxSkip = 25000;
 
 exports.API_REQUEST_ERROR = 'ApiRequestError';
 var API_REQUEST_ERROR = exports.API_REQUEST_ERROR;
@@ -13,14 +15,14 @@ exports.CheckParams = function(params) {
     if (EXPECTED_PARAMS.indexOf(param) == -1) {
       throw {
         name: API_REQUEST_ERROR,
-        message: 'Invalid parameter: ' + param
+        message: 'Invalid parameter: ' + escape(param)
       };
     }
   });
 
   if (params.limit) {
     var limit = parseInt(params.limit);
-    if (isNaN(limit)) {
+    if (isNaN(limit) || !/^\d+$/.test(params.limit.trim())) {
       throw {
         name: API_REQUEST_ERROR,
         message: 'Invalid limit parameter value.'
@@ -31,16 +33,16 @@ exports.CheckParams = function(params) {
 
   if (params.skip) {
     var skip = parseInt(params.skip);
-    if (isNaN(skip)) {
+    if (isNaN(skip) || !/^\d+$/.test(params.skip.trim())) {
       throw {
         name: API_REQUEST_ERROR,
         message: 'Invalid skip parameter value.'
       };
     }
-    if (skip > 5000) {
+    if (skip > maxSkip) {
       throw {
         name: API_REQUEST_ERROR,
-        message: 'Skip value must 5000 or less.'
+        message: 'Skip value must ' + maxSkip + ' or less.'
       }
     }
     params.skip = skip;
@@ -73,7 +75,7 @@ exports.CheckParams = function(params) {
 
   // Set default values for missing params
   params.skip = params.skip || 0;
-  if (!params.limit) {
+  if (!params.limit && params.limit !== 0) {
     if (params.count) {
       params.limit = 100;
     } else {

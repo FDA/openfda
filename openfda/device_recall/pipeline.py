@@ -146,13 +146,13 @@ class DeviceRecallAnnotateMapper(DeviceAnnotateMapper):
       clearance = harmonized.get('510k',[])
 
       harmonized['registration'] = \
-        [d for d in registration if d['fei_number'] == fei_number]
+        [d for d in registration if d.get('fei_number') == fei_number]
 
       harmonized['device_pma'] = \
-        [d for d in pma_device if d['pma_number'] in pma_numbers]
+        [d for d in pma_device if d.get('pma_number') in pma_numbers]
 
       harmonized['510k'] = \
-        [d for d in clearance if d['k_number'] in k_numbers]
+        [d for d in clearance if d.get('k_number') in k_numbers]
 
       return harmonized
     return None

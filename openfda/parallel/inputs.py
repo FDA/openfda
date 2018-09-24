@@ -138,6 +138,15 @@ class JSONLineInput(MRInput):
       for idx, line in enumerate(open(self.filename)):
         yield str(idx), json.loads(line)
 
+class JSONListInput(MRInput):
+  class Reader(MRInput.Reader):
+    def entries(self):
+      with open(self.filename, 'r') as input_file:
+        data = json.load(input_file)
+        for item in data:
+          for k, v in item.iteritems():
+            yield k, v
+
 # TODO(hansnelsen): convert all the input parameters to a inputdict_args for
 #                   readability and simplicity
 class CSVDictLineInput(MRInput):

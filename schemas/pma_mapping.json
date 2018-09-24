@@ -41,7 +41,7 @@
         "type": "string"
       },
       "date_received": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "decision_code": {
@@ -49,7 +49,7 @@
         "type": "string"
       },
       "decision_date": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "docket_number": {
@@ -57,7 +57,7 @@
         "type": "string"
       },
       "fed_reg_notice_date": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "generic_name": {

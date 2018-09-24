@@ -22,7 +22,7 @@
         "type": "string"
       },
       "@timestamp": {
-        "format": "dateOptionalTime",
+        "format": "dateOptionalTime||epoch_millis",
         "type": "date"
       },
       "@version": {
@@ -48,7 +48,7 @@
         "type": "string"
       },
       "center_classification_date": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "city": {
@@ -322,7 +322,7 @@
         "type": "string"
       },
       "recall_initiation_date": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "recall_number": {
@@ -344,7 +344,7 @@
         "type": "string"
       },
       "report_date": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "state": {
@@ -366,7 +366,7 @@
         "type": "string"
       },
       "termination_date": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "voluntary_mandated": {

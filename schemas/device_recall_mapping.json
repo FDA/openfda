@@ -14,7 +14,7 @@
         "type": "string"
       },
       "event_date_terminated": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "firm_fei_number": {

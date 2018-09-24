@@ -27,7 +27,7 @@
         "type": "double"
       },
       "@timestamp": {
-        "format": "dateOptionalTime",
+        "format": "dateOptionalTime||epoch_millis",
         "type": "date"
       },
       "authoritynumb": {
@@ -141,7 +141,7 @@
                 "type": "string"
               },
               "drugenddate": {
-                "format": "basic_date||date",
+                "format": "basic_date||date||epoch_millis",
                 "type": "date"
               },
               "drugenddateformat": {
@@ -182,7 +182,7 @@
                 "type": "byte"
               },
               "drugstartdate": {
-                "format": "basic_date||date",
+                "format": "basic_date||date||epoch_millis",
                 "type": "date"
               },
               "drugstartdateformat": {
@@ -377,7 +377,7 @@
           "patientdeath": {
             "properties": {
               "patientdeathdate": {
-                "format": "basic_date||date",
+                "format": "basic_date||date||epoch_millis",
                 "type": "date"
               },
               "patientdeathdateformat": {
@@ -455,14 +455,14 @@
         "type": "string"
       },
       "receiptdate": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "receiptdateformat": {
         "type": "string"
       },
       "receivedate": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "receivedateformat": {
@@ -559,7 +559,7 @@
         "type": "byte"
       },
       "transmissiondate": {
-        "format": "basic_date||date",
+        "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "transmissiondateformat": {

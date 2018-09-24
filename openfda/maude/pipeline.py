@@ -30,16 +30,21 @@ csv.field_size_limit(sys.maxsize)
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 BASE_DIR = './data/'
 
+# See https://github.com/FDA/openfda/issues/27
+# Files for resolving device problem codes
+DEVICE_PROBLEM_CODES_FILE = join(BASE_DIR, 'maude/extracted/events/deviceproblemcodes.txt')
+DEVICE_PROBLEMS_FILE = join(BASE_DIR, 'maude/extracted/events/foidevproblem.txt')
+
 # Use to ensure a standard naming of level db outputs is achieved across tasks.
 DATE_FMT = 'YYYY-MM-DD'
 CATEGORIES = ['mdrfoi', 'patient', 'foidev', 'foitext']
 IGNORE_FILES = ['problem', 'add', 'change']
 
-DEVICE_DOWNLOAD_PAGE = ('http://www.fda.gov/MedicalDevices/'
+DEVICE_DOWNLOAD_PAGE = ('https://www.fda.gov/MedicalDevices/'
                         'DeviceRegulationandGuidance/PostmarketRequirements/'
                         'ReportingAdverseEvents/ucm127891.htm')
 
-DEVICE_CLASS_DOWNLOAD = ('http://www.fda.gov/MedicalDevices/'
+DEVICE_CLASS_DOWNLOAD = ('https://www.fda.gov/MedicalDevices/'
                          'DeviceRegulationandGuidance/Overview/'
                          'ClassifyYourDevice/ucm051668.htm')
 
@@ -386,6 +391,11 @@ class ExtractAndCleanDownloadsMaude(AlwaysRunTask):
 
 
 class CSV2JSONMapper(parallel.Mapper):
+  def __init__(self, problem_codes_reference, device_problem_codes):
+    parallel.Mapper.__init__(self)
+    self.problem_codes_reference = problem_codes_reference
+    self.device_problem_codes = device_problem_codes
+
   def map_shard(self, map_input, map_output):
     self.filename = map_input.filename
     return parallel.Mapper.map_shard(self, map_input, map_output)
@@ -475,6 +485,16 @@ class CSV2JSONMapper(parallel.Mapper):
     new_value = dict(zip(FILE_HEADERS[file_type], value))
     new_value = common.transform_dict(new_value, self.cleaner)
 
+    # https://github.com/FDA/openfda/issues/27
+    # We need to see if device problem code is available for this report in the
+    # foidevproblem.txt file, resolve it to a problem description, and add it to the
+    # master record.
+    if file_type == 'mdrfoi':
+      problem_codes = self.device_problem_codes.get(mdr_key)
+      if problem_codes is not None:
+        product_problems = [self.problem_codes_reference.get(code) for code in problem_codes]
+        new_value['product_problems'] = product_problems
+
     output.add(mdr_key, (file_type, new_value))
 
 
@@ -551,10 +571,25 @@ class CSV2JSON(luigi.Task):
     else:
       input_files = [f for f in files if self.loader_task in f]
 
+    # Load and cache device problem codes.
+    problem_codes_reference = {}
+    device_problem_codes = {}
+
+    reader = csv.reader(open(DEVICE_PROBLEM_CODES_FILE), quoting=csv.QUOTE_NONE, delimiter='|')
+    for idx, line in enumerate(reader):
+      if len(line) > 1:
+        problem_codes_reference[line[0]] = line[1].strip()
+
+    reader = csv.reader(open(DEVICE_PROBLEMS_FILE), quoting=csv.QUOTE_NONE, delimiter='|')
+    for idx, line in enumerate(reader):
+      if len(line) > 1:
+        device_problem_codes[line[0]] = [line[1]] if device_problem_codes.get(line[0]) is None else \
+        device_problem_codes[line[0]] + [line[1]]
+
     parallel.mapreduce(
       parallel.Collection.from_glob(
         input_files, parallel.CSVLineInput(quoting=csv.QUOTE_NONE, delimiter='|')),
-      mapper=CSV2JSONMapper(),
+      mapper=CSV2JSONMapper(problem_codes_reference=problem_codes_reference, device_problem_codes=device_problem_codes),
       reducer=CSV2JSONJoinReducer(),
       output_prefix=self.output().path)
 
@@ -668,7 +703,7 @@ class MaudeAnnotationMapper(DeviceAnnotateMapper):
       if 'device_pma' in harmonized:
         del harmonized['device_pma']
       registration = list(harmonized['registration'])
-      new_reg = [d for d in registration if d['registration_number'] == lookup]
+      new_reg = [d for d in registration if d.get('registration_number') == lookup]
       harmonized['registration'] = new_reg
       return harmonized
     return None

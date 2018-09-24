@@ -64,7 +64,7 @@ RENAME_MAP = {
   'More Code Info': 'more-code-info'
 }
 
-DOWNLOAD_URL = ('http://www.accessdata.fda.gov/scripts/ires/index.cfm?action='
+DOWNLOAD_URL = ('https://www.accessdata.fda.gov/scripts/ires/index.cfm?action='
                 'export.getWeeklyExportCSVResult&'
                 'monthVal=--M--&dayVal=--D--&yearVal=--Y--')
 

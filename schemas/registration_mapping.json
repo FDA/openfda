@@ -23,7 +23,7 @@
       "products": {
         "properties": {
           "created_date": {
-            "format": "basic_date||date",
+            "format": "basic_date||date||epoch_millis",
             "type": "date"
           },
           "exempt": {

@@ -424,6 +424,12 @@
     "product_problem_flag": {
       "type": "string"
     },
+    "product_problems": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
     "remedial_action": {
       "type": "string"
     },
