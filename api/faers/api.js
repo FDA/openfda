@@ -713,7 +713,7 @@ TrySearch = function(index, params, es_search_params, response, request) {
         var query = Object.keys(request.query).map(function(key) { 
           return key + '=' + obj[key]; 
         }).join('&'); 
-        var nextPageUrl = request.protocol' + '://' + request.get('host') + request.path + '?' + query;
+        var nextPageUrl = request.protocol + '://' + request.get('host') + request.path + '?' + query;
         response.header("Link",'<' + nextPageUrl + '>; rel="next"');
       }
       return response.json(HTTP_CODE.OK, response_json);
