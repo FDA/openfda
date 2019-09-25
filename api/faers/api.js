@@ -664,7 +664,7 @@ TryToBuildElasticsearchParams = function(params, es_index, response) {
   return es_search_params;
 };
 
-TrySearch = function(index, params, es_search_params, response) {
+TrySearch = function(index, params, es_search_params, response, request) {
   client.search(es_search_params)
   .then(function(body) {
     if (body.hits.hits.length == 0 && !(params.limit === 0 && body.hits.total > 0)) {
@@ -709,7 +709,12 @@ TrySearch = function(index, params, es_search_params, response) {
       }
       var nextSkip = params.skip + params.limit;
       if (body.hits.total > nextSkip) {
-          response.header("Link",'<https://api.fda.gov/device/510k.json?search=advisory_committee:cv&skip=' + nextSkip + '&limit=' + params.limit + '>; rel="next"');
+        request.query.skip = nextSkip;
+        var query = Object.keys(request.query).map(function(key) { 
+          return key + '=' + obj[key]; 
+        }).join('&'); 
+        var nextPageUrl = request.protocol' + '://' + request.get('host') + request.path + '?' + query;
+        response.header("Link",'<' + nextPageUrl + '>; rel="next"');
       }
       return response.json(HTTP_CODE.OK, response_json);
     }
@@ -816,7 +821,7 @@ EnforcementEndpoint = function(noun) {
       return;
     }
 
-    TrySearch(index, params, es_search_params, response);
+    TrySearch(index, params, es_search_params, response, request);
   });
 };
 
@@ -843,7 +848,7 @@ BasicEndpoint = function(data) {
       return;
     }
 
-    TrySearch(index, params, es_search_params, response);
+    TrySearch(index, params, es_search_params, response, request);
   });
 };
 
