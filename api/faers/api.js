@@ -707,6 +707,10 @@ TrySearch = function(index, params, es_search_params, response) {
         }
         response_json.results.push(result);
       }
+      var nextSkip = params.skip + params.limit;
+      if (body.hits.total > nextSkip) {
+          response.header("Link",'<https://api.fda.gov/device/510k.json?search=advisory_committee:cv&skip=' + nextSkip + '&limit=' + params.limit + '>; rel="next"');
+      }
       return response.json(HTTP_CODE.OK, response_json);
     }
 
