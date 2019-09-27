@@ -10,6 +10,7 @@ var querystring = require('querystring');
 var url = require('url');
 var Promise = require('bluebird');
 var cache = require('apicache').middleware;
+var qs = require('qs');
 
 var Stats = require('fast-stats').Stats;
 
@@ -710,10 +711,8 @@ TrySearch = function(index, params, es_search_params, response, request) {
       var nextSkip = params.skip + params.limit;
       if (body.hits.total > nextSkip) {
         request.query.skip = nextSkip;
-        var query = Object.keys(request.query).map(function(key) { 
-          return key + '=' + obj[key]; 
-        }).join('&'); 
-        var nextPageUrl = request.protocol + '://' + request.get('host') + request.path + '?' + query;
+        var nextQuery = qs.stringify(request.query);
+        var nextPageUrl = request.protocol + '://' + request.get('host') + request.path + '?' + nextQuery;
         response.header("Link",'<' + nextPageUrl + '>; rel="next"');
       }
       return response.json(HTTP_CODE.OK, response_json);
