@@ -3,8 +3,7 @@
 var underscore = require('underscore');
 var escape = require('escape-html');
 
-var EXPECTED_PARAMS = ['search', 'count', 'limit', 'skip', 'sort'],
-    maxSkip = 25000;
+var EXPECTED_PARAMS = ['search', 'count', 'limit', 'skip', 'sort'];
 
 exports.API_REQUEST_ERROR = 'ApiRequestError';
 var API_REQUEST_ERROR = exports.API_REQUEST_ERROR;
@@ -38,12 +37,6 @@ exports.CheckParams = function(params) {
         name: API_REQUEST_ERROR,
         message: 'Invalid skip parameter value.'
       };
-    }
-    if (skip > maxSkip) {
-      throw {
-        name: API_REQUEST_ERROR,
-        message: 'Skip value must ' + maxSkip + ' or less.'
-      }
     }
     params.skip = skip;
   }
