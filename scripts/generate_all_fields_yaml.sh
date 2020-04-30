@@ -71,6 +71,11 @@ $PYTHON scripts/generate_fields_yaml.py generate \
 --schema ./schemas/deviceudi_schema.json \
 --filename $DATA_DIR/device.udi.yaml
 
+$PYTHON scripts/generate_fields_yaml.py generate \
+--mapping ./schemas/animaldrugevent_mapping.json \
+--schema ./schemas/animaldrugevent_schema.json \
+--filename $DATA_DIR/animal.drug.event.yaml
+
 cd $DATA_DIR
 
 zip _fields.zip device.*.yaml drug.*.yaml food.*.yaml

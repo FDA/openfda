@@ -64,7 +64,7 @@ class DownloadDataset(AlwaysRunTask):
     os.system('mkdir -p "%s"' % self.output().path)
     self._faers_current = BeautifulSoup(urllib2.urlopen(FAERS_CURRENT).read())
     for filename, url in list(self._fetch()):
-      target_name = join(BASE_DIR, 'faers/raw', filename)
+      target_name = join(BASE_DIR, 'faers/raw', filename.lower())
       self._download_with_retry(url, target_name)
 
 

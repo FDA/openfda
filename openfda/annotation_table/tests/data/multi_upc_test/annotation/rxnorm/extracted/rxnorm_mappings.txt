@@ -1,0 +1,6 @@
+SETID|SPL_VERSION|RXCUI|RXSTRING|RXTTY
+00011703-bc55-4c0c-858c-149dc674bc3c|1|312075|Ofloxacin 3 MG/ML Ophthalmic Solution|SCD
+00011703-bc55-4c0c-858c-149dc674bc3c|1|312075|ofloxacin 0.3 % Ophthalmic Solution|PSN
+00011703-bc55-4c0c-858c-149dc674bc3c|1|312075|ofloxacin 0.3 % Ophthalmic Solution|SY
+000155a8-709c-44e5-a75f-cd890f3a7caf|5|198014|Naproxen 500 MG Oral Tablet|SCD
+000155a8-709c-44e5-a75f-cd890f3a7caf|5|198014|naproxen 500 MG Oral Tablet|PSN

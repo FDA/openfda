@@ -75,9 +75,9 @@ common.shell_cmd('mkdir -p %s', BASE_DIR)
 META_DIR = config.data_dir('registration/meta')
 common.shell_cmd('mkdir -p %s', META_DIR)
 
-DEVICE_REG_PAGE = ('https://www.fda.gov/MedicalDevices/'
-                   'DeviceRegulationandGuidance/HowtoMarketYourDevice/'
-                   'RegistrationandListing/ucm134495.htm')
+DEVICE_REG_PAGE = ('https://www.fda.gov/medical-devices/'
+                   'device-registration-and-listing/'
+                   'establishment-registration-and-medical-device-listing-files-download')
 
 S3_BUCKET = 's3://openfda-data-reglist/'
 S3_LOCAL_DIR = config.data_dir('registration/s3_sync')

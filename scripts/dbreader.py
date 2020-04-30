@@ -14,7 +14,7 @@ import sys
 
 import simplejson as json
 from openfda import app, parallel
-
+import cPickle
 
 gflags.DEFINE_string('level_db', None, 'Database file to read.')
 gflags.DEFINE_string('sharded_db', None, 'Database file to read.')
@@ -49,12 +49,15 @@ def main(argv):
     print FLAGS.GetHelp()
     sys.exit(1)
 
+  cnt = 0
   for (k, v) in db_iter:
-    if FLAGS.json_value_out: v = json.dumps(v, indent=2, sort_keys=True)
+    if FLAGS.json_value_out: v = json.dumps(cPickle.loads(v), indent=2, sort_keys=True)
 
     if FLAGS.key_only: print k
     elif FLAGS.value_only: print v
     else: print k, v
+    cnt+=1
+  print ("Total keys: %s", cnt)
 
 
 

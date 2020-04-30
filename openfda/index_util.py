@@ -337,7 +337,8 @@ def index_with_checksum(es, index, doc_type, batch):
 
   logging.info('%s update batch complete: %s total, %s indexed, %s skipped, %s errors',
                index, len(index_batch) + skipped, len(index_batch), skipped, len(errors))
-
+  if len(errors) > 0:
+    raise Exception('Some of the documents failed to index: halting the pipeline!')
 
 def get_mapping(es, index):
   ''' Get the Elasticsearch mapping for an index.

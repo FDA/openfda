@@ -1,0 +1,1690 @@
+{
+  "properties": {
+    "codes": {
+      "items": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "code_system": {
+            "type": "string"
+          },
+          "comments": {
+            "type": "string"
+          },
+          "references": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          }
+        }
+      },
+      "type": "array"
+    },
+    "definition_level": {
+      "type": "string"
+    },
+    "definition_type": {
+      "type": "string"
+    },
+    "mixture": {
+      "properties": {
+        "components": {
+          "items": {
+            "properties": {
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "substance": {
+                "properties": {
+                  "linking_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "ref_pname": {
+                    "type": "string"
+                  },
+                  "references": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "refuuid": {
+                    "type": "string"
+                  },
+                  "substance_class": {
+                    "type": "string"
+                  },
+                  "unii": {
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "type": {
+                "type": "string"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            }
+          },
+          "type": "array"
+        },
+        "parent_substance": {
+          "properties": {
+            "linking_id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "ref_pname": {
+              "type": "string"
+            },
+            "references": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "refuuid": {
+              "type": "string"
+            },
+            "substance_class": {
+              "type": "string"
+            },
+            "unii": {
+              "type": "string"
+            },
+            "uuid": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "references": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "modifications": {
+      "properties": {
+        "agent_modifications": {
+          "items": {
+            "properties": {
+              "agent_modification_process": {
+                "type": "string"
+              },
+              "agent_modification_role": {
+                "type": "string"
+              },
+              "agent_modification_type": {
+                "type": "string"
+              },
+              "agent_substance": {
+                "properties": {
+                  "linking_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "ref_pname": {
+                    "type": "string"
+                  },
+                  "references": {
+                    "type": "string"
+                  },
+                  "refuuid": {
+                    "type": "string"
+                  },
+                  "substance_class": {
+                    "type": "string"
+                  },
+                  "unii": {
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "amount": {
+                "properties": {
+                  "average": {
+                    "type": "float"
+                  },
+                  "high": {
+                    "type": "float"
+                  },
+                  "high_limit": {
+                    "type": "float"
+                  },
+                  "low": {
+                    "type": "float"
+                  },
+                  "low_limit": {
+                    "type": "float"
+                  },
+                  "non_numeric_value": {
+                    "type": "string"
+                  },
+                  "references": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "units": {
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "modification_group": {
+                "type": "string"
+              },
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            }
+          },
+          "type": "array"
+        },
+        "physical_modifications": {
+          "items": {
+            "properties": {
+              "modification_group": {
+                "type": "string"
+              },
+              "parameters": {
+                "items": {
+                  "properties": {
+                    "amount": {
+                      "properties": {
+                        "average": {
+                          "type": "float"
+                        },
+                        "high_limit": {
+                          "type": "float"
+                        },
+                        "low_limit": {
+                          "type": "float"
+                        },
+                        "non_numeric_value": {
+                          "type": "string"
+                        },
+                        "references": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "units": {
+                          "type": "string"
+                        },
+                        "uuid": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "parameter_name": {
+                      "type": "string"
+                    },
+                    "references": {
+                      "type": "string"
+                    },
+                    "uuid": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "type": "array"
+              },
+              "physical_modification_role": {
+                "type": "string"
+              },
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            }
+          },
+          "type": "array"
+        },
+        "references": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "structural_modifications": {
+          "items": {
+            "properties": {
+              "extent": {
+                "type": "string"
+              },
+              "extent_amount": {
+                "properties": {
+                  "average": {
+                    "type": "float"
+                  },
+                  "high": {
+                    "type": "float"
+                  },
+                  "high_limit": {
+                    "type": "float"
+                  },
+                  "low": {
+                    "type": "float"
+                  },
+                  "low_limit": {
+                    "type": "float"
+                  },
+                  "non_numeric_value": {
+                    "type": "string"
+                  },
+                  "references": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "units": {
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "location_type": {
+                "type": "string"
+              },
+              "modification_group": {
+                "type": "string"
+              },
+              "molecular_fragment": {
+                "properties": {
+                  "linking_id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "ref_pname": {
+                    "type": "string"
+                  },
+                  "references": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "refuuid": {
+                    "type": "string"
+                  },
+                  "substance_class": {
+                    "type": "string"
+                  },
+                  "unii": {
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "residue_modified": {
+                "type": "string"
+              },
+              "sites": {
+                "items": {
+                  "properties": {
+                    "residue_index": {
+                      "type": "integer"
+                    },
+                    "subunit_index": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "type": "array"
+              },
+              "structural_modification_type": {
+                "type": "string"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            }
+          },
+          "type": "array"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "moieties": {
+      "items": {
+        "properties": {
+          "atropisomerism": {
+            "type": "string"
+          },
+          "charge": {
+            "type": "integer"
+          },
+          "count": {
+            "type": "integer"
+          },
+          "count_amount": {
+            "properties": {
+              "average": {
+                "type": "float"
+              },
+              "high": {
+                "type": "float"
+              },
+              "high_limit": {
+                "type": "float"
+              },
+              "low": {
+                "type": "float"
+              },
+              "low_limit": {
+                "type": "float"
+              },
+              "non_numeric_value": {
+                "type": "string"
+              },
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "type": {
+                "type": "string"
+              },
+              "units": {
+                "type": "string"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "defined_stereo": {
+            "type": "integer"
+          },
+          "digest": {
+            "type": "string"
+          },
+          "ez_centers": {
+            "type": "integer"
+          },
+          "formula": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "molecular_weight": {
+            "type": "float"
+          },
+          "molfile": {
+            "type": "string"
+          },
+          "optical_activity": {
+            "type": "string"
+          },
+          "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+          "smiles": {
+            "type": "string"
+          },
+          "stereo_centers": {
+            "type": "integers"
+          },
+          "stereo_comments": {
+            "type": "string"
+          },
+          "stereochemistry": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          }
+        }
+      },
+      "type": "array"
+    },
+    "names": {
+      "properties": {
+        "display_name": {
+          "type": "boolean"
+        },
+        "domains": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "languages": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "name": {
+          "type": "string"
+        },
+        "name_jurisdiction": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "name_orgs": {
+          "items": {
+            "properties": {
+              "deprecated_date": {
+                "type": "integer"
+              },
+              "name_org": {
+                "type": "string"
+              },
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            }
+          },
+          "type": "array"
+        },
+        "preferred": {
+          "type": "boolean"
+        },
+        "references": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "type": {
+          "type": "string"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "notes": {
+      "properties": {
+        "note": {
+          "type": "string"
+        },
+        "references": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "nucleic_acid": {
+      "properties": {
+        "linkages": {
+          "items": {
+            "properties": {
+              "linkage": {
+                "type": "string"
+              },
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "sites": {
+                "properties": {
+                  "residue_index": {
+                    "type": "integer"
+                  },
+                  "subunit_index": {
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            }
+          },
+          "type": "array"
+        },
+        "nucleic_acid_sub_type": {
+          "type": "string"
+        },
+        "nucleic_acid_type": {
+          "type": "string"
+        },
+        "references": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "sequence_origin": {
+          "type": "string"
+        },
+        "sequence_type": {
+          "type": "string"
+        },
+        "subunits": {
+          "items": {
+            "properties": {
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "sequence": {
+                "type": "string"
+              },
+              "subunit_index": {
+                "type": "integer"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            }
+          },
+          "type": "array"
+        },
+        "sugars": {
+          "items": {
+            "properties": {
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "sites": {
+                "items": {
+                  "properties": {
+                    "residue_index": {
+                      "type": "integer"
+                    },
+                    "subunit_index": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "type": "array"
+              },
+              "sugar": {
+                "type": "string"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            }
+          },
+          "type": "array"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "polymer": {
+      "properties": {
+        "classification": {
+          "properties": {
+            "parent_substance": {
+              "properties": {
+                "linking_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "ref_pname": {
+                  "type": "string"
+                },
+                "references": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "refuuid": {
+                  "type": "string"
+                },
+                "substance_class": {
+                  "type": "string"
+                },
+                "unii": {
+                  "type": "string"
+                },
+                "uuid": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "polymer_class": {
+              "type": "string"
+            },
+            "polymer_geometry": {
+              "type": "string"
+            },
+            "polymer_subclass": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "references": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "source_type": {
+              "type": "string"
+            },
+            "uuid": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "display_structure": {
+          "properties": {
+            "charge": {
+              "type": "integer"
+            },
+            "count": {
+              "type": "integer"
+            },
+            "defined_stereo": {
+              "type": "integer"
+            },
+            "ez_centers": {
+              "type": "integer"
+            },
+            "id": {
+              "type": "string"
+            },
+            "molecular_weight": {
+              "type": "float"
+            },
+            "molfile": {
+              "type": "string"
+            },
+            "optical_activity": {
+              "type": "string"
+            },
+            "references": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "stereochemistry": {
+              "type": "string"
+            },
+            "stereo_centers": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "idealized_structure": {
+          "properties": {
+            "charge": {
+              "type": "integer"
+            },
+            "count": {
+              "type": "integer"
+            },
+            "defined_stereo": {
+              "type": "integer"
+            },
+            "ez_centers": {
+              "type": "integer"
+            },
+            "id": {
+              "type": "string"
+            },
+            "molecular_weight": {
+              "type": "float"
+            },
+            "molfile": {
+              "type": "string"
+            },
+            "optical_activity": {
+              "type": "string"
+            },
+            "references": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "stereochemistry": {
+              "type": "string"
+            },
+            "stereo_centers": {
+              "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "monomers": {
+          "properties": {
+            "amount": {
+              "properties": {
+                "average": {
+                  "type": "float"
+                },
+                "high": {
+                  "type": "float"
+                },
+                "high_limit": {
+                  "type": "float"
+                },
+                "low": {
+                  "type": "float"
+                },
+                "low_limit": {
+                  "type": "float"
+                },
+                "non_numeric_value": {
+                  "type": "string"
+                },
+                "references": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "units": {
+                  "type": "string"
+                },
+                "uuid": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "defining": {
+              "type": "boolean"
+            },
+            "monomer_substance": {
+              "properties": {
+                "linking_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "ref_pname": {
+                  "type": "string"
+                },
+                "references": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "refuuid": {
+                  "type": "string"
+                },
+                "substance_class": {
+                  "type": "string"
+                },
+                "unii": {
+                  "type": "string"
+                },
+                "uuid": {
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
+            "references": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": {
+              "type": "string"
+            },
+            "uuid": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "references": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "structural_units": {
+          "items": {
+            "properties": {
+              "amount": {
+                "properties": {
+                  "average": {
+                    "type": "string"
+                  },
+                  "high": {
+                    "type": "string"
+                  },
+                  "high_limit": {
+                    "type": "string"
+                  },
+                  "low": {
+                    "type": "string"
+                  },
+                  "low_limit": {
+                    "type": "string"
+                  },
+                  "non_numeric_value": {
+                    "type": "string"
+                  },
+                  "references": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "units": {
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "type": "string"
+                  }
+                }
+              },
+              "attachment_count": {
+                "type": "float"
+              },
+              "attachment_map": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "structure": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            }
+          },
+          "type": "array"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "properties": {
+      "items": {
+        "properties": {
+          "defining": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "parameters": {
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "type": {
+                "type": "string"
+              },
+              "uuid": {
+                "type": "string"
+              },
+              "value": {
+                "properties": {
+                  "average": {
+                    "type": "float"
+                  },
+                  "high": {
+                    "type": "float"
+                  },
+                  "low": {
+                    "type": "float"
+                  },
+                  "non_numeric_value": {
+                    "type": "string"
+                  },
+                  "references": {
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "type": {
+                    "type": "string"
+                  },
+                  "units": {
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "property_type": {
+            "type": "string"
+          },
+          "references": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          },
+          "value":  {
+            "properties": {
+              "average": {
+                "type": "float"
+              },
+              "high": {
+                "type": "float"
+              },
+              "high_limit": {
+                "type": "string"
+              },
+              "low": {
+                "type": "float"
+              },
+              "low_limit": {
+                "type": "string"
+              },
+              "non_numeric_value": {
+                "type": "string"
+              },
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "type": {
+                "type": "string"
+              },
+              "units": {
+                "type": "string"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        }
+      },
+      "type": "array"
+    },
+    "protein": {
+      "properties": {
+        "disulfide_links": {
+          "items": {
+            "properties": {
+              "sites": {
+                "properties": {
+                  "residue_index": {
+                    "type": "integer"
+                  },
+                  "subunit_index": {
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "type": "array"
+        },
+        "glycosylation": {
+          "properties": {
+            "c_glycosylation_sites": {
+              "items": {
+                "properties": {
+                  "residue_index": {
+                    "type": "integer"
+                  },
+                  "subunit_index": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": "array"
+            },
+            "glycosylation_type": {
+              "type": "string"
+            },
+            "n_glycosylation_sites": {
+              "items": {
+                "properties": {
+                  "residue_index": {
+                    "type": "integer"
+                  },
+                  "subunit_index": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": "array"
+            },
+            "o_glycosylation_sites": {
+              "items": {
+                "properties": {
+                  "residue_index": {
+                    "type": "integer"
+                  },
+                  "subunit_index": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": "array"
+            },
+            "references": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "uuid": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "other_links": {
+          "properties": {
+            "linkage_type": {
+              "type": "string"
+            },
+            "references": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "sites": {
+              "items": {
+                "properties": {
+                  "residue_index": {
+                    "type": "integer"
+                  },
+                  "subunit_index": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "type": "array"
+            },
+            "uuid": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "protein_sub_type": {
+          "type": "string"
+        },
+        "protein_type": {
+          "type": "string"
+        },
+        "references": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "sequence_origin": {
+          "type": "string"
+        },
+        "sequence_type": {
+          "type": "string"
+        },
+        "subunits": {
+          "items": {
+            "properties": {
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "sequence": {
+                "type": "string"
+              },
+              "subunit_index": {
+                "type": "integer"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            }
+          },
+          "type": "array"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "references": {
+      "items": {
+        "properties": {
+          "citation": {
+            "type": "string"
+          },
+          "doc_type": {
+            "type": "string"
+          },
+          "document_date": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "public_domain": {
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "url": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          }
+        }
+      },
+      "type": "array"
+    },
+    "relationships": {
+      "items": {
+        "properties": {
+          "amount": {
+            "properties": {
+              "average": {
+                "type": "float"
+              },
+              "high": {
+                "type": "float"
+              },
+              "high_limit": {
+                "type": "float"
+              },
+              "low": {
+                "type": "float"
+              },
+              "low_limit": {
+                "type": "float"
+              },
+              "non_numeric_value": {
+                "type": "string"
+              },
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "type": {
+                "type": "string"
+              },
+              "units": {
+                "type": "string"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "comments": {
+            "type": "string"
+          },
+          "interaction_type": {
+            "type": "string"
+          },
+          "mediator_substance": {
+            "properties": {
+              "linking_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "ref_pname": {
+                "type": "string"
+              },
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "refuuid": {
+                "type": "string"
+              },
+              "substance_class": {
+                "type": "string"
+              },
+              "unii": {
+                "type": "string"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "qualification": {
+            "type": "string"
+          },
+          "references": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "related_substance": {
+            "properties": {
+              "linking_id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "ref_pname": {
+                "type": "string"
+              },
+              "references": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "refuuid": {
+                "type": "string"
+              },
+              "substance_class": {
+                "type": "string"
+              },
+              "unii": {
+                "type": "string"
+              },
+              "uuid": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          }
+        }
+      },
+      "type": "array"
+    },
+    "structurally_diverse": {
+      "properties": {
+        "developmental_stage": {
+          "type": "string"
+        },
+        "fraction_material_type": {
+          "type": "string"
+        },
+        "fraction_name": {
+          "type": "string"
+        },
+        "hybrid_species_maternal_organism": {
+          "properties": {
+            "linking_id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "ref_pname": {
+              "type": "string"
+            },
+            "references": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "refuuid": {
+              "type": "string"
+            },
+            "substance_class": {
+              "type": "string"
+            },
+            "unii": {
+              "type": "string"
+            },
+            "uuid": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "hybrid_species_paternal_organism": {
+          "properties": {
+            "linking_id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "ref_pname": {
+              "type": "string"
+            },
+            "references": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "refuuid": {
+              "type": "string"
+            },
+            "substance_class": {
+              "type": "string"
+            },
+            "unii": {
+              "type": "string"
+            },
+            "uuid": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "infra_specific_name": {
+          "type": "string"
+        },
+        "infra_specific_type": {
+          "type": "string"
+        },
+        "organism_author": {
+          "type": "string"
+        },
+        "organism_family": {
+          "type": "string"
+        },
+        "organism_genus": {
+          "type": "string"
+        },
+        "organism_species": {
+          "type": "string"
+        },
+        "parent_substance": {
+          "properties": {
+            "linking_id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "ref_pname": {
+              "type": "string"
+            },
+            "references": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "refuuid": {
+              "type": "string"
+            },
+            "substance_class": {
+              "type": "string"
+            },
+            "unii": {
+              "type": "string"
+            },
+            "uuid": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "part": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "part_location": {
+          "type": "string"
+        },
+        "references": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "source_material_class": {
+          "type": "string"
+        },
+        "source_material_state": {
+          "type": "string"
+        },
+        "source_material_type": {
+          "type": "string"
+        },
+        "uuid": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "structure": {
+      "properties": {
+        "atropisomerism": {
+          "type": "string"
+        },
+        "charge": {
+          "type": "integer"
+        },
+        "count": {
+          "type": "integer"
+        },
+        "defined_stereo": {
+          "type": "integer"
+        },
+        "ez_centers": {
+          "type": "integer"
+        },
+        "formula": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "molecular_weight": {
+          "type": "string"
+        },
+        "molfile": {
+          "type": "string"
+        },
+        "optical_activity": {
+          "type": "string"
+        },
+        "references": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "smiles": {
+          "type": "string"
+        },
+        "stereo_centers": {
+          "type": "integer"
+        },
+        "stereo_comments": {
+          "type": "string"
+        },
+        "stereochemistry": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "substance_class": {
+      "type": "string"
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "unii": {
+      "type": "string"
+    },
+    "uuid": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    }
+  },
+  "type": "object"
+}

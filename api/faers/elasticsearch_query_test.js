@@ -41,8 +41,6 @@ exports.testSupportedQueryString_NotSupported = function(test) {
   // alternative: date:<2012-01-01
   notSupported(test, 'date:{* TO 2012/01/01}');
 
-  // alternative date:[2012-01-01 TO 2012-12-31]
-  notSupported(test, 'date:[2012/01/01 TO 2012/12/31]');
 
   // -------------------------------------------------------------
 
@@ -62,6 +60,8 @@ supported = function(test, query) {
 
 // All the query string query types we want to support
 exports.testSupportedQueryString_Supported = function(test) {
+  supported(test, '@drugtype:human');
+
   supported(test, 'active');
 
   supported(test, 'status:active');
@@ -99,7 +99,8 @@ exports.testBuildSort = function (test) {
     test.equal(elasticsearch_query.BuildSort({sort: 'report_date:asc'}), 'report_date:asc')
     test.equal(elasticsearch_query.BuildSort({sort: 'report_date:desc'}), 'report_date:desc')
     test.throws(function () {
-            elasticsearch_query.BuildSort({sort: 'report_date,receiptdate'})
+            // Unallowed character within sort param.
+            elasticsearch_query.BuildSort({sort: 'report_date`receiptdate'})
         },
         elasticsearch_query.ELASTICSEARCH_QUERY_ERROR);
     test.throws(function () {

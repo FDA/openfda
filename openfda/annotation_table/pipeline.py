@@ -26,7 +26,6 @@ from openfda import common, config, parallel, spl
 from openfda.annotation_table import unii_harmonization
 from openfda.spl import process_barcodes, extract
 
-RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 data_dir = config.data_dir('harmonization')
 BATCH_DATE = arrow.utcnow().ceil('week').format('YYYYMMDD')
 BASE_DIR = config.data_dir('harmonization/batches/%s' % BATCH_DATE)
@@ -50,7 +49,7 @@ UNII_DOWNLOAD = \
   'https://www.fda.gov/downloads/ForIndustry/DataStandards/StructuredProductLabeling/UCM363354.zip'
 
 NDC_DOWNLOAD_PAGE = \
-  'https://www.fda.gov/drugs/informationondrugs/ucm142438.htm'
+  'https://www.fda.gov/drugs/drug-approvals-and-databases/national-drug-code-directory'
 
 
 # The database names play a central role in terms of output and the joiner.
@@ -334,6 +333,21 @@ class NDC2JSON(luigi.Task):
     return luigi.LocalTarget(join(BASE_DIR, 'ndc', NDC_EXTRACT_DB))
 
   def run(self):
+    import sys
+    import csv
+    maxInt = sys.maxsize
+    decrement = True
+
+    while decrement:
+      # decrease the maxInt value by factor 10
+      # as long as the OverflowError occurs.
+
+      decrement = False
+      try:
+        csv.field_size_limit(maxInt)
+      except OverflowError:
+        maxInt = int(maxInt / 10)
+        decrement = True
     parallel.mapreduce(
         parallel.Collection.from_glob(
           self.input().path, parallel.CSVDictLineInput(delimiter='\t')),
@@ -503,9 +517,10 @@ class UpcMapper(parallel.Mapper):
     upc_json = join(SPL_S3_DIR, _id, 'barcodes/otc-bars.json')
     if os.path.exists(upc_json):
       upcs = open(upc_json, 'r')
+      upcList = []
       for upc in upcs:
-        upc_dict = json.loads(upc)
-        output.add(upc_dict['id'], upc_dict)
+        upcList.append(json.loads(upc))
+      output.add(_id, upcList)
 
 
 class UpcXml2JSON(luigi.Task):
@@ -619,7 +634,7 @@ class JoinAllReducer(parallel.Reducer):
       final['upc'] = []
       upc_data = intermediate.get(UPC_EXTRACT_DB, None)
       if upc_data:
-        final['upc'] = upc_data[0]['upc']
+        final['upc'] = [upc['upc'] for upc in upc_data]
 
       final_result.append(final)
 

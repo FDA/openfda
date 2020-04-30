@@ -23,9 +23,11 @@ SCHEMA_DIR = os.path.abspath(join(RUN_DIR, './schemas/'))
 # structure needs to follow the API. As such, we need to map the API to the
 # index. Please note that some indices serve more than one endpoint.
 ENDPOINT_INDEX_MAP = {
+  '/animalandveterinary/event': 'animalandveterinarydrugevent',
   '/drug/event': 'drugevent',
   '/drug/label': 'druglabel',
   '/drug/enforcement': 'recall',
+  '/drug/ndc': 'ndc',
   '/device/enforcement': 'recall',
   '/food/enforcement': 'recall',
   '/food/event': 'foodevent',
@@ -36,7 +38,9 @@ ENDPOINT_INDEX_MAP = {
   '/device/recall': 'devicerecall',
   '/device/registrationlisting': 'devicereglist',
   '/device/udi': 'deviceudi',
-  '/other/nsde': 'othernsde'
+  '/other/nsde': 'othernsde',
+  '/other/substance': 'substancedata'
+
 }
 
 # A data structure that helps generate a distinct dataset from a shared index.
@@ -68,15 +72,20 @@ RANGE_ENDPOINT_MAP = {
   '/drug/event': {
     'date_key': '@timestamp',
     'start_date': '2004-01-01',
-    'end_date': '2018-07-01'
+    'end_date': '2020-01-01'
   },
   # Check here for device event:
   # https://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/PostmarketRequirements/ReportingAdverseEvents/ucm127891.htm
   '/device/event': {
     'date_key': 'date_received',
     'start_date': '1991-10-01',
-    'end_date': '2018-04-01'
+    'end_date': '2020-04-01'
   },
+  '/animalandveterinary/event': {
+    'date_key': 'original_receive_date',
+    'start_date': '1987-01-01',
+    'end_date': '2020-04-01'
+  }
 }
 
 DEFAULT_CHUNKS = 250000
@@ -318,6 +327,8 @@ class MakeExportBatches(AlwaysRunTask):
 
         if 'enforcement' in ep.endpoint:
           partition = ep.endpoint.replace('enforcement', '').replace('/', '')
+        elif 'label' in ep.endpoint:
+          partition = ep.endpoint.replace('label', '').replace('/', '')
 
         output_dir = join(self.output().path, index_name)
         common.shell_cmd('mkdir -p %s', output_dir)
@@ -474,7 +485,7 @@ class LoadDownloadJSON(index_util.LoadJSONBase):
       'body': json_data
     }
 
-    es_client = elasticsearch.Elasticsearch(config.es_host())
+    es_client = elasticsearch.Elasticsearch(config.es_host(), timeout=60)
 
     # We put the same document into the index twice.
     # Once with a key as its date

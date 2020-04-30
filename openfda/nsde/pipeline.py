@@ -19,14 +19,14 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 NSDE_DOWNLOAD = \
-  'https://www.fda.gov/downloads/ForIndustry/DataStandards/StructuredProductLabeling/UCM363569.csv'
+  'https://www.fda.gov/downloads/ForIndustry/DataStandards/StructuredProductLabeling/UCM363568.zip'
 
 
 NSDE_EXTRACT_DB = 'nsde/nsde.db'
 
 
 class DownloadNSDE(luigi.Task):
-  furl = NSDE_DOWNLOAD
+  csv_file_name = "Comprehensive NDC SPL Data Elements File.csv"
 
   def requires(self):
     return []
@@ -36,9 +36,17 @@ class DownloadNSDE(luigi.Task):
 
   def run(self):
     logging.basicConfig(level=logging.INFO)
-    logging.info("Reading csv file: %s", (self.furl))
+
+    zip_filename = config.data_dir('nsde/raw/nsde.zip')
+    output_dir = config.data_dir('nsde/raw')
+    os.system('mkdir -p %s' % output_dir)
+    common.download(NSDE_DOWNLOAD, zip_filename)
+    os.system('unzip -o %(zip_filename)s -d %(output_dir)s' % locals())
+
+    csv_file = join(output_dir, self.csv_file_name)
+    logging.info("Reading csv file: %s", (csv_file))
     os.system('mkdir -p %s' % dirname(self.output().path))
-    df = pd.read_csv(self.furl, encoding='utf-8-sig')
+    df = pd.read_csv(csv_file, encoding='utf-8-sig')
     df.to_json(self.output().path, orient='records')
     with open(self.output().path, "w") as f:
       for row in df.iterrows():

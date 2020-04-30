@@ -1,0 +1,542 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "properties": {
+    "unique_aer_id_number": {
+      "description": "The globally unique adverse event report is designated by the Marketing Authorization Holder. It consists of a 3-character ISO 3166 country code, 8-character MAH identifier code, and a unique number assigned by the MAH. If the report originally was sent by a Regulatory Authority, this number may include the RA identifier code in place of the MAH identifier code.",
+      "type": "string"
+    },
+    "report_id": {
+      "description": "The globally unique adverse event report is designated by the Marketing Authorization Holder. It consists of a 3-character ISO 3166 country code, 8-character MAH identifier code, and a unique number assigned by the MAH. If the report originally was sent by a Regulatory Authority, this number may include the RA identifier code in place of the MAH identifier code.",
+      "type": "string"
+    },
+    "original_receive_date": {
+      "description": "The date of the first receipt of information by the MAH responsible for reporting the adverse event to the FDA.",
+      "format": "date",
+      "type": "string"
+    },
+    "receiver": {
+      "properties": {
+        "organization": {
+          "type": "string"
+        },
+        "street_address": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "postal_code": {
+          "type": "string"
+        },
+        "country": {
+          "type": "string"
+        }
+      }
+    },
+    "primary_reporter": {
+      "description": "The person or organization who holds or provides the most pertinent information related to the adverse event report.",
+      "type": "string"
+    },
+    "secondary_reporter": {
+      "description": "A person or organization who also possesses pertinent information related to the adverse event report e.g. if the primary reporter is a veterinarian, the secondary reporter may be the animal owner.",
+      "type": "string"
+    },
+    "type_of_information": {
+      "description": "A list of values regarding the type of information in the report.",
+      "type": "string"
+    },
+    "serious_ae": {
+      "description": "A list of values (Yes or No) characterizing the seriousness of the adverse event.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "Yes": "The adverse event is fatal or life-threatening, or requires professional intervention, or causes an abortion, or stillbirth, or infertility, or congenital anomaly, or prolonged or permanent disability, or disfigurement."
+          },
+          {
+            "No": "The adverse event is none of the above."
+          }
+        ]
+      }
+    },
+    "number_of_animals_treated": {
+      "description": "Number of animals being treated directly but the veterinary medicinal product.",
+      "type": "integer"
+    },
+    "number_of_animals_affected": {
+      "description": "Total number of animals affected by the adverse event, whether through direct or indirect exposure (e.g. treated during pregnancy or lactation, commingled, infection spread, etc.).",
+      "type": "integer"
+    },
+    "animal": {
+      "properties": {
+        "species": {
+          "description": "A list of values regarding the species of animal affected.",
+          "type": "string"
+        },
+        "gender": {
+          "description": "Described whether the affected animal(s) is male or female.",
+          "type": "string"
+        },
+        "reproductive_status": {
+          "description": "Describes whether the affected animal(s) is intact or neutered.",
+          "type": "string"
+        },
+        "female_animal_physiological_status": {
+          "description": "Describes the pregnancy and lactation status of affected female animal(s).",
+          "type": "string"
+        },
+        "age": {
+          "description": "Describes the age of the affected animal(s).",
+          "properties": {
+            "min": {
+              "type": "float"
+            },
+            "max": {
+              "type": "float"
+            },
+            "unit": {
+              "type": "string"
+            },
+            "qualifier": {
+              "type": "string"
+            }
+          }
+        },
+        "weight": {
+          "description": "Describes the weight of the animals involved in the adverse event.",
+          "properties": {
+            "min": {
+              "type": "float"
+            },
+            "max": {
+              "type": "float"
+            },
+            "unit": {
+              "type": "string"
+            },
+            "qualifier": {
+              "type": "string"
+            }
+          }
+        },
+        "breed": {
+          "description": "Describes the breed of the animal(s) associated with the species.",
+          "properties": {
+            "is_crossbred": {
+              "type": "boolean"
+            },
+            "breed_component": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "outcome": {
+      "properties": {
+        "medical_status": {
+          "type": "string"
+        },
+        "number_of_animals_affected": {
+          "description": "Total number of animals affected by the adverse event, whether through direct or indirect exposure (e.g. treated during pregnancy or lactation, commingled, infection spread, etc.).",
+          "type": "integer"
+        }
+      }
+    },
+    "health_assessment_prior_to_exposure": {
+      "description": "Veterinarian’s assessment of the health status of the animal(s) involved in the adverse event prior to exposure. In case of human exposure, this would be the assessment by the attending physician.",
+      "properties": {
+        "condition": {
+          "type": "string"
+        },
+        "assessed_by": {
+          "description": "Who the animal affected by the adverse event was assessed by.",
+          "type": "string"
+        }
+      }
+    },
+    "onset_date": {
+      "description": "The date (day, month or year) of the onset of the adverse event.",
+      "format": "date",
+      "type": "string"
+    },
+    "duration": {
+      "description": "The numeric value for the duration of the adverse event.",
+      "properties": {
+        "value": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string"
+        }
+      }
+    },
+    "reaction": {
+      "properties": {
+        "veddra_version": {
+          "type": "integer"
+        },
+        "veddra_term_code": {
+          "type": "string"
+        },
+        "veddra_term_name": {
+          "description": "The VeDDRA Vocabulary is the VICH-harmonized list for submission of AE terms. The most current list, as well as a full explanation and guidance notes on the use of VeDDRA Terminology for Reporting Adverse Events in Animals, can be downloaded here.",
+          "type": "string"
+        },
+        "number_of_animals_affected": {
+          "description": "Total number of animals affected by the adverse event, whether through direct or indirect exposure (e.g. treated during pregnancy or lactation, commingled, infection spread, etc.).",
+          "type": "integer"
+        },
+        "accuracy": {
+          "index": "not_analyzed",
+          "type": "string"
+        }
+      }
+    },
+    "time_between_exposure_and_onset": {
+      "description": "The length of time between the first exposure to the veterinary medicinal product and the onset of the adverse event.",
+      "type": "string"
+    },
+    "treated_for_ae": {
+      "description": "A list of values (Yes, No, Unknown, or Not Applicable) describing whether or not the human or animal affected received treatment in response to the adverse event.",
+      "type": "boolean",
+      "possible_values": {
+        "type": "one_of",
+        "value": [
+          {
+            "Yes": "Human or animal was treated."
+          },
+          {
+            "No": "Human or animal was not treated."
+          },
+          {
+            "Unknown": "Information is not available."
+          },
+          {
+            "Not Applicable": "The veterinary medicinal product was neither stopped nor re-introduced."
+          }
+        ]
+      }
+    },
+    "drug": {
+      "properties": {
+        "first_exposure_date": {
+          "description": "The date (day, month and year) on which the animal was first treated with the veterinary medicinal product.",
+          "format": "date",
+          "type": "string"
+        },
+        "last_exposure_date": {
+          "description": "The date (day, month and year) on which the animal was last treated with the veterinary medicinal product.",
+          "format": "date",
+          "type": "string"
+        },
+        "frequency_of_administration": {
+          "description": "Frequency of administration of the veterinary medicinal product(s) involved in the adverse event.",
+          "properties": {
+            "value": {
+              "type": "float"
+            },
+            "unit": {
+              "type": "string"
+            }
+          }
+        },
+        "administered_by": {
+          "description": "Describes the individual who administered the veterinary medicinal product(s) to the animal(s) involved in the adverse event.",
+          "type": "string"
+        },
+        "route": {
+          "description": "Route by which the veterinary medicinal product was administered.",
+          "type": "string"
+        },
+        "dose": {
+          "description": "The actual dose administered to the animal involved in the adverse event.",
+          "properties": {
+            "numerator": {
+              "type": "float"
+            },
+            "numerator_unit": {
+              "type": "string"
+            },
+            "denominator": {
+              "type": "float"
+            },
+            "denominator_unit": {
+              "type": "string"
+            }
+          }
+        },
+        "used_according_to_label": {
+          "description": "A list of values (Yes, No, or Unknown) describing whether the veterinary medicinal product was used according to its labeled recommendations/directions of use.",
+          "type": "boolean",
+          "possible_values": {
+            "type": "one_of",
+            "value": [
+              {
+                "Yes": "The veterinary medicinal product was used according to its labeled recommendations/directions of use."
+              },
+              {
+                "No": "The veterinary medicinal product was used in an off-label use manner."
+              },
+              {
+                "Unknown": "Information is not available."
+              }
+            ]
+          }
+        },
+        "off_label_use": {
+          "description": "Describes how the veterinary medicinal product was used in an off-label manner.",
+          "type": "string"
+        },
+        "previous_exposure_to_drug": {
+          "description": "A list of values (Yes, No, or Unknown) describing whether or not the affected animal(s) had been exposed to the veterinary medicinal product on a date previous to the adverse event report.",
+          "type": "boolean",
+          "possible_values": {
+            "type": "one_of",
+            "value": [
+              {
+                "Yes": "There was a previous exposure."
+              },
+              {
+                "No": "There was no previous exposure."
+              },
+              {
+                "Unknown": "Information is not available."
+              }
+            ]
+          }
+        },
+        "previous_ae_to_drug": {
+          "description": "No = The adverse event is none of the above.",
+          "type": "boolean",
+          "possible_values": {
+            "type": "one_of",
+            "value": [
+              {
+                "Yes": "There was a previous adverse event."
+              },
+              {
+                "No": "There was no previous adverse event."
+              },
+              {
+                "Unknown": "Information is not available."
+              },
+              {
+                "Not Applicable": "There was no previous exposure to the veterinary medicinal product."
+              }
+            ]
+          }
+        },
+        "ae_abated_after_stopping_drug": {
+          "description": "A list of values (Yes, No, Unknown, or Not Applicable) describing whether the adverse event abated after stopping the veterinary medicinal product.",
+          "type": "boolean",
+          "possible_values": {
+            "type": "one_of",
+            "value": [
+              {
+                "Yes": "Adverse event abated."
+              },
+              {
+                "No": "Adverse event did not abate."
+              },
+              {
+                "Unknown": "Information is not available."
+              },
+              {
+                "Not Applicable": "The veterinary medicinal product was neither stopped nor re-introduced."
+              }
+            ]
+          }
+        },
+        "ae_reappeared_after_resuming_drug": {
+          "description": "A list of values (Yes, No, Unknown, or Not Applicable) describing whether the adverse event reappeared after re-introduction of the veterinary medicinal product.",
+          "type": "boolean",
+          "possible_values": {
+            "type": "one_of",
+            "value": [
+              {
+                "Yes": "Adverse event reappeared."
+              },
+              {
+                "No": "Adverse event did not reappear."
+              },
+              {
+                "Unknown": "Information is not available."
+              },
+              {
+                "Not Applicable": "The veterinary medicinal product was neither stopped nor re-introduced."
+              }
+            ]
+          }
+        },
+        "manufacturing_date": {
+          "description": "The date the veterinary medicinal product was manufactured.",
+          "format": "date",
+          "type": "string"
+        },
+        "lot_number": {
+          "description": "The lot number of the veterinary medicinal product(s) involved in the adverse event.",
+          "type": "string"
+        },
+        "lot_expiration": {
+          "description": "The expiration date of the veterinary medicinal product(s) involved in the adverse event.",
+          "format": "year_month",
+          "type": "string"
+        },
+        "product_ndc": {
+          "description": "The national drug code number for the veterinary medicinal product(s) involved in the adverse event",
+          "type": "string"
+        },
+        "brand_name": {
+          "description": "The name by which the product is presented by the marketing authorization holder",
+          "type": "string"
+        },
+        "dosage_form": {
+          "description": "The labeled dosage form of the veterinary medicinal product(s) involved in the adverse event.",
+          "type": "string"
+        },
+        "openfda": {
+          "properties": {
+            "application_number": {
+              "type": "string"
+            },
+            "brand_name": {
+              "description": "The name by which the product is presented by the marketing authorization holder.",
+              "type": "string"
+            },
+            "dosage_form": {
+              "description": "The labeled dosage form of the veterinary medicinal product(s) involved in the adverse event.",
+              "type": "string"
+            },
+            "generic_name": {
+              "description": "The generic name(s) of the veterinary medicinal product.",
+              "type": "string"
+            },
+            "is_original_packager": {
+              "type": "boolean"
+            },
+            "manufacturer_name": {
+              "description": "Manufacturer of the veterinary medicinal product involved in the adverse event.",
+              "type": "string"
+            },
+            "nui": {
+              "description": "Unique Identifier Code of the veterinary medicinal product involved in the adverse event.",
+              "type": "string"
+            },
+            "package_ndc": {
+              "description": "National Drug Code for the package containing veterinary medicinal products involved in an adverse event.",
+              "type": "string"
+            },
+            "pharm_class_cs": {
+              "description": "Chemical structure classification of the veterinary medicinal product’s pharmacologic class.",
+              "type": "string"
+            },
+            "pharm_class_epc": {
+              "description": "Established pharmacologic class associated with an approved indication of an active moiety that the FDA has determined to be scientifically valid and clinically meaningful.",
+              "type": "string"
+            },
+            "pharm_class_moa": {
+              "description": "Mechanism of action of the veterinary medicinal product—molecular, subcellular, or cellular functional activity—of the drug’s established pharmacologic class.",
+              "type": "string"
+            },
+            "pharm_class_pe": {
+              "description": "Physiologic effect or pharmacodynamics effect—tissue, organ, or organ system functional activity—of the drug’s established pharmacologic class.",
+              "type": "string"
+            },
+            "product_ndc": {
+              "description": "National Drug Code for the veterinary medicinal product(s) involved in an adverse event.",
+              "type": "string"
+            },
+            "product_type": {
+              "description": "Type of veterinary medicinal product involved in the adverse event.",
+              "type": "string"
+            },
+            "route": {
+              "description": "Route by which the veterinary medicinal product was administered.",
+              "type": "string"
+            },
+            "rxcui": {
+              "description": "A unique number that described a semantic concept about the veterinary medicinal product, including its ingredients, strength, and dose forms.",
+              "type": "string"
+            },
+            "rxstring": {
+              "type": "string"
+            },
+            "rxtty": {
+              "type": "string"
+            },
+            "spl_id": {
+              "description": "Unique identifier for a particular version of a Structured Product Label for a product",
+              "type": "string"
+            },
+            "spl_set_id": {
+              "description": "Unique identifier for the Structured Product Label for a product, which is stable across versions of the label.",
+              "type": "string"
+            },
+            "substance_name": {
+              "type": "string"
+            },
+            "unii": {
+              "type": "string"
+            },
+            "upc": {
+              "type": "string"
+            }
+          }
+        },
+        "manufacturer": {
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "registration_number": {
+              "description": "A combination of the 3-character ISO 3166 code for the country where the veterinary medicinal product is approved, the 8-character RA Identifier code, and the registration number of the veterinary medicinal product involved in the adverse event.",
+              "type": "string"
+            }
+          }
+        },
+        "number_of_defective_items": {
+          "description": "The number of defective items of the veterinary medicinal product described in the adverse event, based on the applicable retail unit.",
+          "type": "integer"
+        },
+        "number_of_items_returned": {
+          "description": "The number of veterinary medicinal products returned as described in the adverse event.",
+          "type": "integer"
+        },
+        "atc_vet_code": {
+          "description": "The Anatomic Therapeutic Chemical system for the classification of substance intended for therapeutic use, which can serve as a tool for the classification of Veterinary Medicinal Products.",
+          "type": "string"
+        },
+        "active_ingredients": {
+          "description": "Active ingredients for the veterinary medicinal product.",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "dose": {
+              "description": "The actual dose administered to the animal involved in the adverse event.",
+              "properties": {
+                "numerator": {
+                  "type": "float"
+                },
+                "numerator_unit": {
+                  "type": "string"
+                },
+                "denominator": {
+                  "type": "float"
+                },
+                "denominator_unit": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

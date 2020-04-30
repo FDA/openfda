@@ -17,7 +17,7 @@ RUN \
   rm -f elasticsearch-2.4.6.tar.gz && \
   mv /tmp/elasticsearch-2.4.6 /elasticsearch
 
-VOLUME ["/data0", "/data1", "/data2", "/data3"]
+VOLUME ["/data0"]
 
 WORKDIR /elasticsearch
 

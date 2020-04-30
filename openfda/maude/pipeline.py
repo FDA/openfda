@@ -40,13 +40,13 @@ DATE_FMT = 'YYYY-MM-DD'
 CATEGORIES = ['mdrfoi', 'patient', 'foidev', 'foitext']
 IGNORE_FILES = ['problem', 'add', 'change']
 
-DEVICE_DOWNLOAD_PAGE = ('https://www.fda.gov/MedicalDevices/'
-                        'DeviceRegulationandGuidance/PostmarketRequirements/'
-                        'ReportingAdverseEvents/ucm127891.htm')
+DEVICE_DOWNLOAD_PAGE = ('https://www.fda.gov/medical-devices/'
+                        'mandatory-reporting-requirements-manufacturers-importers-and-device-user-facilities/'
+                        'manufacturer-and-user-facility-device-experience-database-maude')
 
-DEVICE_CLASS_DOWNLOAD = ('https://www.fda.gov/MedicalDevices/'
-                         'DeviceRegulationandGuidance/Overview/'
-                         'ClassifyYourDevice/ucm051668.htm')
+DEVICE_CLASS_DOWNLOAD = ('https://www.fda.gov/medical-devices/'
+                         'classify-your-medical-device/'
+                         'download-product-code-classification-files')
 
 enum_file = join(RUN_DIR, 'maude/data/enums.csv')
 enum_csv = csv.DictReader(open(enum_file))
@@ -591,7 +591,9 @@ class CSV2JSON(luigi.Task):
         input_files, parallel.CSVLineInput(quoting=csv.QUOTE_NONE, delimiter='|')),
       mapper=CSV2JSONMapper(problem_codes_reference=problem_codes_reference, device_problem_codes=device_problem_codes),
       reducer=CSV2JSONJoinReducer(),
-      output_prefix=self.output().path)
+      output_prefix=self.output().path,
+      map_workers=multiprocessing.cpu_count() / 2,
+      num_shards=multiprocessing.cpu_count() / 2)
 
 
 class MergeUpdatesMapper(parallel.Mapper):

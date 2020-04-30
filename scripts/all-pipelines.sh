@@ -10,9 +10,11 @@ mkdir -p $LOGDIR
 
 $PYTHON openfda/annotation_table/pipeline.py CombineHarmonization > $LOGDIR/annotation.log 2>&1
 $PYTHON openfda/nsde/pipeline.py LoadJSON > $LOGDIR/nsde.log 2>&1
+$PYTHON openfda/ndc/pipeline.py LoadJSON > $LOGDIR/ndc.log 2>&1
 $PYTHON openfda/faers/pipeline.py LoadJSON --quarter=all > $LOGDIR/faers.log 2>&1
 $PYTHON openfda/res/pipeline.py RunWeeklyProcess > $LOGDIR/res.log 2>&1
 $PYTHON openfda/spl/pipeline.py ProcessBatch > $LOGDIR/spl.log 2>&1
+$PYTHON openfda/adae/pipeline.py LoadJSON > $LOGDIR/adae.log 2>&1
 $PYTHON openfda/classification/pipeline.py LoadJSON > $LOGDIR/classification.log 2>&1
 $PYTHON openfda/device_pma/pipeline.py LoadJSON > $LOGDIR/device_pma.log 2>&1
 $PYTHON openfda/device_clearance/pipeline.py LoadJSON > $LOGDIR/device_clearance.log 2>&1

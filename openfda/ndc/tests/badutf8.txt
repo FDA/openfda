@@ -1,0 +1,1 @@
+This is a "bad" UTF-8 file.€

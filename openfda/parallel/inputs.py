@@ -138,6 +138,12 @@ class JSONLineInput(MRInput):
       for idx, line in enumerate(open(self.filename)):
         yield str(idx), json.loads(line)
 
+class JSONLineInputUnicode(MRInput):
+  class Reader(MRInput.Reader):
+    def entries(self):
+      for idx, line in enumerate(open(self.filename)):
+        yield str(idx), json.loads(unicode(line, errors='replace'))
+
 class JSONListInput(MRInput):
   class Reader(MRInput.Reader):
     def entries(self):

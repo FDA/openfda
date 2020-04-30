@@ -1,0 +1,1815 @@
+{
+  "substancedata": {
+    "dynamic": false,
+    "properties": {
+      "definition_level": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "definition_type": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "substance_class": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "tags": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "unii": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "uuid": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "version": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "codes":{
+        "properties": {
+          "code": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "code_system": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "comments": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "references": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "url": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "uuid": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      },
+      "mixture":{
+        "properties": {
+          "components": {
+            "properties": {
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "substance": {
+                "properties": {
+                  "linking_id": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "name": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "ref_pname": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "references": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "refuuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "substance_class": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "unii": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "type": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "parent_substance": {
+            "properties": {
+              "linking_id": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "name": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "ref_pname": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "refuuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "substance_class": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "unii": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "references": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "uuid": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      },
+      "modifications":{
+        "properties": {
+          "agent_modifications": {
+            "properties": {
+              "agent_modification_process": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "agent_modification_role": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "agent_modification_type": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "agent_substance": {
+                "properties": {
+                  "linking_id": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "name": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "ref_pname": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "references": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "refuuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "substance_class": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "unii": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "amount": {
+                "properties": {
+                  "average": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "high": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "high_limit": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "low": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "low_limit": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "non_numeric_value": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "references": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "type": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "units": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "modification_group": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "physical_modifications": {
+            "properties": {
+              "modification_group": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "parameters": {
+                "properties": {
+                  "amount": {
+                    "properties": {
+                      "average": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      },
+                      "high_limit": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      },
+                      "low_limit": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      },
+                      "non_numeric_value": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      },
+                      "references": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      },
+                      "type": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      },
+                      "units": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      },
+                      "uuid": {
+                        "index": "not_analyzed",
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "parameter_name": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "references": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "physical_modification_role": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "references": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "structural_modifications": {
+            "properties": {
+              "extent": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "extent_amount": {
+                "properties": {
+                  "average": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "high": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "high_limit": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "low": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "low_limit": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "non_numeric_value": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "references": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "type": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "units": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "location_type": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "modification_group": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "molecular_fragment": {
+                "properties": {
+                  "linking_id": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "name": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "ref_pname": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "references": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "refuuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "substance_class": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "unii": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "residue_modified": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "sites": {
+                "properties": {
+                  "residue_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "subunit_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "structural_modification_type": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "uuid": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      },
+      "moieties":{
+        "properties": {
+          "atropisomerism": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "charge": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "count": {
+            "index": "not_analyzed",
+            "type": "integer"
+          },
+          "count_amount": {
+            "properties": {
+              "average": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "high": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "high_limit": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "low": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "low_limit": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "non_numeric_value": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "type": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "units": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "defined_stereo": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "digest": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "ez_centers": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "formula": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "id": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "molecular_weight": {
+            "index": "not_analyzed",
+            "type": "float"
+          },
+          "molfile": {
+            "index": "no",
+            "type": "string"
+          },
+          "optical_activity": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "references": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "smiles": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "stereochemistry": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "stereo_centers": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "stereo_comments": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "uuid": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      },
+      "names":{
+        "properties": {
+          "display_name": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "domains": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "languages": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "name": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "name_jurisdiction": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "preferred": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "references": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "uuid": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "name_orgs": {
+            "properties": {
+              "deprecated_date": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "name_org": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "notes": {
+        "properties": {
+          "note": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "references": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "uuid": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      },
+      "nucleic_acid":{
+        "properties": {
+          "linkages": {
+            "properties": {
+              "linkage": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "sites": {
+                "properties": {
+                  "residue_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "subunit_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "nucleic_acid_sub_type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "nucleic_acid_type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "references": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "sequence_origin": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "sequence_type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "subunits": {
+            "properties": {
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "sequence": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "subunit_index": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "sugars": {
+            "properties": {
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "sites": {
+                "properties": {
+                  "residue_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "subunit_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "sugar": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "uuid": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      },
+      "polymer":{
+        "properties": {
+          "classification": {
+            "properties": {
+              "parent_substance": {
+                "properties": {
+                  "linking_id": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "name": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "ref_pname": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "references": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "refuuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "substance_class": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "unii": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "polymer_class": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "polymer_geometry": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "polymer_subclass": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "source_type": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "display_structure": {
+            "properties": {
+              "charge": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "count": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "defined_stereo": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "ez_centers": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "id": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "molecular_weight": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "molfile": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "optical_activity": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "stereochemistry": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "stereo_centers": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "idealized_structure": {
+            "properties": {
+              "charge": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "count": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "defined_stereo": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "ez_centers": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "id": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "molecular_weight": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "molfile": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "optical_activity": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "stereochemistry": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "stereo_centers": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "monomers": {
+            "properties": {
+              "amount": {
+                "properties": {
+                  "average": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "high": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "high_limit": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "low": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "low_limit": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "non_numeric_value": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "references": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "type": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "units": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "defining": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "monomer_substance": {
+                "properties": {
+                  "linking_id": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "name": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "ref_pname": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "references": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "refuuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "substance_class": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "unii": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "type": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "references": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "structural_units": {
+            "properties": {
+              "amount": {
+                "properties": {
+                  "average": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "high": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "high_limit": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "low": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "low_limit": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "non_numeric_value": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "references": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "type": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "units": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "attachment_count": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "attachment_map": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "label": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "structure": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "type": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "uuid": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      },
+      "properties":{
+        "properties": {
+          "defining": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "name": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "parameters": {
+            "properties": {
+              "name": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "type": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "value": {
+                "properties": {
+                  "average": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "high": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "low": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "non_numeric_value": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "references": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "type": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "units": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "uuid": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "property_type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "value": {
+            "properties": {
+              "average": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "high": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "high_limit": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "low": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "low_limit": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "non_numeric_value": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "type": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "units": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "references": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "uuid": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      },
+      "protein":{
+        "properties": {
+          "disulfide_links": {
+            "properties": {
+              "sites": {
+                "properties": {
+                  "residue_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "subunit_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "glycosylation": {
+            "properties": {
+              "c_glycosylation_sites": {
+                "properties": {
+                  "residue_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "subunit_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "glycosylation_type": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "n_glycosylation_sites": {
+                "properties": {
+                  "residue_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "subunit_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "o_glycosylation_sites": {
+                "properties": {
+                  "residue_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "subunit_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "other_links": {
+            "properties": {
+              "linkage_type": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "sites": {
+                "properties": {
+                  "residue_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  },
+                  "subunit_index": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                }
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "protein_sub_type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "protein_type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "references": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "sequence_origin": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "sequence_type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "subunits": {
+            "properties": {
+              "linkage": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "sequence": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "subunit_index": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "uuid": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      },
+      "references":{
+        "properties": {
+          "citation": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "doc_type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "document_date": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "id": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "public_domain": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "tags": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "url": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "uuid": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      },
+      "relationships":{
+        "properties": {
+          "amount": {
+            "properties": {
+              "average": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "high": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "high_limit": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "low": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "low_limit": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "non_numeric_value": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "type": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "units": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "comments": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "interaction_type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "mediator_substance": {
+            "properties": {
+              "linking_id": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "name": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "ref_pname": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "refuuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "substance_class": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "unii": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "qualification": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "references": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "uuid": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "related_substance": {
+            "properties": {
+              "linking_id": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "name": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "ref_pname": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "refuuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "substance_class": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "unii": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "structurally_diverse":{
+        "properties": {
+          "developmental_stage": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "fraction_material_type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "fraction_name": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "hybrid_species_maternal_organism": {
+            "properties": {
+              "linking_id": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "name": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "ref_pname": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "refuuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "substance_class": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "unii": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "hybrid_species_paternal_organism": {
+            "properties": {
+              "linking_id": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "name": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "ref_pname": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "refuuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "substance_class": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "unii": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "infra_specific_name": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "infra_specific_type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "organism_author": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "organism_family": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "organism_genus": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "organism_species": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "parent_substance": {
+            "properties": {
+              "linking_id": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "name": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "ref_pname": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "references": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "refuuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "substance_class": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "unii": {
+                "index": "not_analyzed",
+                "type": "string"
+              },
+              "uuid": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "part": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "part_location": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "references": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "source_material_class": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "source_material_state": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "source_material_type": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "uuid": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      },
+      "structure":{
+        "properties": {
+          "atropisomerism": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "charge": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "count": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "defined_stereo": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "ez_centers": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "formula": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "id": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "molecular_weight": {
+            "index": "not_analyzed",
+            "type": "float"
+          },
+          "molfile": {
+            "index": "no",
+            "type": "string"
+          },
+          "optical_activity": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "references": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "smiles": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "stereochemistry": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "stereo_centers": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "stereo_comments": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
