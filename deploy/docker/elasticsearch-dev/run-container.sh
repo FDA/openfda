@@ -1,5 +1,9 @@
 #!/bin/bash
 
+docker stop elasticsearch-dev
+docker rm -f elasticsearch-dev
+docker rmi -f openfda/elasticsearch.0
+
 set -x
 set -e
 

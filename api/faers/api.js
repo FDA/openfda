@@ -9,7 +9,11 @@ var request = require('request');
 var querystring = require('querystring');
 var url = require('url');
 var Promise = require('bluebird');
+
+var apicache = require('apicache');
+apicache.options({debug: true});
 var cache = require('apicache').middleware;
+var qs = require('qs')
 
 var Stats = require('fast-stats').Stats;
 
@@ -57,6 +61,7 @@ var FIELDS_TO_REMOVE = [
   '@case_number',
   '@version',
   '@epoch',
+  '@drugtype',
 
   // MAUDE fields to remove
   'baseline_510_k_exempt_flag',
@@ -81,6 +86,7 @@ var FIELDS_TO_REMOVE = [
 
 // TODO(hansnelsen): all these index data structures are becoming too much,
 //                   consolidate down to one and refactor the code accordingly.
+var ANIMAL_AND_VETERINARY_DRUG_EVENT_INDEX = 'animalandveterinarydrugevent';
 var ALL_ENFORCEMENT_INDEX = 'recall';
 var DEVICE_EVENT_INDEX = 'deviceevent';
 var DEVICE_CLASSIFICATION_INDEX = 'deviceclass';
@@ -91,10 +97,12 @@ var DEVICE_RECALL_INDEX = 'devicerecall';
 var DEVICE_UDI_INDEX = 'deviceudi';
 var DRUG_EVENT_INDEX = 'drugevent';
 var DRUG_LABEL_INDEX = 'druglabel';
+var DRUG_NDC_INDEX = 'ndc';
 var FOOD_EVENT_INDEX = 'foodevent';
 var OTHER_NSDE_INDEX = 'othernsde';
 var PROCESS_METADATA_INDEX = 'openfdametadata';
 var EXPORT_DATA_INDEX = 'openfdadata';
+var SUBSTANCE_DATA_INDEX = 'substancedata';
 
 // This data structure is the standard way to add an endpoint to the api, which
 // is to say, if there is a one-to-one mapping between an index and an endpoint,
@@ -111,6 +119,12 @@ var EXPORT_DATA_INDEX = 'openfdadata';
 // Results in an endpoint: /device/event.json hitting /deviceevent/maude index.
 
 var ENDPOINTS = [
+  {
+    'index': ANIMAL_AND_VETERINARY_DRUG_EVENT_INDEX,
+    'endpoint': '/animalandveterinary/event.json',
+    'name': 'animalandveterinarydrugevent',
+    'basic' : true
+  },
   {
     'index': DEVICE_CLASSIFICATION_INDEX,
     'endpoint': '/device/classification.json',
@@ -176,6 +190,12 @@ var ENDPOINTS = [
     'basic' : true
   },
   {
+      'index': DRUG_NDC_INDEX,
+      'endpoint': '/drug/ndc.json',
+      'name': 'ndc',
+      'basic' : true
+  },
+  {
     'index': ALL_ENFORCEMENT_INDEX,
     'endpoint': '/food/enforcement.json',
     'name': 'foodenforcement'
@@ -193,6 +213,12 @@ var ENDPOINTS = [
     'basic' : true
   },
   {
+    'index': SUBSTANCE_DATA_INDEX,
+    'endpoint': '/other/substance.json',
+    'name': 'othersubstance',
+    'basic' : true
+  },
+  {
     'index': EXPORT_DATA_INDEX,
     'endpoint': '/download.json',
     'name': 'openfdadata',
@@ -201,12 +227,15 @@ var ENDPOINTS = [
 ];
 
 var VALID_URLS = [
+  'api.fda.gov/animalandveterinary/event.json',
+  'api.fda.gov/animalandveterinary/',
   'api.fda.gov/drug/',
   'api.fda.gov/food/',
   'api.fda.gov/device/',
   'api.fda.gov/other/',
   'api.fda.gov/drug/event.json',
   'api.fda.gov/drug/label.json',
+  'api.fda.gov/drug/ndc.json',
   'api.fda.gov/drug/enforcement.json',
   'api.fda.gov/device/510k.json',
   'api.fda.gov/device/event.json',
@@ -218,7 +247,8 @@ var VALID_URLS = [
   'api.fda.gov/device/pma.json',
   'api.fda.gov/food/enforcement.json',
   'api.fda.gov/food/event.json',
-  'api.fda.gov/other/nsde.json'
+  'api.fda.gov/other/nsde.json',
+  'api.fda.gov/other/substance.json'
 ];
 
 // For each endpoint, we track the success/failure status for the
@@ -335,7 +365,7 @@ var client = new elasticsearch.Client({
   log: logging.ElasticsearchLogger,
 
   // Note that this doesn't abort the query.
-  requestTimeout: 10000  // milliseconds
+  requestTimeout: 20000  // milliseconds
 });
 
 // Initialize our index information.  This is returned by the status API.
@@ -664,7 +694,7 @@ TryToBuildElasticsearchParams = function(params, es_index, response) {
   return es_search_params;
 };
 
-TrySearch = function(index, params, es_search_params, response) {
+TrySearch = function(index, params, es_search_params, request, response) {
   client.search(es_search_params)
   .then(function(body) {
     if (body.hits.hits.length == 0 && !(params.limit === 0 && body.hits.total > 0)) {
@@ -706,6 +736,16 @@ TrySearch = function(index, params, es_search_params, response) {
           }
         }
         response_json.results.push(result);
+      }
+      var nextSkip = params.skip + params.limit;
+      if (body.hits.total > nextSkip) {
+        request.query.skip = nextSkip;
+        var nextQuery = qs.stringify(request.query);
+        var nextPageUrl = (request.header('x-api-umbrella-request-id') !== undefined ?
+          'https://api.fda.gov' :
+          request.protocol + '://' + request.get('host'))
+          + request.path + '?' + nextQuery;
+        response.header("Link",'<' + nextPageUrl + '>; rel="next"');
       }
       return response.json(HTTP_CODE.OK, response_json);
     }
@@ -781,7 +821,7 @@ GetDownload = function(response) {
   });
 };
 
-
+// Enforcement.
 EnforcementEndpoint = function(noun) {
   app.get('/' + noun + '/enforcement.json', function(request, response) {
     LogRequest(request);
@@ -812,7 +852,7 @@ EnforcementEndpoint = function(noun) {
       return;
     }
 
-    TrySearch(index, params, es_search_params, response);
+    TrySearch(index, params, es_search_params, request, response);
   });
 };
 
@@ -824,7 +864,12 @@ BasicEndpoint = function(data) {
   var endpoint = data['endpoint'];
   var index = data['index'];
 
-  app.get(endpoint, function(request, response) {
+  // cache "limitless" count requests. Those can be very expensive.
+  const limitlessCountReq = (req, res) => req.query.count && req.query.limit && parseInt(req.query.limit) > 1000
+      && res.statusCode === 200;
+  const cacheLimitlessCountReq = cache('1 day', limitlessCountReq);
+
+  app.get(endpoint, cacheLimitlessCountReq, function(request, response) {
     LogRequest(request);
     SetHeaders(response);
 
@@ -839,7 +884,7 @@ BasicEndpoint = function(data) {
       return;
     }
 
-    TrySearch(index, params, es_search_params, response);
+    TrySearch(index, params, es_search_params, request, response);
   });
 };
 

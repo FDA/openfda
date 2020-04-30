@@ -5,7 +5,7 @@ import multiprocessing
 import os
 import logging
 import subprocess
-import types
+
 
 import leveldb
 import simplejson as json
@@ -122,13 +122,13 @@ class JSONLineOutput(MROutput):
       # add recursive decoder to prevent unicode errors on writes.
       def _convert(data):
         if isinstance(data, basestring):
-	  return data.decode('utf-8', 'replace')
-	elif isinstance(data, collections.Mapping):
-	  return dict(map(_convert, data.items()))
-	elif isinstance(data, collections.Iterable):
-	  return type(data)(map(_convert, data))
-	else:
-	  return data
+          return data.decode('utf-8', 'replace')
+        elif isinstance(data, collections.Mapping):
+          return dict(map(_convert, data.items()))
+        elif isinstance(data, collections.Iterable):
+          return type(data)(map(_convert, data))
+        else:
+          return data
 
       json_str = json.dumps(_convert(value), ensure_ascii=False, encoding='utf-8')
       self.output_file.write(unicode(json_str + '\n'))

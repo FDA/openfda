@@ -113,3 +113,52 @@ exports.testCountMaxLimit = function(test) {
 
   test.done();
 };
+
+exports.testCountMaxLimitExceeded = function(test) {
+    var request = 'search=foo&count=bar&limit=1001';
+    var params = querystring.parse(request);
+    apiRequestError(test, params);
+
+    test.done();
+};
+
+
+exports.testLimitlessCount = function(test) {
+    var request = 'search=foo&count=openfda.generic_name&limit=2147482647';
+    var params = querystring.parse(request);
+    apiRequestValid(test, params);
+
+    var request = 'search=foo&count=openfda.generic_name.exact&limit=2147482647';
+    var params = querystring.parse(request);
+    apiRequestValid(test, params);
+
+    var request = 'search=foo&count=openfda.generic_name&limit=2147482648';
+    var params = querystring.parse(request);
+    apiRequestError(test, params);
+
+    var request = 'search=foo&count=openfda.brand_name&limit=2147482647';
+    var params = querystring.parse(request);
+    apiRequestValid(test, params);
+
+    var request = 'search=foo&count=openfda.brand_name.exact&limit=2147482647';
+    var params = querystring.parse(request);
+    apiRequestValid(test, params);
+
+    var request = 'search=foo&count=openfda.brand_name&limit=2147482648';
+    var params = querystring.parse(request);
+    apiRequestError(test, params);
+
+    var request = 'search=foo&count=openfda.substance_name&limit=2147482647';
+    var params = querystring.parse(request);
+    apiRequestValid(test, params);
+
+    var request = 'search=foo&count=openfda.substance_name.exact&limit=2147482647';
+    var params = querystring.parse(request);
+    apiRequestValid(test, params);
+
+    var request = 'search=foo&count=openfda.substance_name&limit=2147482648';
+    var params = querystring.parse(request);
+    apiRequestError(test, params);
+
+    test.done();
+};

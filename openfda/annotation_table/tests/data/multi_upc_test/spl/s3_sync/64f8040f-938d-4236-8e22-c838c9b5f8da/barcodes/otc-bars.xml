@@ -1,0 +1,61 @@
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/64f8040f-938d-4236-8e22-c838c9b5f8da/viagra-02.jpg'>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/64f8040f-938d-4236-8e22-c838c9b5f8da/viagra-01.jpg'>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/64f8040f-938d-4236-8e22-c838c9b5f8da/viagra-11.jpg'>
+<index num='0'>
+<symbol type='EAN-13' quality='81'><data><![CDATA[0300694200305]]></data></symbol>
+</index>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/64f8040f-938d-4236-8e22-c838c9b5f8da/viagra-04.jpg'>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/64f8040f-938d-4236-8e22-c838c9b5f8da/viagra-10.jpg'>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/64f8040f-938d-4236-8e22-c838c9b5f8da/viagra-03.jpg'>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/64f8040f-938d-4236-8e22-c838c9b5f8da/viagra-05.jpg'>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/64f8040f-938d-4236-8e22-c838c9b5f8da/viagra-06.jpg'>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/64f8040f-938d-4236-8e22-c838c9b5f8da/viagra-09.jpg'>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/64f8040f-938d-4236-8e22-c838c9b5f8da/viagra-08.jpg'>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/64f8040f-938d-4236-8e22-c838c9b5f8da/viagra-07.jpg'>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/64f8040f-938d-4236-8e22-c838c9b5f8da/viagra-12.jpg'>
+<index num='0'>
+<symbol type='EAN-13' quality='80'><data><![CDATA[0300694210304]]></data></symbol>
+</index>
+</source>
+</barcodes>
+<barcodes xmlns='http://zbar.sourceforge.net/2008/barcode'>
+<source href='./data/spl/s3_sync/64f8040f-938d-4236-8e22-c838c9b5f8da/viagra-13.jpg'>
+<index num='0'>
+<symbol type='EAN-13' quality='81'><data><![CDATA[0300694220303]]></data></symbol>
+</index>
+</source>
+</barcodes>

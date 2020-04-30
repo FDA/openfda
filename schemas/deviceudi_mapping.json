@@ -141,6 +141,12 @@
         "type": "integer"
       },
       "device_description": {
+        "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
         "type": "string"
       },
       "is_direct_marking_exempt": {

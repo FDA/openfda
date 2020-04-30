@@ -22,3 +22,10 @@ openfda/log_parsers/aws_logs_stats
 logs
 api/.idea
 watchdog
+/.eggs/
+/api/faers/package-lock.json
+/openfda/spl/package-lock.json
+/apiserver.sh
+/nosetests.xml
+/nosetests_integration.sh
+/start_pipelines.sh

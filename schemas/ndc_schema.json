@@ -1,0 +1,174 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "properties": {
+    "product_id": {
+      "type": "string"
+    },
+    "product_ndc": {
+      "type": "string"
+    },
+    "spl_id": {
+      "type": "string"
+    },
+    "product_type": {
+      "type": "string"
+    },
+    "finished": {
+      "type": "boolean"
+    },
+    "brand_name": {
+      "type": "string"
+    },
+    "brand_name_base": {
+      "type": "string"
+    },
+    "brand_name_suffix": {
+      "type": "string"
+    },
+    "generic_name": {
+      "type": "string"
+    },
+    "dosage_form": {
+      "type": "string"
+    },
+    "route": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "marketing_start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "marketing_end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "marketing_category": {
+      "index": "not_analyzed",
+      "type": "string"
+    },
+    "application_number": {
+      "type": "string"
+    },
+    "labeler_name": {
+      "type": "string"
+    },
+    "active_ingredients": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "strength": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "pharm_class": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "dea_schedule": {
+      "type": "string"
+    },
+    "listing_expiration_date": {
+      "format": "date",
+      "type": "string"
+    },
+    "packaging": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "package_ndc": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "marketing_start_date": {
+            "format": "date",
+            "type": "string"
+          },
+          "marketing_end_date": {
+            "format": "date",
+            "type": "string"
+          },
+          "sample": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "openfda": {
+      "type": "object",
+      "properties": {
+        "is_original_packager": {
+          "type": "boolean"
+        },
+        "is_original_packager_exact": {
+          "type": "boolean"
+        },
+        "manufacturer_name": {
+          "type": "string"
+        },
+        "nui": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pharm_class_cs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pharm_class_epc": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pharm_class_moa": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pharm_class_pe": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "rxcui": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "spl_set_id": {
+          "type": "string"
+        },
+        "unii": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "upc": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "type": "object"
+}

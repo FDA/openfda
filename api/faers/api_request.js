@@ -5,6 +5,7 @@ var escape = require('escape-html');
 
 var EXPECTED_PARAMS = ['search', 'count', 'limit', 'skip', 'sort'],
     maxSkip = 25000;
+var LIMITLESS_COUNT_FIELDS = ['openfda.generic_name', 'openfda.brand_name', 'openfda.substance_name'];
 
 exports.API_REQUEST_ERROR = 'ApiRequestError';
 var API_REQUEST_ERROR = exports.API_REQUEST_ERROR;
@@ -58,7 +59,7 @@ exports.CheckParams = function(params) {
   }
 
   // Limit to 1000 results per count request.
-  if (params.count && params.limit && params.limit > 1000) {
+  if (params.count && params.limit && params.limit > exports.DetermineCountMaxSize(params)) {
     throw {
       name: API_REQUEST_ERROR,
       message: 'Limit cannot exceed 1000 results for count requests.'
@@ -88,4 +89,8 @@ exports.CheckParams = function(params) {
     underscore.pick(params, EXPECTED_PARAMS));
 
   return clean_params;
+};
+
+exports.DetermineCountMaxSize = function (params) {
+  return !!LIMITLESS_COUNT_FIELDS.find(field => [field, `${field}.exact`].indexOf(params.count) !== -1) ? 2147483647 - 1000 : 1000;
 };

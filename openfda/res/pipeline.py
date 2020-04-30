@@ -34,6 +34,15 @@ DATE_KEYS = [
   'report-date'
 ]
 
+# Fields to be used to derive a Document ID for Elasticsearch
+ID_FIELDS = [
+  'product-type',
+  'recall-number',
+  'event-id',
+  'recall-initiation-date',
+  'report-date'
+]
+
 # Enforcement data changed from XML to CSV the week of 2016-03-10
 # Keeping names in line with the former XML style so that all of the pipeline
 # logic can remain in place. All `-` elements get converted to `_` in the end.
@@ -114,22 +123,31 @@ class CSV2JSONMapper(parallel.Mapper):
       Also, upc and ndc are extracted and added to reports that are of drug
       type.
   '''
-  def _hash(self, doc_json):
+  def _generate_doc_id(self, res_report):
     ''' Hash function used to create unique IDs for the reports
     '''
+    key_fields = {}
+    for field in ID_FIELDS:
+      key_fields[field] = res_report.get(field)
+    json_str = json.dumps(key_fields, sort_keys=True)
     hasher = hashlib.sha256()
-    hasher.update(doc_json)
+    hasher.update(json_str)
     return hasher.hexdigest()
 
   def map(self, key, value, output):
     def cleaner(k, v):
-      if k in RENAME_MAP:
-        k = RENAME_MAP[k]
+      if k not in RENAME_MAP:
+        return None
+
+      k = RENAME_MAP[k]
 
       if k in DATE_KEYS:
         if not v:
           return None
         v = arrow.get(v, 'MM/DD/YYYY').format('YYYYMMDD')
+
+      if isinstance(v, basestring):
+        v = v.strip()
 
       return (k, v)
 
@@ -147,7 +165,7 @@ class CSV2JSONMapper(parallel.Mapper):
       val['ndc'] = extract.extract_ndc_from_recall(val)
 
     # There is not a decent ID for the report, so we need to make one
-    doc_id = self._hash(json.dumps(val, sort_keys=True))
+    doc_id = self._generate_doc_id(val)
     val['@id'] = doc_id
     val['@version'] = 1
 
@@ -155,7 +173,7 @@ class CSV2JSONMapper(parallel.Mapper):
     if set(logic_keys).issubset(val) and val['report-date'] is not None:
       output.add(doc_id, val)
     else:
-      logging.warn('Docuemnt is missing required fields. %s',
+      logging.warn('Document is missing required fields. %s',
                    json.dumps(val, indent=2, sort_keys=True))
 
 

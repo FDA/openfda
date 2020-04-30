@@ -9,6 +9,7 @@ ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get -y update
 RUN apt-get -y install wget curl
+RUN apt install p7zip-full
 
 RUN \
   cd /tmp && \
@@ -24,6 +25,7 @@ WORKDIR /elasticsearch
 # Install S3 plugin
 RUN bin/plugin install cloud-aws
 RUN bin/plugin install mobz/elasticsearch-head
+RUN bin/plugin install https://github.com/elastic/elasticsearch-migration/releases/download/v2.0.4/elasticsearch-migration-2.0.4.zip
 
 ADD elasticsearch.yml /elasticsearch/config/elasticsearch.yml
 ADD logging.yml /elasticsearch/config/logging.yml

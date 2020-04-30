@@ -4,22 +4,19 @@
     recall data into Elasticsearch.
 '''
 
-import collections
+import csv
 import glob
-import logging
 import os
 from os.path import dirname, join
-import sys
 
 import arrow
-import elasticsearch
 import luigi
-import requests
-import simplejson as json
+import numpy as np
+import pandas as pd
 
-from openfda import common, config, elasticsearch_requests, index_util, parallel
+from openfda import common, config, index_util, parallel
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
-  DeviceAnnotateMapper)
+                                                   DeviceAnnotateMapper)
 from openfda.tasks import AlwaysRunTask
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
@@ -28,6 +25,7 @@ common.shell_cmd('mkdir -p %s', META_DIR)
 
 DEVICE_RECALL_BUCKET = 's3://openfda-device-recalls/'
 DEVICE_RECALL_LOCAL_DIR = config.data_dir('device_recall/s3_sync')
+DEVICE_RECALL_FILTERED_DIR = config.data_dir('device_recall/filtered')
 
 class SyncS3DeviceRecall(AlwaysRunTask):
   bucket = DEVICE_RECALL_BUCKET
@@ -41,6 +39,21 @@ class SyncS3DeviceRecall(AlwaysRunTask):
                 'sync',
                 self.bucket,
                 self.local_dir])
+
+class RemoveDuplicates(luigi.Task):
+  def requires(self):
+    return SyncS3DeviceRecall()
+
+  def output(self):
+    return luigi.LocalTarget(join(DEVICE_RECALL_FILTERED_DIR, "filtered.csv"))
+
+  def run(self):
+    common.cmd(['mkdir', '-p', DEVICE_RECALL_FILTERED_DIR])
+    unfiltered = pd.read_csv(glob.glob(DEVICE_RECALL_LOCAL_DIR + '/*.csv')[0], index_col=False,
+                             encoding='utf-8',
+                             dtype=np.unicode, keep_default_na=False)
+    filtered = unfiltered.drop_duplicates()
+    filtered.to_csv(self.output().path, encoding='utf-8', index=False, quoting=csv.QUOTE_ALL)
 
 class CSV2JSON(parallel.MRTask):
   input_dir = DEVICE_RECALL_LOCAL_DIR
@@ -99,13 +112,13 @@ class CSV2JSON(parallel.MRTask):
     output.add(key, new_value)
 
   def requires(self):
-    return SyncS3DeviceRecall()
+    return RemoveDuplicates()
 
   def output(self):
     return luigi.LocalTarget(config.data_dir('device_recall/json.db'))
 
   def mapreduce_inputs(self):
-    input_files = glob.glob(self.input_dir + '/*.csv')
+    input_files = glob.glob(dirname(self.requires().output().path) + '/*.csv')
     return parallel.Collection.from_glob(input_files,
       parallel.CSVDictLineInput())
 

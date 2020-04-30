@@ -17,7 +17,8 @@ var ELASTICSEARCH_QUERY_ERROR = 'ElasticsearchQueryError';
 // - for dates and boolean
 // + for boolean
 // space for terms
-var SUPPORTED_QUERY_RE = '^[0-9a-zA-Z\.\_\:\(\)\"\\[\\]\{\}\\-\\+\>\<\= ]+$';
+// @ for internal fields.
+var SUPPORTED_QUERY_RE = '^[0-9a-zA-Z@%/\'\,\.\_\:\(\)\"\\[\\]\{\}\\-\\+\>\<\= ]+$';
 
 var DATE_FIELDS = [
   // FAERS
@@ -72,13 +73,31 @@ var DATE_FIELDS = [
   'identifiers.package_discontinue_date',
   'package_discontinue_date',
 
+  // ADAE
+  'original_receive_date',
+  'onset_date',
+  'first_exposure_date',
+  'last_exposure_date',
+  'manufacturing_date',
+  'lot_expiration',
+  'drug.first_exposure_date',
+  'drug.last_exposure_date',
+  'drug.manufacturing_date',
+  'drug.lot_expiration',
+
   // Food Events
   'date_created',
   'date_started',
 
   // NSDE
   'marketing_start_date',
-  'marketing_end_date'
+  'marketing_end_date',
+
+
+  // NDC
+  'marketing_start_date',
+  'marketing_end_date',
+  'listing_expiration_date'
 
 
 ];

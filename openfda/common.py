@@ -1,16 +1,17 @@
 #!/usr/bin/python
 
-import collections
-import os
 import cStringIO
+import collections
 from os.path import basename, dirname, join
 import subprocess
 import requests
 import logging
+import os
 import re
+import subprocess
 import sys
 import time
-
+from os.path import dirname
 from threading import Thread
 
 DEFAULT_BATCH_SIZE = 100
@@ -275,3 +276,14 @@ def extract_date(date_str):
     day = "01"
 
   return year + '-' + month + '-' + day
+
+def convert_unicode(data):
+  # add recursive decoder to prevent unicode errors on writes.
+  if isinstance(data, str):
+    return unicode(data, 'utf8', 'ignore').encode(encoding='utf8')
+  elif isinstance(data, collections.Mapping):
+    return dict(map(convert_unicode, data.items()))
+  elif isinstance(data, collections.Iterable):
+    return type(data)(map(convert_unicode, data))
+  else:
+    return data

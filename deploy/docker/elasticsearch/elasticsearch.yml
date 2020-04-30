@@ -4,7 +4,7 @@ node.data: true
 index.number_of_shards: 10
 index.number_of_replicas: 2
 
-path.data: /data0/es-data, /data1/es-data, /data2/es-data, /data3/es-data
+path.data: /data0/es-data
 path.work: /data0/es-work
 path.logs: /data0/es-log
 

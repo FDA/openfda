@@ -3,6 +3,7 @@ import re
 import logging
 import os
 from os.path import dirname, join
+from openfda.common import convert_unicode
 
 import arrow
 import datetime
@@ -83,7 +84,7 @@ class CSV2JSONMapper(parallel.Mapper):
         both (by returning None).
 
         In this case: renaming all fields, returning None on empty keys to
-          avoid blowing up downstream transforms, formating dates and creating
+          avoid blowing up downstream transforms, formatting dates and creating
           _exact fields.
     '''
     if k in RENAME_MAP:
@@ -93,12 +94,12 @@ class CSV2JSONMapper(parallel.Mapper):
       return (k, None)
 
     if isinstance(v, str):
-      v = unicode(v, 'utf8', 'ignore').encode().strip()
+      v = convert_unicode(v).strip()
 
     if k in DATES:
       if v:
         try:
-          v = datetime.datetime.strptime(re.sub(r'-(\d\d)$', r'-20\1', v), "%d-%b-%Y").strftime("%Y%m%d")
+          v = datetime.datetime.strptime(v, "%m/%d/%Y").strftime("%Y%m%d")
         except ValueError:
           logging.warn('Unparseable date: ' + v)
       else:
