@@ -192,9 +192,9 @@ def join_maude(master_file,
       NOTE: The MAUDE files must converted to UTF-8 for this function to work,
             this is taken care of in the pipeline itself. If this function is
             required as a standalone piece, use the UNIX command:
-              iconv -f "ISO-8859-1//TRANSLIT" -t UTF8 -c | \
+              iconv -f "ISO-8859-1//TRANSLIT" -t UTF8 -c input_file | \
               iconv -f "UTF8//TRANSLIT" -t UTF8 -c \
-              file_name_here > file_name_here
+              > output_file
             which will convert the file to UTF-8 and ignore all non-UTF-8
             characters.
   '''
