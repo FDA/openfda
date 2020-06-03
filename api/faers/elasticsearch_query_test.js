@@ -118,6 +118,16 @@ exports.testBuildSort = function (test) {
     test.done();
 }
 
+exports.testHandleDeprecatedClauses = function (test) {
+    // No section, with known exact top level
+    test.ok(elasticsearch_query.HandleDeprecatedClauses(
+        '_missing_:type_of_report.exact AND product_type:abc AND _missing_:"something_else"') ==
+        '(NOT (_exists_:type_of_report.exact)) AND product_type:abc AND (NOT (_exists_:"something_else"))');
+
+
+    test.done();
+}
+
 exports.testReplaceExact = function(test) {
   // patient.drug.openfda section, exact but no value
   test.ok(elasticsearch_query.ReplaceExact(

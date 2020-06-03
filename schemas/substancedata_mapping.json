@@ -3,62 +3,48 @@
     "dynamic": false,
     "properties": {
       "definition_level": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type":  "keyword"
       },
       "definition_type": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type":  "keyword"
       },
       "substance_class": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type":  "keyword"
       },
       "tags": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type":  "keyword"
       },
       "unii": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type":  "keyword"
       },
       "uuid": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type":  "keyword"
       },
       "version": {
-        "index": "not_analyzed",
-        "type": "string"
+       "type":  "keyword"
       },
       "codes":{
         "properties": {
           "code": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type":  "keyword"
           },
           "code_system": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type":  "keyword"
           },
           "comments": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type":  "keyword"
           },
           "references": {
-            "index": "not_analyzed",
-            "type": "string"
+           "type":  "keyword"
           },
           "type": {
-            "index": "not_analyzed",
-            "type": "string"
+           "type":  "keyword"
           },
           "url": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type":  "keyword"
           },
           "uuid": {
-            "index": "not_analyzed",
-            "type": "string"
+           "type":  "keyword"
           }
         }
       },
@@ -67,98 +53,77 @@
           "components": {
             "properties": {
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+               "type":  "keyword"
               },
               "substance": {
                 "properties": {
                   "linking_id": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type":  "keyword"
                   },
                   "name": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                   "type":  "keyword"
                   },
                   "ref_pname": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                   "type":  "keyword"
                   },
                   "references": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                   "type":  "keyword"
                   },
                   "refuuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                  "type":  "keyword"
                   },
                   "substance_class": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                   "type":  "keyword"
                   },
                   "unii": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                   "type":  "keyword"
                   },
                   "uuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                   "type":  "keyword"
                   }
                 }
               },
               "type": {
-                "index": "not_analyzed",
-                "type": "string"
+               "type":  "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+               "type":  "keyword"
               }
             }
           },
           "parent_substance": {
             "properties": {
               "linking_id": {
-                "index": "not_analyzed",
-                "type": "string"
+               "type":  "keyword"
               },
               "name": {
-                "index": "not_analyzed",
-                "type": "string"
+               "type":  "keyword"
               },
               "ref_pname": {
-                "index": "not_analyzed",
-                "type": "string"
+               "type":  "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+              "type":  "keyword"
               },
               "refuuid": {
-                "index": "not_analyzed",
-                "type": "string"
+              "type":  "keyword"
               },
               "substance_class": {
-                "index": "not_analyzed",
-                "type": "string"
+               "type":  "keyword"
               },
               "unii": {
-                "index": "not_analyzed",
-                "type": "string"
+               "type":  "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+               "type":  "keyword"
               }
             }
           },
           "references": {
-            "index": "not_analyzed",
-            "type": "string"
+           "type":  "keyword"
           },
           "uuid": {
-            "index": "not_analyzed",
-            "type": "string"
+          "type":  "keyword"
           }
         }
       },
@@ -167,326 +132,256 @@
           "agent_modifications": {
             "properties": {
               "agent_modification_process": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "agent_modification_role": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "agent_modification_type": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "agent_substance": {
                 "properties": {
                   "linking_id": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "name": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "ref_pname": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "references": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "refuuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "substance_class": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "unii": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "uuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "amount": {
                 "properties": {
                   "average": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "high": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "high_limit": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "low": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "low_limit": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "non_numeric_value": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "references": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "type": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "units": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "uuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "modification_group": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "physical_modifications": {
             "properties": {
               "modification_group": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "parameters": {
                 "properties": {
                   "amount": {
                     "properties": {
                       "average": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       },
                       "high_limit": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       },
                       "low_limit": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       },
                       "non_numeric_value": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       },
                       "references": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       },
                       "type": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       },
                       "units": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       },
                       "uuid": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       }
                     }
                   },
                   "parameter_name": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "references": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "uuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "physical_modification_role": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "references": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "structural_modifications": {
             "properties": {
               "extent": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "extent_amount": {
                 "properties": {
                   "average": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "high": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "high_limit": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "low": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "low_limit": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "non_numeric_value": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "references": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "type": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "units": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "uuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "location_type": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "modification_group": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "molecular_fragment": {
                 "properties": {
                   "linking_id": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "name": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "ref_pname": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "references": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "refuuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "substance_class": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "unii": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "uuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "residue_modified": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "sites": {
                 "properties": {
                   "residue_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "subunit_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "structural_modification_type": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "uuid": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         }
       },
       "moieties":{
         "properties": {
           "atropisomerism": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "charge": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "count": {
             "index": "not_analyzed",
@@ -495,66 +390,51 @@
           "count_amount": {
             "properties": {
               "average": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "high": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "high_limit": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "low": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "low_limit": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "non_numeric_value": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "type": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "units": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "defined_stereo": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "digest": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "ez_centers": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "formula": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "id": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "molecular_weight": {
             "index": "not_analyzed",
@@ -562,93 +442,73 @@
           },
           "molfile": {
             "index": "no",
-            "type": "string"
+            "type": "text"
           },
           "optical_activity": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "references": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "smiles": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "stereochemistry": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "stereo_centers": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "stereo_comments": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "uuid": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         }
       },
       "names":{
         "properties": {
           "display_name": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "domains": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "languages": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "name": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "name_jurisdiction": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "preferred": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "references": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "uuid": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "name_orgs": {
             "properties": {
               "deprecated_date": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "name_org": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           }
@@ -657,16 +517,13 @@
       "notes": {
         "properties": {
           "note": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "references": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "uuid": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         }
       },
@@ -675,102 +532,82 @@
           "linkages": {
             "properties": {
               "linkage": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "sites": {
                 "properties": {
                   "residue_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "subunit_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "nucleic_acid_sub_type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "nucleic_acid_type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "references": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "sequence_origin": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "sequence_type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "subunits": {
             "properties": {
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "sequence": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "subunit_index": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "sugars": {
             "properties": {
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "sites": {
                 "properties": {
                   "residue_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "subunit_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "sugar": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "uuid": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         }
       },
@@ -781,158 +618,122 @@
               "parent_substance": {
                 "properties": {
                   "linking_id": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "name": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "ref_pname": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "references": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "refuuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "substance_class": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "unii": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "uuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "polymer_class": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "polymer_geometry": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "polymer_subclass": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "source_type": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "display_structure": {
             "properties": {
               "charge": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "count": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "defined_stereo": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "ez_centers": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "id": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "molecular_weight": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "molfile": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "text"
               },
               "optical_activity": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "stereochemistry": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "stereo_centers": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "idealized_structure": {
             "properties": {
               "charge": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "count": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "defined_stereo": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "ez_centers": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "id": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "molecular_weight": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "molfile": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "text"
               },
               "optical_activity": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "stereochemistry": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "stereo_centers": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
@@ -941,304 +742,237 @@
               "amount": {
                 "properties": {
                   "average": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "high": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "high_limit": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "low": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "low_limit": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "non_numeric_value": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "references": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "type": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "units": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "uuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "defining": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "monomer_substance": {
                 "properties": {
                   "linking_id": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "name": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "ref_pname": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "references": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "refuuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "substance_class": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "unii": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "uuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "type": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "references": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "structural_units": {
             "properties": {
               "amount": {
                 "properties": {
                   "average": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "high": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "high_limit": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "low": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "low_limit": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "non_numeric_value": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "references": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "type": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "units": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "uuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "attachment_count": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "attachment_map": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "label": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "structure": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "type": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "uuid": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         }
       },
       "properties":{
         "properties": {
           "defining": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "name": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "parameters": {
             "properties": {
               "name": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "type": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "value": {
                 "properties": {
                   "average": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "high": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "low": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "non_numeric_value": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "references": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "type": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "units": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "uuid": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               }
             }
           },
           "property_type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "value": {
             "properties": {
               "average": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "high": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "high_limit": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "low": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "low_limit": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "non_numeric_value": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "type": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "units": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "references": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "uuid": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         }
       },
@@ -1249,12 +983,10 @@
               "sites": {
                 "properties": {
                   "residue_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "subunit_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               }
@@ -1265,164 +997,131 @@
               "c_glycosylation_sites": {
                 "properties": {
                   "residue_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "subunit_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "glycosylation_type": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "n_glycosylation_sites": {
                 "properties": {
                   "residue_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "subunit_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "o_glycosylation_sites": {
                 "properties": {
                   "residue_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "subunit_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "other_links": {
             "properties": {
               "linkage_type": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "sites": {
                 "properties": {
                   "residue_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "subunit_index": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 }
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "protein_sub_type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "protein_type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "references": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "sequence_origin": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "sequence_type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "subunits": {
             "properties": {
               "linkage": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "sequence": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "subunit_index": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "uuid": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         }
       },
       "references":{
         "properties": {
           "citation": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "doc_type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "document_date": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "id": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "public_domain": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "tags": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "url": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "uuid": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         }
       },
@@ -1431,140 +1130,108 @@
           "amount": {
             "properties": {
               "average": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "high": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "high_limit": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "low": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "low_limit": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "non_numeric_value": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "type": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "units": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "comments": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "interaction_type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "mediator_substance": {
             "properties": {
               "linking_id": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "name": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "ref_pname": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "refuuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "substance_class": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "unii": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "qualification": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "references": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "uuid": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "related_substance": {
             "properties": {
               "linking_id": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "name": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "ref_pname": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "refuuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "substance_class": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "unii": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           }
@@ -1573,208 +1240,161 @@
       "structurally_diverse":{
         "properties": {
           "developmental_stage": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "fraction_material_type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "fraction_name": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "hybrid_species_maternal_organism": {
             "properties": {
               "linking_id": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "name": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "ref_pname": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "refuuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "substance_class": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "unii": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "hybrid_species_paternal_organism": {
             "properties": {
               "linking_id": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "name": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "ref_pname": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "refuuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "substance_class": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "unii": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "infra_specific_name": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "infra_specific_type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "organism_author": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "organism_family": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "organism_genus": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "organism_species": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "parent_substance": {
             "properties": {
               "linking_id": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "name": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "ref_pname": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "references": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "refuuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "substance_class": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "unii": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "uuid": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "part": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "part_location": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "references": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "source_material_class": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "source_material_state": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "source_material_type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "uuid": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         }
       },
       "structure":{
         "properties": {
           "atropisomerism": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "charge": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "count": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "defined_stereo": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "ez_centers": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "formula": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "id": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "molecular_weight": {
             "index": "not_analyzed",
@@ -1782,31 +1402,25 @@
           },
           "molfile": {
             "index": "no",
-            "type": "string"
+            "type": "text"
           },
           "optical_activity": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "references": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "smiles": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "stereochemistry": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "stereo_centers": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "stereo_comments": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "text"
           }
         }
       }

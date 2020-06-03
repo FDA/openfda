@@ -131,7 +131,7 @@ class ExtractSafetyReportsMapper(parallel.Mapper):
 
         # strip "check" digit
         report_id = report_id.split('-')[0]
-        if id_to_case:
+        if id_to_case and id_to_case[report_id]:
           case_number = id_to_case[report_id]
         else:
           case_number = report_id

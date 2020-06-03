@@ -3,6 +3,7 @@
 
 var elasticsearch = require('elasticsearch');
 var express = require('express');
+var compression = require('compression')
 var moment = require('moment');
 var _ = require('underscore');
 var request = require('request');
@@ -278,13 +279,13 @@ var UpdateIndexInformation = function(client, index_info) {
     index: PROCESS_METADATA_INDEX,
     type: 'last_run',
     size: 20,
-    fields: 'last_update_date'
+    _sourceInclude: ['last_update_date']
   }).then(function(body) {
     var util = require('util');
     for (var i = 0; i < body.hits.hits.length; ++i) {
       var hit = body.hits.hits[i];
       var id = hit._id;
-      index_info[id].last_updated = hit.fields.last_update_date[0];
+      index_info[id].last_updated = hit._source.last_update_date;
     }
   }, function (error) {
     console.log('Failed to fetch index update times:: ', error.message);
@@ -352,7 +353,7 @@ app.use(trim_middleware);
 app.use(CacheMiddleware(3600));
 
 // Use gzip compression
-app.use(express.compress());
+app.use(compression());
 
 // Setup defaults for API JSON error responses
 app.set('json spaces', 2);
@@ -363,7 +364,7 @@ var log = logging.GetLogger();
 var client = new elasticsearch.Client({
   host: process.env.ES_HOST || 'localhost:9200',
   log: logging.ElasticsearchLogger,
-
+  apiVersion: '5.6',
   // Note that this doesn't abort the query.
   requestTimeout: 20000  // milliseconds
 });
@@ -623,7 +624,7 @@ ApiError = function(response, code, message, details) {
   error_response.error.message = message;
   if (details)
     error_response.error.details = details;
-  response.json(HTTP_CODE[code], error_response);
+  response.status(HTTP_CODE[code]).json(error_response);
 };
 
 LogRequest = function(request) {
@@ -747,7 +748,7 @@ TrySearch = function(index, params, es_search_params, request, response) {
           + request.path + '?' + nextQuery;
         response.header("Link",'<' + nextPageUrl + '>; rel="next"');
       }
-      return response.json(HTTP_CODE.OK, response_json);
+      return response.status(HTTP_CODE.OK).json(response_json);
     }
 
     // Count query
@@ -768,7 +769,7 @@ TrySearch = function(index, params, es_search_params, request, response) {
       response_json.results = (count_result.length > params.limit) ?
                                count_result.slice(0, params.limit) :
                                count_result;
-      return response.json(HTTP_CODE.OK, response_json);
+      return response.status(HTTP_CODE.OK).json(response_json);
     }
 
     // Date facet count
@@ -783,7 +784,7 @@ TrySearch = function(index, params, es_search_params, request, response) {
               count: bucket.doc_count
           };
       });
-      return response.json(HTTP_CODE.OK, response_json);
+      return response.status(HTTP_CODE.OK).json(response_json);
     }
 
     return ApiError(response, ErrorTypes.NOT_FOUND, 'Nothing to count');
@@ -813,10 +814,10 @@ GetDownload = function(response) {
 
     response_json.results = body._source ? _.clone(body._source) : {};
 
-    return response.json(HTTP_CODE.OK, response_json);
+    return response.status(HTTP_CODE.OK).json(response_json);
 
   }, function (error) {
-    console.log('Failed to fetch index update times:: ', error.message);
+    console.log('Failed to get downloads information:: ', error.message);
     ApiError(response, ErrorTypes.SERVER_ERROR, 'Check your request and try again');
   });
 };

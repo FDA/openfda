@@ -15,9 +15,10 @@ sudo docker run \
   -p 9300:9300\
   -e AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID"\
   -e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY"\
+  -e ES_JAVA_OPTS="-Xms16g -Xmx16g"\
   --name elasticsearch-dev\
-  openfda/elasticsearch.0\
-  /elasticsearch/bin/elasticsearch\
-  -Des.insecure.allow.root=true\
-  -Daws.accessKeyId="$AWS_ACCESS_KEY_ID"\
-  -Daws.secretKey="$AWS_SECRET_ACCESS_KEY"
+  openfda/elasticsearch.0
+#  /elasticsearch/bin/elasticsearch
+#  -Ees.insecure.allow.root=true
+#  -Daws.accessKeyId="$AWS_ACCESS_KEY_ID"\
+#  -Daws.secretKey="$AWS_SECRET_ACCESS_KEY"

@@ -3,15 +3,10 @@ cluster.name: openfda
 node.master: true
 node.data: true
 
-index.number_of_shards: 10
-index.number_of_replicas: 0
-
 path.data: /data0/elasticsearch/data
-path.work: /data0/elasticsearch/work
 path.logs: /data0/elasticsearch/log
 path.repo: /data0/elasticsearch/snapshots
 
-bootstrap.mlockall: true
 bootstrap.system_call_filter: false
 
 network.host: 0.0.0.0
@@ -21,14 +16,9 @@ cluster.routing.allocation.node_concurrent_recoveries: 32
 
 indices.recovery.max_bytes_per_sec: 1000mb
 indices.store.throttle.max_bytes_per_sec: 1000mb
-indices.recovery.concurrent_streams: 16
 indices.store.throttle.type: none
-index.merge.policy.max_merge_at_once : 128
-index.merge.policy.max_merge_at_once_explicit : 128
-index.merge.scheduler.max_thread_count: 32
 
 cloud.aws.region: 'us-east-1'
-discovery.type: zen
-discovery.zen.minimum_master_nodes: 0
-discovery.zen.ping.timeout: 1s
-discovery.zen.ping.multicast.enabled: false
+#discovery.type: zen
+#discovery.zen.minimum_master_nodes: 0
+#discovery.zen.ping_timeout: 1s

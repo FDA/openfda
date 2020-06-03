@@ -11,7 +11,7 @@ openFDA is a research project to provide open APIs, raw data downloads, document
 
 This repository contains the code which powers all of the `api.fda.gov` end points:
 
-* Python pipelines written with [Luigi](https://github.com/spotify/luigi) for processing public FDA data sets (drugs, foods, and medical devices) into a JSON format that can be loaded into Elasticsearch. 
+* Python pipelines written with [Luigi](https://github.com/spotify/luigi) for processing public FDA data sets (drugs, foods, and medical devices) into a JSON format that can be loaded into Elasticsearch.
 
 * [Elasticsearch](http://www.elasticsearch.org/) schemas for the available data sets.
 
@@ -19,9 +19,9 @@ This repository contains the code which powers all of the `api.fda.gov` end poin
 
 # Prerequisites
 
-* Elasticsearch 2.4.6
+* Elasticsearch 5.6.*
 * Python 2.7.*
-* Node 4
+* Node 6 or above
 
 # Packaging
 

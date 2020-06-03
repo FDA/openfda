@@ -13,6 +13,7 @@ curl -XPUT 'http://localhost:9200/recall/_mapping/enforcementreport' --data '@./
 curl -XPUT 'http://localhost:9200/druglabel/_mapping/spl' --data '@./../schemas/spl_mapping.json'
 curl -XPUT 'http://localhost:9200/drugevent/_mapping/safetyreport' --data '@./../schemas/faers_mapping.json'
 curl -XPUT 'http://localhost:9200/deviceclass/_mapping/classification' --data '@./../schemas/classification_mapping.json'
-curl -XPUT 'http://localhost:9200/animalandveterinarydrugevent/_mapping/animalandveterinarydrugevent' --data '@./../animalandveterinarydrugevent_mapping.json'
+curl -XPUT 'http://localhost:9200/animalandveterinarydrugevent/_mapping/animalandveterinarydrugevent' --data '@./../schemas/animalandveterinarydrugevent_mapping.json'
+curl -XPUT 'http://localhost:9200/substancedata/_mapping/substancedata' --data '@./../schemas/substancedata_mapping.json'
 curl -XPUT 'http://localhost:9200/openfdadata/_mapping/downloads' --data '@./../schemas/downloads_mapping.json'
 

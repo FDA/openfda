@@ -14,7 +14,7 @@ tmp/
 openfda/annotation_table/data/
 openfda/faers/data/
 openfda/res/data/
-/data/
+data/
 /.idea
 api/faers/.idea
 openfda/log_parsers/aws_logs

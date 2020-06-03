@@ -11,9 +11,9 @@
     "properties": {
       "consumer": {
         "properties": {
-          "age": {"type": "string"},
-          "age_unit": {"type": "string"},
-          "gender": {"type": "string"}
+          "age": {"type": "keyword"},
+          "age_unit": {"type": "keyword"},
+          "gender": {"type": "keyword"}
         }
       },
       "date_created": {

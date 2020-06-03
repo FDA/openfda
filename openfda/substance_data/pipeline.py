@@ -6,55 +6,40 @@ Pipeline for converting Substance data to JSON and importing into Elasticsearch.
 
 import logging
 import os
+import re
 import sys
 import urllib2
 from os.path import join, dirname
 from dictsearch.search import iterate_dictionary
-
+from bs4 import BeautifulSoup
 import luigi
-
+import urlparse
 from openfda import common, config, parallel, index_util
 
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
 BASE_DIR = config.data_dir()
-
-SUBSTANCE_DATA_DOWNLOAD_URL = \
-  'https://tripod.nih.gov/ginas/downloads/dump-public-2019-10-11.gsrs'
-
+GINAS_ROOT_URL = 'https://tripod.nih.gov/ginas/'
+SUBSTANCE_DATA_DOWNLOAD_PAGE_URL = urlparse.urljoin(GINAS_ROOT_URL, 'release/release.html')
 SUBSTANCE_DATA_EXTRACT_DB = 'substancedata/substancedata.db'
 
-
 class DownloadSubstanceData(luigi.Task):
-  furl = SUBSTANCE_DATA_DOWNLOAD_URL
 
   def requires(self):
     return []
 
   def output(self):
-    return luigi.LocalTarget(config.data_dir('substancedata/raw/dump-public-2019-10-11.gsrs'))
+    return luigi.LocalTarget(config.data_dir('substancedata/raw/dump-public.gsrs'))
 
   def run(self):
-    logging.basicConfig(level=logging.INFO)
-    logging.info("Downloading: %s", (self.furl))
-    try:
-      filename = 'dump-public-2019-10-11.gsrs'
-      target_name = join(BASE_DIR, 'substancedata/raw', filename)
+    fileURL = None
+    soup = BeautifulSoup(urllib2.urlopen(SUBSTANCE_DATA_DOWNLOAD_PAGE_URL).read(), 'lxml')
+    for a in soup.find_all(href=re.compile('.*.gsrs')):
+      if 'Full Public Data Dump' in a.text:
+        fileURL = urlparse.urljoin(GINAS_ROOT_URL, a['href'])
 
-      os.system('mkdir -p %s' % dirname(self.output().path))
-
-      try:
-          f = urllib2.urlopen(SUBSTANCE_DATA_DOWNLOAD_URL, timeout = 10)
-      except urllib2.URLError, e:
-          logging.error("There was an error: %r" % e)
-
-      data = f.read()
-      with open(target_name, "wb") as code:
-        code.write(data)
-
-    except:
-      logging.info('Problem while unzipping[download URL:%s, zip file:%s], retrying...', SUBSTANCE_DATA_DOWNLOAD_URL, filename)
+    common.download(fileURL, self.output().path)
 
 class ExtractZip(luigi.Task):
 
@@ -62,10 +47,10 @@ class ExtractZip(luigi.Task):
     return DownloadSubstanceData()
 
   def output(self):
-    return luigi.LocalTarget(config.data_dir('substancedata/raw/dump-public-2019-10-11.json'))
+    return luigi.LocalTarget(config.data_dir('substancedata/raw/dump-public.json'))
 
   def run(self):
-    logging.info('Extracting: %s')
+    logging.info('Extracting: %s', (self.input().path))
 
     extract_dir = dirname(self.input().path)
     gsrs_file_name = os.path.basename(self.input().path)
@@ -74,7 +59,7 @@ class ExtractZip(luigi.Task):
 
     gz_file = join(extract_dir, gz_filename)
     os.rename(gsrs_file, gz_file)
-    os.system('gunzip ' + gz_file)
+    common.shell_cmd('gunzip ' + gz_file)
     os.rename(os.path.splitext(gz_file)[0], os.path.splitext(gz_file)[0] + ".json")
 
 class SubstanceData2JSONMapper(parallel.Mapper):
@@ -747,8 +732,7 @@ class SubstanceData2JSON(luigi.Task):
           self.input().path, parallel.JSONLineInputUnicode()),
         mapper=SubstanceData2JSONMapper(),
         reducer=parallel.IdentityReducer(),
-        output_prefix=self.output().path,
-        num_shards=1)
+        output_prefix=self.output().path)
 
 
 class LoadJSON(index_util.LoadJSONBase):

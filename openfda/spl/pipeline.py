@@ -8,23 +8,21 @@ import csv
 import glob
 import logging
 import os
-from os.path import basename, join, dirname
-
-import multiprocessing
-import simplejson as json
+import re
 import sys
-import time
+from os.path import join, dirname
 
 import arrow
-import elasticsearch
 import luigi
+import simplejson as json
 
-from openfda import config, common, elasticsearch_requests, index_util, parallel
+from openfda import config, common, index_util, parallel
 from openfda.annotation_table.pipeline import CombineHarmonization
-from openfda.tasks import AlwaysRunTask
+from openfda.parallel import NullOutput
 from openfda.spl import annotate
-from openfda.parallel import IdentityReducer
-
+from openfda.tasks import AlwaysRunTask
+from bs4 import BeautifulSoup
+import urllib2
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 META_DIR = config.data_dir('spl/meta')
@@ -40,8 +38,108 @@ SPL_S3_CHANGE_LOG = join(SPL_S3_LOCAL_DIR, 'change_log/SPLDocuments.csv')
 SPL_BATCH_DIR = join(META_DIR, 'batch')
 SPL_PROCESS_DIR = config.data_dir('spl/batches')
 
+DAILY_MED_DIR = config.data_dir('spl/dailymed')
+DAILY_MED_DOWNLOADS_DIR = config.data_dir('spl/dailymed/raw')
+DAILY_MED_EXTRACT_DIR = config.data_dir('spl/dailymed/extract')
+DAILY_MED_FLATTEN_DIR = config.data_dir('spl/dailymed/flatten')
+DAILY_MED_DOWNLOADS_PAGE = 'https://dailymed.nlm.nih.gov/dailymed/spl-resources-all-drug-labels.cfm'
+
+
 common.shell_cmd('mkdir -p %s', SPL_S3_LOCAL_DIR)
 common.shell_cmd('mkdir -p %s', SPL_PROCESS_DIR)
+common.shell_cmd('mkdir -p %s', DAILY_MED_DIR)
+
+class DownloadDailyMedSPL(luigi.Task):
+  local_dir = DAILY_MED_DOWNLOADS_DIR
+
+  def output(self):
+    return luigi.LocalTarget(self.local_dir)
+
+  def run(self):
+    common.shell_cmd('mkdir -p %s', self.local_dir)
+    soup = BeautifulSoup(urllib2.urlopen(DAILY_MED_DOWNLOADS_PAGE).read(), 'lxml')
+    for a in soup.find_all(href=re.compile('.*.zip')):
+      if '_human_' in a.text:
+        common.download(a['href'], join(self.local_dir, a['href'].split('/')[-1]))
+
+
+class ExtractDailyMedSPL(luigi.Task):
+  local_dir = DAILY_MED_EXTRACT_DIR
+
+  def requires(self):
+    return DownloadDailyMedSPL()
+
+  def output(self):
+    return luigi.LocalTarget(self.local_dir)
+
+  def run(self):
+    src_dir = self.input().path
+    os.system('mkdir -p "%s"' % self.output().path)
+    pattern = join(src_dir, '*.zip')
+    zip_files = glob.glob(pattern)
+
+    if len(zip_files) == 0:
+      logging.warn(
+        'Expected to find one or more daily med SPL files')
+
+    extract_dir = self.output().path
+    for zip_file in zip_files:
+      os.system('unzip -oq -d %(extract_dir)s %(zip_file)s' % locals())
+
+class FlattenDailyMedSPL(parallel.MRTask):
+  local_dir = DAILY_MED_FLATTEN_DIR
+
+  def map(self, zip_file, value, output):
+    cmd = 'zipinfo -1 %(zip_file)s' % locals()
+    xml_file_name = None
+    zip_contents = common.shell_cmd_quiet(cmd)
+    xml_match = re.search('^([0-9a-f-]{36})\.xml$', zip_contents, re.I | re.M)
+    if (xml_match):
+      xml_file_name = xml_match.group()
+      spl_dir_name = os.path.join(self.output().path, xml_match.group(1))
+      os.system('mkdir -p "%s"' % spl_dir_name)
+      common.shell_cmd_quiet('unzip -oq %(zip_file)s -d %(spl_dir_name)s' % locals())
+      output.add(xml_file_name, zip_file)
+
+
+  def requires(self):
+    return ExtractDailyMedSPL()
+
+  def output(self):
+    return luigi.LocalTarget(self.local_dir)
+
+  def mapreduce_inputs(self):
+    return parallel.Collection.from_glob(os.path.join(self.input().path, '*/*.zip'))
+
+  def output_format(self):
+    return NullOutput()
+
+
+class AddInDailyMedSPL(luigi.Task):
+  local_dir = DAILY_MED_DIR
+
+  def requires(self):
+    return FlattenDailyMedSPL()
+
+  def flag_file(self):
+    return os.path.join(self.local_dir, '.last_sync_time')
+
+  def complete(self):
+    # Only run daily med once per day.
+    if config.disable_downloads():
+      return True
+
+    return os.path.exists(self.flag_file()) and (
+        arrow.get(os.path.getmtime(self.flag_file())) > arrow.now().floor('day'))
+
+  def run(self):
+    src = self.input().path
+    dest = SPL_S3_LOCAL_DIR
+    os.system('cp -nr %(src)s/. %(dest)s/' % locals())
+
+    with open(self.flag_file(), 'w') as out_f:
+      out_f.write('')
+
 
 class SyncS3SPL(luigi.Task):
   bucket = SPL_S3_BUCKET
@@ -75,7 +173,7 @@ class CreateBatchFiles(AlwaysRunTask):
   change_log_file = SPL_S3_CHANGE_LOG
 
   def requires(self):
-    return SyncS3SPL()
+    return [SyncS3SPL(), AddInDailyMedSPL()]
 
   def output(self):
     return luigi.LocalTarget(self.batch_dir)
