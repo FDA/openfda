@@ -1,44 +1,39 @@
 import csv
-import re
+import datetime
+import glob
 import logging
 import os
-from os.path import dirname, join
-from openfda.common import convert_unicode
+import re
+import urllib2
+import urlparse
+from os.path import join, dirname
 
-import arrow
-import datetime
 import luigi
+from bs4 import BeautifulSoup
 
 from openfda import common, config, index_util, parallel
+from openfda.common import convert_unicode
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 BASE_DIR = config.data_dir('caers')
+DOWNLOAD_DIR = config.data_dir('caers/raw')
 common.shell_cmd('mkdir -p %s', BASE_DIR)
 
-S3_BUCKET = 's3://openfda-data-caers/'
-S3_LOCAL_DIR = config.data_dir('caers/s3_sync')
-# TODO(hansnelsen): initiate and resolve naming convention for this file and
-#                   s3 bucket. Currently, the file is downloaded from
-#                   s3://openfda-lonnie/caers/ (the naming of this file is
-#                   not consistent). The pipeline engineer downloads it, renames
-#                   it and then uploaded manually to the above bucket.
-CAERS_FILE = 'caers.csv'
-logging.info(S3_LOCAL_DIR, 'dir')
-common.shell_cmd('mkdir -p %s', S3_LOCAL_DIR)
+CAERS_DOWNLOAD_PAGE_URL = 'https://www.fda.gov/food/compliance-enforcement-food/cfsan-adverse-event-reporting-system-caers'
 
 RENAME_MAP = {
-  'Report #': 'report_number',
-  'Created Date': 'date_created',
-  'Event Start Date': 'date_started',
-  'Product Role': 'role',
-  'Reported Brand/Product Name': 'name_brand',
-  'Industry Code': 'industry_code',
-  'Industry Name': 'industry_name',
-  'Age at Adverse Event': 'age',
-  'Age Unit': 'age_unit',
+  'Report ID': 'report_number',
+  'CAERS Created Date': 'date_created',
+  'Date of Event': 'date_started',
+  'Product Type': 'role',
+  'Product': 'name_brand',
+  'Product Code': 'industry_code',
+  'Description': 'industry_name',
+  'Patient Age': 'age',
+  'Age Units': 'age_unit',
   'Sex': 'gender',
-  'One Row Outcomes': 'outcomes',
-  'One Row Symptoms': 'reactions'
+  'Outcomes': 'outcomes',
+  'MedDRA Preferred Terms': 'reactions'
 }
 
 # Lists of keys used by the cleaner function in the CSV2JSONMapper() and the
@@ -49,31 +44,24 @@ EXACT = ['outcomes', 'reactions']
 DATES = ['date_created', 'date_started']
 
 
-class SyncS3(luigi.Task):
-  bucket = S3_BUCKET
-  local_dir = S3_LOCAL_DIR
+class DownloadCAERS(luigi.Task):
+  local_dir = DOWNLOAD_DIR
+
+  def requires(self):
+    return []
 
   def output(self):
     return luigi.LocalTarget(self.local_dir)
 
-  def flag_file(self):
-    return os.path.join(self.local_dir, '.last_sync_time')
-
-  def complete(self):
-    'Only run S3 sync once per day.'
-    return os.path.exists(self.flag_file()) and (
-      arrow.get(os.path.getmtime(self.flag_file())) > arrow.now().floor('day'))
-
   def run(self):
-    common.cmd(['aws',
-                '--profile=' + config.aws_profile(),
-                's3',
-                'sync',
-                self.bucket,
-                self.local_dir])
+    common.shell_cmd('mkdir -p %s', self.local_dir)
+    soup = BeautifulSoup(urllib2.urlopen(CAERS_DOWNLOAD_PAGE_URL).read(), 'lxml')
+    for a in soup.find_all(title=re.compile('CAERS ASCII.*')):
+      if 'Download CAERS ASCII' in re.sub(r'\s', ' ', a.text):
+        fileURL = urlparse.urljoin('https://www.fda.gov', a['href'])
+        common.download(fileURL, join(self.output().path, a.attrs['title']+'.csv'))
 
-    with open(self.flag_file(), 'w') as out_f:
-      out_f.write('')
+
 
 
 class CSV2JSONMapper(parallel.Mapper):
@@ -127,7 +115,7 @@ class CSV2JSONReducer(parallel.Reducer):
   def _transform(self, value):
     ''' Takes several rows for the same report_number and merges them into
         a single report object, which is the final JSON representation,
-        barring any anotation steps that may follow.
+        barring any annotation steps that may follow.
     '''
     result = {
       'report_number': None,
@@ -185,20 +173,18 @@ class CSV2JSONReducer(parallel.Reducer):
 
 class CSV2JSON(luigi.Task):
   def requires(self):
-    return SyncS3()
+    return DownloadCAERS()
 
   def output(self):
     return luigi.LocalTarget(join(BASE_DIR, 'json.db'))
 
   def run(self):
-    file_name = join(self.input().path, CAERS_FILE)
     parallel.mapreduce(
-      parallel.Collection.from_glob(file_name,
-        parallel.CSVDictLineInput(delimiter=',', quoting=csv.QUOTE_MINIMAL)),
+      parallel.Collection.from_glob(glob.glob(join(self.input().path, '*.csv')),
+                                    parallel.CSVDictLineInput(delimiter=',', quoting=csv.QUOTE_MINIMAL)),
       mapper=CSV2JSONMapper(),
       reducer=CSV2JSONReducer(),
-      output_prefix=self.output().path,
-      num_shards=10)
+      output_prefix=self.output().path)
 
 
 class LoadJSON(index_util.LoadJSONBase):

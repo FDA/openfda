@@ -19,6 +19,7 @@ import elasticsearch
 import elasticsearch.helpers
 import luigi
 import czipfile as zipfile
+from elasticsearch.client.utils import  _make_path
 
 from openfda import config, elasticsearch_requests, parallel
 from openfda.common import BatchHelper
@@ -35,8 +36,8 @@ def optimize_index(index_name, wait_for_merge=1):
   # elasticsearch client throws a timeout error when waiting for an optimize
   # command to finish, so we use requests instead
   logging.info('Optimizing: %s (this may take a while)', index_name)
-  resp = requests.post('http://%s/%s/_optimize?max_num_segments=1&wait_for_merge=%d' %
-    (config.es_host(), index_name, wait_for_merge), timeout=100000)
+  resp = requests.post('http://%s/%s/_forcemerge?max_num_segments=1' %
+    (config.es_host(), index_name), timeout=100000)
   resp.raise_for_status()
 
 
@@ -193,9 +194,15 @@ def dump_index(es,
   target_file = _make_file_name(target_dir, file_idx, total_zips)
 
   results = []
+
+  query_with_sort = query.copy() if query is not None else None
+  if query_with_sort is not None:
+    query_with_sort['sort'] = ["_doc"]
+
   for result in elasticsearch.helpers.scan(es,
-                                           query=query,
+                                           query=query_with_sort,
                                            raise_on_error=True,
+                                           preserve_order=True,
                                            scroll='30m',
                                            index=index):
 
@@ -254,7 +261,7 @@ def index_without_checksum(es, index, doc_type, batch):
       raise_on_error=False,
       raise_on_exception=False)
   for item in errors:
-    create_resp = item['create']
+    create_resp = item['index']
     if create_resp['status'] >= 400:
       logging.error('Unexpected conflict in creating documents: %s', create_resp)
 
@@ -285,11 +292,10 @@ def index_with_checksum(es, index, doc_type, batch):
 
   # mapping from docid to checksum
   existing_docs = {}
-  for match in es.mget(body={ 'ids' : [docid for (docid, _, _) in batch_with_checksum] },
-                       index=index,
-                       doc_type=doc_type,
-                       _source=False,
-                       fields='@checksum')['docs']:
+  status, found_docs = es.transport.perform_request('GET', _make_path(index, doc_type, '_mget'),
+                                               params={'_source_include': '@checksum'},
+                                               body={'ids': [docid for (docid, _, _) in batch_with_checksum]})
+  for match in found_docs['docs']:
     if 'error' in match:
       logging.warn('ERROR during query: %s', match['error'])
       continue
@@ -301,7 +307,7 @@ def index_with_checksum(es, index, doc_type, batch):
     # match the documents in either case, so we use a string id here
     # explicitly
     matching_id = str(match['_id'])
-    existing_docs[matching_id] = match['fields']['@checksum'][0]
+    existing_docs[matching_id] = match['_source']['@checksum']
 
   logging.debug('%d existing documents found', len(existing_docs))
   # filter out documents with matching checksums

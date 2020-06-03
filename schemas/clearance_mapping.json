@@ -37,7 +37,7 @@
             "type": "string"
           }
         },
-        "type": "string"
+        "type": "keyword"
       },
       "applicant": {
         "fields": {
@@ -82,7 +82,7 @@
             "type": "string"
           }
         },
-        "type": "string"
+        "type": "keyword"
       },
       "date_received": {
         "format": "basic_date||date||epoch_millis",

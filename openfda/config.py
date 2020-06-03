@@ -23,7 +23,7 @@ class FDAConfig(luigi.WrapperTask):
   aws_profile = luigi.Parameter(default='openfda')
   disable_downloads = luigi.Parameter(default=False)
 
-  snapshot_path = luigi.Parameter(default='elasticsearch-snapshots/es-2.4')
+  snapshot_path = luigi.Parameter(default='elasticsearch-snapshots/es-5')
   snapshot_bucket = luigi.Parameter(default='openfda-prod')
 
 

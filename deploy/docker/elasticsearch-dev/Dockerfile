@@ -3,42 +3,27 @@
 #
 # It has been modified to support multiple data directories
 
-FROM openjdk:8
+FROM docker.elastic.co/elasticsearch/elasticsearch:5.6.16
 
-ENV DEBIAN_FRONTEND noninteractive
+ADD elasticsearch.yml /usr/share/elasticsearch/config/
+ADD log4j2.properties /usr/share/elasticsearch/config/
 
-RUN apt-get -y update
-RUN apt-get -y install wget curl
-RUN apt install p7zip-full
+# Remove annoying X-Pack
+RUN bin/elasticsearch-plugin remove x-pack
 
-RUN \
-  cd /tmp && \
-  wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.4.6/elasticsearch-2.4.6.tar.gz && \
-  tar xvzf elasticsearch-2.4.6.tar.gz && \
-  rm -f elasticsearch-2.4.6.tar.gz && \
-  mv /tmp/elasticsearch-2.4.6 /elasticsearch
+# Install AWS plugins
+# RUN bin/elasticsearch-plugin install discovery-ec2
+RUN bin/elasticsearch-plugin install repository-s3
 
-VOLUME ["/data0"]
 
-WORKDIR /elasticsearch
+USER root
+RUN chown elasticsearch:elasticsearch config/elasticsearch.yml
+RUN chown elasticsearch:elasticsearch config/log4j2.properties
+USER elasticsearch
 
-# Install S3 plugin
-RUN bin/plugin install cloud-aws
-RUN bin/plugin install mobz/elasticsearch-head
-RUN bin/plugin install https://github.com/elastic/elasticsearch-migration/releases/download/v2.0.4/elasticsearch-migration-2.0.4.zip
-
-ADD elasticsearch.yml /elasticsearch/config/elasticsearch.yml
-ADD logging.yml /elasticsearch/config/logging.yml
-
-# Expose ports.
-#   - 9200: HTTP
-#   - 9300: transport
-EXPOSE 9200
-EXPOSE 9300
-
-ENV ES_HEAP_SIZE 16g
+ENV ES_JAVA_OPTS ""
 ENV MAX_LOCKED_MEMORY unlimited
 ENV AWS_ACCESS_KEY_ID ""
 ENV AWS_SECRET_ACCESS_KEY ""
 
-CMD /elasticsearch/bin/elasticsearch -Des.insecure.allow.root=true
+VOLUME ["/data0"]

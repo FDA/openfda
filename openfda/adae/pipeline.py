@@ -105,6 +105,9 @@ class XML2JSONMapper(parallel.Mapper):
 
   NS = {'ns': 'urn:hl7-org:v3'}
 
+  DATE_FIELDS = ['original_receive_date', 'onset_date', 'first_exposure_date', 'last_exposure_date',
+                 'manufacturing_date', 'lot_expiration']
+
   def map_shard(self, map_input, map_output):
 
     XPATH_MAP = {
@@ -244,7 +247,15 @@ class XML2JSONMapper(parallel.Mapper):
         json[first] = {}
       self.set_field_dot_notation(val, '.'.join(parts[1:]), json[first])
     elif val is not None:
-      json[field] = val
+      if not (field in self.DATE_FIELDS and not val):
+        json[field] = val
+
+  def isdigit(self, s):
+    try:
+      float(s)
+      return True
+    except ValueError:
+      return False
 
   def drug(self, nodeset, json):
 
@@ -314,6 +325,14 @@ class XML2JSONMapper(parallel.Mapper):
       # Convert yyyymm to yyyy-mm that ES can understand.
       if drug.get('lot_expiration') is not None:
         drug['lot_expiration'] = re.sub(r'^(\d{4})(\d{2})$', r'\1-\2', drug['lot_expiration'])
+
+      # A corner-case scenario (US-FDACVM-2014-US-065247.xml)
+      if drug.get('dose') is not None and drug['dose'].get('denominator') is not None and not self.isdigit(drug['dose'][
+        'denominator']):
+        logging.warn("Non-numeric denominator: " + drug['dose'][
+          'denominator'])
+        drug['dose']['denominator'] = '0'
+
 
       json["drug"].append(drug)
 
@@ -395,6 +414,7 @@ class XML2JSON(luigi.Task):
       mapper=XML2JSONMapper(),
       reducer=parallel.IdentityReducer(),
       output_prefix=self.output().path)
+
 
 # Annotation code left in for posterity. This class is not currently used at the request of CVM.
 class AnnotateEvent(luigi.Task):

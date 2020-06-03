@@ -72,7 +72,7 @@ RANGE_ENDPOINT_MAP = {
   '/drug/event': {
     'date_key': '@timestamp',
     'start_date': '2004-01-01',
-    'end_date': '2020-01-01'
+    'end_date': '2020-04-01'
   },
   # Check here for device event:
   # https://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/PostmarketRequirements/ReportingAdverseEvents/ucm127891.htm
@@ -117,10 +117,10 @@ class EndpointExport(object):
 
   @staticmethod
   def build_term_filter(key, term):
-    return  {
+    return {
       'query': {
-        'filtered': {
-          'query': { 'match_all': {}},
+        'bool': {
+          'must': {'match_all': {}},
           'filter': {
             'term': {
               key: term
@@ -134,29 +134,23 @@ class EndpointExport(object):
   def build_date_range_query(key, start, end, negate=False):
     query = {
       'query': {
-        'filtered': {
-          'query': { 'match_all': {} },
-          'filter': {}
-        }
-      }
-    }
-
-    inner = {
-      'range': {
-        key: {
-          'gte': start,
-          'lt': end
+        'bool': {
+          'must': {'match_all': {}},
+          'filter': {
+            'range': {
+              key: {
+                'gte': start,
+                'lt': end
+              }
+            }
+          }
         }
       }
     }
 
     # If negated, wrap condition with a `not` dictionary
     if negate:
-      inner = {
-        'not': inner
-      }
-
-    query['query']['filtered']['filter'] = inner
+      query['query']['bool']['must_not'] = query['query']['bool'].pop('filter')
 
     return dict(query)
 

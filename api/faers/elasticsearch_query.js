@@ -205,6 +205,12 @@ exports.ReplaceExact = function(search_or_count) {
   return search_or_count;
 };
 
+// _missing_ is gone from Elasticsearch 5 and up, but we still have to support it in the API.
+// We are replacing _missing_ with negated _exists_ behind the scenes.
+exports.HandleDeprecatedClauses = function(search) {
+    return search.replace(/_missing_:("?[\w.]+"?)/g, "(NOT (_exists_:$1))");
+};
+
 exports.BuildSort = function(params) {
     var sort = '';
     if (params.sort) {
@@ -240,7 +246,7 @@ exports.BuildQuery = function(params) {
         message: 'Search not supported: ' + escape(params.search)
       };
     }
-    q.query(ejs.QueryStringQuery(exports.ReplaceExact(params.search)));
+    q.query(ejs.QueryStringQuery(exports.HandleDeprecatedClauses(exports.ReplaceExact(params.search))));
   }
 
   if (params.count) {

@@ -46,6 +46,21 @@ class ADAEPipelineTests(unittest.TestCase):
   def test_normalize_product_ndc(self):
     eq_("57319-485", normalize_product_ndc("NDC57319-485-05"))
 
+  def test_is_digit(self):
+    mapper = XML2JSONMapper()
+    ok_(mapper.isdigit('1'))
+    ok_(mapper.isdigit('0'))
+    ok_(mapper.isdigit('1.5'))
+    ok_(mapper.isdigit('-10'))
+    ok_(mapper.isdigit('-20.5'))
+    ok_(mapper.isdigit('+1245.33434'))
+    ok_(mapper.isdigit('-1245.33434'))
+    ok_(mapper.isdigit('0.00'))
+    ok_(not mapper.isdigit('I'))
+    ok_(not mapper.isdigit('I0'))
+    ok_(not mapper.isdigit('.'))
+
+
   def test_xml_to_json(self):
     mapper = XML2JSONMapper()
     map_input = MagicMock()
@@ -162,6 +177,48 @@ class ADAEPipelineTests(unittest.TestCase):
     eq_("Milligram", ae["drug"][0]["active_ingredients"][0]["dose"]["numerator_unit"])
     eq_("1", ae["drug"][0]["active_ingredients"][0]["dose"]["denominator"])
     eq_("dose", ae["drug"][0]["active_ingredients"][0]["dose"]["denominator_unit"])
+
+  def test_empty_date_handling(self):
+    mapper = XML2JSONMapper()
+    map_input = MagicMock()
+    map_input.filename = os.path.join(dirname(os.path.abspath(__file__)), "test_blank_orig_date.xml")
+
+    map_dict = {}
+
+    def add(id, json):
+      map_dict[id] = json
+
+    map_output = MagicMock()
+    map_output.add = add
+    mapper.map_shard(map_input, map_output)
+
+    uid = "USA-USFDACVM-2016-US-017128"
+
+    ae = map_dict[uid]
+    eq_(None, ae.get("original_receive_date"))
+
+
+  def test_non_numeric_denominator(self):
+    mapper = XML2JSONMapper()
+    map_input = MagicMock()
+    map_input.filename = os.path.join(dirname(os.path.abspath(__file__)), "test-non-numeric-denominator.xml")
+
+    map_dict = {}
+
+    def add(id, json):
+      map_dict[id] = json
+
+    map_output = MagicMock()
+    map_output.add = add
+    mapper.map_shard(map_input, map_output)
+
+    uid = "USA-USFDACVM-2016-US-017128"
+
+    ae = map_dict[uid]
+    eq_(uid, ae["unique_aer_id_number"])
+    eq_(uid, ae["@id"])
+    eq_("0", ae["drug"][0]["dose"]["denominator"])
+    eq_("Unknown", ae["drug"][0]["dose"]["denominator_unit"])
 
 
 def main(argv):

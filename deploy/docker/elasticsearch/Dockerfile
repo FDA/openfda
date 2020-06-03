@@ -3,40 +3,30 @@
 #
 # It has been modified to support multiple data directories
 
-FROM openjdk:8
+FROM docker.elastic.co/elasticsearch/elasticsearch:5.6.16
 
-ENV DEBIAN_FRONTEND noninteractive
+ADD elasticsearch.yml /usr/share/elasticsearch/config/
+ADD log4j2.properties /usr/share/elasticsearch/config/
 
-RUN apt-get -y update
-RUN apt-get -y install wget curl
+ENV ES_JAVA_OPTS ""
+ENV AWS_REGION ""
+ENV ES_AVAILABILITY_ZONES ""
+ENV ES_SEC_GROUP_ID ""
+ENV CLUSTER_TAG ""
+ENV MAX_LOCKED_MEMORY unlimited
 
-RUN \
-  cd /tmp && \
-  wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.4.6/elasticsearch-2.4.6.tar.gz && \
-  tar xvzf elasticsearch-2.4.6.tar.gz && \
-  rm -f elasticsearch-2.4.6.tar.gz && \
-  mv /tmp/elasticsearch-2.4.6 /elasticsearch
+# Remove annoying X-Pack
+RUN bin/elasticsearch-plugin remove x-pack
+
+# Install AWS plugins
+RUN bin/elasticsearch-plugin install discovery-ec2
+RUN bin/elasticsearch-plugin install repository-s3
+
+USER root
+RUN chown elasticsearch:elasticsearch config/elasticsearch.yml
+RUN chown elasticsearch:elasticsearch config/log4j2.properties
+USER elasticsearch
+
+
 
 VOLUME ["/data0"]
-
-WORKDIR /elasticsearch
-
-# Install S3 plugin
-RUN bin/plugin install cloud-aws
-RUN bin/plugin install mobz/elasticsearch-head
-
-ADD elasticsearch.yml /elasticsearch/config/elasticsearch.yml
-ADD logging.yml /elasticsearch/config/logging.yml
-
-# Define default command.
-CMD ["/elasticsearch/bin/elasticsearch", "-Des.insecure.allow.root=true"]
-
-# Expose ports.
-#   - 9200: HTTP
-#   - 9300: transport
-EXPOSE 9200
-EXPOSE 9300
-
-# Give ES more memory
-ENV ES_HEAP_SIZE 15g
-ENV MAX_LOCKED_MEMORY unlimited
