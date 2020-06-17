@@ -29,3 +29,4 @@ watchdog
 /nosetests.xml
 /nosetests_integration.sh
 /start_pipelines.sh
+/nosetests_unit.sh

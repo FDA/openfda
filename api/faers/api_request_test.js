@@ -68,6 +68,23 @@ exports.testCountRequestWithSkip = function(test) {
   test.done();
 };
 
+exports.testSearchAfterWithSkip = function(test) {
+  let request = 'search=foo&search_after=1&skip=1';
+  let params = querystring.parse(request);
+  apiRequestError(test, params);
+
+  request = 'search=foo&search_after=1&skip=0';
+  params = querystring.parse(request);
+  apiRequestValid(test, params);
+
+  request = 'search=foo&search_after=1';
+  params = querystring.parse(request);
+  apiRequestValid(test, params);
+
+  test.done();
+};
+
+
 apiRequestValid = function(test, params) {
   test.doesNotThrow(function() { api_request.CheckParams(params) },
                     api_request.API_REQUEST_ERROR,

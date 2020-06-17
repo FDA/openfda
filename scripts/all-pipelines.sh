@@ -22,4 +22,6 @@ $PYTHON openfda/registration/pipeline.py LoadJSON > $LOGDIR/registration.log 2>&
 $PYTHON openfda/device_recall/pipeline.py LoadJSON > $LOGDIR/device_recall.log 2>&1
 $PYTHON openfda/maude/pipeline.py LoadJSON > $LOGDIR/maude.log 2>&1
 $PYTHON openfda/device_udi/pipeline.py LoadJSON > $LOGDIR/device_udi.log 2>&1
+$PYTHON openfda/covid19serology/pipeline.py LoadJSON > $LOGDIR/serology.log 2>&1
 $PYTHON openfda/caers/pipeline.py LoadJSON > $LOGDIR/caers.log 2>&1
+$PYTHON openfda/substance_data/pipeline.py LoadJSON > $LOGDIR/substance.log 2>&1

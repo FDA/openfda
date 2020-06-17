@@ -2,9 +2,6 @@
 
 import cStringIO
 import collections
-from os.path import basename, dirname, join
-import subprocess
-import requests
 import logging
 import os
 import re
@@ -13,6 +10,8 @@ import sys
 import time
 from os.path import dirname
 from threading import Thread
+
+import requests
 
 DEFAULT_BATCH_SIZE = 100
 
@@ -132,6 +131,8 @@ def _checked_subprocess(quiet=False, *args, **kw):
   stdout.join()
   stderr.join()
   if status_code != 0:
+    logging.error(stdout.output())
+    logging.error(stderr.output())
     raise ProcessException(status_code, stdout.output(), stderr.output())
 
   return stdout.output()

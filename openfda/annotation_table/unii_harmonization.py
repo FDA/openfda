@@ -67,7 +67,7 @@ def harmonize_unii(out_file, product_file, unii_file, class_index_dir):
   ndc_dict = {}
   for row in meta_file:
 
-    # Building the ndc_dict which is the out_fileer data structure of the final loop
+    # Building the ndc_dict which is the out_file data structure of the final loop
     # A little weird because there are duplicate set_id entries in the Product
     # file. Setting the key of the ndc_dict as the substance name and then
     # checking to see if the set_id is already in value list of that key.
@@ -93,7 +93,7 @@ def harmonize_unii(out_file, product_file, unii_file, class_index_dir):
   # call async worker
   pharma_rows = parallel_extract(pharma_xmls, harmonization_extract_worker)
 
-  unii_rows = extract_unii.extract_unii_dict(extract_unii.parse_xml(unii_file))
+  unii_rows = extract_unii.load_unii_from_csv(unii_file)
 
   combo = []
 

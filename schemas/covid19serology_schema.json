@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "properties": {
+    "manufacturer": {
+      "type": "string"
+    },
+    "device": {
+      "type": "string"
+    },
+    "date_performed": {
+      "type": "string"
+    },
+    "lot_number": {
+      "type": "string"
+    },
+    "panel": {
+      "type": "string"
+    },
+    "sample_no": {
+      "type": "integer"
+    },
+    "sample_id": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "group": {
+      "type": "string"
+    },
+    "days_from_symptom": {
+      "type": "string"
+    },
+    "igm_result": {
+      "type": "string"
+    },
+    "igg_result": {
+      "type": "string"
+    },
+    "iga_resul": {
+      "type": "string"
+    },
+    "pan_result": {
+      "type": "string"
+    },
+    "igm_igg_result": {
+      "type": "string"
+    },
+    "control": {
+      "type": "string"
+    },
+    "pan_titer": {
+      "type": "string"
+    },
+    "igm_titer": {
+      "type": "string"
+    },
+    "igg_titer": {
+      "type": "string"
+    },
+    "igm_truth": {
+      "type": "string"
+    },
+    "igg_truth": {
+      "type": "string"
+    },
+    "antibody_truth": {
+      "type": "string"
+    },
+    "igm_agree": {
+      "type": "string"
+    },
+    "igg_agree": {
+      "type": "string"
+    },
+    "iga_agree": {
+      "type": "string"
+    },
+    "pan_agree": {
+      "type": "string"
+    },
+    "igm_igg_agree": {
+      "type": "string"
+    },
+    "antibody_agree": {
+      "type": "string"
+    }
+  }
+}
+

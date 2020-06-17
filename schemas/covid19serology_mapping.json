@@ -1,0 +1,133 @@
+{
+  "covid19serology": {
+    "_source": {
+      "includes": [
+        "*"
+      ]
+    },
+    "properties": {
+      "manufacturer": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "device": {
+        "fields": {
+          "exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        },
+        "type": "string"
+      },
+      "date_performed": {
+        "format": "M/d/yyyy||basic_date||date_time_no_millis||date||epoch_millis",
+        "type": "date"
+      },
+      "lot_number": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "panel": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "sample_no": {
+        "index": "not_analyzed",
+        "type": "integer"
+      },
+      "sample_id": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "type": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "group": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "days_from_symptom": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "igm_result": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "igg_result": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "iga_resul": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "pan_result": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "igm_igg_result": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "control": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "pan_titer": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "igm_titer": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "igg_titer": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "igm_truth": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "igg_truth": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "antibody_truth": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "igm_agree": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "igg_agree": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "iga_agree": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "pan_agree": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "igm_igg_agree": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "antibody_agree": {
+        "index": "not_analyzed",
+        "type": "string"
+      }
+    }
+  }
+}

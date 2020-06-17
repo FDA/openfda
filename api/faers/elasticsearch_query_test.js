@@ -94,10 +94,12 @@ exports.testSupportedQueryString_Supported = function(test) {
 };
 
 exports.testBuildSort = function (test) {
-    test.equal(elasticsearch_query.BuildSort({}), '')
-    test.equal(elasticsearch_query.BuildSort({sort: 'report_date'}), 'report_date')
-    test.equal(elasticsearch_query.BuildSort({sort: 'report_date:asc'}), 'report_date:asc')
-    test.equal(elasticsearch_query.BuildSort({sort: 'report_date:desc'}), 'report_date:desc')
+  test.equal(elasticsearch_query.BuildSort({}), '_uid')
+  test.equal(elasticsearch_query.BuildSort({sort: ''}), '_uid')
+  test.equal(elasticsearch_query.BuildSort({sort: ' report_date '}), 'report_date,_uid')
+  test.equal(elasticsearch_query.BuildSort({sort: 'report_date:asc'}), 'report_date:asc,_uid')
+  test.equal(elasticsearch_query.BuildSort({sort: 'report_date:desc'}), 'report_date:desc,_uid')
+  test.equal(elasticsearch_query.BuildSort({sort: 'report_date:desc,field.exact'}), 'report_date:desc,field.exact,_uid')
     test.throws(function () {
             // Unallowed character within sort param.
             elasticsearch_query.BuildSort({sort: 'report_date`receiptdate'})

@@ -12,7 +12,7 @@ network.host: 0.0.0.0
 cluster.routing.allocation.node_initial_primaries_recoveries: 32
 cluster.routing.allocation.node_concurrent_recoveries: 32
 cluster.routing.allocation.disk.watermark.low: 90%
-cluster.routing.allocation.disk.watermark.high: 97%
+cluster.routing.allocation.disk.watermark.high: 96%
 
 indices.recovery.max_bytes_per_sec: 1000mb
 

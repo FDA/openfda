@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  es:
+    image: docker.elastic.co/elasticsearch/elasticsearch:5.6.16
+    environment:
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - xpack.security.enabled=false
+    ports:
+      - "9200"
+  import:
+    image: elasticdump/elasticsearch-dump
+    command: >
+      sh -c "chmod a+x /tmp/wait-for.sh &&
+             /tmp/wait-for.sh es:9200 -t 120 &&
+             elasticdump --input=/tmp/covid19serology_mapping.json --output=http://es:9200/covid19serology --type=mapping &&
+             elasticdump --input=/tmp/covid19serology_data.json --output=http://es:9200/covid19serology --type=data &&
+             sleep 3600"
+    volumes:
+      - ./test/integration:/tmp
+    depends_on:
+      - es
+  test:
+    image: node:8-alpine
+    working_dir: /api
+    volumes:
+      - ./:/api
+    command: >
+      sh -c "chmod a+x ./test/integration/wait-for.sh &&
+             ./test/integration/wait-for.sh es:9200 -t 120 &&
+             npm i && npm install -g grunt-cli && npm test && npm run test:integration"
+    environment:
+      - ES_HOST=es:9200
+      - SNYK_TOKEN=${SNYK_TOKEN}
+    depends_on:
+      - es

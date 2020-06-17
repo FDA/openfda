@@ -18,6 +18,7 @@ import simplejson as json
 
 from openfda import config, common, index_util, parallel
 from openfda.annotation_table.pipeline import CombineHarmonization
+from openfda.common import ProcessException
 from openfda.parallel import NullOutput
 from openfda.spl import annotate
 from openfda.tasks import AlwaysRunTask
@@ -60,7 +61,10 @@ class DownloadDailyMedSPL(luigi.Task):
     soup = BeautifulSoup(urllib2.urlopen(DAILY_MED_DOWNLOADS_PAGE).read(), 'lxml')
     for a in soup.find_all(href=re.compile('.*.zip')):
       if '_human_' in a.text:
-        common.download(a['href'], join(self.local_dir, a['href'].split('/')[-1]))
+        try:
+          common.download(a['href'], join(self.local_dir, a['href'].split('/')[-1]))
+        except ProcessException as e:
+          logging.error("Could not download a DailyMed SPL archive: {0}: {1}".format(a['href'], e))
 
 
 class ExtractDailyMedSPL(luigi.Task):
