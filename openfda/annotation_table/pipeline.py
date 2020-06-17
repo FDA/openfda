@@ -5,26 +5,25 @@ Execution pipeline for generating the openfda harmonization json file
 (aka the annotation table).
 """
 
-from bs4 import BeautifulSoup
 import collections
 import glob
 import logging
-import luigi
 import os
-from os.path import basename, dirname, join
 import re
 import subprocess
 import urllib2
 import urlparse
-import requests
+from os.path import basename, dirname, join
 
 import arrow
+import luigi
 import simplejson as json
+from bs4 import BeautifulSoup
 
-from openfda.tasks import DependencyTriggeredTask
 from openfda import common, config, parallel, spl
 from openfda.annotation_table import unii_harmonization
 from openfda.spl import process_barcodes, extract
+from openfda.tasks import DependencyTriggeredTask
 
 data_dir = config.data_dir('harmonization')
 BATCH_DATE = arrow.utcnow().ceil('week').format('YYYYMMDD')
@@ -46,7 +45,7 @@ RXNORM_DOWNLOAD = \
   DAILYMED_PREFIX + 'rxnorm_mappings.zip'
 
 UNII_DOWNLOAD = \
-  'https://www.fda.gov/downloads/ForIndustry/DataStandards/StructuredProductLabeling/UCM363354.zip'
+  'https://fdasis.nlm.nih.gov/srs/download/srs/UNIIs.zip'
 
 NDC_DOWNLOAD_PAGE = \
   'https://www.fda.gov/drugs/drug-approvals-and-databases/national-drug-code-directory'
@@ -192,15 +191,21 @@ class ExtractUNII(luigi.Task):
     return DownloadUNII()
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'unii/extracted/unii.xml'))
+    return luigi.LocalTarget(join(BASE_DIR, 'unii/extracted/unii.csv'))
 
   def run(self):
     zip_filename = self.input().path
     output_filename = self.output().path
-    os.system('mkdir -p %s' % dirname(output_filename))
-    cmd = 'unzip -p %(zip_filename)s unii.xml > \
-                    %(output_filename)s' % locals()
+    output_dir = dirname(output_filename)
+    os.system('mkdir -p %s' % output_dir)
+    cmd = 'unzip -o %(zip_filename)s \
+                    -d %(output_dir)s' % locals()
     os.system(cmd)
+
+    # UNII filename varies; find and rename to a standardized name.
+    # It is now a tab-delimited CSV instead of an XML as before.
+    for file in glob.glob(join(output_dir, 'UNII_Names*.txt')):
+      os.rename(file, output_filename)
 
 
 class RXNorm2JSONMapper(parallel.Mapper):
@@ -265,10 +270,10 @@ class UNIIHarmonizationJSON(luigi.Task):
   def run(self):
     ndc_file = self.input()[0].path
     pharma_class_dir = self.input()[1].path
-    unii_dir = self.input()[2].path
+    unii_file = self.input()[2].path
     output_file = self.output().path
     os.system('mkdir -p %s' % dirname(self.output().path))
-    unii_harmonization.harmonize_unii(output_file, ndc_file, unii_dir, pharma_class_dir)
+    unii_harmonization.harmonize_unii(output_file, ndc_file, unii_file, pharma_class_dir)
 
 
 class UNII2JSON(luigi.Task):

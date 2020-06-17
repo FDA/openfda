@@ -11,9 +11,6 @@ npm-debug.log
 openfda-*.zip
 openfda.egg-info/
 tmp/
-openfda/annotation_table/data/
-openfda/faers/data/
-openfda/res/data/
 data/
 /.idea
 api/faers/.idea
@@ -23,9 +20,8 @@ logs
 api/.idea
 watchdog
 /.eggs/
-/api/faers/package-lock.json
-/openfda/spl/package-lock.json
 /apiserver.sh
 /nosetests.xml
 /nosetests_integration.sh
 /start_pipelines.sh
+/nosetests_unit.sh

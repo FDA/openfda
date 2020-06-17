@@ -38,6 +38,7 @@ ENDPOINT_INDEX_MAP = {
   '/device/recall': 'devicerecall',
   '/device/registrationlisting': 'devicereglist',
   '/device/udi': 'deviceudi',
+  '/device/covid19serology': 'covid19serology',
   '/other/nsde': 'othernsde',
   '/other/substance': 'substancedata'
 

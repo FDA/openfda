@@ -2,7 +2,8 @@
 
 var ejs = require('elastic.js');
 var escape = require('escape-html');
-
+const qs = require('qs')
+const _ = require('underscore');
 var ELASTICSEARCH_QUERY_ERROR = 'ElasticsearchQueryError';
 
 // Supported characters:
@@ -97,8 +98,10 @@ var DATE_FIELDS = [
   // NDC
   'marketing_start_date',
   'marketing_end_date',
-  'listing_expiration_date'
+  'listing_expiration_date',
 
+  // Serology
+  'date_performed'
 
 ];
 
@@ -214,6 +217,7 @@ exports.HandleDeprecatedClauses = function(search) {
 exports.BuildSort = function(params) {
     var sort = '';
     if (params.sort) {
+        params.sort = params.sort.trim()
         if (!exports.SupportedQueryString(params.sort)) {
             throw {
                 name: ELASTICSEARCH_QUERY_ERROR,
@@ -229,45 +233,51 @@ exports.BuildSort = function(params) {
         sort = exports.ReplaceExact(params.sort);
     }
 
-    return sort;
+  return sort ? sort + ',_uid' : '_uid';
 };
-exports.BuildQuery = function(params) {
-  q = ejs.Request();
+
+var AddSearchAfter = function (ejsBody, params) {
+  if (params.search_after) {
+    ejsBody.search_after = _.values(qs.parse(params.search_after, {delimiter: ';'}))
+  }
+};
+
+exports.BuildQuery = function (params) {
+  const q = ejs.Request();
 
   if (!params.search && !params.count) {
     q.query(ejs.MatchAllQuery());
-    return q;
-  }
-
-  if (params.search) {
-    if (!exports.SupportedQueryString(params.search)) {
-      throw {
-        name: ELASTICSEARCH_QUERY_ERROR,
-        message: 'Search not supported: ' + escape(params.search)
-      };
+  } else {
+    if (params.search) {
+      if (!exports.SupportedQueryString(params.search)) {
+        throw {
+          name: ELASTICSEARCH_QUERY_ERROR,
+          message: 'Search not supported: ' + escape(params.search)
+        };
+      }
+      q.query(ejs.QueryStringQuery(exports.HandleDeprecatedClauses(exports.ReplaceExact(params.search))));
     }
-    q.query(ejs.QueryStringQuery(exports.HandleDeprecatedClauses(exports.ReplaceExact(params.search))));
-  }
 
-  if (params.count) {
-    if (DATE_FIELDS.indexOf(params.count) != -1) {
-      //q.facet(ejs.DateHistogramFacet('count').
-      //  field(params.count).interval('day').order('time'));
+    if (params.count) {
+      if (DATE_FIELDS.indexOf(params.count) != -1) {
+        //q.facet(ejs.DateHistogramFacet('count').
+        //  field(params.count).interval('day').order('time'));
         q.agg(ejs.DateHistogramAggregation('histogram').field(params.count).interval('day')
-            .order('_key', 'asc').format('yyyyMMdd').minDocCount(1));
-    } else {
-      // Adding 1000 extra to limit since we are using estimates rather than
-      // actual counts. It turns out that the tail of estimates starts to
-      // degenerate, so we need to ask for more than we want in order to chop
-      // the degenerate tail off the result. If we ever allow more than 25k on
-      // the limit, this number will need to be increased. We currently only
-      // allow a max limit of 1k, so this setting is overkill.
-      var limit = parseInt(params.limit) + 1000;
-      //q.facet(ejs.TermsFacet('count').
-      //  fields([exports.ReplaceExact(params.count)]).size(limit));
-      q.agg(ejs.TermsAggregation('count').field(exports.ReplaceExact(params.count)).size(limit));
+          .order('_key', 'asc').format('yyyyMMdd').minDocCount(1));
+      } else {
+        // Adding 1000 extra to limit since we are using estimates rather than
+        // actual counts. It turns out that the tail of estimates starts to
+        // degenerate, so we need to ask for more than we want in order to chop
+        // the degenerate tail off the result. If we ever allow more than 25k on
+        // the limit, this number will need to be increased. We currently only
+        // allow a max limit of 1k, so this setting is overkill.
+        var limit = parseInt(params.limit) + 1000;
+        q.agg(ejs.TermsAggregation('count').field(exports.ReplaceExact(params.count)).size(limit));
+      }
     }
   }
 
-  return q;
+  const qJson = q.toJSON();
+  AddSearchAfter(qJson, params);
+  return qJson;
 };

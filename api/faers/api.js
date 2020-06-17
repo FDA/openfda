@@ -3,6 +3,7 @@
 
 var elasticsearch = require('elasticsearch');
 var express = require('express');
+var cors = require('cors');
 var compression = require('compression')
 var moment = require('moment');
 var _ = require('underscore');
@@ -18,6 +19,7 @@ var qs = require('qs')
 
 var Stats = require('fast-stats').Stats;
 
+const traversal = require('./traversal.js');
 var api_request = require('./api_request.js');
 var elasticsearch_query = require('./elasticsearch_query.js');
 var logging = require('./logging.js');
@@ -26,9 +28,9 @@ var logging = require('./logging.js');
 // please update the openfda/index_util.py as well.
 var META = {
   'disclaimer': 'Do not rely on openFDA to make decisions regarding medical care. ' +
-                'While we make every effort to ensure that data is accurate, you ' +
-                'should assume all results are unvalidated. We may limit or otherwise ' +
-                'restrict your access to the API in line with our Terms of Service.',
+    'While we make every effort to ensure that data is accurate, you ' +
+    'should assume all results are unvalidated. We may limit or otherwise ' +
+    'restrict your access to the API in line with our Terms of Service.',
   'terms': 'https://open.fda.gov/terms/',
   'license': 'https://open.fda.gov/license/',
   'last_updated': '2014-05-29'
@@ -96,6 +98,7 @@ var DEVICE_CLEARANCE_INDEX = 'deviceclearance';
 var DEVICE_PMA_INDEX = 'devicepma';
 var DEVICE_RECALL_INDEX = 'devicerecall';
 var DEVICE_UDI_INDEX = 'deviceudi';
+var DEVICE_SEROLOGY_INDEX = 'covid19serology';
 var DRUG_EVENT_INDEX = 'drugevent';
 var DRUG_LABEL_INDEX = 'druglabel';
 var DRUG_NDC_INDEX = 'ndc';
@@ -124,19 +127,19 @@ var ENDPOINTS = [
     'index': ANIMAL_AND_VETERINARY_DRUG_EVENT_INDEX,
     'endpoint': '/animalandveterinary/event.json',
     'name': 'animalandveterinarydrugevent',
-    'basic' : true
+    'basic': true
   },
   {
     'index': DEVICE_CLASSIFICATION_INDEX,
     'endpoint': '/device/classification.json',
     'name': 'deviceclass',
-    'basic' : true
+    'basic': true
   },
   {
     'index': DEVICE_CLEARANCE_INDEX,
     'endpoint': '/device/510k.json',
     'name': 'deviceclearance',
-    'basic' : true
+    'basic': true
   },
   {
     'index': ALL_ENFORCEMENT_INDEX,
@@ -147,31 +150,37 @@ var ENDPOINTS = [
     'index': DEVICE_EVENT_INDEX,
     'endpoint': '/device/event.json',
     'name': 'deviceevent',
-    'basic' : true
+    'basic': true
   },
   {
     'index': DEVICE_PMA_INDEX,
     'endpoint': '/device/pma.json',
     'name': 'devicepma',
-    'basic' : true
+    'basic': true
   },
   {
     'index': DEVICE_RECALL_INDEX,
     'endpoint': '/device/recall.json',
     'name': 'devicerecall',
-    'basic' : true
+    'basic': true
   },
   {
     'index': DEVICE_REGISTRATION_INDEX,
     'endpoint': '/device/registrationlisting.json',
     'name': 'devicereglist',
-    'basic' : true
+    'basic': true
   },
   {
     'index': DEVICE_UDI_INDEX,
     'endpoint': '/device/udi.json',
     'name': 'deviceudi',
-    'basic' : true
+    'basic': true
+  },
+  {
+    'index': DEVICE_SEROLOGY_INDEX,
+    'endpoint': '/device/covid19serology.json',
+    'name': 'covid19serology',
+    'basic': true
   },
   {
     'index': ALL_ENFORCEMENT_INDEX,
@@ -182,19 +191,19 @@ var ENDPOINTS = [
     'index': DRUG_EVENT_INDEX,
     'endpoint': '/drug/event.json',
     'name': 'drugevent',
-    'basic' : true
+    'basic': true
   },
   {
     'index': DRUG_LABEL_INDEX,
     'endpoint': '/drug/label.json',
     'name': 'druglabel',
-    'basic' : true
+    'basic': true
   },
   {
-      'index': DRUG_NDC_INDEX,
-      'endpoint': '/drug/ndc.json',
-      'name': 'ndc',
-      'basic' : true
+    'index': DRUG_NDC_INDEX,
+    'endpoint': '/drug/ndc.json',
+    'name': 'ndc',
+    'basic': true
   },
   {
     'index': ALL_ENFORCEMENT_INDEX,
@@ -205,19 +214,19 @@ var ENDPOINTS = [
     'index': FOOD_EVENT_INDEX,
     'endpoint': '/food/event.json',
     'name': 'foodevent',
-    'basic' : true
+    'basic': true
   },
   {
     'index': OTHER_NSDE_INDEX,
     'endpoint': '/other/nsde.json',
     'name': 'othernsde',
-    'basic' : true
+    'basic': true
   },
   {
     'index': SUBSTANCE_DATA_INDEX,
     'endpoint': '/other/substance.json',
     'name': 'othersubstance',
-    'basic' : true
+    'basic': true
   },
   {
     'index': EXPORT_DATA_INDEX,
@@ -246,6 +255,7 @@ var VALID_URLS = [
   'api.fda.gov/device/classification.json',
   'api.fda.gov/device/registrationlisting.json',
   'api.fda.gov/device/pma.json',
+  'api.fda.gov/device/covid19serology.json',
   'api.fda.gov/food/enforcement.json',
   'api.fda.gov/food/event.json',
   'api.fda.gov/other/nsde.json',
@@ -259,8 +269,8 @@ var REQUEST_HISTORY_LENGTH = 10;
 
 
 // Set caching headers for Amazon Cloudfront
-CacheMiddleware = function(seconds) {
-  return function(request, response, next) {
+CacheMiddleware = function (seconds) {
+  return function (request, response, next) {
     response.setHeader('Cache-Control', 'public, max-age=' + seconds);
     return next();
   };
@@ -273,14 +283,14 @@ var index_info = {};
 //
 // This is run at startup and periodically during operation; the results
 // are returned with search requests and via the status API.
-var UpdateIndexInformation = function(client, index_info) {
+var UpdateIndexInformation = function (client, index_info) {
   console.log("Updating index information.");
   client.search({
     index: PROCESS_METADATA_INDEX,
     type: 'last_run',
     size: 20,
     _sourceInclude: ['last_update_date']
-  }).then(function(body) {
+  }).then(function (body) {
     var util = require('util');
     for (var i = 0; i < body.hits.hits.length; ++i) {
       var hit = body.hits.hits[i];
@@ -292,18 +302,18 @@ var UpdateIndexInformation = function(client, index_info) {
   });
 
   // Fetch document counts
-  _.map(ENDPOINTS, function(endpoint) {
+  _.map(ENDPOINTS, function (endpoint) {
     client
-      .count({ index: endpoint.index })
-      .then(function(endpoint, body) {
+      .count({index: endpoint.index})
+      .then(function (endpoint, body) {
         index_info[endpoint.index].document_count = body.count;
       }.bind(null, endpoint));
   });
 };
 
-var TestAvailability = function() {
-  _.map(ENDPOINTS, function(endpoint) {
-    request(endpoint.endpoint, function(error, response, body) {
+var TestAvailability = function () {
+  _.map(ENDPOINTS, function (endpoint) {
+    request(endpoint.endpoint, function (error, response, body) {
       var info = index_info[endpoint.index];
       info.status.push(!error);
     });
@@ -318,17 +328,28 @@ var ErrorTypes = {
 var app = express();
 app.disable('x-powered-by');
 
+// Configure CORS
+app.use(cors({
+  "origin": "*",
+  "methods": "GET,HEAD",
+  "allowedHeaders": "X-Requested-With, Authorization, Content-Type, Upgrade-Insecure-Requests",
+  "credentials": true,
+  "maxAge": 3600,
+  "preflightContinue": false,
+  "optionsSuccessStatus": 204
+}));
+
+
 //Middleware to trim extra spaces from api urls.
-var trim_middleware = function(req, res, next) {
+var trim_middleware = function (req, res, next) {
   req.url = req.url.trim().replace(/\%20$/, "")
   req.originalUrl = req.originalUrl.trim().replace(/\%20$/, "")
 
   if (!_.isEmpty(req.query)) {
     req.query = _.object(_.map(req.query, function (value, key) {
-      if (typeof(value)=="string") {
+      if (typeof (value) == "string") {
         return [key, value.trim().replace(/\%20$/, "")];
-      }
-      else {
+      } else {
         return value
       }
     }));
@@ -336,10 +357,9 @@ var trim_middleware = function(req, res, next) {
 
   if (!_.isEmpty(req._parsedUrl)) {
     req._parsedUrl = _.mapObject(req._parsedUrl, function (value, key) {
-      if (typeof(value)=="string") {
+      if (typeof (value) == "string") {
         return value.trim().replace(/\%20$/, "");
-      }
-      else {
+      } else {
         return value
       }
     })
@@ -370,11 +390,11 @@ var client = new elasticsearch.Client({
 });
 
 // Initialize our index information.  This is returned by the status API.
-_.map(ENDPOINTS, function(endpoint) {
+_.map(ENDPOINTS, function (endpoint) {
   index_info[endpoint.index] = {
     last_updated: '2015-01-01',
     document_count: 1,
-    latency: new Stats({ bucket_precision: 10, store_data: false }),
+    latency: new Stats({bucket_precision: 10, store_data: false}),
     status: []
   };
 });
@@ -384,21 +404,18 @@ UpdateIndexInformation(client, index_info);
 
 // Check API availability periodically
 setInterval(UpdateIndexInformation.bind(null, client, index_info),
-            60 * 1000 /* 1 minute */);
+  60 * 1000 /* 1 minute */);
 
 // Returns a JSON response indicating the status of each endpoint. The status
 // includes the last time the index was updated, a green/yellow/red "status"
 // field indicating the recent health of the endpoint, the number of requests to
 // the endpoint, and the average latency of the endpoint in milliseconds.
-app.get('/status', function(req, response) {
-  // Allow the status page to get status info....
-  response.setHeader('Access-Control-Allow-Origin', '*');
-
-  var filtered_endpoints = ENDPOINTS.filter(function(item) {
-    return item.download!=true
+app.get('/status', function (req, response) {
+  var filtered_endpoints = ENDPOINTS.filter(function (item) {
+    return item.download != true
   })
 
-  Promise.all(filtered_endpoints.map(function(endpoint) {
+  Promise.all(filtered_endpoints.map(function (endpoint) {
     var index = endpoint.index;
     var info = index_info[index];
     var errorCount = 0;
@@ -419,25 +436,27 @@ app.get('/status', function(req, response) {
     var buckets = info.latency.distribution();
 
     for (var i = 0; i < buckets.length; ++i) {
-      if (!buckets[i]) { continue; }
-        requestCount += buckets[i].count;
+      if (!buckets[i]) {
+        continue;
+      }
+      requestCount += buckets[i].count;
     }
 
-    return new Promise(function(resolve, reject) {
-      request('http://localhost:8000'+endpoint.endpoint, function(error, response, body) {
+    return new Promise(function (resolve, reject) {
+      request('http://localhost:8000' + endpoint.endpoint, function (error, response, body) {
         if (error) {
           reject(error)
         } else {
           try {
             resolve(JSON.parse(body).meta.results.total)
-          } catch(err) {
+          } catch (err) {
             reject(err)
           }
         }
       })
 
-    }).then(function(document) {
-      return new Promise(function(resolve, reject) {
+    }).then(function (document) {
+      return new Promise(function (resolve, reject) {
         try {
           resolve({
             endpoint: endpoint.name,
@@ -447,42 +466,52 @@ app.get('/status', function(req, response) {
             requests: requestCount,
             latency: info.latency.amean()
           })
-        } catch(err) {
+        } catch (err) {
           reject(err)
         }
-      }).then(function(promised_status_object) {
+      }).then(function (promised_status_object) {
         return promised_status_object
-      }).catch(function(err) {
+      }).catch(function (err) {
         log.error("Encountered error: ", err)
       });
 
-    }).catch(function(err) {
+    }).catch(function (err) {
       log.error("Encountered error: ", err)
     })
 
-  })).then(function(status_object) {
-    response.json(status_object.filter(function(item) {
-      return item!=undefined
+  })).then(function (status_object) {
+    response.json(status_object.filter(function (item) {
+      return item != undefined
     }))
 
-  }).catch(function(err) {
+  }).catch(function (err) {
     log.error("Encountered error: ", err)
   });
 });
 
 // endpoint for the API statistics page - cached in memory for 1 hour.
-app.get('/usage.json', cache('1 hour'), function(req, res) {
+app.get('/usage.json', cache('1 hour'), function (req, res) {
 
-  var end_at = req.query.start_at|| moment().format("YYYY-MM-DD");
-  var start_at = req.query.end_at|| moment().subtract(30, 'day').format("YYYY-MM-DD");
+  var end_at = req.query.start_at || moment().format("YYYY-MM-DD");
+  var start_at = req.query.end_at || moment().subtract(30, 'day').format("YYYY-MM-DD");
   var prefix = req.query.prefix || '0/';
   var params = querystring.stringify({
-      start_at: start_at,
-      end_at: end_at,
-      interval: 'day',
-      prefix: prefix,
-      query: {"condition":"AND","rules":[{"field":"gatekeeper_denied_code","id":"gatekeeper_denied_code","input":"select" ,"operator":"is_null","type":"string","value":null}]}
-    });
+    start_at: start_at,
+    end_at: end_at,
+    interval: 'day',
+    prefix: prefix,
+    query: {
+      "condition": "AND",
+      "rules": [{
+        "field": "gatekeeper_denied_code",
+        "id": "gatekeeper_denied_code",
+        "input": "select",
+        "operator": "is_null",
+        "type": "string",
+        "value": null
+      }]
+    }
+  });
 
   //NEVER expose this key to public
   var options = {
@@ -498,12 +527,12 @@ app.get('/usage.json', cache('1 hour'), function(req, res) {
   request(options, function (error, response, body) {
 
     var indexInfo = {}
-    var filtered_endpoints = ENDPOINTS.filter(function(item) {
+    var filtered_endpoints = ENDPOINTS.filter(function (item) {
       indexInfo[item.name] = 0
-      return item.download!=true
+      return item.download != true
     })
 
-    Promise.all(filtered_endpoints.map(function(endpoint) {
+    Promise.all(filtered_endpoints.map(function (endpoint) {
       var index = endpoint.index;
       var info = index_info[index];
       return new Promise(function (resolve, reject) {
@@ -522,15 +551,15 @@ app.get('/usage.json', cache('1 hour'), function(req, res) {
       }).then(function (document) {
         indexInfo[endpoint.name] = document || 10
 
-      }).catch(function(err) {
+      }).catch(function (err) {
         log.error("Usage encountered error on : ", endpoint.name, ": ", err)
       })
 
     })).then(function () {
       var usage = {
-        table:[],
-        stats :[],
-        others:[],
+        table: [],
+        stats: [],
+        others: [],
         lastThirtyDayUsage: 0,
         indexInfo: indexInfo
       };
@@ -539,11 +568,11 @@ app.get('/usage.json', cache('1 hour'), function(req, res) {
         var data = JSON.parse(body);
         if (data.results) {
           var unwanted = 0;
-          _.map(data.results, function(result){
+          _.map(data.results, function (result) {
             if (VALID_URLS.indexOf(result.path) > -1) {
               usage.table.push(result);
             } else {
-              unwanted+= result.hits;
+              unwanted += result.hits;
               usage.others.push(result);
             }
 
@@ -559,21 +588,21 @@ app.get('/usage.json', cache('1 hour'), function(req, res) {
             });
           }
 
-          _.each(usage.table, function(row){
+          _.each(usage.table, function (row) {
             usage.lastThirtyDayUsage += row.hits;
           });
 
         }
         if (data.hits_over_time) {
 
-          _.each(data.hits_over_time.rows, function(row){
+          _.each(data.hits_over_time.rows, function (row) {
 
-            var stat = {totalCount: 0, paths:[]};
+            var stat = {totalCount: 0, paths: []};
             usage.stats.push(stat);
 
-            for (var i =0; i < row.c.length; i++) {
+            for (var i = 0; i < row.c.length; i++) {
               if (i === 0) {
-               stat.day = row.c[i].f;
+                stat.day = row.c[i].f;
               } else {
                 stat.totalCount += row.c[i].v;
                 stat.paths.push({path: data.hits_over_time.cols[i].label, count: row.c[i].v});
@@ -587,7 +616,6 @@ app.get('/usage.json', cache('1 hour'), function(req, res) {
         log.error("The response is :");
         log.error(response);
       }
-      res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader('Cache-Control', 'public, max-age=' + 43200); //cache for 12 hours
       res.json(usage);
 
@@ -599,12 +627,12 @@ app.get('/usage.json', cache('1 hour'), function(req, res) {
 
 });
 
-app.get('/healthcheck', function(request, response) {
+app.get('/healthcheck', function (request, response) {
   client.cluster.health({
     index: DRUG_EVENT_INDEX,
     timeout: '60s',
     waitForStatus: 'yellow'
-  }, function(error, health_response, status) {
+  }, function (error, health_response, status) {
     health_json = JSON.stringify(health_response, undefined, 2);
     response.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
     if (error != undefined) {
@@ -617,7 +645,7 @@ app.get('/healthcheck', function(request, response) {
   });
 });
 
-ApiError = function(response, code, message, details) {
+ApiError = function (response, code, message, details) {
   error_response = {};
   error_response.error = {};
   error_response.error.code = code;
@@ -627,17 +655,13 @@ ApiError = function(response, code, message, details) {
   response.status(HTTP_CODE[code]).json(error_response);
 };
 
-LogRequest = function(request) {
+LogRequest = function (request) {
   log.info(request.headers, 'Request Headers');
   log.info(request.query, 'Request Query');
 };
 
-SetHeaders = function(response) {
+SetHeaders = function (response) {
   response.header('Server', 'open.fda.gov');
-  // http://john.sh/blog/2011/6/30/cross-domain-ajax-expressjs-
-  // and-access-control-allow-origin.html
-  response.header('Access-Control-Allow-Origin', '*');
-  response.header('Access-Control-Allow-Headers', 'X-Requested-With');
   response.header('Content-Security-Policy', "default-src 'none'");
   // https://www.owasp.org/index.php/REST_Security_Cheat_Sheet
   // #Send_security_headers
@@ -646,7 +670,7 @@ SetHeaders = function(response) {
   response.header('X-XSS-Protection', '1; mode=block');
 };
 
-TryToCheckApiParams = function(request, response) {
+TryToCheckApiParams = function (request, response) {
   try {
     return api_request.CheckParams(request.query);
   } catch (e) {
@@ -660,7 +684,7 @@ TryToCheckApiParams = function(request, response) {
   }
 };
 
-TryToBuildElasticsearchParams = function(params, es_index, response) {
+TryToBuildElasticsearchParams = function (params, es_index, response) {
   try {
     var es_query = elasticsearch_query.BuildQuery(params);
     var es_sort = elasticsearch_query.BuildSort(params);
@@ -676,15 +700,12 @@ TryToBuildElasticsearchParams = function(params, es_index, response) {
   }
 
   var index = es_index;
-  if (params.staging) {
-    index = es_index + '.staging';
-  }
   // Added default sort by _uid to ensure consistent results
   // across servers
   var es_search_params = {
     index: es_index,
     body: es_query,
-    sort: es_sort || '_uid'
+    sort: es_sort
   };
 
   if (!params.count) {
@@ -695,106 +716,101 @@ TryToBuildElasticsearchParams = function(params, es_index, response) {
   return es_search_params;
 };
 
-TrySearch = function(index, params, es_search_params, request, response) {
+TrySearch = function (index, params, es_search_params, request, response) {
   client.search(es_search_params)
-  .then(function(body) {
-    if (body.hits.hits.length == 0 && !(params.limit === 0 && body.hits.total > 0)) {
+    .then(function (body) {
+      if (body.hits.hits.length == 0 && !(params.limit === 0 && body.hits.total > 0)) {
         return ApiError(response, ErrorTypes.NOT_FOUND, 'No matches found!');
-    }
+      }
 
-    var requestTime = body.took;
-    index_info[index].latency.push(requestTime);
+      var requestTime = body.took;
+      index_info[index].latency.push(requestTime);
 
-    var response_json = {};
-    response_json.meta = _.clone(META);
+      var response_json = {};
+      response_json.meta = _.clone(META);
 
-    if (index === 'foodevent') {
-      response_json.meta.disclaimer = CAERS_DISCLAIMER
-    }
+      if (index === 'foodevent') {
+        response_json.meta.disclaimer = CAERS_DISCLAIMER
+      }
 
-    response_json.meta.last_updated = index_info[index].last_updated;
+      response_json.meta.last_updated = index_info[index].last_updated;
 
-    // Search query
-    if (!params.count) {
-      response_json.meta.results = {
-        'skip': params.skip,
-        'limit': params.limit,
-        'total': body.hits.total
-      };
+      // Search query
+      if (!params.count) {
+        response_json.meta.results = {
+          'skip': params.skip,
+          'limit': params.limit,
+          'total': body.hits.total
+        };
 
-      response_json.results = [];
-      for (i = 0; i < body.hits.hits.length; i++) {
-        var result = body.hits.hits[i]._source;
-        for (j = 0; j < FIELDS_TO_REMOVE.length; j++) {
-          delete result[FIELDS_TO_REMOVE[j]];
+        response_json.results = [];
+        for (i = 0; i < body.hits.hits.length; i++) {
+          var result = body.hits.hits[i]._source;
+          for (j = 0; j < FIELDS_TO_REMOVE.length; j++) {
+            delete result[FIELDS_TO_REMOVE[j]];
 
-          // For MAUDE. TODO(mattmo): Refactor
-          var device = result.device;
-          if (device) {
-            for (k = 0; k < device.length; k++) {
-              delete device[k][FIELDS_TO_REMOVE[j]];
+            // For MAUDE. TODO(mattmo): Refactor
+            var device = result.device;
+            if (device) {
+              for (k = 0; k < device.length; k++) {
+                delete device[k][FIELDS_TO_REMOVE[j]];
+              }
             }
           }
+          response_json.results.push(result);
         }
-        response_json.results.push(result);
-      }
-      var nextSkip = params.skip + params.limit;
-      if (body.hits.total > nextSkip) {
-        request.query.skip = nextSkip;
-        var nextQuery = qs.stringify(request.query);
-        var nextPageUrl = (request.header('x-api-umbrella-request-id') !== undefined ?
-          'https://api.fda.gov' :
-          request.protocol + '://' + request.get('host'))
-          + request.path + '?' + nextQuery;
-        response.header("Link",'<' + nextPageUrl + '>; rel="next"');
-      }
-      return response.status(HTTP_CODE.OK).json(response_json);
-    }
 
-    // Count query
-    if (body.aggregations.count && body.aggregations.count.buckets) {
-      if (body.aggregations.count.buckets.length == 0) {
-        return ApiError(response, ErrorTypes.NOT_FOUND, 'Nothing to count');
+        const relNext = traversal.BuildLinkRelNext(request, params, body);
+        if (relNext)
+          response.header("Link", '<' + relNext + '>; rel="next"');
+
+        return response.status(HTTP_CODE.OK).json(response_json);
       }
 
-      // We add 1000 to the limit on all count queries in order to overcome
-      // inaccurate results in the tail of the result, as such, we need to lop
-      // off any results beyond the amount requested in the params.limit.
-      var count_result = body.aggregations.count.buckets.map((bucket) => {
+      // Count query
+      if (body.aggregations.count && body.aggregations.count.buckets) {
+        if (body.aggregations.count.buckets.length == 0) {
+          return ApiError(response, ErrorTypes.NOT_FOUND, 'Nothing to count');
+        }
+
+        // We add 1000 to the limit on all count queries in order to overcome
+        // inaccurate results in the tail of the result, as such, we need to lop
+        // off any results beyond the amount requested in the params.limit.
+        var count_result = body.aggregations.count.buckets.map((bucket) => {
           return {
-              term: bucket.key,
-              count: bucket.doc_count
+            term: bucket.key,
+            count: bucket.doc_count
           }
-      });
-      response_json.results = (count_result.length > params.limit) ?
-                               count_result.slice(0, params.limit) :
-                               count_result;
-      return response.status(HTTP_CODE.OK).json(response_json);
-    }
-
-    // Date facet count
-    if (body.aggregations.histogram && body.aggregations.histogram.buckets) {
-      if (body.aggregations.histogram.buckets.length == 0) {
-        return ApiError(response, ErrorTypes.NOT_FOUND, 'Nothing to count');
+        });
+        response_json.results = (count_result.length > params.limit) ?
+          count_result.slice(0, params.limit) :
+          count_result;
+        return response.status(HTTP_CODE.OK).json(response_json);
       }
 
-      response_json.results = body.aggregations.histogram.buckets.map((bucket) => {
-          return {
-              time: bucket.key_as_string,
-              count: bucket.doc_count
-          };
-      });
-      return response.status(HTTP_CODE.OK).json(response_json);
-    }
+      // Date facet count
+      if (body.aggregations.histogram && body.aggregations.histogram.buckets) {
+        if (body.aggregations.histogram.buckets.length == 0) {
+          return ApiError(response, ErrorTypes.NOT_FOUND, 'Nothing to count');
+        }
 
-    return ApiError(response, ErrorTypes.NOT_FOUND, 'Nothing to count');
-  }, function(error) {
-    log.error(error);
-    ApiError(response, ErrorTypes.SERVER_ERROR, 'Check your request and try again', error.message);
-  });
+        response_json.results = body.aggregations.histogram.buckets.map((bucket) => {
+          return {
+            time: bucket.key_as_string,
+            count: bucket.doc_count
+          };
+        });
+        return response.status(HTTP_CODE.OK).json(response_json);
+      }
+
+      return ApiError(response, ErrorTypes.NOT_FOUND, 'Nothing to count');
+    }, function (error) {
+      log.error(error);
+      ApiError(response, ErrorTypes.SERVER_ERROR, 'Check your request and try again', error.message);
+    });
 };
 
-GetDownload = function(response) {
+GetDownload = function (response) {
   console.log("Getting download information...");
   var index = EXPORT_DATA_INDEX;
 
@@ -802,7 +818,7 @@ GetDownload = function(response) {
     index: index,
     type: 'downloads',
     id: 'current',
-  }).then(function(body) {
+  }).then(function (body) {
     if (!body) {
       return ApiError(response, ErrorTypes.NOT_FOUND, 'No matches found!');
     }
@@ -823,8 +839,8 @@ GetDownload = function(response) {
 };
 
 // Enforcement.
-EnforcementEndpoint = function(noun) {
-  app.get('/' + noun + '/enforcement.json', function(request, response) {
+EnforcementEndpoint = function (noun) {
+  app.get('/' + noun + '/enforcement.json', function (request, response) {
     LogRequest(request);
     SetHeaders(response);
 
@@ -861,16 +877,16 @@ EnforcementEndpoint('drug');
 EnforcementEndpoint('food');
 EnforcementEndpoint('device');
 
-BasicEndpoint = function(data) {
+BasicEndpoint = function (data) {
   var endpoint = data['endpoint'];
   var index = data['index'];
 
   // cache "limitless" count requests. Those can be very expensive.
   const limitlessCountReq = (req, res) => req.query.count && req.query.limit && parseInt(req.query.limit) > 1000
-      && res.statusCode === 200;
+    && res.statusCode === 200;
   const cacheLimitlessCountReq = cache('1 day', limitlessCountReq);
 
-  app.get(endpoint, cacheLimitlessCountReq, function(request, response) {
+  app.get(endpoint, cacheLimitlessCountReq, function (request, response) {
     LogRequest(request);
     SetHeaders(response);
 
@@ -890,7 +906,7 @@ BasicEndpoint = function(data) {
 };
 
 // Make all of the basic endpoints
-_.map(ENDPOINTS, function(endpoint) {
+_.map(ENDPOINTS, function (endpoint) {
   if (endpoint.basic) {
     BasicEndpoint(endpoint);
   }
@@ -898,11 +914,11 @@ _.map(ENDPOINTS, function(endpoint) {
 
 // Take endpoint config object and a prune boolean. If boolean is true, then
 // we only want the specific endpoint's download data.
-DownloadEndpoint = function(data, prune) {
+DownloadEndpoint = function (data, prune) {
   var endpoint = data['endpoint'];
   var index = data['index'];
 
-  app.get(endpoint, function(request, response) {
+  app.get(endpoint, function (request, response) {
     LogRequest(request);
     SetHeaders(response);
 
@@ -911,7 +927,7 @@ DownloadEndpoint = function(data, prune) {
 };
 
 // Make the download endpoint
-_.map(ENDPOINTS, function(endpoint) {
+_.map(ENDPOINTS, function (endpoint) {
   if (endpoint.download) {
     DownloadEndpoint(endpoint, false);
   }
@@ -920,13 +936,15 @@ _.map(ENDPOINTS, function(endpoint) {
 // From http://strongloop.com/strongblog/
 // robust-node-applications-error-handling/
 if (process.env.NODE_ENV === 'production') {
-  process.on('uncaughtException', function(e) {
+  process.on('uncaughtException', function (e) {
     log.error(e);
     process.exit(1);
   });
 }
 
 var port = process.env.PORT || 8000;
-app.listen(port, function() {
+app.listen(port, function () {
   console.log('Listening on ' + port);
 });
+
+module.exports = app;

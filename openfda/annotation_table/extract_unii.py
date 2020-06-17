@@ -20,7 +20,8 @@ Functions:
 from lxml import etree
 import StringIO
 import re
-
+import numpy as np
+import pandas as pd
 
 # http://www.fda.gov/ForIndustry/DataStandards/StructuredProductLabeling/ucm162061.htm
 UNII_OID = '2.16.840.1.113883.4.9'
@@ -52,12 +53,16 @@ def extract_set_id(tree):
   return first_match_or_empty_string(
     tree.getroot().xpath('/document/setId/@root'))
 
-def extract_unii_dict(tree):
-  """Extracts the name and UNII from unii.xml"""
+
+def load_unii_from_csv(file):
   unii_rows = {}
-  root = tree.getroot()
-  for child in root.iter('choice'):
-    unii_rows[child.find('label').text.lower()] = {'va': [], 'name': child.find('label').text, 'set_id': '', 'unii': child.find('value').text}
+  df = pd.read_csv(file, header=0, names=['Name', 'Type', 'UNII', 'PT'], sep='\t', index_col=False, encoding='utf-8',
+                   dtype=str, low_memory=False, na_values=[], keep_default_na=False)
+  for row in df.itertuples():
+    unii_rows[row.Name.lower()] = {'va': [], 'name': row.Name, 'set_id': '',
+                                   'unii': row.UNII}
+    unii_rows[row.PT.lower()] = {'va': [], 'name': row.PT, 'set_id': '',
+                                 'unii': row.UNII}
   return unii_rows
 
 def extract_unii(tree):

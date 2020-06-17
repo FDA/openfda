@@ -3,7 +3,7 @@
 var underscore = require('underscore');
 var escape = require('escape-html');
 
-var EXPECTED_PARAMS = ['search', 'count', 'limit', 'skip', 'sort'],
+var EXPECTED_PARAMS = ['search', 'count', 'limit', 'skip', 'sort', 'search_after'],
     maxSkip = 25000;
 var LIMITLESS_COUNT_FIELDS = ['openfda.generic_name', 'openfda.brand_name', 'openfda.substance_name'];
 
@@ -54,7 +54,7 @@ exports.CheckParams = function(params) {
     throw {
       name: API_REQUEST_ERROR,
       message: 'Limit cannot exceed 100 results for search requests. Use ' +
-        'the skip param to get additional results.'
+        'the skip or search_after param to get additional results.'
     };
   }
 
@@ -73,6 +73,15 @@ exports.CheckParams = function(params) {
       message: 'Should not use skip param when using count.'
     };
   }
+
+  // Do not allow skip param with count requests.
+  if (params.search_after && params.skip) {
+    throw {
+      name: API_REQUEST_ERROR,
+      message: 'The skip parameter is not supported when using search_after.'
+    };
+  }
+
 
   // Set default values for missing params
   params.skip = params.skip || 0;

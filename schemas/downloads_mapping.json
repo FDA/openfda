@@ -139,6 +139,23 @@
                   }
                 }
             }
+          },
+          "covid19serology": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime||epoch_millis",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                  }
+                }
+            }
           }
         }
       },
