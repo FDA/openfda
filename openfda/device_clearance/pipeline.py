@@ -4,39 +4,28 @@
     Elasticsearch.
 '''
 
-import collections
 import glob
-import logging
 import os
-from os.path import basename, dirname, join
-import sys
+import re
+import urllib2
+from os.path import dirname, join
 
-import arrow
-import elasticsearch
 import luigi
-import requests
-import simplejson as json
+from bs4 import BeautifulSoup
 
-from openfda import common, config, elasticsearch_requests, index_util, parallel
+from openfda import common, config, index_util, parallel
 from openfda import download_util
 from openfda.device_clearance import transform
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
   DeviceAnnotateMapper)
-from openfda.tasks import AlwaysRunTask
+
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 # A directory for holding files that track Task state
 META_DIR = config.data_dir('510k/meta')
 common.shell_cmd('mkdir -p %s', META_DIR)
 
-
-CLEARED_DEVICE_URL = 'https://www.accessdata.fda.gov/premarket/ftparea/'
-CLEARED_DEV_ZIPS = [CLEARED_DEVICE_URL + 'pmn96cur.zip',
-  CLEARED_DEVICE_URL + 'pmn9195.zip',
-  CLEARED_DEVICE_URL + 'pmn8690.zip',
-  CLEARED_DEVICE_URL + 'pmn8185.zip',
-  CLEARED_DEVICE_URL + 'pmn7680.zip']
-
+CLEARED_DEVICE_URL = 'https://www.fda.gov/medical-devices/510k-clearances/downloadable-510k-files'
 
 class Download_510K(luigi.Task):
   def requires(self):
@@ -46,11 +35,12 @@ class Download_510K(luigi.Task):
     return luigi.LocalTarget(config.data_dir('510k/raw'))
 
   def run(self):
-    output_dir = self.output().path
+    soup = BeautifulSoup(urllib2.urlopen(CLEARED_DEVICE_URL).read(), 'lxml')
+    for a in soup.find_all(href=re.compile('.*.zip')):
+      if a.text.startswith('PMN') and a.text != 'PMNLSTMN.ZIP':
+        fileURL = a['href']
+        common.download(fileURL, join(self.output().path, a['href'].split('/')[-1]))
 
-    for zip_url in CLEARED_DEV_ZIPS:
-      output_filename = join(output_dir, zip_url.split('/')[-1])
-      common.download(zip_url, output_filename)
 
 class ExtractAndCleanDownloads510k(luigi.Task):
   ''' Unzip each of the download files and remove all the non-UTF8 characters.
