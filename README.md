@@ -47,3 +47,7 @@ At this point the Python container only runs the NSDE, CAERS, and Substance Data
 are relatively lightweight and require no access to internal FDA networks. We will add more pipelines
 in case there is substantial interest from the community. However, the three pipelines above provide a good starting
 point into understanding openFDA internals and/or customizing openFDA.
+
+## Windows Users
+
+Clone the repository with `git clone https://github.com/FDA/openfda.git --config core.autocrlf=input` in order to circumvent docker issues with building images on a Windows computer.
