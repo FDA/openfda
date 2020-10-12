@@ -1,0 +1,130 @@
+{
+  "meta": {
+    "disclaimer": "Do not rely on openFDA to make decisions regarding medical care. While we make every effort to ensure that data is accurate, you should assume all results are unvalidated. We may limit or otherwise restrict your access to the API in line with our Terms of Service.", 
+    "last_updated": "2017-03-06", 
+    "license": "https://open.fda.gov/license/", 
+    "terms": "https://open.fda.gov/terms/"
+  }, 
+  "results": [
+    {
+      "count": 25904, 
+      "term": "general"
+    }, 
+    {
+      "count": 15760, 
+      "term": "cardiovascular"
+    }, 
+    {
+      "count": 15338, 
+      "term": "clinical"
+    }, 
+    {
+      "count": 13282, 
+      "term": "hospital"
+    }, 
+    {
+      "count": 12622, 
+      "term": "surgery"
+    }, 
+    {
+      "count": 12622, 
+      "term": "plastic"
+    }, 
+    {
+      "count": 12401, 
+      "term": "orthopedic"
+    }, 
+    {
+      "count": 12400, 
+      "term": "chemistry"
+    }, 
+    {
+      "count": 10663, 
+      "term": "radiology"
+    }, 
+    {
+      "count": 10430, 
+      "term": "dental"
+    }, 
+    {
+      "count": 9265, 
+      "term": "urology"
+    }, 
+    {
+      "count": 9265, 
+      "term": "gastroenterology"
+    }, 
+    {
+      "count": 7593, 
+      "term": "anesthesiology"
+    }, 
+    {
+      "count": 6148, 
+      "term": "microbiology"
+    }, 
+    {
+      "count": 4868, 
+      "term": "physical"
+    }, 
+    {
+      "count": 4868, 
+      "term": "medicine"
+    }, 
+    {
+      "count": 4488, 
+      "term": "unknown"
+    }, 
+    {
+      "count": 4360, 
+      "term": "neurology"
+    }, 
+    {
+      "count": 4260, 
+      "term": "ophthalmic"
+    }, 
+    {
+      "count": 4001, 
+      "term": "hematology"
+    }, 
+    {
+      "count": 3818, 
+      "term": "obstetrics"
+    }, 
+    {
+      "count": 3818, 
+      "term": "gynecology"
+    }, 
+    {
+      "count": 3402, 
+      "term": "throat"
+    }, 
+    {
+      "count": 3402, 
+      "term": "nose"
+    }, 
+    {
+      "count": 3402, 
+      "term": "ear"
+    }, 
+    {
+      "count": 3312, 
+      "term": "immunology"
+    }, 
+    {
+      "count": 2938, 
+      "term": "toxicology"
+    }, 
+    {
+      "count": 277, 
+      "term": "pathology"
+    }, 
+    {
+      "count": 1, 
+      "term": "medical"
+    }, 
+    {
+      "count": 1, 
+      "term": "genetics"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "meta": {
+    "disclaimer": "Do not rely on openFDA to make decisions regarding medical care. While we make every effort to ensure that data is accurate, you should assume all results are unvalidated. We may limit or otherwise restrict your access to the API in line with our Terms of Service.", 
+    "last_updated": "2017-03-06", 
+    "license": "https://open.fda.gov/license/", 
+    "terms": "https://open.fda.gov/terms/"
+  }, 
+  "results": [
+    {
+      "count": 800, 
+      "term": "Unknown"
+    }, 
+    {
+      "count": 504, 
+      "term": "Gastroenterology, Urology"
+    }, 
+    {
+      "count": 484, 
+      "term": "Clinical Chemistry"
+    }, 
+    {
+      "count": 461, 
+      "term": "General, Plastic Surgery"
+    }, 
+    {
+      "count": 431, 
+      "term": "Microbiology"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "disclaimer": "Do not rely on openFDA to make decisions regarding medical care. While we make every effort to ensure that data is accurate, you should assume all results are unvalidated. We may limit or otherwise restrict your access to the API in line with our Terms of Service.", 
+    "last_updated": "2017-03-06", 
+    "license": "https://open.fda.gov/license/", 
+    "results": {
+      "limit": 1, 
+      "skip": 0, 
+      "total": 1
+    }, 
+    "terms": "https://open.fda.gov/terms/"
+  }, 
+  "results": [
+    {
+      "address_1": "33 Technology Dr", 
+      "address_2": "", 
+      "center_classification_date": "20120907", 
+      "city": "Irvine", 
+      "classification": "Class III", 
+      "code_info": " Product Code: 10133", 
+      "country": "United States", 
+      "distribution_pattern": "Nationwide Distribution.", 
+      "event_id": "62925", 
+      "initial_firm_notification": "Letter", 
+      "openfda": {}, 
+      "postal_code": "92618-2346", 
+      "product_description": "STERRAD NX Cassette, Batch # 12A078.    The STERRAD 100S and STERRAD NX sterilizations systems are low-temperature general purpose sterilizers used to sterilize heat and moisture sensitive reusable medical devices. The sterilant used is hydrogen peroxide supplied in cassette form as a separate accessory. The STERRAD Cassettes are used in conjunction with the STERRAD Sterilizers, and each cassette model is for use only in the matching sterilizer model.", 
+      "product_quantity": "7,550 units", 
+      "product_type": "Devices", 
+      "reason_for_recall": "Advanced Sterilization Products (ASP) is recalling (removing) the Sterrad 100S and Sterrad NX System cassettes because the camera used to verify printing on the Sterrad System cassettes was inadvertently disabled.  The STERRAD 100S and STERRAD NX System cases were shipped without verification of proper printing.", 
+      "recall_initiation_date": "20120619", 
+      "recall_number": "Z-2338-2012", 
+      "recalling_firm": "Advanced Sterilization Products", 
+      "report_date": "20120919", 
+      "state": "CA", 
+      "status": "Terminated", 
+      "termination_date": "20131108", 
+      "voluntary_mandated": "Voluntary: Firm Initiated"
+    }
+  ]
+}

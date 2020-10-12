@@ -1,0 +1,41 @@
+{
+  "meta": {
+    "disclaimer": "Do not rely on openFDA to make decisions regarding medical care. While we make every effort to ensure that data is accurate, you should assume all results are unvalidated. We may limit or otherwise restrict your access to the API in line with our Terms of Service.", 
+    "last_updated": "2017-03-06", 
+    "license": "https://open.fda.gov/license/", 
+    "results": {
+      "limit": 1, 
+      "skip": 0, 
+      "total": 1
+    }, 
+    "terms": "https://open.fda.gov/terms/"
+  }, 
+  "results": [
+    {
+      "address_1": "463 44th St SE", 
+      "address_2": "", 
+      "center_classification_date": "20121018", 
+      "city": "Grand Rapids", 
+      "classification": "Class II", 
+      "code_info": " All with sell by dates on or before 15-Sep with UPC 0-11213-90380", 
+      "country": "United States", 
+      "distribution_pattern": "MI and OH only.", 
+      "event_id": "63159", 
+      "initial_firm_notification": "E-Mail", 
+      "openfda": {}, 
+      "postal_code": "49548-4327", 
+      "product_description": "#011 Zucchini Stir,Fry\t\t0.75 pounds  ", 
+      "product_quantity": "520", 
+      "product_type": "Food", 
+      "reason_for_recall": "During an FDA inspection, microbiological swabs were collected and the results found that 21 sub samples in zones 1, 2 & 3 are positive for Listeria Monocytogenes (L.M.), Listeria innocua (L.I.) or Listeria seeligeri (L.S.).  The firm is voluntarily recalling all products manufactured from August 20th to September 10th 2012 due to the possible contamination.  All products with sell by dates on or ", 
+      "recall_initiation_date": "20120910", 
+      "recall_number": "F-0283-2013", 
+      "recalling_firm": "Spartan Central Kitchen", 
+      "report_date": "20121024", 
+      "state": "MI", 
+      "status": "Terminated", 
+      "termination_date": "20130219", 
+      "voluntary_mandated": "Voluntary: Firm Initiated"
+    }
+  ]
+}

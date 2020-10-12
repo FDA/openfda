@@ -1,0 +1,410 @@
+{
+  "meta": {
+    "disclaimer": "Do not rely on openFDA to make decisions regarding medical care. While we make every effort to ensure that data is accurate, you should assume all results are unvalidated. We may limit or otherwise restrict your access to the API in line with our Terms of Service.", 
+    "last_updated": "2017-03-06", 
+    "license": "https://open.fda.gov/license/", 
+    "terms": "https://open.fda.gov/terms/"
+  }, 
+  "results": [
+    {
+      "count": 3573, 
+      "term": "KWP"
+    }, 
+    {
+      "count": 3397, 
+      "term": "MNI"
+    }, 
+    {
+      "count": 3384, 
+      "term": "MNH"
+    }, 
+    {
+      "count": 3154, 
+      "term": "HWC"
+    }, 
+    {
+      "count": 3072, 
+      "term": "KWQ"
+    }, 
+    {
+      "count": 2752, 
+      "term": "GEI"
+    }, 
+    {
+      "count": 2473, 
+      "term": "HRS"
+    }, 
+    {
+      "count": 2042, 
+      "term": "JWH"
+    }, 
+    {
+      "count": 2021, 
+      "term": "ITX"
+    }, 
+    {
+      "count": 1881, 
+      "term": "NKB"
+    }, 
+    {
+      "count": 1821, 
+      "term": "IYO"
+    }, 
+    {
+      "count": 1769, 
+      "term": "GCJ"
+    }, 
+    {
+      "count": 1656, 
+      "term": "DZE"
+    }, 
+    {
+      "count": 1589, 
+      "term": "IYN"
+    }, 
+    {
+      "count": 1545, 
+      "term": "LPH"
+    }, 
+    {
+      "count": 1533, 
+      "term": "FPA"
+    }, 
+    {
+      "count": 1527, 
+      "term": "LZO"
+    }, 
+    {
+      "count": 1490, 
+      "term": "JDI"
+    }, 
+    {
+      "count": 1397, 
+      "term": "HQY"
+    }, 
+    {
+      "count": 1236, 
+      "term": "MAX"
+    }, 
+    {
+      "count": 1188, 
+      "term": "DQA"
+    }, 
+    {
+      "count": 1186, 
+      "term": "LLZ"
+    }, 
+    {
+      "count": 1170, 
+      "term": "DXN"
+    }, 
+    {
+      "count": 1164, 
+      "term": "NHA"
+    }, 
+    {
+      "count": 1110, 
+      "term": "GEX"
+    }, 
+    {
+      "count": 1056, 
+      "term": "JJX"
+    }, 
+    {
+      "count": 1033, 
+      "term": "LZA"
+    }, 
+    {
+      "count": 1016, 
+      "term": "DQX"
+    }, 
+    {
+      "count": 1015, 
+      "term": "HQZ"
+    }, 
+    {
+      "count": 977, 
+      "term": "MQP"
+    }, 
+    {
+      "count": 963, 
+      "term": "DQY"
+    }, 
+    {
+      "count": 947, 
+      "term": "FRO"
+    }, 
+    {
+      "count": 942, 
+      "term": "HRX"
+    }, 
+    {
+      "count": 918, 
+      "term": "HSB"
+    }, 
+    {
+      "count": 902, 
+      "term": "KTT"
+    }, 
+    {
+      "count": 899, 
+      "term": "FMF"
+    }, 
+    {
+      "count": 885, 
+      "term": "LXH"
+    }, 
+    {
+      "count": 884, 
+      "term": "EBF"
+    }, 
+    {
+      "count": 864, 
+      "term": "FLL"
+    }, 
+    {
+      "count": 843, 
+      "term": "DYB"
+    }, 
+    {
+      "count": 841, 
+      "term": "NBW"
+    }, 
+    {
+      "count": 806, 
+      "term": "LYY"
+    }, 
+    {
+      "count": 805, 
+      "term": "FMI"
+    }, 
+    {
+      "count": 787, 
+      "term": "MEH"
+    }, 
+    {
+      "count": 771, 
+      "term": "KKX"
+    }, 
+    {
+      "count": 765, 
+      "term": "MBI"
+    }, 
+    {
+      "count": 746, 
+      "term": "DWF"
+    }, 
+    {
+      "count": 679, 
+      "term": "KGX"
+    }, 
+    {
+      "count": 672, 
+      "term": "MQV"
+    }, 
+    {
+      "count": 671, 
+      "term": "LPL"
+    }, 
+    {
+      "count": 640, 
+      "term": "FSM"
+    }, 
+    {
+      "count": 639, 
+      "term": "CGA"
+    }, 
+    {
+      "count": 638, 
+      "term": "KWS"
+    }, 
+    {
+      "count": 623, 
+      "term": "JJY"
+    }, 
+    {
+      "count": 616, 
+      "term": "MDM"
+    }, 
+    {
+      "count": 611, 
+      "term": "EMA"
+    }, 
+    {
+      "count": 605, 
+      "term": "HOI"
+    }, 
+    {
+      "count": 582, 
+      "term": "DQO"
+    }, 
+    {
+      "count": 577, 
+      "term": "JIT"
+    }, 
+    {
+      "count": 559, 
+      "term": "FGE"
+    }, 
+    {
+      "count": 543, 
+      "term": "LNH"
+    }, 
+    {
+      "count": 535, 
+      "term": "FOZ"
+    }, 
+    {
+      "count": 531, 
+      "term": "GAD"
+    }, 
+    {
+      "count": 529, 
+      "term": "FQM"
+    }, 
+    {
+      "count": 520, 
+      "term": "KGO"
+    }, 
+    {
+      "count": 516, 
+      "term": "ODP"
+    }, 
+    {
+      "count": 511, 
+      "term": "KWY"
+    }, 
+    {
+      "count": 510, 
+      "term": "JAK"
+    }, 
+    {
+      "count": 509, 
+      "term": "ELW"
+    }, 
+    {
+      "count": 506, 
+      "term": "HTD"
+    }, 
+    {
+      "count": 504, 
+      "term": "HET"
+    }, 
+    {
+      "count": 497, 
+      "term": "LWJ"
+    }, 
+    {
+      "count": 492, 
+      "term": "KNT"
+    }, 
+    {
+      "count": 490, 
+      "term": "HAW"
+    }, 
+    {
+      "count": 488, 
+      "term": "LYZ"
+    }, 
+    {
+      "count": 487, 
+      "term": "EFW"
+    }, 
+    {
+      "count": 486, 
+      "term": "LJS"
+    }, 
+    {
+      "count": 479, 
+      "term": "HSD"
+    }, 
+    {
+      "count": 475, 
+      "term": "MAI"
+    }, 
+    {
+      "count": 466, 
+      "term": "CAF"
+    }, 
+    {
+      "count": 463, 
+      "term": "EIH"
+    }, 
+    {
+      "count": 455, 
+      "term": "CCK"
+    }, 
+    {
+      "count": 448, 
+      "term": "MHX"
+    }, 
+    {
+      "count": 446, 
+      "term": "KLE"
+    }, 
+    {
+      "count": 445, 
+      "term": "NAB"
+    }, 
+    {
+      "count": 445, 
+      "term": "HQG"
+    }, 
+    {
+      "count": 443, 
+      "term": "GAT"
+    }, 
+    {
+      "count": 440, 
+      "term": "FRN"
+    }, 
+    {
+      "count": 439, 
+      "term": "HTY"
+    }, 
+    {
+      "count": 434, 
+      "term": "JEY"
+    }, 
+    {
+      "count": 430, 
+      "term": "JIX"
+    }, 
+    {
+      "count": 424, 
+      "term": "MOS"
+    }, 
+    {
+      "count": 423, 
+      "term": "MBH"
+    }, 
+    {
+      "count": 413, 
+      "term": "FTL"
+    }, 
+    {
+      "count": 412, 
+      "term": "LRW"
+    }, 
+    {
+      "count": 411, 
+      "term": "IQI"
+    }, 
+    {
+      "count": 405, 
+      "term": "DJG"
+    }, 
+    {
+      "count": 404, 
+      "term": "OSH"
+    }, 
+    {
+      "count": 402, 
+      "term": "MQB"
+    }, 
+    {
+      "count": 396, 
+      "term": "BZD"
+    }
+  ]
+}
