@@ -1,8 +1,8 @@
-from cPickle import loads
 import collections
 import logging
 import os
 import tempfile
+from pickle import loads
 
 import leveldb
 
@@ -18,6 +18,7 @@ def group_by_key(iterator):
   values = []
   for key, value in iterator:
     value = loads(value)
+    key = key.decode()
     user_key, _ = key.rsplit('.', 1)
     if user_key != last_key:
       if last_key is not None:
@@ -42,8 +43,8 @@ class Reducer(object):
 
   def reduce_shard(self, input_db, output_db):
     for idx, (key, values) in enumerate(group_by_key(input_db.RangeIter())):
-      if idx % 1000 == 0:
-        logger.info('Reducing records=%d key=%s shard=%d', idx, key, self.shard_idx)
+      # if idx % 1000 == 0:
+      #   logger.info('Reducing records=%d key=%s shard=%d', idx, key, self.shard_idx)
       self.reduce(key, values, output_db)
 
   def shuffle(self):
@@ -59,14 +60,14 @@ class Reducer(object):
       if next_entry is None:
         break
       key, value_str = next_entry
-      shuffle_db.Put(key + ('.%s' % idx), value_str)
+      shuffle_db.Put((key + ('.%s' % idx)).encode(), value_str)
       idx += 1
 
-      if idx % 1000 == 0:
-        logger.info('Shuffling records=%d key=%s shard=%d', idx, key, self.shard_idx)
+      # if idx % 1000 == 0:
+      #   logger.info('Shuffling records=%d key=%s shard=%d', idx, key, self.shard_idx)
 
     output_db = self.output_class.create_writer(self.output_prefix, self.shard_idx, self.num_shards)
-    logger.debug('Reducer: %s', output_db)
+    # logger.debug('Reducer: %s', output_db)
     self.reduce_shard(shuffle_db, output_db)
     output_db.flush()
     del output_db

@@ -10,7 +10,6 @@ import logging
 import math
 import os
 from os.path import basename, join
-import sys
 import requests
 import time
 
@@ -18,19 +17,13 @@ import arrow
 import elasticsearch
 import elasticsearch.helpers
 import luigi
-import czipfile as zipfile
+import zipfile as zipfile
 from elasticsearch.client.utils import  _make_path
 
 from openfda import config, elasticsearch_requests, parallel
 from openfda.common import BatchHelper
 from openfda.tasks import AlwaysRunTask
-
-try:
-  import simplejson as json
-except:
-  print >>sys.stderr, 'Failed to import simplejson.  This might result in slowdowns.'
-  import json
-
+import simplejson as json
 
 def optimize_index(index_name, wait_for_merge=1):
   # elasticsearch client throws a timeout error when waiting for an optimize
@@ -64,7 +57,7 @@ def dump_index(es,
     try:
       with contextlib.closing(zipfile.ZipFile(target_file, 'w')) as out_f:
         zip_info = zipfile.ZipInfo(file_to_zip, time.localtime()[0:6])
-        zip_info.external_attr = 0777 << 16L
+        zip_info.external_attr = 0o777 << 16
         zip_info.compress_type = zipfile.ZIP_DEFLATED
         out_f.writestr(zip_info, json.dumps(data, indent=2) + '\n')
     except:
@@ -265,8 +258,9 @@ def index_without_checksum(es, index, doc_type, batch):
     if create_resp['status'] >= 400:
       logging.error('Unexpected conflict in creating documents: %s', create_resp)
 
-  logging.info('%s create batch complete: %s created %s errors',
-               index, create_count, len(errors))
+  if len(errors) > 0:
+    logging.warning('%s create batch complete: %s created %s errors',
+                 index, create_count, len(errors))
 
 
 def index_with_checksum(es, index, doc_type, batch):
@@ -286,7 +280,7 @@ def index_with_checksum(es, index, doc_type, batch):
   batch_with_checksum = []
   for docid, doc in batch:
     doc['@checksum'] = ''
-    checksum = hashlib.sha1(json.dumps(doc, sort_keys=True)).hexdigest()
+    checksum = hashlib.sha1(json.dumps(doc, sort_keys=True).encode('utf-8')).hexdigest()
     doc['@checksum'] = checksum
     batch_with_checksum.append((docid, checksum, doc))
 
@@ -297,7 +291,7 @@ def index_with_checksum(es, index, doc_type, batch):
                                                body={'ids': [docid for (docid, _, _) in batch_with_checksum]})
   for match in found_docs['docs']:
     if 'error' in match:
-      logging.warn('ERROR during query: %s', match['error'])
+      logging.warning('ERROR during query: %s', match['error'])
       continue
 
     if not match['found']:

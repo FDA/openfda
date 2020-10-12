@@ -1,6 +1,6 @@
 {
   "downloads": {
-    "dynamic": "strict",
+    "dynamic": "true",
     "properties": {
       "device": {
         "properties": {
@@ -266,6 +266,23 @@
                 }
               }
             }
+          },
+          "drugsfda": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime||epoch_millis",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                }
+              }
+            }
           }
         }
       },
@@ -310,6 +327,27 @@
       "animalandveterinary": {
         "properties": {
           "event": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime||epoch_millis",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "string" },
+                  "file": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "tobacco": {
+        "properties": {
+          "problem": {
             "properties": {
               "total_records": { "type": "integer" },
               "export_date": {

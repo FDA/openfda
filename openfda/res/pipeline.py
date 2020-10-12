@@ -25,6 +25,7 @@ from openfda.common import download_to_file_with_retry
 from openfda.tasks import AlwaysRunTask
 from openfda.res import annotate, extract
 
+
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 
 DATE_KEYS = [
@@ -113,7 +114,7 @@ class CleanCSV(luigi.Task):
     cmd = 'iconv -f %s -t %s -c %s > %s' % \
       ('ISO-8859-1//TRANSLIT', 'UTF-8', self.input().path, self.output().path)
 
-    common.shell_cmd(cmd)
+    common.shell_cmd_quiet(cmd)
 
 
 class CSV2JSONMapper(parallel.Mapper):
@@ -131,7 +132,7 @@ class CSV2JSONMapper(parallel.Mapper):
       key_fields[field] = res_report.get(field)
     json_str = json.dumps(key_fields, sort_keys=True)
     hasher = hashlib.sha256()
-    hasher.update(json_str)
+    hasher.update(json_str.encode('utf-8'))
     return hasher.hexdigest()
 
   def map(self, key, value, output):
@@ -146,7 +147,7 @@ class CSV2JSONMapper(parallel.Mapper):
           return None
         v = arrow.get(v, 'MM/DD/YYYY').format('YYYYMMDD')
 
-      if isinstance(v, basestring):
+      if isinstance(v, str):
         v = v.strip()
 
       return (k, v)
@@ -173,7 +174,7 @@ class CSV2JSONMapper(parallel.Mapper):
     if set(logic_keys).issubset(val) and val['report-date'] is not None:
       output.add(doc_id, val)
     else:
-      logging.warn('Document is missing required fields. %s',
+      logging.warning('Document is missing required fields. %s',
                    json.dumps(val, indent=2, sort_keys=True))
 
 
@@ -247,10 +248,10 @@ class RunWeeklyProcess(AlwaysRunTask):
     # Always run for the most recent wednesday (iso 3) that has passed
     # Reminder: iso day of weeks are Monday (1) through Sunday (7)
     end_delta = 3 - dow if dow >= 3 else (-1 * (4 + dow))
-    end_date = run_date.replace(days=end_delta)
+    end_date = run_date.shift(days=end_delta)
 
     # arrow.Arrow.range() likes the dates in particular datetime format
-    start = arrow.get(2012, 06, 20)
+    start = arrow.get(2012, 0o6, 20)
     end = arrow.get(end_date.year, end_date.month, end_date.day)
     previous_task = None
 

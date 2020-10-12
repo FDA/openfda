@@ -76,6 +76,14 @@
       "product_type_exact": {
         "index": "not_analyzed",
         "type": "string"
+      },
+      "inactivation_date": {
+        "format": "basic_date||date||epoch_millis",
+        "type": "date"
+      },
+      "reactivation_date": {
+        "format": "basic_date||date||epoch_millis",
+        "type": "date"
       }
     }
   }

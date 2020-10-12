@@ -1,7 +1,8 @@
 #!/usr/local/bin/python
 
-import StringIO
+from io import StringIO
 import logging
+import io
 import xml.parsers.expat
 from os.path import basename
 
@@ -83,7 +84,7 @@ def XML2JSON(input_file):
 
   out_file = input_file.replace('.xml', '.json')
   out = open(out_file, 'w')
-  escaped_xml = StringIO.StringIO(escape_xml(open(input_file).read()))
+  escaped_xml = StringIO(escape_xml(io.open(input_file, encoding="utf-8").read()))
 
   try:
     xmltodict.parse(strip_unicode(escaped_xml.getvalue(), True), item_depth=2, item_callback=handle_barcode)
@@ -93,3 +94,4 @@ def XML2JSON(input_file):
 
   for row in rows:
    out.write(json.dumps(row) + '\n')
+

@@ -4,9 +4,10 @@
 to be used in the schemas/spl_mapping.json file.
 '''
 import logging
-import os
-import simplejson as json
 import sys
+
+import simplejson as json
+
 
 # TODO(hansnelsen): Added pretty printing for pleasant looking JSON
 # TODO(hansnelsen): Add writing directly to schemas/spl_mapping.json once it is
@@ -275,4 +276,4 @@ if __name__ == '__main__':
   logging.basicConfig(stream=sys.stderr,
                       format=fmt_string,
                       level=logging.DEBUG)
-  print generate_mapping()
+  print(generate_mapping())

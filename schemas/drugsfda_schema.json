@@ -1,0 +1,187 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "properties": {
+    "application_number": {
+      "type": "string"
+    },
+    "openfda": {
+      "type": "object",
+      "properties": {
+        "application_number": {
+          "type": "string"
+        },
+        "brand_name": {
+          "type": "string"
+        },
+        "generic_name": {
+          "type": "string"
+        },
+        "manufacturer_name": {
+          "type": "string"
+        },
+        "nui": {
+          "type": "string"
+        },
+        "package_ndc": {
+          "type": "string"
+        },
+        "pharm_class_cs": {
+          "type": "string"
+        },
+        "pharm_class_epc": {
+          "type": "string"
+        },
+        "pharm_class_moa": {
+          "type": "string"
+        },
+        "pharm_class_pe": {
+          "type": "string"
+        },
+        "product_ndc": {
+          "type": "string"
+        },
+        "product_type": {
+          "type": "string"
+        },
+        "route": {
+          "type": "string"
+        },
+        "rxcui": {
+          "type": "string"
+        },
+        "spl_id": {
+          "type": "string"
+        },
+        "spl_set_id": {
+          "type": "string"
+        },
+        "substance_name": {
+          "type": "string"
+        },
+        "unii": {
+          "type": "string"
+        }
+      }
+    },
+    "products": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "active_ingredients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "strength": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "brand_name": {
+            "type": "string"
+          },
+          "dosage_form": {
+            "type": "string"
+          },
+          "marketing_status": {
+            "type": "string"
+          },
+          "product_number": {
+            "type": "string"
+          },
+          "reference_drug": {
+            "type": "string"
+          },
+          "reference_standard": {
+            "type": "string"
+          },
+          "route": {
+            "type": "string"
+          },
+          "te_code": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sponsor_name": {
+      "type": "string"
+    },
+    "submissions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "submission_property_type": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "application_docs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "date": {
+                  "format": "date",
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "review_priority": {
+            "type": "string"
+          },
+          "submission_class_code": {
+            "type": "string"
+          },
+          "submission_class_code_description": {
+            "type": "string"
+          },
+          "submission_number": {
+            "type": "string"
+          },
+          "submission_public_notes": {
+            "type": "string"
+          },
+          "submission_status": {
+            "type": "string"
+          },
+          "submission_status_date": {
+            "format": "date",
+            "type": "string"
+          },
+          "submission_type": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

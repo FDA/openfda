@@ -1,0 +1,10 @@
+{
+  "downloadstats": {
+    "_source": {
+      "includes": [
+        "*"
+      ]
+    },
+    "dynamic": true
+  }
+}

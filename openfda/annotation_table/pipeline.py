@@ -11,9 +11,10 @@ import logging
 import os
 import re
 import subprocess
-import urllib2
-import urlparse
+import traceback
 from os.path import basename, dirname, join
+from urllib.parse import urljoin
+from urllib.request import urlopen
 
 import arrow
 import luigi
@@ -31,9 +32,9 @@ BASE_DIR = config.data_dir('harmonization/batches/%s' % BATCH_DATE)
 SPL_S3_DIR = config.data_dir('spl/s3_sync')
 TMP_DIR = config.tmp_dir()
 
-common.shell_cmd('mkdir -p %s', data_dir)
-common.shell_cmd('mkdir -p %s', BASE_DIR)
-common.shell_cmd('mkdir -p %s', TMP_DIR)
+common.shell_cmd_quiet('mkdir -p %s', data_dir)
+common.shell_cmd_quiet('mkdir -p %s', BASE_DIR)
+common.shell_cmd_quiet('mkdir -p %s', TMP_DIR)
 
 SPL_SET_ID_INDEX = join(BASE_DIR, 'spl_index.db')
 DAILYMED_PREFIX = 'ftp://public.nlm.nih.gov/nlmdata/.dailymed/'
@@ -71,10 +72,10 @@ class DownloadNDC(luigi.Task):
 
   def run(self):
     zip_url = None
-    soup = BeautifulSoup(urllib2.urlopen(NDC_DOWNLOAD_PAGE).read(), 'lxml')
+    soup = BeautifulSoup(urlopen(NDC_DOWNLOAD_PAGE).read(), 'lxml')
     for a in soup.find_all(href=re.compile('.*.zip')):
-      if 'NDC Database File' in a.text:
-        zip_url = urlparse.urljoin('https://www.fda.gov', a['href'])
+      if 'NDC Database File - Text' in a.text:
+        zip_url = urljoin('https://www.fda.gov', a['href'])
         break
 
     if not zip_url:
@@ -119,7 +120,7 @@ def list_zip_files_in_zip(zip_filename):
   return subprocess.check_output("unzip -l %s | \
                                   grep zip | \
                                   awk '{print $4}'" % zip_filename,
-                                  shell=True).strip().split('\n')
+                                  shell=True, encoding='utf-8').strip().split('\n')
 
 
 def ExtractXMLFromNestedZip(zip_filename, output_dir, exclude_images=True):
@@ -129,15 +130,15 @@ def ExtractXMLFromNestedZip(zip_filename, output_dir, exclude_images=True):
     cmd = 'unzip -j -d %(output_dir)s/%(target_dir)s \
                        %(zip_filename)s \
                        %(child_zip_filename)s' % locals()
-    os.system(cmd)
+    common.shell_cmd_quiet(cmd)
 
     cmd = 'unzip %(output_dir)s/%(target_dir)s/%(base_zip)s -d \
                    %(output_dir)s/%(target_dir)s' % locals()
     if exclude_images:
       cmd += ' -x *.jpg'
 
-    os.system(cmd)
-    os.system('rm %(output_dir)s/%(target_dir)s/%(base_zip)s' % locals())
+      common.shell_cmd_quiet(cmd)
+      common.shell_cmd_quiet('rm %(output_dir)s/%(target_dir)s/%(base_zip)s' % locals())
 
 
 class ExtractNDC(luigi.Task):
@@ -150,10 +151,10 @@ class ExtractNDC(luigi.Task):
   def run(self):
     zip_filename = self.input().path
     output_filename = self.output().path
-    os.system('mkdir -p %s' % dirname(self.output().path))
+    common.shell_cmd_quiet('mkdir -p %s' % dirname(self.output().path))
     cmd = 'unzip -p %(zip_filename)s product.txt > \
                     %(output_filename)s' % locals()
-    os.system(cmd)
+    common.shell_cmd_quiet(cmd)
 
 
 class ExtractRXNorm(luigi.Task):
@@ -167,10 +168,10 @@ class ExtractRXNorm(luigi.Task):
   def run(self):
     zip_filename = self.input().path
     output_filename = self.output().path
-    os.system('mkdir -p %s' % dirname(self.output().path))
+    common.shell_cmd_quiet('mkdir -p %s' % dirname(self.output().path))
     cmd = 'unzip -p %(zip_filename)s rxnorm_mappings.txt > \
                     %(output_filename)s' % locals()
-    os.system(cmd)
+    common.shell_cmd_quiet(cmd)
 
 
 class ExtractPharmaClass(luigi.Task):
@@ -183,7 +184,7 @@ class ExtractPharmaClass(luigi.Task):
   def run(self):
     zip_filename = self.input().path
     output_dir = self.output().path
-    os.system('mkdir -p %s' % output_dir)
+    common.shell_cmd_quiet('mkdir -p %s' % output_dir)
     ExtractXMLFromNestedZip(zip_filename, output_dir)
 
 class ExtractUNII(luigi.Task):
@@ -197,14 +198,15 @@ class ExtractUNII(luigi.Task):
     zip_filename = self.input().path
     output_filename = self.output().path
     output_dir = dirname(output_filename)
-    os.system('mkdir -p %s' % output_dir)
+    common.shell_cmd('mkdir -p %s' % output_dir)
     cmd = 'unzip -o %(zip_filename)s \
                     -d %(output_dir)s' % locals()
-    os.system(cmd)
+    common.shell_cmd(cmd)
 
     # UNII filename varies; find and rename to a standardized name.
     # It is now a tab-delimited CSV instead of an XML as before.
-    for file in glob.glob(join(output_dir, 'UNII_Names*.txt')):
+    for file in glob.glob(join(output_dir, 'UNII*Names*.txt')):
+      logging.info('Renaming %s', file)
       os.rename(file, output_filename)
 
 
@@ -272,7 +274,7 @@ class UNIIHarmonizationJSON(luigi.Task):
     pharma_class_dir = self.input()[1].path
     unii_file = self.input()[2].path
     output_file = self.output().path
-    os.system('mkdir -p %s' % dirname(self.output().path))
+    common.shell_cmd_quiet('mkdir -p %s' % dirname(self.output().path))
     unii_harmonization.harmonize_unii(output_file, ndc_file, unii_file, pharma_class_dir)
 
 
@@ -313,11 +315,6 @@ class NDC2JSONMapper(parallel.Mapper):
       ''' Helper function to rename keys and purge any keys that are not in
           the map.
       '''
-      # See https://github.com/FDA/openfda-dev/issues/6
-      # Handle bad Unicode characters that may come fron NDC product.txt.
-      if isinstance(v, str):
-        v = unicode(v, 'utf8', 'ignore').encode()
-
       if k == 'PRODUCTID':
         v = v.split('_')[1]
       if k in self.rename_map:
@@ -378,7 +375,7 @@ class SPLSetIDMapper(parallel.Mapper):
     set_id, version, _id = value.get('set_id'), value.get('version'), value.get('id')
 
     if set_id is None:
-      logging.warn('SPLSetIDMapper encountered a blank SPL Set ID!')
+      logging.warning('SPLSetIDMapper encountered a blank SPL Set ID!')
     else:
       _index = {
         '_version': version,
@@ -400,8 +397,8 @@ class SPLSetIDIndex(luigi.Task):
       of every json.db every made by the SPL pipeline.
   '''
   def requires(self):
-    from openfda.spl.pipeline import PrepareBatch
-    return [PrepareBatch(), NDC2JSON()]
+    from openfda.spl.pipeline import SPL2JSON
+    return [SPL2JSON(), NDC2JSON()]
 
   def output(self):
     return luigi.LocalTarget(SPL_SET_ID_INDEX)
@@ -420,7 +417,7 @@ class SPLSetIDIndex(luigi.Task):
 
 
     parallel.mapreduce(
-      parallel.Collection.from_sharded_list([batch.path for batch in self.input()[0]]),
+      parallel.Collection.from_sharded(self.input()[0].path),
       mapper=SPLSetIDMapper(index_db=ndc_spl_id_index),
       reducer=parallel.ListReducer(),
       output_prefix=self.output().path,
@@ -447,7 +444,8 @@ class CurrentSPLMapper(parallel.Mapper):
       harmonized['package_ndc'] = spl.extract.extract_package_ndcs(tree)
       return harmonized
     except:
-      logging.warn('ERROR processing SPL data: %s', filename)
+      logging.warning('ERROR processing SPL data: %s', filename)
+      traceback.print_exc()
       return None
 
   def map(self, key, value, output):
@@ -498,28 +496,32 @@ class ExtractUPCFromSPL(luigi.Task):
       json_out = xml_out.replace('.xml', '.json')
 
       if not os.path.exists(xml_out):
-        common.shell_cmd('mkdir -p %s', barcode_target)
-        logging.info('Zbarimg on directory %s', src_dir)
+        common.shell_cmd_quiet('mkdir -p %s', barcode_target)
+        # logging.info('Zbarimg on directory %s', src_dir)
         cmd = 'find %(src_dir)s -name "*.jpg" -size +0\
                                 -exec zbarimg -q --xml {} \; > \
                     %(xml_out)s' % locals()
-        os.system(cmd)
+        common.shell_cmd_quiet(cmd)
 
       if common.is_older(json_out, xml_out):
-        logging.info('%s does not exist, producing...', json_out)
+        # logging.info('%s does not exist, producing...', json_out)
         process_barcodes.XML2JSON(xml_out)
-      else:
-        logging.debug('%s already exists, skipping', xml_out)
-    common.shell_cmd('touch %s', self.output().path)
+
+    common.shell_cmd_quiet('touch %s', self.output().path)
 
 
 class UpcMapper(parallel.Mapper):
+
+  def __init__(self, spl_s3_dir):
+    parallel.Mapper.__init__(self)
+    self.spl_s3_dir = spl_s3_dir
+
   def map(self, key, value, output):
     if value is None: return
     _id = value['id']
     # otc-bars.json contains new-line delimited JSON strings.  we output each
     # line along with it's id.
-    upc_json = join(SPL_S3_DIR, _id, 'barcodes/otc-bars.json')
+    upc_json = join(self.spl_s3_dir, _id, 'barcodes/otc-bars.json')
     if os.path.exists(upc_json):
       upcs = open(upc_json, 'r')
       upcList = []
@@ -536,10 +538,9 @@ class UpcXml2JSON(luigi.Task):
     return luigi.LocalTarget(join(BASE_DIR, UPC_EXTRACT_DB))
 
   def run(self):
-    input_glob = glob.glob(SPL_S3_DIR + '/*/barcodes/otc-bars.json')
     parallel.mapreduce(
       parallel.Collection.from_sharded(self.input()[1].path),
-      mapper=UpcMapper(),
+      mapper=UpcMapper(spl_s3_dir=SPL_S3_DIR),
       reducer=parallel.IdentityReducer(),
       output_prefix=self.output().path)
 
@@ -583,7 +584,7 @@ class JoinAllMapper(parallel.Mapper):
     db_name = basename(dirname(self.filename))
     prefix, lookup_key = ID_PREFIX_DB_MAP[db_name]
     if not value:
-      logging.warn('Bad value for map input: %s, %s', db_name, key)
+      logging.warning('Bad value for map input: %s, %s', db_name, key)
       return
     if not isinstance(value, list): value = [value]
     for val in value:
@@ -592,7 +593,7 @@ class JoinAllMapper(parallel.Mapper):
       if set_id:
         output.add(set_id, (db_name, val))
       else:
-        logging.warn('Missing set id for %s', lookup_value)
+        logging.warning('Missing set id for %s', lookup_value)
 
 
 class JoinAllReducer(parallel.Reducer):
@@ -611,7 +612,7 @@ class JoinAllReducer(parallel.Reducer):
     result = []
     for ndc_row in intermediate[NDC_EXTRACT_DB]:
       for spl_row in intermediate[SPL_EXTRACT_DB]:
-        result.append(dict(ndc_row.items() + spl_row.items()))
+        result.append(dict(list(ndc_row.items()) + list(spl_row.items())))
 
     final_result = []
 
@@ -651,7 +652,7 @@ class JoinAllReducer(parallel.Reducer):
     for row in self._join(values):
       output.put(key, row)
     else:
-      logging.warn('No data for key: %s', key)
+      logging.warning('No data for key: %s', key)
 
 
 class CombineHarmonization(DependencyTriggeredTask):

@@ -8,9 +8,9 @@ setuptools.setup(
   maintainer='openFDA',
   maintainer_email='open@fda.hhs.gov',
   url='http://github.com/fda/openfda',
-  python_requires='<=2.7',
+  python_requires='>=3.6',
   install_requires=[
-    'arrow',
+    'arrow<0.16.0',
     'beautifulsoup4<=4.4.0',
     'boto',
     'click',
@@ -26,12 +26,11 @@ setuptools.setup(
     'pyyaml',
     'pyelasticsearch',
     'requests',
+    'setproctitle',
     'simplejson',
     'xmltodict',
     'dictsearch',
-    'czipfile',
-    'pandas<0.24',
-    'numpy<1.17'
+    'pandas<1.1'
   ],
   description=('A research project to provide open APIs, raw data downloads, '
                'documentation and examples, and a developer community for an '

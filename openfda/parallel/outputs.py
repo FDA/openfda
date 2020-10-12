@@ -1,14 +1,14 @@
-import cPickle
-import collections
 import io
+import logging
 import multiprocessing
 import os
-import logging
+import pickle
 import subprocess
-
 
 import leveldb
 import simplejson as json
+
+from openfda.common import convert_unicode
 
 logger = logging.getLogger('mapreduce')
 
@@ -59,7 +59,7 @@ class LevelDBOutput(MROutput):
           'Duplicate keys (%s) passed to LevelDBOutput.'
           'This output does not support multiple keys!' % key
       )
-      self.db.Put(key, cPickle.dumps(value, -1))
+      self.db.Put(key.encode(), pickle.dumps(value, -1))
 
 
 class JSONOutput(MROutput):
@@ -119,19 +119,8 @@ class JSONLineOutput(MROutput):
       self.output_file = io.open(filename, 'w')
 
     def put(self, key, value):
-      # add recursive decoder to prevent unicode errors on writes.
-      def _convert(data):
-        if isinstance(data, basestring):
-          return data.decode('utf-8', 'replace')
-        elif isinstance(data, collections.Mapping):
-          return dict(map(_convert, data.items()))
-        elif isinstance(data, collections.Iterable):
-          return type(data)(map(_convert, data))
-        else:
-          return data
-
-      json_str = json.dumps(_convert(value), ensure_ascii=False, encoding='utf-8')
-      self.output_file.write(unicode(json_str + '\n'))
+      json_str = json.dumps(convert_unicode(value), ensure_ascii=False, encoding='utf-8')
+      self.output_file.write(str(json_str + '\n'))
 
     def flush(self):
       logger.info('Flushing: %s', self.filename)

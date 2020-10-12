@@ -23,7 +23,9 @@ Process: Serially merge each of the input files
 """
 
 import csv
+
 import simplejson as json
+
 
 def read_json_file(json_file):
   for line in json_file:
@@ -46,17 +48,17 @@ def _joinable_dict(record_list, join_key_list):
 
 def _combine_dicts(record_dict, new_data_dict, new_data_key):
   record_list = []
-  for join_key, record_value in record_dict.iteritems():
+  for join_key, record_value in iter(record_dict.items()):
     for pivot in record_value:
       joined_dict = {}
       if join_key in new_data_dict:
         for new_data_value in new_data_dict[join_key]:
-          joined_dict = dict(pivot.items() + new_data_value.items())
+          joined_dict = dict(list(pivot.items()) + list(new_data_value.items()))
           record_list.append(joined_dict)
       else:
         if new_data_key == None:
           continue
-        joined_dict = dict(pivot.items() + {new_data_key: []}.items())
+        joined_dict = dict(list(pivot.items()) + list({new_data_key: []}.items()))
         record_list.append(joined_dict)
   return record_list
 

@@ -19,7 +19,7 @@ exports.testInvalidParam = function(test) {
 };
 
 exports.testTooBigSearchLimit = function(test) {
-  var request = 'search=foo&limit=101';
+  var request = 'search=foo&limit=1001';
   var params = querystring.parse(request);
   apiRequestError(test, params);
 

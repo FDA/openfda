@@ -4,6 +4,7 @@
 #
 # Author: Matt Mohebbi
 
+from __future__ import print_function
 import inspect
 import sys
 
@@ -27,6 +28,6 @@ def run():
     user_main = inspect.currentframe().f_back.f_locals['main']
     user_main(other_argv)
 
-  except flags.FlagsError, e:
-    print '%s\n\nUsage: %s ARGS\n%s' % (e, sys.argv[0], flags.FLAGS)
+  except flags.FlagsError as e:
+    print('%s\n\nUsage: %s ARGS\n%s' % (e, sys.argv[0], flags.FLAGS))
     sys.exit(1)

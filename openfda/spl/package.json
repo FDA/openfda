@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "dependencies": {
-    "cheerio": "^0.17.0"
+    "cheerio": "^0.22.0"
   },
   "devDependencies": {},
   "scripts": {

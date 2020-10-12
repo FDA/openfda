@@ -13,4 +13,4 @@ def data_filename(fname, caller_frame=1):
   return os.path.join(base_dir, 'data', fname)
 
 def open_data_file(fname):
-  return open(data_filename(fname, caller_frame=2))
+  return open(data_filename(fname, caller_frame=2), mode='rb')

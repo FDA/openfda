@@ -2,19 +2,22 @@
 
 ''' A pipeline for loading SPL data into ElasticSearch
 '''
-
-import collections
-import csv
+import gzip
 import glob
 import logging
+import multiprocessing
 import os
 import re
+import shutil
 import sys
 from os.path import join, dirname
-
+import traceback
 import arrow
 import luigi
 import simplejson as json
+from bs4 import BeautifulSoup
+from lxml import etree
+from lxml.etree import XMLSyntaxError
 
 from openfda import config, common, index_util, parallel
 from openfda.annotation_table.pipeline import CombineHarmonization
@@ -23,21 +26,18 @@ from openfda.parallel import NullOutput
 from openfda.spl import annotate
 from openfda.tasks import AlwaysRunTask
 from bs4 import BeautifulSoup
-import urllib2
+import urllib.request
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
-META_DIR = config.data_dir('spl/meta')
-# Ensure meta directory is available for task tracking
-common.shell_cmd('mkdir -p %s', META_DIR)
-
 SPL_JS = join(RUN_DIR, 'spl/spl_to_json.js')
 LOINC = join(RUN_DIR, 'spl/data/sections.csv')
 
 SPL_S3_BUCKET = 's3://openfda-data-spl/data/'
+SPL_STAGING_S3_BUCKET = 's3://openfda-data-spl-staging/'
 SPL_S3_LOCAL_DIR = config.data_dir('spl/s3_sync')
-SPL_S3_CHANGE_LOG = join(SPL_S3_LOCAL_DIR, 'change_log/SPLDocuments.csv')
-SPL_BATCH_DIR = join(META_DIR, 'batch')
-SPL_PROCESS_DIR = config.data_dir('spl/batches')
+SPL_INDEX_DIR = config.data_dir('spl/index.db')
+SPL_JSON_DIR = config.data_dir('spl/json.db')
+SPL_ANNOTATED_DIR = config.data_dir('spl/annotated.db')
 
 DAILY_MED_DIR = config.data_dir('spl/dailymed')
 DAILY_MED_DOWNLOADS_DIR = config.data_dir('spl/dailymed/raw')
@@ -46,9 +46,8 @@ DAILY_MED_FLATTEN_DIR = config.data_dir('spl/dailymed/flatten')
 DAILY_MED_DOWNLOADS_PAGE = 'https://dailymed.nlm.nih.gov/dailymed/spl-resources-all-drug-labels.cfm'
 
 
-common.shell_cmd('mkdir -p %s', SPL_S3_LOCAL_DIR)
-common.shell_cmd('mkdir -p %s', SPL_PROCESS_DIR)
-common.shell_cmd('mkdir -p %s', DAILY_MED_DIR)
+common.shell_cmd_quiet('mkdir -p %s', SPL_S3_LOCAL_DIR)
+common.shell_cmd_quiet('mkdir -p %s', DAILY_MED_DIR)
 
 class DownloadDailyMedSPL(luigi.Task):
   local_dir = DAILY_MED_DOWNLOADS_DIR
@@ -57,8 +56,8 @@ class DownloadDailyMedSPL(luigi.Task):
     return luigi.LocalTarget(self.local_dir)
 
   def run(self):
-    common.shell_cmd('mkdir -p %s', self.local_dir)
-    soup = BeautifulSoup(urllib2.urlopen(DAILY_MED_DOWNLOADS_PAGE).read(), 'lxml')
+    common.shell_cmd_quiet('mkdir -p %s', self.local_dir)
+    soup = BeautifulSoup(urllib.request.urlopen(DAILY_MED_DOWNLOADS_PAGE).read(), 'lxml')
     for a in soup.find_all(href=re.compile('.*.zip')):
       if '_human_' in a.text:
         try:
@@ -83,12 +82,12 @@ class ExtractDailyMedSPL(luigi.Task):
     zip_files = glob.glob(pattern)
 
     if len(zip_files) == 0:
-      logging.warn(
+      logging.warning(
         'Expected to find one or more daily med SPL files')
 
     extract_dir = self.output().path
     for zip_file in zip_files:
-      os.system('unzip -oq -d %(extract_dir)s %(zip_file)s' % locals())
+      common.shell_cmd_quiet('unzip -oq -d %(extract_dir)s %(zip_file)s' % locals())
 
 class FlattenDailyMedSPL(parallel.MRTask):
   local_dir = DAILY_MED_FLATTEN_DIR
@@ -97,7 +96,7 @@ class FlattenDailyMedSPL(parallel.MRTask):
     cmd = 'zipinfo -1 %(zip_file)s' % locals()
     xml_file_name = None
     zip_contents = common.shell_cmd_quiet(cmd)
-    xml_match = re.search('^([0-9a-f-]{36})\.xml$', zip_contents, re.I | re.M)
+    xml_match = re.search('^([0-9a-f-]{36})\.xml$', zip_contents.decode(), re.I | re.M)
     if (xml_match):
       xml_file_name = xml_match.group()
       spl_dir_name = os.path.join(self.output().path, xml_match.group(1))
@@ -147,6 +146,7 @@ class AddInDailyMedSPL(luigi.Task):
 
 class SyncS3SPL(luigi.Task):
   bucket = SPL_S3_BUCKET
+  staging_bucket = SPL_STAGING_S3_BUCKET
   local_dir = SPL_S3_LOCAL_DIR
 
   def flag_file(self):
@@ -161,7 +161,14 @@ class SyncS3SPL(luigi.Task):
         arrow.get(os.path.getmtime(self.flag_file())) > arrow.now().floor('day'))
 
   def run(self):
-    common.cmd(['aws',
+    common.quiet_cmd(['aws',
+                '--cli-read-timeout=3600',
+                '--profile=' + config.aws_profile(),
+                's3', 'sync',
+                self.staging_bucket,
+                self.bucket])
+
+    common.quiet_cmd(['aws',
                 '--cli-read-timeout=3600',
 		'--profile=' + config.aws_profile(),
                 's3', 'sync',
@@ -172,47 +179,69 @@ class SyncS3SPL(luigi.Task):
       out_f.write('')
 
 
-class CreateBatchFiles(AlwaysRunTask):
-  batch_dir = SPL_BATCH_DIR
-  change_log_file = SPL_S3_CHANGE_LOG
+class DetermineSPLToIndex(parallel.MRTask):
+  NS = {'ns': 'urn:hl7-org:v3'}
 
   def requires(self):
-    return [SyncS3SPL(), AddInDailyMedSPL()]
+    return SyncS3SPL() #, AddInDailyMedSPL()]
 
   def output(self):
-    return luigi.LocalTarget(self.batch_dir)
+    return luigi.LocalTarget(SPL_INDEX_DIR)
 
-  def _run(self):
-    output_dir = self.output().path
-    common.shell_cmd('mkdir -p %s', output_dir)
-    change_log = csv.reader(open(self.change_log_file, 'r'))
-    batches = collections.defaultdict(list)
+  def mapreduce_inputs(self):
+    return parallel.Collection.from_glob(join(SPL_S3_LOCAL_DIR, '*/*.xml'))
 
-    for row in change_log:
-      spl_id, spl_type, spl_date = row
-      # Only grab the human labels for this index
-      if spl_type.lower().find('human') != -1:
-        # All blank dates to be treated as the week of June 1, 2009
-        if not spl_date:
-          spl_date = '20090601120000'
-        date = arrow.get(spl_date, 'YYYYMMDDHHmmss')
-        batches[date.ceil('week')].append(spl_id)
+  def map(self, xml_file, value, output):
+    if os.path.getsize(xml_file) > 0:
 
-    for batch_date, ids in batches.items():
-      batch_file = '%s.ids' % batch_date.format('YYYYMMDD')
-      batch_out = open(join(output_dir, batch_file), 'w')
-      unique_ids = list(set(ids))
-      batch_out.write('\n'.join(unique_ids))
+      # Oddly enough, some SPL XML files arrive from FDA gzipped, which requires us to take an additional
+      # uncompressing step.
+      filetype = common.shell_cmd_quiet('file %(xml_file)s' % locals())
+      if "gzip compressed data" in filetype.decode() or "DOS/MBR boot sector" in filetype.decode():
+        # logging.warning("SPL XML is gzipped: " + xml_file)
+        gz_file = xml_file + '.gz'
+        os.rename(xml_file, gz_file)
+        with gzip.open(gz_file, 'rb') as f_in, open(xml_file, 'wb') as f_out:
+          shutil.copyfileobj(f_in, f_out)
+
+      p = etree.XMLParser(huge_tree=True)
+      try:
+        tree = etree.parse(open(xml_file), parser=p)
+        code = next(iter(
+          tree.xpath("//ns:document/ns:code[@codeSystem='2.16.840.1.113883.6.1']/@displayName", namespaces=self.NS)),
+                    '')
+        if code.lower().find('human') != -1:
+          spl_id = tree.xpath('//ns:document/ns:id/@root', namespaces=self.NS)[0].lower()
+          spl_set_id = tree.xpath('//ns:document/ns:setId/@root', namespaces=self.NS)[0].lower()
+          version = tree.xpath('//ns:document/ns:versionNumber/@value', namespaces=self.NS)[0]
+          output.add(spl_set_id, {'spl_id': spl_id, 'version': version})
+        elif len(code) == 0:
+          logging.warning("Not a drug label SPL file: " + xml_file)
+      except XMLSyntaxError as e:
+        logging.warning("Invalid SPL file: " + xml_file)
+        logging.warning(e)
+      except:
+        logging.error("Error processing SPL file: " + xml_file)
+        traceback.print_exc()
+        raise
+    else:
+      logging.warning("Zero length SPL file: " + xml_file)
+
+  def reduce(self, key, values, output):
+    values.sort(key=lambda spl: int(spl['version']))
+    output.put(key, values[-1])
+
+  def map_workers(self):
+    return multiprocessing.cpu_count() * 2
 
 class SPL2JSON(parallel.MRTask):
   spl_path = SPL_S3_LOCAL_DIR
-  batch = luigi.Parameter()
 
-  def map(self, _, value, output):
-    value = value.strip()
+  def map(self, spl_set_id, value, output):
+    value = value['spl_id'].strip()
     xml_file = join(self.spl_path, value, value + '.xml')
     if not os.path.exists(xml_file):
-      logging.info('File does not exist, skipping %s', xml_file)
+      # logging.error('File does not exist, skipping %s', xml_file)
       return
     spl_js = SPL_JS
     loinc = LOINC
@@ -222,7 +251,7 @@ class SPL2JSON(parallel.MRTask):
       json_str = common.shell_cmd_quiet(cmd)
       json_obj = json.loads(json_str)
       if not json_obj.get('set_id'):
-        logging.error('SPL file has no set_id: %s', xml_file)
+        raise RuntimeError('SPL file has no set_id: %s', xml_file)
       else:
         output.add(xml_file, json_obj)
     except:
@@ -233,29 +262,22 @@ class SPL2JSON(parallel.MRTask):
       raise
 
   def requires(self):
-    return CreateBatchFiles()
+    return DetermineSPLToIndex()
 
   def output(self):
-    weekly = self.batch.split('/')[-1].split('.')[0]
-    dir_name = join(SPL_PROCESS_DIR, weekly)
-    return luigi.LocalTarget(join(dir_name, 'json.db'))
-
-  def num_shards(self):
-    return 8
+    return luigi.LocalTarget(SPL_JSON_DIR)
 
   def mapreduce_inputs(self):
-    return parallel.Collection.from_glob(self.batch, parallel.LineInput())
+    return parallel.Collection.from_sharded(self.input().path)
 
 
 class AnnotateJSON(luigi.Task):
-  batch = luigi.Parameter()
 
   def requires(self):
-    return [SPL2JSON(self.batch), CombineHarmonization()]
+    return [SPL2JSON(), CombineHarmonization()]
 
   def output(self):
-    output_dir = self.input()[0].path.replace('json.db', 'annotated.db')
-    return  luigi.LocalTarget(output_dir)
+    return luigi.LocalTarget(SPL_ANNOTATED_DIR)
 
   def run(self):
     input_db = self.input()[0].path
@@ -265,55 +287,18 @@ class AnnotateJSON(luigi.Task):
       parallel.Collection.from_sharded(input_db),
       mapper=annotate.AnnotateMapper(harmonized_file),
       reducer=parallel.IdentityReducer(),
-      output_prefix=self.output().path,
-      num_shards=1)
-
-
-
-class PrepareBatch(luigi.Task):
-  ''' Prepares all of the pre-annoation steps. This task is called by the
-      weekly harmonization process.
-  '''
-  def requires(self):
-    start = arrow.get('20090601', 'YYYYMMDD').ceil('week')
-    end = arrow.utcnow().ceil('week')
-    for batch in arrow.Arrow.range('week', start, end):
-      batch_file = join(SPL_BATCH_DIR, batch.format('YYYYMMDD') + '.ids')
-      yield SPL2JSON(batch_file)
-
-  def output(self):
-    return self.input()
-
-  def run(self):
-    pass
+      output_prefix=self.output().path)
 
 class LoadJSON(index_util.LoadJSONBase):
-  batch = luigi.Parameter()
   index_name = 'druglabel'
   type_name = 'spl'
   mapping_file = './schemas/spl_mapping.json'
   use_checksum = True
   docid_key = 'set_id'
-  optimize_index = False
+  optimize_index = True
 
   def _data(self):
-    return AnnotateJSON(self.batch)
-
-
-class ProcessBatch(AlwaysRunTask):
-  def requires(self):
-    start = arrow.get('20090601', 'YYYYMMDD').ceil('week')
-    end = arrow.utcnow().ceil('week')
-    previous_task = None
-    for batch in arrow.Arrow.range('week', start, end):
-      batch_file = join(SPL_BATCH_DIR, batch.format('YYYYMMDD') + '.ids')
-      task = LoadJSON(batch=batch_file, previous_task=previous_task)
-      previous_task = task
-      yield task
-
-  def _run(self):
-    index_util.optimize_index('druglabel', wait_for_merge=0)
-
+    return AnnotateJSON()
 
 if __name__ == '__main__':
   luigi.run()

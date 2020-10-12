@@ -176,7 +176,7 @@ def AnnotateEvent(recall, harmonized_dict):
   AnnotateRecall(recall, harmonized_dict)
   recall['@timestamp'] = arrow.get(recall['report-date']).format('YYYY-MM-DD')
 
-  for key, value in recall.items():
+  for key, value in list(recall.items()):
     if '-' in key:
       new_name = key.replace('-', '_')
       recall[new_name] = value

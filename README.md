@@ -19,8 +19,8 @@ This repository contains the code which powers all of the `api.fda.gov` end poin
 
 # Prerequisites
 
-* Elasticsearch 5.6.*
-* Python 2.7.*
+* Elasticsearch 5.6
+* Python 3
 * Node 6 or above
 
 # Packaging
@@ -33,7 +33,7 @@ If you intend to try and run openFDA yourself, we have put together a `docker-co
  that can help you get started. `docker-compose up` will:
 1. Start an [Elasticsearch](http://www.elasticsearch.org/) container
 2. Start an API container, which will expose port `8000` for queries.
-3. Start a Python 2.7 container that will run the NSDE, CAERS, and Substance Data pipelines and
+3. Start a Python 3 container that will run the NSDE, CAERS, and Substance Data pipelines and
 create corresponding indices in Elasticsearch.
 
 Note: even though the API container starts right away, it will not serve any data until some or all

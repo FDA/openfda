@@ -7,14 +7,16 @@ This takes a leveldb file and a start and stop key.  Records
 between start_key and end_key are printed, one per line.
 '''
 
-import gflags
-import leveldb
+
 import os
+import pickle
 import sys
 
+import gflags
+import leveldb
 import simplejson as json
+
 from openfda import app, parallel
-import cPickle
 
 gflags.DEFINE_string('level_db', None, 'Database file to read.')
 gflags.DEFINE_string('sharded_db', None, 'Database file to read.')
@@ -45,19 +47,19 @@ def main(argv):
     else:
       db_iter = db.__iter__()
   else:
-    print 'Must specify --level_db or --sharded_db'
-    print FLAGS.GetHelp()
+    print('Must specify --level_db or --sharded_db')
+    print(FLAGS.GetHelp())
     sys.exit(1)
 
   cnt = 0
   for (k, v) in db_iter:
-    if FLAGS.json_value_out: v = json.dumps(cPickle.loads(v), indent=2, sort_keys=True)
+    if FLAGS.json_value_out: v = json.dumps(pickle.loads(v), indent=2, sort_keys=True)
 
-    if FLAGS.key_only: print k
-    elif FLAGS.value_only: print v
-    else: print k, v
+    if FLAGS.key_only: print(k)
+    elif FLAGS.value_only: print(v)
+    else: print(k, v)
     cnt+=1
-  print ("Total keys: %s", cnt)
+  print(("Total keys: %s", cnt))
 
 
 

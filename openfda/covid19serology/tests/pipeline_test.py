@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # coding=utf-8
-import cPickle
 import shutil
 import tempfile
 import unittest
-
+from pickle import *
 import leveldb
 
 import openfda.ndc.pipeline
@@ -36,7 +35,7 @@ class SerologyPipelineTests(unittest.TestCase):
     eq_(110, len(data))
 
     # Verify base logic.
-    row = cPickle.loads(data[0][1])
+    row = loads(data[0][1])
     eq_('Euroimmun', row.get('manufacturer'))
     eq_('SARS-COV-2 ELISA (IgG)', row.get('device'))
     eq_('4/21/2020', row.get('date_performed'))
@@ -66,7 +65,7 @@ class SerologyPipelineTests(unittest.TestCase):
     eq_('TN', row.get('antibody_agree'))
 
     # Verify some variations.
-    row = cPickle.loads(data[55][1])
+    row = loads(data[55][1])
     eq_('29', row.get('days_from_symptom'))
     eq_('400', row.get('igm_titer'))
     eq_('1600', row.get('igg_titer'))

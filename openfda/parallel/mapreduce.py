@@ -7,30 +7,25 @@ The main function of interest is `map_reduce`, which provides a local
 version of mapreduce.
 '''
 
-import arrow
 import collections
 import glob
 import logging
 import multiprocessing
 import os
-import subprocess
-import traceback
-import time
-
-import cPickle
+import pickle
 import sys
+import time
+import traceback
+import zlib
 
-from .inputs import MRInput, LevelDBInput, FilenameInput
-from .outputs import MROutput, LevelDBOutput
-from .mapper import Mapper
-from .reducer import Reducer
+import arrow
+from setproctitle import setproctitle
+
 from . import watchdog
-
-try:
-  from setproctitle import setproctitle
-except:
-  def setproctitle(title):
-    pass
+from .inputs import MRInput, LevelDBInput, FilenameInput
+from .mapper import Mapper
+from .outputs import LevelDBOutput
+from .reducer import Reducer
 
 logger = logging.getLogger('mapreduce')
 
@@ -60,8 +55,8 @@ class _MapperOutput(object):
     self.shuffle_queues = shuffle_queues
 
   def add(self, k, v):
-    queue = self.shuffle_queues[hash(k) % len(self.shuffle_queues)]
-    queue.put((k, cPickle.dumps(v, -1)))
+    queue = self.shuffle_queues[zlib.adler32(k.encode()) % len(self.shuffle_queues)]
+    queue.put((k, pickle.dumps(v, -1)))
 
 
 class Collection(object):
@@ -131,7 +126,7 @@ def _run_mapper(mapper, shuffle_queues, split):
       map_input = split.mr_input.create_reader(split)
       return mapper.map_shard(map_input, map_output)
     except:
-      print >> sys.stderr, 'Error running mapper (%s, %s)' % (mapper, split)
+      print('Error running mapper (%s, %s)' % (mapper, split), file=sys.stderr)
       return WrappedException()
 
 
@@ -143,7 +138,8 @@ def _run_reducer(reducer, queue, tmp_prefix, output_format, output_tmp, i, num_s
       reducer.shuffle()
       return reducer.reduce_finished()
     except:
-      print >> sys.stderr, 'Error running reducer (%s)' % reducer
+      print('Error running reducer (%s)' % reducer, file=sys.stderr)
+      traceback.print_exc()
       return WrappedException()
 
 
@@ -165,17 +161,14 @@ def mapreduce(
   # Managers "manage" the queues used by the mapper and reducers to communicate
   # A single manager ends up being a processing bottleneck; hence we shard the
   # queues across a number of managers.
-  managers = [multiprocessing.Manager() for i in range(max(map_workers, num_shards))]
-  shuffle_queues = [managers[i % len(managers)].Queue(1000) for i in range(num_shards)]
+  managers = [multiprocessing.Manager() for i in range(int(max(map_workers, num_shards)))]
+  shuffle_queues = [managers[i % len(managers)].Queue(1000) for i in range(int(num_shards))]
 
   mapper_pool = multiprocessing.Pool(processes=map_workers)
   reducer_pool = multiprocessing.Pool(processes=num_shards)
 
   assert isinstance(mapper, Mapper)
   assert isinstance(reducer, Reducer)
-
-  if num_shards is None:
-    num_shards = output_format.recommended_shards()
 
   if not isinstance(inputs, list):
     inputs = [inputs]
@@ -217,19 +210,22 @@ def mapreduce(
         result = task.get()
         map_results[i] = result
         if isinstance(result, WrappedException):
+          print("Exception mapper tasks here??")
+          print(result.exception_message)
+
           logger.error('Caught exception during mapper execution.')
           logger.error('%s', result.exception_message)
           raise MRException('Mapper %d failed.' % i,
               child_message=result.exception_message)
-        else:
-          logger.info('Finished mapper: %d', i)
+        # else:
+          # logger.info('Finished mapper: %d', i)
       time.sleep(0.1)
 
       if time.time() - last_log_time > 5:
         last_log_time = time.time()
-        print 'Waiting for mappers: %d/%d' % (len(map_results), len(mapper_tasks)), '\r',
+        # print 'Waiting for mappers: %d/%d' % (len(map_results), len(mapper_tasks)), '\r',
 
-    logger.info('All mappers finished.')
+    # logger.info('All mappers finished.')
 
     # flush shuffle queues
     for q in shuffle_queues:
@@ -237,7 +233,7 @@ def mapreduce(
 
     reduce_outputs = []
     for i, task in enumerate(reducer_tasks):
-      print 'Waiting for reducers... %d/%d' % (i, len(reducer_tasks)), '\r',
+      # print 'Waiting for reducers... %d/%d' % (i, len(reducer_tasks)), '\r',
       result = task.get()
       if isinstance(result, WrappedException):
         logger.info('Caught exception during reducer execution.')
@@ -247,7 +243,7 @@ def mapreduce(
 
       reduce_outputs.append(result)
 
-    logger.info('All reducers finished.')
+    # logger.info('All reducers finished.')
     output_format.finalize(output_tmp, output_final)
     return reduce_outputs
   except:

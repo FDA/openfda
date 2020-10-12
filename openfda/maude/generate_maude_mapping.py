@@ -3,6 +3,7 @@
 ''' A Utility to generate a mapping file for the MAUDE dataset (device recalls)
 '''
 
+from __future__ import print_function
 import os
 from os.path import dirname, join
 import simplejson as json
@@ -70,7 +71,7 @@ for json_dict in json_list:
     else:
       # Lists
       if '_exact' in key_name or type(value) == type([]):
-        if key_name not in base_mapping['maude']['properties'].keys():
+        if key_name not in list(base_mapping['maude']['properties'].keys()):
           new_key = {}
           if '_exact' in key_name:
             base_mapping['maude']['properties'][key_name] = exact_type
@@ -78,11 +79,11 @@ for json_dict in json_list:
             base_mapping['maude']['properties'][key_name] = string_type
       # Multifield
       else:
-        if key_name not in base_mapping['maude']['properties'].keys():
+        if key_name not in list(base_mapping['maude']['properties'].keys()):
           new_key = {}
           base_mapping['maude']['properties'][key_name] = multifield_type
           new_key[key_name] = string_type
           new_key['exact'] = exact_type
           base_mapping['maude']['properties'][key_name]['fields'] = new_key
 
-print json.dumps(base_mapping, sort_keys=True, indent=4)
+print(json.dumps(base_mapping, sort_keys=True, indent=4))

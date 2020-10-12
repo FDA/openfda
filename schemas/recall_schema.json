@@ -188,6 +188,9 @@
     "product_description": {
       "type": "string"
     },
+    "postal_code": {
+        "type": "string"
+    },
     "product_quantity": {
       "type": "string"
     },

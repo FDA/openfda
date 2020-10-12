@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-03/schema",
+  "properties": {
+    "nonuser_affected": {
+      "type": "string"
+    },
+    "number_health_problems": {
+      "type": "integer"
+    },
+    "number_product_problems": {
+      "type": "integer"
+    },
+    "number_tobacco_products": {
+      "type": "integer"
+    },
+    "tobacco_products": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "report_id": {
+      "type": "integer"
+    },
+    "reported_health_problems": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reported_product_problems": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "date_submitted": {
+      "format": "date",
+      "type": "string"
+    }
+  }
+}

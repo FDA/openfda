@@ -1,6 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-03/schema",
   "properties": {
+    "evaluation_id": {
+      "type": "string"
+    },
     "manufacturer": {
       "type": "string"
     },
@@ -37,13 +40,16 @@
     "igg_result": {
       "type": "string"
     },
-    "iga_resul": {
+    "iga_result": {
       "type": "string"
     },
     "pan_result": {
       "type": "string"
     },
     "igm_igg_result": {
+      "type": "string"
+    },
+    "igm_iga_result": {
       "type": "string"
     },
     "control": {
@@ -80,6 +86,9 @@
       "type": "string"
     },
     "igm_igg_agree": {
+      "type": "string"
+    },
+    "igm_iga_agree": {
       "type": "string"
     },
     "antibody_agree": {

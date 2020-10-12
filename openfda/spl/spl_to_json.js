@@ -3,6 +3,24 @@
 var cheerio = require('cheerio');
 var fs = require('fs');
 
+
+const toText = function(elems) {
+  var ret = '',
+    len = elems.length,
+    elem;
+
+  for (var i = 0; i < len; i++) {
+    elem = elems[i];
+    if (elem.type === 'text' && elem.data.trim().length > 0) ret += (elem.data + ' ');
+    else if (elem.children && elem.type !== 'comment') {
+      ret += toText(elem.children);
+    }
+  }
+
+  return ret;
+};
+
+
 ParseSections = function(sections_filepath) {
   var code_to_name = {};
   var csv = fs.readFileSync(sections_filepath, 'utf-8');
@@ -68,7 +86,7 @@ PopulateSectionsFromXml = function(xml_filepath, output_json) {
       if (output_json[code] == undefined) {
         output_json[code] = [];
       }
-      var text = $(this).text().trim().replace(/ +/gm, ' ');
+      var text = toText($(this)).trim().replace(/ +/gm, ' ');
       output_json[code].push(text);
 
       $(this).find('table').each(function(j, table) {

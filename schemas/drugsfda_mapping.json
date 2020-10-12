@@ -1,0 +1,309 @@
+{
+  "drugsfda": {
+    "_source": {
+      "excludes": [
+        "*_exact"
+      ],
+      "includes": [
+        "*"
+      ]
+    },
+    "properties": {
+      "application_number": {
+        "type": "keyword"
+      },
+      "openfda": {
+        "properties": {
+          "application_number": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "application_number_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "brand_name": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "brand_name_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "generic_name": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "generic_name_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "manufacturer_name": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "manufacturer_name_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "nui": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "nui_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "package_ndc": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "package_ndc_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "pharm_class_cs": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "pharm_class_cs_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "pharm_class_epc": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "pharm_class_epc_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "pharm_class_moa": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "pharm_class_moa_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "pharm_class_pe": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "pharm_class_pe_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "product_ndc": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "product_ndc_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "product_type": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "product_type_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "route": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "route_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "rxcui": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "rxcui_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "spl_id": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "spl_id_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "spl_set_id": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "spl_set_id_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "substance_name": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "substance_name_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "unii": {
+            "index": "analyzed",
+            "type": "string"
+          },
+          "unii_exact": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      },
+      "products": {
+        "properties": {
+          "active_ingredients": {
+            "properties": {
+              "name": {
+                "fields": {
+                  "exact": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                },
+                "type": "string"
+              },
+              "strength": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            }
+          },
+          "brand_name": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "dosage_form": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "marketing_status": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "product_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "reference_drug": {
+            "type": "keyword"
+          },
+          "reference_standard": {
+            "type": "keyword"
+          },
+          "route": {
+            "fields": {
+              "exact": {
+                "index": "not_analyzed",
+                "type": "string"
+              }
+            },
+            "type": "string"
+          },
+          "te_code": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      },
+      "sponsor_name": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "submissions": {
+        "properties": {
+          "submission_property_type": {
+            "properties": {
+              "code": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              }
+            }
+          },
+          "application_docs": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "type": {
+                 "type": "keyword"
+              },
+              "title": {
+                "fields": {
+                  "exact": {
+                    "index": "not_analyzed",
+                    "type": "string"
+                  }
+                },
+                "type": "string"
+              },
+              "date": {
+                "format": "basic_date||MMM d, yyyy||date||epoch_millis",
+                "type": "date",
+                "ignore_malformed": false
+              },
+              "url": {
+                "type": "keyword"
+              }
+            }
+          },
+          "review_priority": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "submission_class_code": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "submission_class_code_description": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "submission_number": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "submission_public_notes": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "submission_status": {
+            "index": "not_analyzed",
+            "type": "string"
+          },
+          "submission_status_date": {
+            "format": "basic_date||MMM d, yyyy||date||epoch_millis",
+            "type": "date",
+            "ignore_malformed": false
+          },
+          "submission_type": {
+            "index": "not_analyzed",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

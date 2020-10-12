@@ -50,10 +50,10 @@ exports.CheckParams = function(params) {
   }
 
   // Limit to 100 results per search request.
-  if (!params.count && params.limit && params.limit > 100) {
+  if (!params.count && params.limit && params.limit > 1000) {
     throw {
       name: API_REQUEST_ERROR,
-      message: 'Limit cannot exceed 100 results for search requests. Use ' +
+      message: 'Limit cannot exceed 1000 results for search requests. Use ' +
         'the skip or search_after param to get additional results.'
     };
   }

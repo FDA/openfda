@@ -4,54 +4,30 @@
 Pipeline for converting CSV nsde data to JSON and importing into Elasticsearch.
 '''
 
-import logging
+import glob
 import os
-import sys
 from os.path import join, dirname
 
-import arrow
 import luigi
-import pandas as pd
 
 from openfda import common, config, parallel, index_util
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
-
 NSDE_DOWNLOAD = \
-  'https://www.fda.gov/downloads/ForIndustry/DataStandards/StructuredProductLabeling/UCM363568.zip'
-
-
+  'https://download.open.fda.gov/Comprehensive_NDC_SPL_Data_Elements_File.zip'
 NSDE_EXTRACT_DB = 'nsde/nsde.db'
 
 
 class DownloadNSDE(luigi.Task):
-  csv_file_name = "Comprehensive NDC SPL Data Elements File.csv"
-
-  def requires(self):
-    return []
 
   def output(self):
-    return luigi.LocalTarget(config.data_dir('nsde/raw/nsde_raw.json'))
+    return luigi.LocalTarget(config.data_dir('nsde/raw/nsde.csv'))
 
   def run(self):
-    logging.basicConfig(level=logging.INFO)
-
-    zip_filename = config.data_dir('nsde/raw/nsde.zip')
-    output_dir = config.data_dir('nsde/raw')
-    os.system('mkdir -p %s' % output_dir)
+    output_dir = dirname(self.output().path)
+    zip_filename = join(output_dir, 'nsde.zip')
     common.download(NSDE_DOWNLOAD, zip_filename)
     os.system('unzip -o %(zip_filename)s -d %(output_dir)s' % locals())
-
-    csv_file = join(output_dir, self.csv_file_name)
-    logging.info("Reading csv file: %s", (csv_file))
-    os.system('mkdir -p %s' % dirname(self.output().path))
-    df = pd.read_csv(csv_file, encoding='utf-8-sig')
-    df.to_json(self.output().path, orient='records')
-    with open(self.output().path, "w") as f:
-      for row in df.iterrows():
-        row[1].to_json(f)
-        f.write("\n")
+    os.rename(glob.glob(join(output_dir, '*.csv'))[0], self.output().path)
 
 
 class NSDE2JSONMapper(parallel.Mapper):
@@ -65,7 +41,9 @@ class NSDE2JSONMapper(parallel.Mapper):
     "Proprietary Name": "proprietary_name",
     "Dosage Form": "dosage_form",
     "Application Number or Citation": "application_number_or_citation",
-    "Product Type": "product_type"
+    "Product Type": "product_type",
+    "Inactivation Date": "inactivation_date",
+    "Reactivation Date": "reactivation_date"
   }
 
   def map(self, key, value, output):
@@ -73,16 +51,12 @@ class NSDE2JSONMapper(parallel.Mapper):
       ''' Helper function to rename keys and purge any keys that are not in
           the map.
       '''
-      # See https://github.com/FDA/openfda-dev/issues/6
-      # Handle bad Unicode characters that may come fron NDC product.txt.
-      if isinstance(v, str):
-        v = unicode(v, 'utf8', 'ignore').encode()
 
-      if k in self.rename_map and v is not None:
+      if k in self.rename_map and v is not None and v != '':
         if "Date" in k:
           return (self.rename_map[k], str(int(v)))
         if "Proprietary Name" in k:
-          return (self.rename_map[k], v.title())
+          return (self.rename_map[k], str(v).title())
         else:
           return (self.rename_map[k], v)
 
@@ -100,11 +74,10 @@ class NSDE2JSON(luigi.Task):
   def run(self):
     parallel.mapreduce(
         parallel.Collection.from_glob(
-          self.input().path, parallel.JSONLineInput()),
+          self.input().path, parallel.CSVDictLineInput()),
         mapper=NSDE2JSONMapper(),
         reducer=parallel.IdentityReducer(),
-        output_prefix=self.output().path,
-        num_shards=1)
+        output_prefix=self.output().path)
 
 
 class LoadJSON(index_util.LoadJSONBase):

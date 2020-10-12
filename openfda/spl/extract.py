@@ -7,7 +7,7 @@ TODO(mattmo): Logging to a file when fields are not present.
 """
 
 from lxml import etree
-import StringIO
+from io import BytesIO
 import re
 
 # http://www.fda.gov/ForIndustry/DataStandards/StructuredProductLabeling/ucm162061.htm
@@ -25,7 +25,7 @@ def remove_namespace(xml_file):
   lines = xml_file.read()
   lines = re.sub(r'<document [^>]+>', '<document>', lines)
   lines = re.sub(r'\w+:type="[^"]+"', '', lines)
-  return StringIO.StringIO(lines)
+  return BytesIO(lines.encode())
 
 def parse_xml(xml_file):
   p = etree.XMLParser(huge_tree=True)
