@@ -6,6 +6,10 @@
       ]
     },
     "properties": {
+      "evaluation_id": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
       "manufacturer": {
         "fields": {
           "exact": {
@@ -64,7 +68,7 @@
         "index": "not_analyzed",
         "type": "string"
       },
-      "iga_resul": {
+      "iga_result": {
         "index": "not_analyzed",
         "type": "string"
       },
@@ -73,6 +77,10 @@
         "type": "string"
       },
       "igm_igg_result": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "igm_iga_result": {
         "index": "not_analyzed",
         "type": "string"
       },
@@ -121,6 +129,10 @@
         "type": "string"
       },
       "igm_igg_agree": {
+        "index": "not_analyzed",
+        "type": "string"
+      },
+      "igm_iga_agree": {
         "index": "not_analyzed",
         "type": "string"
       },

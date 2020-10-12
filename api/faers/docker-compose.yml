@@ -13,6 +13,8 @@ services:
     command: >
       sh -c "chmod a+x /tmp/wait-for.sh &&
              /tmp/wait-for.sh es:9200 -t 120 &&
+             elasticdump --input=/tmp/downloadstats_mapping.json --output=http://es:9200/downloadstats --type=mapping &&
+             elasticdump --input=/tmp/downloadstats_data.json --output=http://es:9200/downloadstats --type=data &&
              elasticdump --input=/tmp/covid19serology_mapping.json --output=http://es:9200/covid19serology --type=mapping &&
              elasticdump --input=/tmp/covid19serology_data.json --output=http://es:9200/covid19serology --type=data &&
              sleep 3600"

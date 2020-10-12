@@ -16,37 +16,38 @@ import os
 import sys
 import requests
 
+
 data  = json.loads(open('./openfda/deploy/tests_config.json').read())[0]
 endpoint = sys.argv[1]
 types = data[endpoint]
 
-total_idx = iter(range(100))
-count_idx = iter(range(100))
+total_idx = iter(list(range(100)))
+count_idx = iter(list(range(100)))
 
 def print_total(name, query, count=None):
   if not count:
     data = requests.get('http://localhost:8000%s' % query).json()
     count = data['meta']['results']['total']
 
-  print '''
+  print('''
 def test_%s_%d():
   assert_total('%s', %d)
-''' % (name, total_idx.next(), query, count),
+''' % (name, next(total_idx), query, count), end=' ')
 
 def print_count(name, query):
   cmd = 'curl -s "http://localhost:8000%s" | jq -r ".results[].term"' % query
   counts = os.popen(cmd).read().split('\n')[:5]
-  print '''
+  print('''
 def test_%s_%d():
   assert_count_top('%s', %s)
-''' % (name, count_idx.next(), query, counts),
+''' % (name, next(count_idx), query, counts), end=' ')
 
-print '''from nose.tools import *
+print('''from nose.tools import *
 import requests
 
 from openfda.tests.api_test_helpers import *
 from nose.tools import *
-'''
+''')
 
 for name, tests in types.items():
   if name == 'openfda_key_check':

@@ -38,6 +38,14 @@
     },
     "product_type": {
       "type": "string"
+    },
+    "inactivation_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "reactivation_date": {
+      "type": "string",
+      "format": "date"
     }
   }
 }

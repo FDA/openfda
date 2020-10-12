@@ -57,7 +57,7 @@ class AlwaysRunTask(luigi.Task):
 
   def _nonce_file(self):
     import hashlib
-    digest = hashlib.sha1(repr(self)).hexdigest()
+    digest = hashlib.sha1(repr(self).encode('utf-8')).hexdigest()
     return '/tmp/always-run-task/%s-%s' % (self.nonce_timestamp, digest)
 
   def complete(self):

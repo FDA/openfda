@@ -127,6 +127,28 @@ describe('GET /device/covid19serology.json', () => {
         done();
       });
   });
+
+  it('should allow page size up to 1,000', done => {
+    chai
+      .request(app)
+      .get('/device/covid19serology.json?limit=1000')
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res.body.results).to.have.lengthOf(770);
+        done();
+      });
+  });
+
+  it('should not allow page size above 1,000', done => {
+    chai
+      .request(app)
+      .get('/device/covid19serology.json?limit=1001')
+      .end((err, res) => {
+        res.should.have.status(400);
+        done();
+      });
+  });
+
 });
 
 var parseNextURL = (link) => {

@@ -1,22 +1,17 @@
 #!/usr/bin/env python
 # coding=utf-8
-import cPickle
+
 import math
-import os
+import pickle
 import shutil
 import tempfile
 import unittest
-from os.path import dirname
 
 import leveldb
-import luigi
-from mock import MagicMock
-from pandas import DataFrame
 
-from openfda.ndc.pipeline import *
 import openfda.ndc.pipeline
+from openfda.ndc.pipeline import *
 from openfda.tests.api_test_helpers import *
-import simplejson as json
 
 
 class NDCPipelineTests(unittest.TestCase):
@@ -29,7 +24,7 @@ class NDCPipelineTests(unittest.TestCase):
     openfda.ndc.pipeline.NDC_PRODUCT_DB = join(openfda.ndc.pipeline.BASE_DIR, 'json/product.db')
     openfda.ndc.pipeline.NDC_MERGE_DB = join(openfda.ndc.pipeline.BASE_DIR, 'json/merged.db')
 
-    print('Temp dir is ' + self.test_dir)
+    print(('Temp dir is ' + self.test_dir))
 
   def tearDown(self):
     shutil.rmtree(self.test_dir)
@@ -39,11 +34,11 @@ class NDCPipelineTests(unittest.TestCase):
     shutil.copyfile(os.path.join(dirname(os.path.abspath(__file__)), "product_trimmed.txt"),
                     os.path.join(self.test_dir, "extracted/product.txt"))
     shutil.copyfile(os.path.join(dirname(os.path.abspath(__file__)), "unfinished_product_trimmed.txt"),
-                    os.path.join(self.test_dir, "extracted/unfinished_products_excluded.txt"))
+                    os.path.join(self.test_dir, "extracted/unfinished_product.txt"))
     shutil.copyfile(os.path.join(dirname(os.path.abspath(__file__)), "package_trimmed.txt"),
                     os.path.join(self.test_dir, "extracted/package.txt"))
     shutil.copyfile(os.path.join(dirname(os.path.abspath(__file__)), "unfinished_package_trimmed.txt"),
-                    os.path.join(self.test_dir, "extracted/unfinished_packages_excluded.txt"))
+                    os.path.join(self.test_dir, "extracted/unfinished_package.txt"))
 
     merge = MergeProductNDC()
     merge.run()
@@ -64,7 +59,7 @@ class NDCPipelineTests(unittest.TestCase):
     data = list(ldb.RangeIter())
 
     # Verify base logic.
-    pkg = cPickle.loads(data[0][1])
+    pkg = pickle.loads(data[0][1])
     eq_('0002-0800_ab2a5006-1880-4b6c-9640-dc2ec1066449', pkg.get('product_id'))
     eq_('ab2a5006-1880-4b6c-9640-dc2ec1066449', pkg.get('spl_id'))
     eq_('0002-0800', pkg.get('product_ndc'))
@@ -97,7 +92,7 @@ class NDCPipelineTests(unittest.TestCase):
     ok_(not pkg['packaging'][0]['sample'])
 
     # Verify multiple packaging per product also work as expected
-    pkg = cPickle.loads(data[1][1])
+    pkg = pickle.loads(data[1][1])
     eq_('0002-1200_4bd46cbe-cdc1-4329-a8e7-22816bd7fc33', pkg.get('product_id'))
 
     eq_(2, len(pkg['packaging']))
@@ -113,7 +108,7 @@ class NDCPipelineTests(unittest.TestCase):
     ok_(not pkg['packaging'][1]['sample'])
 
     # Verify unfinished drugs.
-    pkg = cPickle.loads(data[3][1])
+    pkg = pickle.loads(data[3][1])
     eq_('0002-0485_6d8a935c-fc7b-44c6-92d1-2337b959d1ce', pkg.get('product_id'))
     eq_('6d8a935c-fc7b-44c6-92d1-2337b959d1ce', pkg.get('spl_id'))
     eq_('0002-0485', pkg.get('product_ndc'))
@@ -159,7 +154,7 @@ class NDCPipelineTests(unittest.TestCase):
     shutil.copyfile(os.path.join(dirname(os.path.abspath(__file__)), "product_trimmed.txt"),
                     os.path.join(self.test_dir, "extracted/product.txt"))
     shutil.copyfile(os.path.join(dirname(os.path.abspath(__file__)), "unfinished_product_trimmed.txt"),
-                    os.path.join(self.test_dir, "extracted/unfinished_products_excluded.txt"))
+                    os.path.join(self.test_dir, "extracted/unfinished_product.txt"))
 
     merge = MergeProductNDC()
     merge.run()
@@ -172,7 +167,7 @@ class NDCPipelineTests(unittest.TestCase):
     data = list(ldb.RangeIter())
 
     # Verify base logic.
-    pkg = cPickle.loads(data[0][1])
+    pkg = pickle.loads(data[0][1])
     eq_('0002-0800_ab2a5006-1880-4b6c-9640-dc2ec1066449', pkg.get('product_id'))
     eq_('ab2a5006-1880-4b6c-9640-dc2ec1066449', pkg.get('spl_id'))
     eq_('0002-0800', pkg.get('product_ndc'))
@@ -197,7 +192,7 @@ class NDCPipelineTests(unittest.TestCase):
     ok_(pkg.get('finished'))
 
     # Verify some corner cases.
-    pkg = cPickle.loads(data[1][1])
+    pkg = pickle.loads(data[1][1])
     eq_('0002-1200_4bd46cbe-cdc1-4329-a8e7-22816bd7fc33', pkg.get('product_id'))
     eq_('Amyvid III', pkg.get('brand_name'))
     eq_('Amyvid', pkg.get('brand_name_base'))
@@ -211,7 +206,7 @@ class NDCPipelineTests(unittest.TestCase):
         pkg.get('active_ingredients'))
 
     # Verify unfinished drugs.
-    pkg = cPickle.loads(data[5][1])
+    pkg = pickle.loads(data[5][1])
     eq_('0002-1401_70b2e81d-fb7e-48bb-b97d-7f2f26f18c41', pkg.get('product_id'))
     eq_('70b2e81d-fb7e-48bb-b97d-7f2f26f18c41', pkg.get('spl_id'))
     eq_('0002-1401', pkg.get('product_ndc'))
@@ -240,7 +235,7 @@ class NDCPipelineTests(unittest.TestCase):
     shutil.copyfile(os.path.join(dirname(os.path.abspath(__file__)), "package_trimmed.txt"),
                     os.path.join(self.test_dir, "extracted/package.txt"))
     shutil.copyfile(os.path.join(dirname(os.path.abspath(__file__)), "unfinished_package_trimmed.txt"),
-                    os.path.join(self.test_dir, "extracted/unfinished_packages_excluded.txt"))
+                    os.path.join(self.test_dir, "extracted/unfinished_package.txt"))
 
     merge = MergePackageNDC()
     merge.run()
@@ -251,7 +246,7 @@ class NDCPipelineTests(unittest.TestCase):
 
     ldb = leveldb.LevelDB(os.path.join(toJSON.output().path, 'shard-00000-of-00001.db'))
     data = list(ldb.RangeIter())
-    pkg = cPickle.loads(data[0][1])
+    pkg = pickle.loads(data[0][1])
     eq_('0002-0800_ab2a5006-1880-4b6c-9640-dc2ec1066449', pkg.get('product_id'))
     eq_('0002-0800', pkg.get('product_ndc'))
     eq_('0002-0800-01', pkg.get('package_ndc'))
@@ -261,11 +256,11 @@ class NDCPipelineTests(unittest.TestCase):
     eq_(False, pkg.get('sample'))
     eq_(True, pkg.get('finished'))
 
-    pkg = cPickle.loads(data[1][1])
+    pkg = pickle.loads(data[1][1])
     eq_('20190203', pkg.get('marketing_end_date'))
     eq_(True, pkg.get('sample'))
 
-    pkg = cPickle.loads(data[3][1])
+    pkg = pickle.loads(data[3][1])
     eq_('0002-0485_6d8a935c-fc7b-44c6-92d1-2337b959d1ce', pkg.get('product_id'))
     eq_('0002-0485', pkg.get('product_ndc'))
     eq_('0002-0485-04', pkg.get('package_ndc'))
@@ -279,8 +274,8 @@ class NDCPipelineTests(unittest.TestCase):
     os.mkdir(os.path.join(self.test_dir, "extracted"))
     shutil.copyfile(os.path.join(dirname(os.path.abspath(__file__)), "product.txt"),
                     os.path.join(self.test_dir, "extracted/product.txt"))
-    shutil.copyfile(os.path.join(dirname(os.path.abspath(__file__)), "unfinished_products_excluded.txt"),
-                    os.path.join(self.test_dir, "extracted/unfinished_products_excluded.txt"))
+    shutil.copyfile(os.path.join(dirname(os.path.abspath(__file__)), "unfinished_product.txt"),
+                    os.path.join(self.test_dir, "extracted/unfinished_product.txt"))
 
     merge = MergeProductNDC()
     merge.run()
@@ -302,19 +297,19 @@ class NDCPipelineTests(unittest.TestCase):
                            dtype=dtype)
     truncated = csv.truncate(after=len(finished.index) - 1)
     # Next line ensures all of the finished lines got Y in the FINISHED column indeed.
-    ok_(cmp(truncated['FINISHED'].unique(), ['Y']) == 0)
+    eq_(truncated['FINISHED'].unique(), ['Y'])
 
     # Drop the last column, after which the two frames must match precisely.
     truncated = truncated.drop(columns=['FINISHED'])
     ok_(finished.equals(truncated))
 
     # Now, make sure every line from unfinished package.txt made it correctly into the merged CSV.
-    unfinished = pd.read_csv(os.path.join(self.test_dir, "extracted/unfinished_products_excluded.txt"), sep='\t', index_col=False,
+    unfinished = pd.read_csv(os.path.join(self.test_dir, "extracted/unfinished_product.txt"), sep='\t', index_col=False,
                              encoding='utf-8',
                              dtype=dtype)
     truncated = csv.truncate(before=len(finished.index)).reindex()
     # Next line ensures all of the finished lines got N in the FINISHED column indeed.
-    ok_(cmp(truncated['FINISHED'].unique(), ['N']) == 0)
+    eq_(truncated['FINISHED'].unique(), ['N'])
 
     # Drop the last column, after which the two frames must match precisely.
     truncated = truncated.drop(
@@ -326,8 +321,8 @@ class NDCPipelineTests(unittest.TestCase):
     os.mkdir(os.path.join(self.test_dir, "extracted"))
     shutil.copyfile(os.path.join(dirname(os.path.abspath(__file__)), "package.txt"),
                     os.path.join(self.test_dir, "extracted/package.txt"))
-    shutil.copyfile(os.path.join(dirname(os.path.abspath(__file__)), "unfinished_packages_excluded.txt"),
-                    os.path.join(self.test_dir, "extracted/unfinished_packages_excluded.txt"))
+    shutil.copyfile(os.path.join(dirname(os.path.abspath(__file__)), "unfinished_package.txt"),
+                    os.path.join(self.test_dir, "extracted/unfinished_package.txt"))
 
     merge = MergePackageNDC()
     merge.run()
@@ -347,7 +342,7 @@ class NDCPipelineTests(unittest.TestCase):
                            dtype=dtype)
     truncated = csv.truncate(after=len(finished.index) - 1)
     # Next line ensures all of the finished lines got Y in the FINISHED column indeed.
-    ok_(cmp(truncated['FINISHED'].unique(), ['Y']) == 0)
+    eq_(truncated['FINISHED'].unique(), ['Y'])
 
     # Drop the last column, after which the two frames must match precisely.
     truncated = truncated.drop(columns=['FINISHED'])
@@ -364,12 +359,12 @@ class NDCPipelineTests(unittest.TestCase):
     ok_(csv.at[22, 'SAMPLE_PACKAGE'] == 'N')
 
     # Now, make sure every line from unfinished package.txt made it correctly into the merged CSV.
-    unfinished = pd.read_csv(os.path.join(self.test_dir, "extracted/unfinished_packages_excluded.txt"), sep='\t', index_col=False,
+    unfinished = pd.read_csv(os.path.join(self.test_dir, "extracted/unfinished_package.txt"), sep='\t', index_col=False,
                              encoding='utf-8',
                              dtype=dtype)
     truncated = csv.truncate(before=len(finished.index)).reindex()
     # Next line ensures all of the finished lines got N in the FINISHED column indeed.
-    ok_(cmp(truncated['FINISHED'].unique(), ['N']) == 0)
+    eq_(truncated['FINISHED'].unique(), ['N'])
 
     # Drop the last column, after which the two frames must match precisely.
     truncated = truncated.drop(
@@ -409,10 +404,10 @@ class NDCPipelineTests(unittest.TestCase):
     extract = ExtractNDCFiles()
     extract.run()
 
-    ok_(os.stat(os.path.join(self.test_dir, "extracted/package.txt")).st_size == 31980050)
-    ok_(os.stat(os.path.join(self.test_dir, "extracted/product.txt")).st_size == 41287471)
-    ok_(os.stat(os.path.join(self.test_dir, "extracted/unfinished_packages_excluded.txt")).st_size == 3853326)
-    ok_(os.stat(os.path.join(self.test_dir, "extracted/unfinished_products_excluded.txt")).st_size == 4515397)
+    eq_(os.stat(os.path.join(self.test_dir, "extracted/package.txt")).st_size, 31980050)
+    eq_(os.stat(os.path.join(self.test_dir, "extracted/product.txt")).st_size, 41165614)
+    eq_(os.stat(os.path.join(self.test_dir, "extracted/unfinished_package.txt")).st_size, 3853326)
+    eq_(os.stat(os.path.join(self.test_dir, "extracted/unfinished_product.txt")).st_size, 4493918)
 
   def test_download_ndc(self):
     downloadNDC = DownloadNDCFiles()

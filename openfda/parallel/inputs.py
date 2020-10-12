@@ -2,11 +2,12 @@
     stream data to Mapper. The input types are built out organically as needed
     by the different data source on the openFDA project: XML, CSV, and JSON.
 '''
-import cPickle
 import csv
-import leveldb
 import logging
 import os
+import pickle
+
+import leveldb
 import simplejson as json
 import xmltodict
 
@@ -92,11 +93,11 @@ class LineInput(MRInput):
     The default behavior for splitting files is to have one split per file.
     '''
     file_len = os.path.getsize(filename)
-    split_size = max(1, file_len / desired_splits)
+    split_size = max(1, int(file_len / desired_splits))
     splits = []
     last_pos = 0
 
-    with open(filename, 'r') as f:
+    with open(filename, 'rb') as f:
       while f.tell() < file_len:
         f.seek(split_size, 1)
         f.readline()
@@ -129,20 +130,14 @@ class JSONInput(MRInput):
     def entries(self):
       with open(self.filename, 'r') as input_file:
         data = json.load(input_file)
-        for k, v in data.iteritems():
+        for k, v in iter(data.items()):
           yield k, v
 
 class JSONLineInput(MRInput):
   class Reader(MRInput.Reader):
     def entries(self):
-      for idx, line in enumerate(open(self.filename)):
+      for idx, line in enumerate(open(self.filename, encoding='utf-8', errors='ignore')):
         yield str(idx), json.loads(line)
-
-class JSONLineInputUnicode(MRInput):
-  class Reader(MRInput.Reader):
-    def entries(self):
-      for idx, line in enumerate(open(self.filename)):
-        yield str(idx), json.loads(unicode(line, errors='replace'))
 
 class JSONListInput(MRInput):
   class Reader(MRInput.Reader):
@@ -150,7 +145,7 @@ class JSONListInput(MRInput):
       with open(self.filename, 'r') as input_file:
         data = json.load(input_file)
         for item in data:
-          for k, v in item.iteritems():
+          for k, v in iter(item.items()):
             yield k, v
 
 # TODO(hansnelsen): convert all the input parameters to a inputdict_args for
@@ -179,7 +174,7 @@ class CSVDictLineInput(MRInput):
 
   class Reader(MRInput.Reader):
     def entries(self):
-      fh = open(self.filename, 'rU')
+      fh = open(self.filename, 'rU', encoding='utf-8', errors='ignore')
       if self.strip_str:
         # Some source files have null bytes that need to be stripped first
         fh = (s.replace(self.strip_str, '') for s in fh)
@@ -224,4 +219,4 @@ class LevelDBInput(MRInput):
 
     def entries(self):
       for key, value in self.db.RangeIter():
-        yield key, cPickle.loads(value)
+        yield key.decode("utf-8"), pickle.loads(value)

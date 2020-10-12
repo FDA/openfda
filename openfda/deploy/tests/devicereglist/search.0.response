@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "disclaimer": "Do not rely on openFDA to make decisions regarding medical care. While we make every effort to ensure that data is accurate, you should assume all results are unvalidated. We may limit or otherwise restrict your access to the API in line with our Terms of Service.", 
+    "last_updated": "2017-03-06", 
+    "license": "https://open.fda.gov/license/", 
+    "results": {
+      "limit": 1, 
+      "skip": 0, 
+      "total": 1
+    }, 
+    "terms": "https://open.fda.gov/terms/"
+  }, 
+  "results": [
+    {
+      "establishment_type": [
+        "Sterilize Medical Device for Another Party (Contract Sterilizer)", 
+        "Repack or Relabel Medical Device"
+      ], 
+      "k_number": "K032676", 
+      "pma_number": "", 
+      "products": [
+        {
+          "created_date": "2008-01-17", 
+          "exempt": "", 
+          "openfda": {
+            "device_class": "2", 
+            "device_name": "Laparoscope, General & Plastic Surgery", 
+            "medical_specialty_description": "Gastroenterology, Urology", 
+            "regulation_number": "876.1500"
+          }, 
+          "owner_operator_number": "9010225", 
+          "product_code": "GCJ"
+        }
+      ], 
+      "proprietary_name": [
+        "ENDOPATH XCEL"
+      ], 
+      "registration": {
+        "address_line_1": "3801 University Blvd SE", 
+        "address_line_2": "", 
+        "city": "ALBUQUERQUE", 
+        "fei_number": "1628808", 
+        "initial_importer_flag": "N", 
+        "iso_country_code": "US", 
+        "name": "ETHICON ENDO-SURGERY, INC.", 
+        "owner_operator": {
+          "contact_address": {
+            "address_1": "4545 CREEK RD.", 
+            "address_2": "ML #132", 
+            "city": "Cincinnati", 
+            "iso_country_code": "US", 
+            "postal_code": "45242", 
+            "state_code": "OH", 
+            "state_province": ""
+          }, 
+          "firm_name": "ETHICON ENDO-SURGERY, INC.", 
+          "official_correspondent": {
+            "first_name": "Brian", 
+            "last_name": "Ruble", 
+            "middle_initial": "K", 
+            "phone_number": "x-513-3371593-x", 
+            "subaccount_company_name": ""
+          }, 
+          "owner_operator_number": "9010225"
+        }, 
+        "postal_code": "", 
+        "reg_expiry_date_year": "2017", 
+        "registration_number": "1628808", 
+        "state_code": "NM", 
+        "status_code": "1", 
+        "us_agent": {}, 
+        "zip_code": "87106"
+      }
+    }
+  ]
+}

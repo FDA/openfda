@@ -1,10 +1,9 @@
-import glob
 import json
-import logging
 import os
 import unittest
 
 from openfda import parallel, app
+
 
 class KeyMapper(parallel.Mapper):
   def map(self, key, value, output):
@@ -66,7 +65,7 @@ class ParallelTest(unittest.TestCase):
 
     for i in range(10):
       key, value = results[i]
-      assert key == '/tmp/test-identity/input/%d.txt' % i, (i, results[i])
+      assert key.decode() == '/tmp/test-identity/input/%d.txt' % i, (i, results[i])
       assert value == ''
 
   def test_json_output(self):
@@ -112,7 +111,7 @@ class ParallelTest(unittest.TestCase):
       ['\n'.join([str(i) for i in range(100)]) for i in range(10)],
       reducer=parallel.SumReducer())
 
-    results = set(dict(results).values())
+    results = set(dict(list(map(lambda res: (res[0].decode(), res[1]), results))).values())
     for i in range(100):
       assert i * 10 in results
       results.remove(i * 10)

@@ -4,8 +4,8 @@ import glob
 import logging
 import os
 import re
-import urllib2
-import urlparse
+from urllib.parse import urljoin
+from urllib.request import urlopen
 from os.path import join, dirname
 
 import luigi
@@ -22,18 +22,19 @@ common.shell_cmd('mkdir -p %s', BASE_DIR)
 CAERS_DOWNLOAD_PAGE_URL = 'https://www.fda.gov/food/compliance-enforcement-food/cfsan-adverse-event-reporting-system-caers'
 
 RENAME_MAP = {
-  'Report ID': 'report_number',
-  'CAERS Created Date': 'date_created',
-  'Date of Event': 'date_started',
-  'Product Type': 'role',
-  'Product': 'name_brand',
-  'Product Code': 'industry_code',
-  'Description': 'industry_name',
-  'Patient Age': 'age',
-  'Age Units': 'age_unit',
-  'Sex': 'gender',
-  'Outcomes': 'outcomes',
-  'MedDRA Preferred Terms': 'reactions'
+  'report id': 'report_number',
+  'caers created date': 'date_created',
+  'date of event': 'date_started',
+  'product type': 'role',
+  'product': 'name_brand',
+  'product code': 'industry_code',
+  'description': 'industry_name',
+  'patient age': 'age',
+  'age units': 'age_unit',
+  'sex': 'gender',
+  'outcomes': 'outcomes',
+  'medra preferred terms': 'reactions',
+  'meddra preferred terms': 'reactions'
 }
 
 # Lists of keys used by the cleaner function in the CSV2JSONMapper() and the
@@ -55,10 +56,10 @@ class DownloadCAERS(luigi.Task):
 
   def run(self):
     common.shell_cmd('mkdir -p %s', self.local_dir)
-    soup = BeautifulSoup(urllib2.urlopen(CAERS_DOWNLOAD_PAGE_URL).read(), 'lxml')
+    soup = BeautifulSoup(urlopen(CAERS_DOWNLOAD_PAGE_URL).read(), 'lxml')
     for a in soup.find_all(title=re.compile('CAERS ASCII.*')):
       if 'Download CAERS ASCII' in re.sub(r'\s', ' ', a.text):
-        fileURL = urlparse.urljoin('https://www.fda.gov', a['href'])
+        fileURL = urljoin('https://www.fda.gov', a['href'])
         common.download(fileURL, join(self.output().path, a.attrs['title']+'.csv'))
 
 
@@ -75,8 +76,8 @@ class CSV2JSONMapper(parallel.Mapper):
           avoid blowing up downstream transforms, formatting dates and creating
           _exact fields.
     '''
-    if k in RENAME_MAP:
-      k = RENAME_MAP[k]
+    if k.lower() in RENAME_MAP:
+      k = RENAME_MAP[k.lower()]
 
     if v is None:
       return (k, None)
@@ -89,7 +90,7 @@ class CSV2JSONMapper(parallel.Mapper):
         try:
           v = datetime.datetime.strptime(v, "%m/%d/%Y").strftime("%Y%m%d")
         except ValueError:
-          logging.warn('Unparseable date: ' + v)
+          logging.warning('Unparseable date: ' + v)
       else:
         return None
 
@@ -133,8 +134,8 @@ class CSV2JSONReducer(parallel.Reducer):
     for row in value:
       product = {k:v for k, v in row.items() if k in PRODUCTS}
       consumer = {k:v for k, v in row.items() if k in CONSUMER and v}
-      reactions = row.get('reactions', []).split(',')
-      outcomes = row.get('outcomes', []).split(',')
+      reactions = row.get('reactions', '').split(',')
+      outcomes = row.get('outcomes', '').split(',')
 
       # Setting the results
       result['report_number'] = row['report_number']
@@ -160,10 +161,10 @@ class CSV2JSONReducer(parallel.Reducer):
           result['outcomes_exact'][outcome] = True
 
     # Now that each list is unique, revert to list of strings
-    result['reactions'] = result['reactions'].keys()
-    result['reactions_exact'] = result['reactions_exact'].keys()
-    result['outcomes'] = result['outcomes'].keys()
-    result['outcomes_exact'] = result['outcomes_exact'].keys()
+    result['reactions'] = list(result['reactions'].keys())
+    result['reactions_exact'] = list(result['reactions_exact'].keys())
+    result['outcomes'] = list(result['outcomes'].keys())
+    result['outcomes_exact'] = list(result['outcomes_exact'].keys())
 
     return result
 

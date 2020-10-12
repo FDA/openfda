@@ -45,6 +45,8 @@ var DATE_FIELDS = [
   'date_manufacturer_received',
   'date_of_event',
   'date_received',
+  'date_added',
+  'date_changed',
   'date_report',
   'date_report_to_fda',
   'date_report_to_manufacturer',
@@ -53,7 +55,7 @@ var DATE_FIELDS = [
   'baseline_date_ceased_marketing',
   'baseline_date_first_marketed',
   'expiration_date_of_device',
-  'device_date_of_manufacturere',
+  'device_date_of_manufacturer',
 
 
   // R&L
@@ -93,15 +95,23 @@ var DATE_FIELDS = [
   // NSDE
   'marketing_start_date',
   'marketing_end_date',
-
+  'inactivation_date',
+  'reactivation_date',
 
   // NDC
   'marketing_start_date',
   'marketing_end_date',
   'listing_expiration_date',
 
+  // Drugs@FDA
+  'submissions.submission_status_date',
+  'submissions.application_docs.date',
+
   // Serology
-  'date_performed'
+  'date_performed',
+
+  //Tobacco Problem
+  'date_submitted'
 
 ];
 
@@ -183,7 +193,7 @@ EXACT_FIELDS = [
   'patient.drug.openfda.product_type',
   'patient.drug.openfda.unii',
   'patient.drug.openfda.pharm_class_epc',
-  'outcomes', // Food Event
+  'outcomes', //  Food Event
   'reactions'
 ];
 

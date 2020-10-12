@@ -11,14 +11,14 @@ import logging
 import os
 import re
 import subprocess
-import urllib2
 from os.path import join, dirname
+from urllib.request import urlopen
 
 import arrow
 import luigi
 from bs4 import BeautifulSoup
 
-from openfda import common, parallel, config, index_util
+from openfda import parallel, config, index_util
 from openfda.annotation_table.pipeline import CombineHarmonization
 from openfda.faers import annotate
 from openfda.faers import xml_to_json
@@ -32,7 +32,7 @@ FAERS_CURRENT = 'https://fis.fda.gov/extensions/FPD-QDE-FAERS/FPD-QDE-FAERS.html
 
 MAX_RECORDS_PER_FILE = luigi.IntParameter(-1, is_global=True)
 
-class DownloadDataset(AlwaysRunTask):
+class DownloadDataset(luigi.Task):
   '''
   This task downloads all datasets that have not yet been fetched.
   '''
@@ -60,9 +60,9 @@ class DownloadDataset(AlwaysRunTask):
   def output(self):
     return luigi.LocalTarget(join(BASE_DIR, 'faers/raw'))
 
-  def _run(self):
+  def run(self):
     os.system('mkdir -p "%s"' % self.output().path)
-    self._faers_current = BeautifulSoup(urllib2.urlopen(FAERS_CURRENT).read())
+    self._faers_current = BeautifulSoup(urlopen(FAERS_CURRENT).read())
     for filename, url in list(self._fetch()):
       target_name = join(BASE_DIR, 'faers/raw', filename.lower())
       self._download_with_retry(url, target_name)
@@ -86,7 +86,7 @@ class ExtractZip(luigi.Task):
     zip_files = glob.glob(pattern)
 
     if len(zip_files) == 0:
-      logging.warn(
+      logging.warning(
         'Expected to find one or more files for quarter %s (searched for: %s)\n'
         'This may be a result of a bad download, or simply missing quarter data.',
         self.quarter, pattern)
@@ -94,6 +94,14 @@ class ExtractZip(luigi.Task):
     extract_dir = self.output().path
     for zip_file in zip_files:
       os.system('unzip -o -d %(extract_dir)s %(zip_file)s' % locals())
+
+    # FAERS XML files aren't always well-formed due to invalid characters. E.g. ADR12Q4.xml
+    for xml in glob.glob(self.output().path + '/**/*.xml'):
+      logging.info('Cleaning XML file: %s', xml)
+      cleaned = os.path.splitext(xml)[0]+'_cleaned.xml'
+      os.system('iconv -f UTF-8 -t UTF-8 -c %(xml)s > %(cleaned)s' % locals())
+      os.remove(xml)
+
 
     # AERS SGM records don't always properly escape &
     for sgm in glob.glob(self.output().path + '/*/sgml/*.SGM'):
@@ -133,7 +141,7 @@ class XML2JSON(luigi.Task):
       filenames.extend(glob.glob(input.path + xml_path))
 
     if len(filenames) == 0:
-      logging.warn('No files to process for quarter? %s', self.quarter)
+      logging.warning('No files to process for quarter? %s', self.quarter)
       return
 
     input_shards = []
@@ -152,12 +160,12 @@ class XML2JSON(luigi.Task):
 
     combined_counts = collections.defaultdict(int)
     for rc in report_counts:
-      for timestamp, count in rc.iteritems():
+      for timestamp, count in iter(rc.items()):
         combined_counts[timestamp] += count
 
-    print '----REPORT COUNTS----'
+    print('----REPORT COUNTS----')
     for timestamp, count in sorted(combined_counts.items()):
-      print '>> ', timestamp, count
+      print('>> ', timestamp, count)
 
 
 class AnnotateJSON(DependencyTriggeredTask):

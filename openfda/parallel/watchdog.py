@@ -1,9 +1,8 @@
 import os
+import queue
 import sys
 import threading
-import time
 import traceback
-import Queue
 
 OUTPUT_DIR = './watchdog/'
 
@@ -11,7 +10,7 @@ class Watchdog(threading.Thread):
   def __init__(self, *args, **kw):
     threading.Thread.__init__(self, *args, **kw)
     self.daemon = True
-    self._queue = Queue.Queue(maxsize=1)
+    self._queue = queue.Queue(maxsize=1)
     self._log_frequency = kw.get('log_frequency', 30)
     self._output_dir = kw.get('output_dir', OUTPUT_DIR)
 
@@ -23,16 +22,16 @@ class Watchdog(threading.Thread):
       try:
         self._queue.get(timeout=self._log_frequency)
         return
-      except Queue.Empty:
+      except queue.Empty:
         pass
 
       os.system('mkdir -p "%s"' % self._output_dir)
       with open(self._output_file(), 'w') as out_f:
         for threadid, frame in sys._current_frames().items():
           stack = ''.join(traceback.format_stack(frame))
-          print >>out_f, 'Thread: %s' % threadid
-          print >>out_f, stack
-          print >>out_f, '\n\n'
+          print('Thread: %s' % threadid, file=out_f)
+          print(stack, file=out_f)
+          print('\n\n', file=out_f)
 
   def __enter__(self):
     self.start()

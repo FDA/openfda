@@ -45,28 +45,22 @@
 '''
 
 import csv
-import collections
 import glob
 import logging
 import os
-from os.path import basename, dirname, join
 import re
-import sys
+from os.path import basename, dirname, join
+from urllib.request import urlopen
 
 import arrow
-from bs4 import BeautifulSoup
-import elasticsearch
 import luigi
 import pandas
-import requests
-import simplejson as json
-import urllib2
+from bs4 import BeautifulSoup
 
-from openfda import common, config, elasticsearch_requests, index_util, parallel
+from openfda import common, config, index_util, parallel
 from openfda import download_util
-from openfda.tasks import AlwaysRunTask
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
-  DeviceAnnotateMapper)
+                                                   DeviceAnnotateMapper)
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 BASE_DIR = config.data_dir('registration')
@@ -129,8 +123,8 @@ class SyncS3(luigi.Task):
 def remap_supplemental_files(original, supplemental, output_file):
   orig = pandas.read_csv(original, sep='|')
   supp = pandas.read_csv(supplemental, sep='|')
-  orig.columns = map(str.lower, orig.columns)
-  supp.columns = map(str.lower, supp.columns)
+  orig.columns = list(map(str.lower, orig.columns))
+  supp.columns = list(map(str.lower, supp.columns))
 
   combined = pandas.merge(orig, supp, how='left')
 
@@ -179,7 +173,7 @@ class DownloadDeviceRegistrationAndListings(luigi.Task):
 
   def run(self):
     zip_urls = []
-    soup = BeautifulSoup(urllib2.urlopen(DEVICE_REG_PAGE).read())
+    soup = BeautifulSoup(urlopen(DEVICE_REG_PAGE).read())
     for a in soup.find_all(href=re.compile('.*.zip')):
       zip_urls.append(a['href'])
     if not zip_urls:
@@ -362,7 +356,7 @@ class RegistrationJoinReducer(parallel.Reducer):
     us_agent = {}
     agent_data = intermediate.get('us_agent', [])
     if agent_data:
-      us_agent = dict(agent_data[0].items() + us_agent_address.items())
+      us_agent = dict(list(agent_data[0].items()) + list(us_agent_address.items()))
 
     # There is 0 or 1 owner operators
     owner_operator = {}
@@ -413,7 +407,7 @@ class JoinEstablishmentTypesReducer(parallel.Reducer):
     # There should be only one estblishment type streamed
     est_type = intermediate.get('estabtypes', [])[0]
     for data in intermediate.get('listing_estabtypes', []):
-      final = dict(data.items() + est_type.items())
+      final = dict(list(data.items()) + list(est_type.items()))
       result.append(final)
     return result
 

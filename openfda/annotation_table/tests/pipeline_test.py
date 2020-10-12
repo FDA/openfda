@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 # coding=utf-8
-import os
-import shutil
 import tempfile
 import unittest
 
@@ -28,22 +26,18 @@ class AnnotationPipelineTests(unittest.TestCase):
     openfda.annotation_table.pipeline.SPL_SET_ID_INDEX = join(openfda.annotation_table.pipeline.BASE_DIR,
                                                               'spl_index.db')
 
-    openfda.spl.pipeline.META_DIR = os.path.join(self.test_dir,
-                                                 openfda.spl.pipeline.META_DIR)
     openfda.spl.pipeline.SPL_S3_LOCAL_DIR = os.path.join(self.test_dir,
                                                          openfda.spl.pipeline.SPL_S3_LOCAL_DIR)
-    openfda.spl.pipeline.SPL_BATCH_DIR = join(openfda.spl.pipeline.META_DIR, 'batch')
-    openfda.spl.pipeline.SPL_S3_CHANGE_LOG = join(openfda.spl.pipeline.SPL_S3_LOCAL_DIR, 'change_log/SPLDocuments.csv')
-    openfda.spl.pipeline.SPL_PROCESS_DIR = os.path.join(self.test_dir,
-                                                        openfda.spl.pipeline.SPL_PROCESS_DIR)
+    openfda.spl.pipeline.SPL_INDEX_DIR = os.path.join(self.test_dir,
+                                                        openfda.spl.pipeline.SPL_INDEX_DIR)
 
     common.shell_cmd('mkdir -p %s', openfda.annotation_table.pipeline.data_dir)
     common.shell_cmd('mkdir -p %s', openfda.annotation_table.pipeline.BASE_DIR)
     common.shell_cmd('mkdir -p %s', openfda.annotation_table.pipeline.TMP_DIR)
 
     common.shell_cmd('mkdir -p %s', openfda.spl.pipeline.SPL_S3_LOCAL_DIR)
-    common.shell_cmd('mkdir -p %s', openfda.spl.pipeline.SPL_PROCESS_DIR)
-    common.shell_cmd('mkdir -p %s', openfda.spl.pipeline.META_DIR)
+    common.shell_cmd('mkdir -p %s', openfda.spl.pipeline.SPL_INDEX_DIR)
+
 
   def tearDown(self):
    shutil.rmtree(self.test_dir)
@@ -54,19 +48,17 @@ class AnnotationPipelineTests(unittest.TestCase):
                      openfda.annotation_table.pipeline.BASE_DIR)
     common.shell_cmd('cp -rf %s/* %s', os.path.join(RUN_DIR,
                                                     'data/multi_upc_test/spl'),
-                     (dirname(openfda.spl.pipeline.META_DIR)))
+                     (dirname(openfda.spl.pipeline.SPL_S3_LOCAL_DIR)))
 
     RXNorm2JSON().run()
     UNIIHarmonizationJSON().run()
     UNII2JSON().run()
     NDC2JSON().run()
 
-    batchFiles = CreateBatchFiles()
-    batchFiles.batch_dir = openfda.spl.pipeline.SPL_BATCH_DIR
-    batchFiles.change_log_file = openfda.spl.pipeline.SPL_S3_CHANGE_LOG
-    batchFiles.run()
+    splToIndex = DetermineSPLToIndex()
+    splToIndex.run()
 
-    spl2json = SPL2JSON(batch=join(openfda.spl.pipeline.SPL_BATCH_DIR, '20130811.ids'))
+    spl2json = SPL2JSON()
     spl2json.spl_path = openfda.spl.pipeline.SPL_S3_LOCAL_DIR
     spl2json.run()
 
@@ -74,14 +66,14 @@ class AnnotationPipelineTests(unittest.TestCase):
     GenerateCurrentSPLJSON().run()
     UpcXml2JSON().run()
     CombineHarmonization().run()
-    annotate_json = AnnotateJSON(batch=join(openfda.spl.pipeline.SPL_BATCH_DIR, '20130811.ids'))
+    annotate_json = AnnotateJSON()
     annotate_json.run()
 
     # Make sure there are now 3, not 1, UPCs for this SPL ID stored in LevelDB.
     db = parallel.ShardedDB.open(
       join(openfda.annotation_table.pipeline.BASE_DIR, openfda.annotation_table.pipeline.UPC_EXTRACT_DB))
-    db_iter = db.__iter__()
-    (k, v) = db_iter.next()
+    db_iter = db.range_iter(None, None)
+    (k, v) = next(db_iter)
     ok_(isinstance(v, list))
     eq_(k, '64f8040f-938d-4236-8e22-c838c9b5f8da')
     eq_(len(v), 3)
@@ -99,8 +91,8 @@ class AnnotationPipelineTests(unittest.TestCase):
 
     # Make sure the drug label JSON got openFDA section showing all 3 UPCs.
     db = parallel.ShardedDB.open(annotate_json.output().path)
-    db_iter = db.__iter__()
-    (k, v) = db_iter.next()
+    db_iter = db.range_iter(None, None)
+    (k, v) = next(db_iter)
     v['openfda']['upc'].sort()
     v['openfda']['upc_exact'].sort()
     eq_(v['openfda']['upc'], ['0300694200305', '0300694210304', '0300694220303'])

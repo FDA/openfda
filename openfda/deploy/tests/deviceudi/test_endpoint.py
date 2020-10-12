@@ -5,6 +5,7 @@ import sys
 from openfda.tests.api_test_helpers import *
 
 
+
 def test_package_type():
   meta, results = fetch(
     '/device/udi.json?search=identifiers.id:M20609070')
@@ -241,7 +242,7 @@ def test_CoRoent():
   eq_(udi["version_or_model_number"], "5163284")
   eq_(udi.get("catalog_number"), None)
   eq_(udi["device_count_in_base_package"], "1")
-  eq_(udi["device_description"], unicode("CoRoent Ant TLIF PEEK, 16x13x28mm 4°", encoding="utf-8"))
+  eq_(udi["device_description"], str("CoRoent Ant TLIF PEEK, 16x13x28mm 4°"))
   eq_(udi["is_direct_marking_exempt"], "false")
   eq_(udi["is_pm_exempt"], "false")
   eq_(udi["is_hct_p"], "false")

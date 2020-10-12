@@ -19,18 +19,16 @@
     schema to have the additional fields needs by the documentation site.
 '''
 
-import click
 import collections
 import logging
-import os
-from os.path import basename, dirname, join
-import requests
-import simplejson as json
 import sys
 
-from yaml import SafeDumper
-from yaml.representer import SafeRepresenter
+import click
+import requests
+import simplejson as json
 import yaml
+from yaml import SafeDumper
+
 
 @click.group()
 def cli():
@@ -57,7 +55,7 @@ def completely_flatten(input_data, absolute_key='', sep='.'):
     appended_key = sep.join([absolute_key, key]) if absolute_key else key
 
     if isinstance(value, dict):
-      result.extend(completely_flatten(value, appended_key, sep=sep).items())
+      result.extend(list(completely_flatten(value, appended_key, sep=sep).items()))
 
     else:
       result.append((appended_key, value))
@@ -130,7 +128,7 @@ def get_schema_fields(schema):
     field = _prefix(field)
     result[field] = True
 
-  return result.keys()
+  return list(result.keys())
 
 def get_mapping_fields(mapping):
   result = {}
@@ -167,7 +165,7 @@ def tweak_yaml():
   yaml.add_constructor(_mapping_tag, dict_constructor)
 
   def ordered_dict_serializer(self, data):
-      return self.represent_mapping('tag:yaml.org,2002:map', data.items())
+      return self.represent_mapping('tag:yaml.org,2002:map', list(data.items()))
 
   SafeDumper.add_representer(collections.OrderedDict, ordered_dict_serializer)
   # We want blanks for null values
@@ -283,7 +281,7 @@ def flat_mapping(mapping):
     # Remove non queryable fields from key name
     key = key.replace('properties.', '').replace('.fields', '')
     if 'exact' not in key:
-      print key
+      print(key)
 
 if __name__ == '__main__':
   logging.basicConfig(

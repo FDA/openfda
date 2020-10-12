@@ -88,9 +88,13 @@
                 "format": "int32"
               },
               "drugrecurrence": {
-                "properties": {
-                  "drugrecuraction": {
-                    "type": "string"
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "drugrecuraction": {
+                      "type": "string"
+                    }
                   }
                 }
               },
@@ -243,6 +247,7 @@
           "format": "int32"
         },
         "patientdeath": {
+          "type": "object",
           "properties": {
             "patientdeathdate": {
               "type": "string",
@@ -287,6 +292,7 @@
           "type": "array"
         },
         "summary": {
+          "type": "object",
           "properties": {
             "narrativeincludeclinical": {
               "type": "string"
@@ -328,6 +334,7 @@
       "type": "string"
     },
     "receiver": {
+      "type": "object",
       "properties": {
         "receiverorganization": {
           "type": "string"
@@ -339,6 +346,7 @@
       }
     },
     "reportduplicate": {
+        "type": "object",
         "properties": {
           "duplicatenumb": {
             "type": "string"

@@ -17,11 +17,11 @@ Functions:
 
 # TODO(mattmo): Logging to a file when fields are not present. Should refactor a
 
-from lxml import etree
-import StringIO
 import re
-import numpy as np
+from io import BytesIO
+
 import pandas as pd
+from lxml import etree
 
 # http://www.fda.gov/ForIndustry/DataStandards/StructuredProductLabeling/ucm162061.htm
 UNII_OID = '2.16.840.1.113883.4.9'
@@ -36,7 +36,7 @@ def remove_namespace(xml_file):
   lines = xml_file.read()
   lines = re.sub(r'<document [^>]+>', '<document>', lines)
   lines = re.sub(r'\w+:type="[^"]+"', '', lines)
-  return StringIO.StringIO(lines)
+  return BytesIO(lines.encode())
 
 def parse_xml(xml_file):
   p = etree.XMLParser(huge_tree=True)

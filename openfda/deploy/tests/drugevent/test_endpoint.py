@@ -10,7 +10,7 @@ def test_not_analyzed_0():
 
 
 def test_date_1():
-  assert_total('/drug/event.json?search=receivedate:20040319', 2953)
+  assert_total('/drug/event.json?search=receivedate:20040319', 2900)
 
 
 def test_date_range_2():
@@ -36,9 +36,9 @@ def test_histogram():
   eq_(counts[0].term, '20040101')
   eq_(counts[0].count, 1)
   eq_(counts[1].term, '20040102')
-  eq_(counts[1].count, 518)
+  eq_(counts[1].count, 544)
   eq_(counts[2].term, '20040103')
-  eq_(counts[2].count, 1)
+  eq_(counts[2].count, 2)
   assert_greater_equal(len(counts), 4920)
 
 def test_nonsteriodial_drug_reactions():
@@ -53,10 +53,9 @@ def test_nonsteriodial_drug_reactions():
 def test_nonsteriodial_drug_reactions():
   assert_count_top('/drug/event.json?search=patient.drug.openfda.pharm_class_epc:'
                    '"nonsteroidal+anti-inflammatory+drug"&count=patient.reaction.reactionmeddrapt.exact', [
-    'DRUG INEFFECTIVE',
+    'DIZZINESS',
     'NAUSEA',
-    'FATIGUE',
-    'PAIN'
+    'FATIGUE'
   ])
 
   assert_count_contains('/drug/event.json?search=patient.drug.openfda.pharm_class_epc:'
@@ -73,3 +72,28 @@ def test_date_formats_after_migration():
   assert_total('/drug/event.json?search=safetyreportid:"10141822"+AND+'
                'receiptdate:20181008+AND+receiptdate:2018-10-08+AND+transmissiondate:'
                '[20190203+TO+20190205]+AND+transmissiondate:[2019-02-03+TO+2019-02-05]', 1)
+
+
+
+def test_drugrecurrence_is_always_an_array():
+  meta, results = fetch(
+    '/drug/event.json?search=safetyreportid:14340262&limit=1')
+
+  event = results[0]
+  eq_(len(event['patient']['drug']), 1)
+  eq_(type(event['patient']['drug'][0]['drugrecurrence']), type([]))
+  eq_(len(event['patient']['drug'][0]['drugrecurrence']), 4)
+
+  drugrecurrence = sorted(event['patient']['drug'][0]['drugrecurrence'], key=lambda k: k['drugrecuraction'])
+  eq_(drugrecurrence[0]['drugrecuraction'], 'Drug intolerance')
+  eq_(drugrecurrence[1]['drugrecuraction'], 'Dyspnoea')
+  eq_(drugrecurrence[2]['drugrecuraction'], 'Type III immune complex mediated reaction')
+  eq_(drugrecurrence[3]['drugrecuraction'], 'Urticaria')
+
+  meta, results = fetch(
+    '/drug/event.json?search=safetyreportid:17394804&limit=1')
+  event = results[0]
+  eq_(len(event['patient']['drug']), 1)
+  eq_(type(event['patient']['drug'][0]['drugrecurrence']), type([]))
+  eq_(len(event['patient']['drug'][0]['drugrecurrence']), 1)
+  eq_(event['patient']['drug'][0]['drugrecurrence'][0]['drugrecuraction'], "Embolism venous")

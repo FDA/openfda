@@ -1,0 +1,32 @@
+{
+  "meta": {
+    "disclaimer": "Do not rely on openFDA to make decisions regarding medical care. While we make every effort to ensure that data is accurate, you should assume all results are unvalidated. We may limit or otherwise restrict your access to the API in line with our Terms of Service.", 
+    "last_updated": "2017-03-06", 
+    "license": "https://open.fda.gov/license/", 
+    "results": {
+      "limit": 1, 
+      "skip": 0, 
+      "total": 1
+    }, 
+    "terms": "https://open.fda.gov/terms/"
+  }, 
+  "results": [
+    {
+      "event_date_terminated": "2005-09-22", 
+      "firm_fei_number": "3001236905", 
+      "k_numbers": [], 
+      "openfda": {
+        "device_class": "2", 
+        "device_name": "General Surgery Tray", 
+        "medical_specialty_description": "General, Plastic Surgery", 
+        "regulation_number": "878.4370"
+      }, 
+      "other_submission_description": "", 
+      "pma_numbers": [], 
+      "product_code": "LRO", 
+      "product_res_number": "Z-1022-2003", 
+      "res_event_number": "26609", 
+      "root_cause_description": "Employee Error"
+    }
+  ]
+}

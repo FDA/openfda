@@ -1,4 +1,6 @@
-import cPickle
+import zlib
+
+import pickle
 import glob
 import logging
 import os
@@ -35,24 +37,24 @@ class ShardedDB(object):
     return ShardedDB(filebase, len(files), False)
 
   def _shard_for(self, key):
-    return self._shards[hash(key) % self.num_shards]
+    return self._shards[zlib.adler32(key) % self.num_shards]
 
   def put(self, key, value):
-    self._shard_for(key).Put(key, cPickle.dumps(value, -1))
+    self._shard_for(key).Put(key, pickle.dumps(value, -1))
 
   def get(self, key):
-    return cPickle.loads(self._shard_for(key).Get(key))
+    return pickle.loads(self._shard_for(key).Get(key))
 
   def range_iter(self, start_key, end_key):
     iters = [db.RangeIter(start_key, end_key) for db in self._shards]
     for i in iters:
       for key, value in i:
-        yield key, cPickle.loads(value)
+        yield key.decode(), pickle.loads(value)
 
   def __iter__(self):
     for shard in self._shards:
       for key, value in shard.RangeIter():
-        yield key, cPickle.loads(value)
+        yield key, pickle.loads(value)
 
   def as_dict(self):
     'Returns the content of this database as an in-memory Python dictionary'

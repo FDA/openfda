@@ -25,7 +25,7 @@ def clear_and_load(es, index_name, type_name, mapping_file):
 
 
 def load_mapping(es, index_name, type_name, mapping_file_or_dict):
-  if not isinstance(mapping_file_or_dict, types.DictType):
+  if not isinstance(mapping_file_or_dict, dict):
     mapping = open(mapping_file_or_dict, 'r').read().strip()
     mapping_dict = json.loads(mapping)
   else:

@@ -3,10 +3,10 @@
 import collections
 import glob
 import logging
-from os.path import basename, dirname
 import pprint
 import re
 import traceback
+from os.path import dirname
 
 import arrow
 import xmltodict
@@ -21,7 +21,7 @@ class MergeSafetyReportsReducer(parallel.Reducer):
 
   def reduce(self, key, values, output):
     # keys are case numbers, values are (timestamp, json_data)
-    timestamp, report = sorted(values)[-1]
+    timestamp, report = sorted(values, key=lambda v: v[0])[-1]
     self.report_counts[timestamp] += 1
     output.put(key, (timestamp, report))
 
@@ -107,7 +107,7 @@ class ExtractSafetyReportsMapper(parallel.Mapper):
           return False
 
         # Skip the small number of records without a patient section
-        if 'patient' not in safety_report.keys():
+        if 'patient' not in list(safety_report.keys()):
           return True
 
         # Have drug and reaction in a list (even if they are just one element)
@@ -116,6 +116,12 @@ class ExtractSafetyReportsMapper(parallel.Mapper):
         if type(safety_report['patient']['reaction']) != type([]):
           safety_report['patient']['reaction'] = [
             safety_report['patient']['reaction']]
+
+        # Ensure drugrecurrence is always an array in response to https://github.com/FDA/openfda/issues/139
+        for drug in safety_report['patient']['drug']:
+          if 'drugrecurrence' in drug:
+            if type(drug['drugrecurrence']) != type([]):
+              drug['drugrecurrence'] = [drug['drugrecurrence']]
 
         # add timestamp for kibana
         try:
@@ -131,7 +137,7 @@ class ExtractSafetyReportsMapper(parallel.Mapper):
 
         # strip "check" digit
         report_id = report_id.split('-')[0]
-        if id_to_case and id_to_case[report_id]:
+        if id_to_case and id_to_case.get(report_id):
           case_number = id_to_case[report_id]
         else:
           case_number = report_id
@@ -143,15 +149,16 @@ class ExtractSafetyReportsMapper(parallel.Mapper):
       except Exception:
         # We sometimes encounter bad records.
         # Ignore them and continue processing.
-        logging.info('Traceback in file: %s' % input_filename)
+        logging.error('Traceback in file: %s' % input_filename)
         traceback.print_exc()
-        logging.warn('Report was: %s', pprint.pformat(safety_report))
-        logging.info('Continuing...')
-        return True
+        logging.error('Report was: %s', pprint.pformat(safety_report))
+        raise
 
     try:
-      xmltodict.parse(open(input_filename),
+      xmltodict.parse(open(input_filename, mode='rb'),
                       item_depth=2,
                       item_callback=handle_safety_report)
     except:
-      pass
+      traceback.print_exc()
+      raise
+

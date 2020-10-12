@@ -6,7 +6,7 @@ from openfda.tests.api_test_helpers import *
 
 
 def test_total_count():
-  assert_total('/device/covid19serology.json', 110)
+  assert_total('/device/covid19serology.json', 6380)
 
 
 def test_basic_search():
@@ -43,6 +43,8 @@ def test_basic_search():
   eq_('NA', row.get('iga_agree'))
   eq_('NA', row.get('pan_agree'))
   eq_('NA', row.get('igm_igg_agree'))
+  eq_('NA', row.get('igm_iga_result'))
+  eq_('NA', row.get('igm_iga_agree'))
   eq_('TN', row.get('antibody_agree'))
 
 
@@ -50,7 +52,7 @@ def test_exact_fields():
   assert_total(
     '/device/covid19serology.json?search=date_performed:[20200420+TO+20200422]', 110)
   meta, results = fetch(
-    '/device/covid19serology.json?search=date_performed:[20200622+TO+20210422]')
+    '/device/covid19serology.json?search=date_performed:[20201225+TO+20210422]')
   eq_(results, None)
 
 

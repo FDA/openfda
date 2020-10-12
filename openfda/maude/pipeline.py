@@ -2,24 +2,23 @@
 
 ''' MAUDE pipeline for downloading, joining and loading into elasticsearch
 '''
-from bs4 import BeautifulSoup
 import collections
 import csv
 import glob
 import logging
 import multiprocessing
 import os
-from os.path import basename, dirname, join
 import re
 import sys
-import urllib2
+from os.path import basename, dirname, join
+from urllib.request import urlopen
 
 import arrow
 import luigi
+from bs4 import BeautifulSoup
 
-from openfda import common, config, parallel, index_util
+from openfda import common, parallel, index_util
 from openfda import download_util
-from openfda.maude import join_maude
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
                                                    DeviceAnnotateMapper)
 from openfda.tasks import AlwaysRunTask, DependencyTriggeredTask
@@ -37,16 +36,12 @@ DEVICE_PROBLEMS_FILE = join(BASE_DIR, 'maude/extracted/events/foidevproblem.txt'
 
 # Use to ensure a standard naming of level db outputs is achieved across tasks.
 DATE_FMT = 'YYYY-MM-DD'
-CATEGORIES = ['mdrfoi', 'patient', 'foidev', 'foitext']
+CATEGORIES = ['mdrfoi', 'patient', 'foidev', 'foitext', 'device']
 IGNORE_FILES = ['problem', 'add', 'change']
 
 DEVICE_DOWNLOAD_PAGE = ('https://www.fda.gov/medical-devices/'
                         'mandatory-reporting-requirements-manufacturers-importers-and-device-user-facilities/'
                         'manufacturer-and-user-facility-device-experience-database-maude')
-
-DEVICE_CLASS_DOWNLOAD = ('https://www.fda.gov/medical-devices/'
-                         'classify-your-medical-device/'
-                         'download-product-code-classification-files')
 
 enum_file = join(RUN_DIR, 'maude/data/enums.csv')
 enum_csv = csv.DictReader(open(enum_file))
@@ -76,51 +71,82 @@ FILE_HEADERS = {
     'date_report',
     'text'],
   'foidev': [
-   'mdr_report_key',
-   'device_event_key',
-   'implant_flag',
-   'date_removed_flag',
-   'device_sequence_number',
-   'date_received',
-   'brand_name',
-   'generic_name',
-   'manufacturer_d_name',
-   'manufacturer_d_address_1',
-   'manufacturer_d_address_2',
-   'manufacturer_d_city',
-   'manufacturer_d_state',
-   'manufacturer_d_zip_code',
-   'manufacturer_d_zip_code_ext',
-   'manufacturer_d_country',
-   'manufacturer_d_postal_code',
-   'expiration_date_of_device',
-   'model_number',
-   'catalog_number',
-   'lot_number',
-   'other_id_number',
-   'device_operator',
-   'device_availability',
-   'date_returned_to_manufacturer',
-   'device_report_product_code',
-   'device_age_text',
-   'device_evaluated_by_manufacturer',
-   'baseline_brand_name',
-   'baseline_generic_name',
-   'baseline_model_number',
-   'baseline_catalog_number',
-   'baseline_other_id_number',
-   'baseline_device_family',
-   'baseline_shelf_life_contained',
-   'baseline_shelf_life_in_months',
-   'baseline_pma_flag',
-   'baseline_pma_number',
-   'baseline_510_k__flag',
-   'baseline_510_k__number',
-   'baseline_preamendment_flag',
-   'baseline_transitional_flag',
-   'baseline_510_k__exempt_flag',
-   'baseline_date_first_marketed',
-   'baseline_date_ceased_marketing'
+    'mdr_report_key',
+    'device_event_key',
+    'implant_flag',
+    'date_removed_flag',
+    'device_sequence_number',
+    'date_received',
+    'brand_name',
+    'generic_name',
+    'manufacturer_d_name',
+    'manufacturer_d_address_1',
+    'manufacturer_d_address_2',
+    'manufacturer_d_city',
+    'manufacturer_d_state',
+    'manufacturer_d_zip_code',
+    'manufacturer_d_zip_code_ext',
+    'manufacturer_d_country',
+    'manufacturer_d_postal_code',
+    'expiration_date_of_device',
+    'model_number',
+    'catalog_number',
+    'lot_number',
+    'other_id_number',
+    'device_operator',
+    'device_availability',
+    'date_returned_to_manufacturer',
+    'device_report_product_code',
+    'device_age_text',
+    'device_evaluated_by_manufacturer',
+    'baseline_brand_name',
+    'baseline_generic_name',
+    'baseline_model_number',
+    'baseline_catalog_number',
+    'baseline_other_id_number',
+    'baseline_device_family',
+    'baseline_shelf_life_contained',
+    'baseline_shelf_life_in_months',
+    'baseline_pma_flag',
+    'baseline_pma_number',
+    'baseline_510_k__flag',
+    'baseline_510_k__number',
+    'baseline_preamendment_flag',
+    'baseline_transitional_flag',
+    'baseline_510_k__exempt_flag',
+    'baseline_date_first_marketed',
+    'baseline_date_ceased_marketing'
+  ],
+  'device': [
+    'mdr_report_key',
+    'device_event_key',
+    'implant_flag',
+    'date_removed_flag',
+    'device_sequence_number',
+    'date_received',
+    'brand_name',
+    'generic_name',
+    'manufacturer_d_name',
+    'manufacturer_d_address_1',
+    'manufacturer_d_address_2',
+    'manufacturer_d_city',
+    'manufacturer_d_state',
+    'manufacturer_d_zip_code',
+    'manufacturer_d_zip_code_ext',
+    'manufacturer_d_country',
+    'manufacturer_d_postal_code',
+    'device_operator',
+    'expiration_date_of_device',
+    'model_number',
+    'catalog_number',
+    'lot_number',
+    'other_id_number',
+    'device_availability',
+    'date_returned_to_manufacturer',
+    'device_report_product_code',
+    'device_age_text',
+    'device_evaluated_by_manufacturer',
+    'combination_product_flag'
   ],
   'mdrfoi': [
     'mdr_report_key',
@@ -139,31 +165,12 @@ FILE_HEADERS = {
     'reporter_occupation_code',
     'health_professional',
     'initial_report_to_fda',
-    'distributor_name',
-    'distributor_address_1',
-    'distributor_address_2',
-    'distributor_city',
-    'distributor_state',
-    'distributor_zip_code',
-    'distributor_zip_code_ext',
     'date_facility_aware',
-    'type_of_report',
     'report_date',
     'report_to_fda',
     'date_report_to_fda',
     'event_location',
-    'report_to_manufacturer',
     'date_report_to_manufacturer',
-    'date_manufacturer_received',
-    'manufacturer_name',
-    'manufacturer_address_1',
-    'manufacturer_address_2',
-    'manufacturer_city',
-    'manufacturer_state',
-    'manufacturer_zip_code',
-    'manufacturer_zip_code_ext',
-    'manufacturer_country',
-    'manufacturer_postal_code',
     'manufacturer_contact_t_name',
     'manufacturer_contact_f_name',
     'manufacturer_contact_l_name',
@@ -191,13 +198,38 @@ FILE_HEADERS = {
     'manufacturer_g1_zip_code_ext',
     'manufacturer_g1_country',
     'manufacturer_g1_postal_code',
-    'source_type',
+    'date_manufacturer_received',
     'device_date_of_manufacturer',
     'single_use_flag',
     'remedial_action',
     'previous_use_code',
     'removal_correction_number',
-    'event_type'
+    'event_type',
+    'distributor_name',
+    'distributor_address_1',
+    'distributor_address_2',
+    'distributor_city',
+    'distributor_state',
+    'distributor_zip_code',
+    'distributor_zip_code_ext',
+    'report_to_manufacturer',
+    'manufacturer_name',
+    'manufacturer_address_1',
+    'manufacturer_address_2',
+    'manufacturer_city',
+    'manufacturer_state',
+    'manufacturer_zip_code',
+    'manufacturer_zip_code_ext',
+    'manufacturer_country',
+    'manufacturer_postal_code',
+    'type_of_report',
+    'source_type',
+    'date_added',
+    'date_changed',
+    'reporter_country_code',
+    'pma_pmn_number',
+    'exemption_number',
+    'summary_report_flag'
   ]
 }
 
@@ -214,103 +246,17 @@ DATE_KEYS = [
   'report_date',
   'date_report',
   'date_manufacturer_received',
-  'date_of_event'
+  'date_of_event',
+  'date_added',
+  'date_changed'
 ]
 
 # split these keys in an array on ';'
 SPLIT_KEYS = ['sequence_number_treatment', 'sequence_number_outcome']
 # multiple submits are separated by ',' need to split these keys on ','
 MULTI_SUBMIT = ['source_type', 'remedial_action', 'type_of_report']
-
-# Swap map for current mdrfoi array (from csv file) to the origianl.
-# It is not clear that the file changes is intentional, so, as a temporary
-# work around, we will shuffle each row to resemble the original order.
-# The left represents the list address of the new format and the right
-# represents the address of the original that we want to keep until further
-# notice.
-# TODO(hansnelsen): once the format stabalizes, we should remove this shim
-#                   approach and change everything: pipeline, mapping, schema
-#                   and documentation.
-MDRFOI_SWAP = {
- 0: 0,    # MDR_REPORT_KEY,
- 1: 1,    # EVENT_KEY,
- 2: 2,    # REPORT_NUMBER,
- 3: 3,    # REPORT_SOURCE_CODE,
- 4: 4,    # MANUFACTURER_LINK_FLAG_,
- 5: 5,    # NUMBER_DEVICES_IN_EVENT,
- 6: 6,    # NUMBER_PATIENTS_IN_EVENT,
- 7: 7,    # DATE_RECEIVED,
- 8: 8,    # ADVERSE_EVENT_FLAG,
- 9: 9,    # PRODUCT_PROBLEM_FLAG,
- 10: 10,  # DATE_REPORT,
- 11: 11,  # DATE_OF_EVENT,
- 12: 12,  # REPROCESSED_AND_REUSED_FLAG,
- 13: 13,  # REPORTER_OCCUPATION_CODE,
- 14: 14,  # HEALTH_PROFESSIONAL,
- 15: 15,  # INITIAL_REPORT_TO_FDA,
- 16: 23,  # DATE_FACILITY_AWARE,
- 17: 25,  # REPORT_DATE,
- 18: 26,  # REPORT_TO_FDA,
- 19: 27,  # DATE_REPORT_TO_FDA,
- 20: 28,  # EVENT_LOCATION,
- 21: 30,  # DATE_REPORT_TO_MANUFACTURER,
- 22: 41,  # MANUFACTURER_CONTACT_T_NAME,
- 23: 42,  # MANUFACTURER_CONTACT_F_NAME,
- 24: 43,  # MANUFACTURER_CONTACT_L_NAME,
- 25: 44,  # MANUFACTURER_CONTACT_STREET_1,
- 26: 45,  # MANUFACTURER_CONTACT_STREET_2,
- 27: 46,  # MANUFACTURER_CONTACT_CITY,
- 28: 47,  # MANUFACTURER_CONTACT_STATE,
- 29: 48,  # MANUFACTURER_CONTACT_ZIP_CODE,
- 30: 49,  # MANUFACTURER_CONTACT_ZIP_EXT,
- 31: 50,  # MANUFACTURER_CONTACT_COUNTRY,
- 32: 51,  # MANUFACTURER_CONTACT_POSTAL,
- 33: 52,  # MANUFACTURER_CONTACT_AREA_CODE,
- 34: 53,  # MANUFACTURER_CONTACT_EXCHANGE,
- 35: 54,  # MANUFACTURER_CONTACT_PHONE_NO,
- 36: 55,  # MANUFACTURER_CONTACT_EXTENSION,
- 37: 56,  # MANUFACTURER_CONTACT_PCOUNTRY,
- 38: 57,  # MANUFACTURER_CONTACT_PCITY,
- 39: 58,  # MANUFACTURER_CONTACT_PLOCAL,
- 40: 59,  # MANUFACTURER_G1_NAME,
- 41: 60,  # MANUFACTURER_G1_STREET_1,
- 42: 61,  # MANUFACTURER_G1_STREET_2,
- 43: 62,  # MANUFACTURER_G1_CITY,
- 44: 63,  # MANUFACTURER_G1_STATE_CODE,
- 45: 64,  # MANUFACTURER_G1_ZIP_CODE,
- 46: 65,  # MANUFACTURER_G1_ZIP_CODE_EXT,
- 47: 66,  # MANUFACTURER_G1_COUNTRY_CODE,
- 48: 67,  # MANUFACTURER_G1_POSTAL_CODE,
- 49: 31,  # DATE_MANUFACTURER_RECEIVED,
- 50: 69,  # DEVICE_DATE_OF_MANUFACTURE,
- 51: 70,  # SINGLE_USE_FLAG,
- 52: 71,  # REMEDIAL_ACTION,
- 53: 72,  # PREVIOUS_USE_CODE,
- 54: 73,  # REMOVAL_CORRECTION_NUMBER,
- 55: 74,  # EVENT_TYPE,
- 56: 16,  # DISTRIBUTOR_NAME,
- 57: 17,  # DISTRIBUTOR_ADDRESS_1,
- 58: 18,  # DISTRIBUTOR_ADDRESS_2,
- 59: 19,  # DISTRIBUTOR_CITY,
- 60: 20,  # DISTRIBUTOR_STATE_CODE,
- 61: 21,  # DISTRIBUTOR_ZIP_CODE,
- 62: 22,  # DISTRIBUTOR_ZIP_CODE_EXT,
- 63: 29,  # REPORT_TO_MANUFACTURER,
- 64: 32,  # MANUFACTURER_NAME,
- 65: 33,  # MANUFACTURER_ADDRESS_1,
- 66: 34,  # MANUFACTURER_ADDRESS_2,
- 67: 35,  # MANUFACTURER_CITY,
- 68: 36,  # MANUFACTURER_STATE_CODE,
- 69: 37,  # MANUFACTURER_ZIP_CODE,
- 70: 38,  # MANUFACTURER_ZIP_CODE_EXT,
- 71: 39,  # MANUFACTURER_COUNTRY_CODE,
- 72: 40,  # MANUFACTURER_POSTAL_CODE,
- 73: 24,  # TYPE_OF_REPORT,
- 74: 68   # SOURCE_TYPE
-          # DATE_ADDED (not used)
-          # DATE_CHANGED (not used)
-}
-
+# These keys have malformed integers in them: left-padded with a space and decimal point added.
+MALFORMED_KEYS = ['mdr_report_key', 'device_event_key', 'device_sequence_number']
 
 def _fix_date(input_date):
   ''' Converts input dates for known formats to a standard format that is
@@ -321,7 +267,8 @@ def _fix_date(input_date):
     'DD-MMM-YY',
     'YYYY/MM/DD HH:mm:ss.SSS',
     'MM/DD/YYYY',
-    'YYYYMMDD'
+    'YYYYMMDD',
+    'YYYY/MM/DD'
   ]
 
   # arrow needs 3 char months to be sentence case: e.g. Dec not DEC
@@ -331,7 +278,7 @@ def _fix_date(input_date):
     return date.format('YYYYMMDD')
   except:
     if input_date:
-      logging.info('%s with input %s', input_date, formated_date)
+      logging.info('unparseable date: %s with input %s', input_date, formated_date)
 
   return None
 
@@ -359,11 +306,11 @@ class DownloadDeviceEvents(AlwaysRunTask):
 
   def _run(self):
     zip_urls = []
-    soup = BeautifulSoup(urllib2.urlopen(DEVICE_DOWNLOAD_PAGE).read())
+    soup = BeautifulSoup(urlopen(DEVICE_DOWNLOAD_PAGE).read())
     for a in soup.find_all(href=re.compile('.*.zip')):
       zip_urls.append(a['href'])
     if not zip_urls:
-      logging.fatal('No MAUDE Zip Files Found At %s' % DEVICE_CLASS_DOWNLOAD)
+      logging.fatal('No MAUDE Zip Files Found At %s' % DEVICE_DOWNLOAD_PAGE)
     for zip_url in zip_urls:
       filename = zip_url.split('/')[-1]
       common.download(zip_url, join(self.output().path, filename))
@@ -389,6 +336,50 @@ class ExtractAndCleanDownloadsMaude(AlwaysRunTask):
                                       'UTF-8',
                                       'txt')
 
+# This task no longer works properly. Needs refactoring
+class PreprocessFilesToFixIssues(AlwaysRunTask):
+  ''' The pipe-separated MAUDE files come with issues: no escaping of special characters.
+      Many foitext files contain pipe characters that are part of field values and thus are
+      breaking the layout due to not being escaped properly. In other cases new line characters appear
+      unescaped and break single lines into multi-line chunks. This task attempts to deal with these
+      issues via regular expression search & replace.
+  '''
+  def requires(self):
+    return ExtractAndCleanDownloadsMaude()
+
+  def output(self):
+    return luigi.LocalTarget(join(BASE_DIR, 'maude/extracted'))
+
+  def _run(self):
+    for filename in glob.glob(self.input().path + '/*/*foi*.txt') + glob.glob(self.input().path + '/*/device*.txt'):
+      logging.info('Pre-processing %s', filename)
+
+      filtered = filename + '.filtered'
+      out = open(filtered, 'w')
+      line_num = 0
+      bad_lines = 0
+      with open(filename, 'rU') as fp:
+        for line in fp:
+          line = line.strip()
+          if line_num < 1:
+            # First line is usually the header
+            out.write(line)
+          else:
+            if len(line.strip()) > 0:
+              if re.search(r'^\d{2,}(\.\d)?\|', line):
+                # Properly formatted line. Append it and move on.
+                out.write('\n'+line)
+              else:
+                # Bad line, most likely due to an unescaped carriage return. Tuck it onto the previous line
+                out.write(' ' + line)
+                bad_lines += 1
+
+          line_num += 1
+
+      logging.info('Issues found & fixed: %s', bad_lines)
+      out.close()
+      os.remove(filename)
+      os.rename(filtered, filename)
 
 class CSV2JSONMapper(parallel.Mapper):
   def __init__(self, problem_codes_reference, device_problem_codes):
@@ -415,6 +406,10 @@ class CSV2JSONMapper(parallel.Mapper):
     if k in MULTI_SUBMIT:
       return _exact_split(k, v, ',')
 
+    # The DEVICE files have mdr_report_key padded with a space and in decimal format with a ".0" at the end.
+    if k in MALFORMED_KEYS:
+      v = v.strip().replace('.0', '')
+
     if k in ENUM:
       if v in ENUM[k]:
         if isinstance(v, list):
@@ -424,29 +419,23 @@ class CSV2JSONMapper(parallel.Mapper):
 
     return (k, v)
 
-  def shuffle_mdrfoi_value(self, value):
-    ''' Function for re-shuffling mdrfoi data, since it is coming in out of
-        order. We only need the first 75 values from the list, the remaining
-        are not needed.
-
-        TODO(hansnelsen): Remove once the schema for mdrfoi records is stable.
-    '''
-    projected_size = len(MDRFOI_SWAP.keys())
-    # If value array not long enough, let downstream validators deal with it.
-    if len(value) < projected_size:
-      return value
-
-    result = [''] * projected_size
-    for source, target in MDRFOI_SWAP.items():
-      result[target] = value[source]
-
-    return result
+  # We are seeing a large number of foitext rows not following the column definition and thus
+  # getting rejected by the reducer. The root cause is the fact that the last column (FOI_TEXT) contains
+  # text that includes one or more "pipe" | characters that have not been properly escaped
+  # in the file and thus are throwing column count off.
+  # We are dealing with that by merely concatenating the extra text columns into a single
+  # string and stripping out the bogus columns at the end.
+  def handle_oversized_foitext(self, value):
+    no_columns = len(FILE_HEADERS['foitext'])
+    combined_text = '|'.join([t for t in value[no_columns - 1:]])
+    value[no_columns - 1] = combined_text[:-1] if combined_text.endswith("|") else combined_text
+    return value[0:no_columns]
 
   def map(self, key, value, output):
     if len(value) < 1:
       return
 
-    mdr_key = value[0]
+    mdr_key = self.cleaner('mdr_report_key', value[0])[1]
 
     # Some of the files have headers, we will apply our own, so row that starts
     # with this value is safe to skip
@@ -454,25 +443,28 @@ class CSV2JSONMapper(parallel.Mapper):
       return
 
     file_type = [s for s in CATEGORIES if s in self.filename][0]
-    # logging.info('file type: %s, file: %s', file_type, self.filename)
 
-    # TODO(hansnelsen): remove once file format is stable
-    if file_type == 'mdrfoi':
-      value = self.shuffle_mdrfoi_value(value)
+    if file_type == 'foitext' and len(value) > len(FILE_HEADERS[file_type]):
+      value = self.handle_oversized_foitext(value)
 
     # We send all data anomalies to a reducer for each file type.
     # These non-conforming data are written to a reject file for review.
-    # This file type as variable lengths over time, so it needs its owne check
+    # This file type as variable lengths over time, so it needs its own check
     if file_type == 'foidev':
       if len(value) not in [28, 45]:
         logging.info('Does not conform to foidev structure. Skipping: %s, %s',
-          mdr_key, '#' * 200)
+          mdr_key, '#' * 5)
         output.add(file_type, '%s: missing fields' % mdr_key + ':' +  '|'.join(value))
         return
-
+    elif file_type == 'mdrfoi':
+      if len(value) not in [77, 81]:
+        logging.info('Does not conform to mdrfoi structure. Skipping: %s, %s',
+          mdr_key, '#' * 5)
+        output.add(file_type, '%s: missing fields' % mdr_key + ':' +  '|'.join(value))
+        return
     elif len(value) != len(FILE_HEADERS[file_type]):
       logging.info('Does not conform to %s structure. Skipping: %s, %s',
-        file_type, mdr_key, '#' * 200)
+        file_type, mdr_key, '#' * 5)
       output.add(file_type, '%s: missing fields' % mdr_key + ':' +  '|'.join(value))
       return
 
@@ -482,7 +474,7 @@ class CSV2JSONMapper(parallel.Mapper):
       return
 
     # If it makes it this far, it is a good record
-    new_value = dict(zip(FILE_HEADERS[file_type], value))
+    new_value = dict(list(zip(FILE_HEADERS[file_type], value)))
     new_value = common.transform_dict(new_value, self.cleaner)
 
     # https://github.com/FDA/openfda/issues/27
@@ -501,6 +493,7 @@ class CSV2JSONMapper(parallel.Mapper):
 class CSV2JSONJoinReducer(parallel.Reducer):
   # File type to nested key name mapping
   join_map = {
+    'device': 'device',
     'foidev': 'device',
     'foitext': 'mdr_text',
     'patient': 'patient'
@@ -556,7 +549,7 @@ class CSV2JSON(luigi.Task):
   loader_task = luigi.Parameter()
 
   def requires(self):
-    return ExtractAndCleanDownloadsMaude()
+    return PreprocessFilesToFixIssues()
 
   def output(self):
     file_name = '-'.join([self.loader_task, self.run_date, 'json.db'])
@@ -592,8 +585,8 @@ class CSV2JSON(luigi.Task):
       mapper=CSV2JSONMapper(problem_codes_reference=problem_codes_reference, device_problem_codes=device_problem_codes),
       reducer=CSV2JSONJoinReducer(),
       output_prefix=self.output().path,
-      map_workers=multiprocessing.cpu_count() / 2,
-      num_shards=multiprocessing.cpu_count() / 2)
+      map_workers=int(multiprocessing.cpu_count() / 5),
+      num_shards=int(multiprocessing.cpu_count() / 5))
 
 
 class MergeUpdatesMapper(parallel.Mapper):
@@ -671,7 +664,7 @@ class MergeUpdates(luigi.Task):
   run_date = luigi.Parameter()
 
   def requires(self):
-    previous_run_date = arrow.get(self.run_date).replace(weeks=-1).format(DATE_FMT)
+    previous_run_date = arrow.get(self.run_date).shift(weeks=-1).format(DATE_FMT)
 
     return [
       CSV2JSON(loader_task='init', run_date=previous_run_date),

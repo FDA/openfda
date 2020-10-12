@@ -6,10 +6,9 @@ Pipeline for converting NDC product and package data sets (TXT) to JSON and impo
 import logging
 import os
 import re
-import urllib2
-import urlparse
 from os.path import join, dirname
-
+from urllib.parse import urljoin
+from urllib.request import urlopen
 import luigi
 import numpy as np
 import pandas as pd
@@ -43,12 +42,12 @@ class DownloadNDCFiles(luigi.Task):
     finished_ndc_url = None
     unfinished_ndc_url = None
 
-    soup = BeautifulSoup(urllib2.urlopen(NDC_DOWNLOAD_PAGE).read(), 'lxml')
+    soup = BeautifulSoup(urlopen(NDC_DOWNLOAD_PAGE).read(), 'lxml')
     for a in soup.find_all(href=re.compile('.*.zip')):
       if 'NDC Database File' in a.text and 'text' in a['href']:
-        finished_ndc_url = urlparse.urljoin('https://www.fda.gov', a['href'])
-      if 'NDC Unfinished' in a.text and 'unfinished' in a['href']:
-        unfinished_ndc_url = urlparse.urljoin('https://www.fda.gov', a['href'])
+        finished_ndc_url = urljoin('https://www.fda.gov', a['href'])
+      if 'NDC Unfinished' in a.text and 'unfinished.zip' in a['href']:
+        unfinished_ndc_url = urljoin('https://www.fda.gov', a['href'])
 
     if not finished_ndc_url:
       logging.fatal('NDC finished database file not found!')
@@ -77,14 +76,14 @@ class ExtractNDCFiles(luigi.Task):
 
     # Fix annoying UTF-8 issues in product.txt
     self.fix_utf8_issues(join(output_dir, 'product.txt'))
-    self.fix_utf8_issues(join(output_dir, 'unfinished_products_excluded.txt'))
+    self.fix_utf8_issues(join(output_dir, 'unfinished_product.txt'))
 
   def fix_utf8_issues(self, filename):
-    file = open(filename, 'r')
+    file = open(filename, 'r', encoding='utf-8', errors='ignore')
     data = file.read()
     file.close()
 
-    file = open(filename, 'w')
+    file = open(filename, 'w', encoding='utf-8')
     file.write(common.convert_unicode(data))
     file.flush()
     file.close()
@@ -104,7 +103,7 @@ class MergePackageNDC(luigi.Task):
     dtype = {'STARTMARKETINGDATE': np.unicode, 'ENDMARKETINGDATE': np.unicode}
     finished = pd.read_csv(join(self.input().path, 'package.txt'), sep='\t', index_col=False, encoding='utf-8',
                            dtype=dtype)
-    unfinished = pd.read_csv(join(self.input().path, 'unfinished_packages_excluded.txt'), sep='\t', index_col=False,
+    unfinished = pd.read_csv(join(self.input().path, 'unfinished_package.txt'), sep='\t', index_col=False,
                              encoding='utf-8',
                              dtype=dtype)
 
@@ -130,7 +129,7 @@ class MergeProductNDC(luigi.Task):
       , 'PROPRIETARYNAMESUFFIX': np.unicode}
     finished = pd.read_csv(join(self.input().path, 'product.txt'), sep='\t', index_col=False, encoding='utf-8',
                            dtype=dtype)
-    unfinished = pd.read_csv(join(self.input().path, 'unfinished_products_excluded.txt'), sep='\t', index_col=False,
+    unfinished = pd.read_csv(join(self.input().path, 'unfinished_product.txt'), sep='\t', index_col=False,
                              encoding='utf-8',
                              dtype=dtype)
 
@@ -161,7 +160,7 @@ class NDCPackage2JSONMapper(parallel.Mapper):
       '''
       if k in self.booleans:
         v = v in ['Y', 'y'] if v is not None and v != '' else None
-      v = v.strip() if isinstance(v, basestring) else v
+      v = v.strip() if isinstance(v, str) else v
       if k in self.rename_map and v is not None and v != '':
         return (self.rename_map[k], v)
 
@@ -219,7 +218,7 @@ class NDCProduct2JSONMapper(parallel.Mapper):
       '''
       if k in self.booleans:
         v = v in ['Y', 'y'] if v is not None and v != '' else None
-      v = v.strip() if isinstance(v, basestring) else v
+      v = v.strip() if isinstance(v, str) else v
       if k in self.rename_map and v is not None and v != '':
         return (self.rename_map[k], v)
 

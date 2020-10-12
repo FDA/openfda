@@ -1,0 +1,86 @@
+{
+  "meta": {
+    "disclaimer": "Do not rely on openFDA to make decisions regarding medical care. While we make every effort to ensure that data is accurate, you should assume all results are unvalidated. We may limit or otherwise restrict your access to the API in line with our Terms of Service.", 
+    "last_updated": "2017-03-06", 
+    "license": "https://open.fda.gov/license/", 
+    "terms": "https://open.fda.gov/terms/"
+  }, 
+  "results": [
+    {
+      "count": 17235, 
+      "term": "Cardiovascular"
+    }, 
+    {
+      "count": 5164, 
+      "term": "Ophthalmic"
+    }, 
+    {
+      "count": 1836, 
+      "term": "General, Plastic Surgery"
+    }, 
+    {
+      "count": 1802, 
+      "term": "Microbiology"
+    }, 
+    {
+      "count": 1445, 
+      "term": "Orthopedic"
+    }, 
+    {
+      "count": 1421, 
+      "term": "Gastroenterology, Urology"
+    }, 
+    {
+      "count": 1390, 
+      "term": "Neurology"
+    }, 
+    {
+      "count": 643, 
+      "term": "Ear, Nose, Throat"
+    }, 
+    {
+      "count": 569, 
+      "term": "Clinical Chemistry"
+    }, 
+    {
+      "count": 550, 
+      "term": "Immunology"
+    }, 
+    {
+      "count": 486, 
+      "term": "General Hospital"
+    }, 
+    {
+      "count": 460, 
+      "term": "Obstetrics/Gynecology"
+    }, 
+    {
+      "count": 436, 
+      "term": "Pathology"
+    }, 
+    {
+      "count": 378, 
+      "term": "Radiology"
+    }, 
+    {
+      "count": 200, 
+      "term": "Anesthesiology"
+    }, 
+    {
+      "count": 199, 
+      "term": "Dental"
+    }, 
+    {
+      "count": 40, 
+      "term": "Physical Medicine"
+    }, 
+    {
+      "count": 30, 
+      "term": "Clinical Toxicology"
+    }, 
+    {
+      "count": 5, 
+      "term": "Hematology"
+    }
+  ]
+}

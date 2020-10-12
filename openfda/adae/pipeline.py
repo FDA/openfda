@@ -7,11 +7,11 @@ import glob
 import logging
 import os
 import re
+import sys
 import traceback
 
 import arrow
 import luigi
-import sys
 from lxml import etree
 
 from openfda import common, config, index_util, parallel
@@ -34,7 +34,8 @@ NULLIFIED = ['US-FDACVM-2018-US-045311.xml', 'US-FDACVM-2018-US-048571.xml', 'US
              'US-FDACVM-2017-US-028125.xml', 'US-FDACVM-2017-US-033030.xml',
              'US-FDACVM-2019-US-007584.xml', 'US-FDACVM-2019-US-000655.xml', 'US-FDACVM-2019-US-009469.xml',
              'US-FDACVM-2019-US-021451.xml', 'US-FDACVM-2012-US-036039.xml',
-             'US-FDACVM-2019-US-021383.xml', 'US-FDACVM-2019-US-036949.xml']
+             'US-FDACVM-2019-US-021383.xml', 'US-FDACVM-2019-US-036949.xml', 'US-FDACVM-2019-US-056874.xml',
+             'US-FDACVM-2020-US-000506.xml', 'US-FDACVM-2020-US-012144.xml']
 
 
 class SyncS3(luigi.Task):
@@ -54,7 +55,7 @@ class SyncS3(luigi.Task):
       arrow.get(os.path.getmtime(self.flag_file())) > arrow.now().floor('day'))
 
   def run(self):
-    common.cmd([self.aws,
+    common.quiet_cmd([self.aws,
                 '--profile=' + config.aws_profile(),
                 's3', 'sync',
                 self.bucket,
@@ -75,10 +76,10 @@ class ExtractXML(luigi.Task):
 
   def run(self):
     output_dir = self.output().path
-    common.shell_cmd('mkdir -p %s', output_dir)
+    common.shell_cmd_quiet('mkdir -p %s', output_dir)
     input_dir = self.local_dir
     for zip_filename in glob.glob(input_dir + '/*.zip'):
-      common.shell_cmd('unzip -ouq "%s" -d %s', zip_filename, output_dir)
+      common.shell_cmd_quiet('unzip -ouq "%s" -d %s', zip_filename, output_dir)
 
 
 class XML2JSONMapper(parallel.Mapper):
@@ -202,14 +203,14 @@ class XML2JSONMapper(parallel.Mapper):
         self.process_xpath_map(XPATH_MAP, tree, ae)
         map_output.add(ae["unique_aer_id_number"], ae)
       else:
-        logging.warn("Zero length input file: " + map_input.filename)
+        logging.warning("Zero length input file: " + map_input.filename)
     except Exception:
       traceback.print_exc()
       logging.error(sys.exc_info()[0])
       raise
 
   def process_xpath_map(self, xpath_map, root_node, json):
-    for xpath, json_fields in xpath_map.iteritems():
+    for xpath, json_fields in iter(xpath_map.items()):
       nodeset = root_node.xpath(xpath,
                                 namespaces=self.NS)
       if type(nodeset) == list and len(nodeset) > 0:
@@ -226,7 +227,7 @@ class XML2JSONMapper(parallel.Mapper):
       if type(el) == etree._Element:
         val.append(el.text)
       else:
-        val.append(unicode(el))
+        val.append(str(el))
 
     val = val if len(val) > 1 else val[0]
 
@@ -329,7 +330,7 @@ class XML2JSONMapper(parallel.Mapper):
       # A corner-case scenario (US-FDACVM-2014-US-065247.xml)
       if drug.get('dose') is not None and drug['dose'].get('denominator') is not None and not self.isdigit(drug['dose'][
         'denominator']):
-        logging.warn("Non-numeric denominator: " + drug['dose'][
+        logging.warning("Non-numeric denominator: " + drug['dose'][
           'denominator'])
         drug['dose']['denominator'] = '0'
 
@@ -354,7 +355,7 @@ class XML2JSONMapper(parallel.Mapper):
     for node in nodeset:
       ingredient = {}
       self.process_xpath_map(XPATH_MAP, node, ingredient)
-      if "name" in ingredient.keys():
+      if "name" in list(ingredient.keys()):
         ingredient["name"] = ingredient["name"].title()
       json["active_ingredients"].append(ingredient)
 

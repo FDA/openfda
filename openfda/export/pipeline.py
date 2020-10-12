@@ -1,6 +1,6 @@
 
 import collections
-from itertools import tee, izip
+from itertools import tee
 import glob
 import os.path
 from os.path import dirname, join, basename
@@ -8,10 +8,9 @@ import arrow
 import elasticsearch
 import luigi
 import simplejson as json
-
-
 from openfda import common, config, index_util, elasticsearch_requests, parallel
 from openfda.tasks import AlwaysRunTask
+
 
 
 RUN_DIR = dirname(dirname(dirname(os.path.abspath(__file__))))
@@ -28,6 +27,7 @@ ENDPOINT_INDEX_MAP = {
   '/drug/label': 'druglabel',
   '/drug/enforcement': 'recall',
   '/drug/ndc': 'ndc',
+  '/drug/drugsfda': 'drugsfda',
   '/device/enforcement': 'recall',
   '/food/enforcement': 'recall',
   '/food/event': 'foodevent',
@@ -40,7 +40,8 @@ ENDPOINT_INDEX_MAP = {
   '/device/udi': 'deviceudi',
   '/device/covid19serology': 'covid19serology',
   '/other/nsde': 'othernsde',
-  '/other/substance': 'substancedata'
+  '/other/substance': 'substancedata',
+  '/tobacco/problem': 'tobaccoproblem'
 
 }
 
@@ -73,19 +74,19 @@ RANGE_ENDPOINT_MAP = {
   '/drug/event': {
     'date_key': '@timestamp',
     'start_date': '2004-01-01',
-    'end_date': '2020-04-01'
+    'end_date': '2020-07-01'
   },
   # Check here for device event:
   # https://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/PostmarketRequirements/ReportingAdverseEvents/ucm127891.htm
   '/device/event': {
     'date_key': 'date_received',
     'start_date': '1991-10-01',
-    'end_date': '2020-04-01'
+    'end_date': '2020-10-01'
   },
   '/animalandveterinary/event': {
     'date_key': 'original_receive_date',
     'start_date': '1987-01-01',
-    'end_date': '2020-04-01'
+    'end_date': '2020-07-01'
   }
 }
 
@@ -170,7 +171,7 @@ def pairwise(iterable):
   a, b = tee(iterable)
   next(b, None)
 
-  return izip(a, b)
+  return zip(a, b)
 
 
 def walk_glob(file_pattern, crawl_dir):
@@ -178,12 +179,10 @@ def walk_glob(file_pattern, crawl_dir):
   # partitions, so we have to walk everything from this point down.
   results = []
 
-  def _callback(args, dirpath, filenames):
+  for dirpath, dirs, filenames in os.walk(crawl_dir):
     for name in filenames:
       if name.endswith(file_pattern):
-        results.append(join(crawl_dir, dirpath, name))
-
-  os.path.walk(crawl_dir, _callback, '')
+        results.append(join(dirpath, name))
 
   return results
 
@@ -354,7 +353,7 @@ class ParallelExportMapper(parallel.Mapper):
                           chunks=ep.chunks)
     # Copy the current JSON schema to the zip location so that it is included
     # in the sync to s3
-    common.shell_cmd('cp %s %s', schema_file, endpoint_dir)
+    common.shell_cmd_quiet('cp %s %s', schema_file, endpoint_dir)
 
 
 class ParallelExport(luigi.Task):
@@ -376,7 +375,7 @@ class ParallelExport(luigi.Task):
       reducer=parallel.NullReducer(),
       output_prefix=join(BASE_DIR, 'tmp'),
       output_format=parallel.NullOutput(),
-      map_workers=10)
+      map_workers=11)
 
 
 class CopyIndexToS3(luigi.Task):
@@ -404,8 +403,8 @@ class CopyIndexToS3(luigi.Task):
       '--include "*.zip"',
       '--include "*schema.json"']
 
-    common.shell_cmd(' '.join(s3_cmd))
-    common.shell_cmd('touch %s', self.output().path)
+    common.shell_cmd_quiet(' '.join(s3_cmd))
+    common.shell_cmd_quiet('touch %s', self.output().path)
 
 
 class CombineManifests(luigi.Task):

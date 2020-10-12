@@ -12,6 +12,7 @@ from openfda.device_udi.pipeline import SyncS3DeviceUDI, ExtractXML, XML2JSONMap
 from openfda.tests.api_test_helpers import *
 
 
+
 class UDIPipelineTests(unittest.TestCase):
   def setUp(self):
     self.test_dir = tempfile.mkdtemp()
@@ -130,7 +131,7 @@ class UDIPipelineTests(unittest.TestCase):
       eq_(None, json["device_sizes"][1].get("unit"))
       eq_(None, json["device_sizes"][1].get("value"))
       eq_("Device Size Text, specify", json["device_sizes"][1]["type"])
-      eq_(unicode("SPACER LAT PEEK 8° 40L X 18W X 10H", encoding="utf-8"), json["device_sizes"][1]["text"])
+      eq_(str("SPACER LAT PEEK 8° 40L X 18W X 10H"), json["device_sizes"][1]["text"])
 
       eq_("Storage Environment Temperature", json["storage"][0]["type"])
       eq_("Degrees Celsius", json["storage"][0]["high"]["unit"])

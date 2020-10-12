@@ -112,7 +112,7 @@ def pluck(pluck_list, data):
     try:
       result[new_key] = data.get_nested(key)
     except:
-      logging.warn('Could not get key: '+key)
+      logging.warning('Could not get key: '+key)
   return result
 
 
@@ -144,7 +144,7 @@ class JoinMapper(Mapper):
         products = val.get('products', [])
         for product in products:
           new_key = product['product_code']
-          new_value = dict(val.items() + product.items())
+          new_value = dict(list(val.items()) + list(product.items()))
           if new_key:
             output.add(new_key, (self.table, pluck(self.pluck_list, new_value)))
       else:

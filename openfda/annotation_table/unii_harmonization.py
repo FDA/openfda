@@ -12,14 +12,13 @@ Inputs:
         2) NDC/Product.txt file
         3) JSON to which we dump the extract
 """
-
 import csv
 import fnmatch
-import os
-
-import extract_unii
-import simplejson as json
 import multiprocessing
+import os
+import simplejson as json
+from . import extract_unii
+
 
 def parallel_extract(files, worker):
   manager = multiprocessing.Manager()
@@ -49,20 +48,20 @@ def harmonization_extract_worker(args):
     #zipping together two arrays, since they came from the same xpath locations
     #these are the NUI codes and their respective names
     #we might be able to get the names from somewhere else and avoid the zip
-    intermediate = zip(extract_unii.extract_unii_other_code(tree),
-                       extract_unii.extract_unii_other_name(tree))
+    intermediate = list(zip(extract_unii.extract_unii_other_code(tree),
+                       extract_unii.extract_unii_other_name(tree)))
     # print intermediate
     header = ['number', 'name']
-    harmonized['va'] = [dict(zip(header, s)) for s in intermediate]
+    harmonized['va'] = [dict(list(zip(header, s))) for s in intermediate]
     name_queue.put(harmonized)
   except Exception as inst:
-    print filename + 'has a problem'
-    print inst
+    print(filename + 'has a problem')
+    print(inst)
 
 
 def harmonize_unii(out_file, product_file, unii_file, class_index_dir):
   out = open(out_file, 'w')
-  meta_file = csv.DictReader(open(product_file, 'rb'), delimiter='\t')
+  meta_file = csv.DictReader(open(product_file, 'rt', encoding='utf-8', errors='replace'), delimiter='\t')
 
   ndc_dict = {}
   for row in meta_file:
@@ -104,7 +103,7 @@ def harmonize_unii(out_file, product_file, unii_file, class_index_dir):
   # list that will be the output.
   # Loop handles the many-to-many relationship of ingredients to products.
   unii_pivot = {}
-  for key, value in ndc_dict.iteritems():
+  for key, value in iter(ndc_dict.items()):
     for substance_name in value:
       if substance_name.lower() in pharma_rows:
         if key in unii_pivot:
@@ -117,7 +116,7 @@ def harmonize_unii(out_file, product_file, unii_file, class_index_dir):
         else:
           unii_pivot[key] = [unii_rows[substance_name.lower()]]
 
-  for key, value in unii_pivot.iteritems():
+  for key, value in iter(unii_pivot.items()):
     output_dict = {}
     output_dict['spl_id'] = key
     output_dict['unii_indexing'] = value

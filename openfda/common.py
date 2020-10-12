@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import cStringIO
 import collections
 import logging
 import os
@@ -8,9 +7,9 @@ import re
 import subprocess
 import sys
 import time
+from io import BytesIO
 from os.path import dirname
 from threading import Thread
-
 import requests
 
 DEFAULT_BATCH_SIZE = 100
@@ -56,7 +55,7 @@ class BatchHelper(object):
 # This extends dict to allow for easy json.dump action.
 class ObjectDict(dict):
   def __init__(self, _dict):
-    for k, v in _dict.iteritems():
+    for k, v in iter(_dict.items()):
       v = dict_to_obj(v)
       self[k] = v
       setattr(self, k, v)
@@ -99,7 +98,7 @@ class ProcessException(Exception):
 class TeeStream(Thread):
   def __init__(self, quiet, input_stream, output_stream=sys.stdout, prefix=''):
     Thread.__init__(self)
-    self._output = cStringIO.StringIO()
+    self._output = BytesIO()
     self.output_stream = output_stream
     self.input_stream = input_stream
     self.quiet = quiet
@@ -111,7 +110,7 @@ class TeeStream(Thread):
       if not line:
         return
       if not self.quiet:
-        self.output_stream.write(self.prefix + line)
+        self.output_stream.write(self.prefix + line.decode('utf-8'))
       self._output.write(line)
 
   def output(self):
@@ -139,8 +138,12 @@ def _checked_subprocess(quiet=False, *args, **kw):
 
 
 def cmd(args):
-  print 'Running: ', ' '.join(args)
+  # print 'Running: ', ' '.join(args)
   return _checked_subprocess(False, args)
+
+def quiet_cmd(args):
+  # print 'Running: ', ' '.join(args)
+  return _checked_subprocess(True, args)
 
 
 def shell_cmd(fmt, *args):
@@ -153,7 +156,7 @@ def shell_cmd_quiet(fmt, *args):
 
 
 def _format_cmd(args, fmt):
-  print 'Running: %s: %s' % (fmt, args)
+  # print 'Running: %s: %s' % (fmt, args)
   if len(args) > 0:
     cmd = fmt % args
   else:
@@ -170,7 +173,7 @@ def transform_dict(coll, transform_fn):
   if not isinstance(coll, dict):
     return coll
   res = {}
-  for k, v in coll.iteritems():
+  for k, v in iter(coll.items()):
     v = transform_dict(v, transform_fn)
     transformed = transform_fn(k, v)
     if transformed is None:
@@ -188,7 +191,7 @@ def is_older(a, b):
     return True
 
   if not os.path.exists(b):
-    logging.warn('Trying to compare against non-existent test file %s', b)
+    logging.warning('Trying to compare against non-existent test file %s', b)
     return True
 
   return (os.path.getmtime(a) < os.path.getmtime(b))
@@ -200,7 +203,7 @@ def is_newer(a, b):
     return False
 
   if not os.path.exists(b):
-    logging.warn('Trying to compare against non-existent test file %s', b)
+    logging.warning('Trying to compare against non-existent test file %s', b)
     return True
 
   return (os.path.getmtime(a) >= os.path.getmtime(b))
@@ -280,11 +283,11 @@ def extract_date(date_str):
 
 def convert_unicode(data):
   # add recursive decoder to prevent unicode errors on writes.
-  if isinstance(data, str):
-    return unicode(data, 'utf8', 'ignore').encode(encoding='utf8')
-  elif isinstance(data, collections.Mapping):
-    return dict(map(convert_unicode, data.items()))
-  elif isinstance(data, collections.Iterable):
-    return type(data)(map(convert_unicode, data))
-  else:
-    return data
+  #if isinstance(data, str):
+  #  return data # six.text_type(data, 'utf8', 'ignore').encode(encoding='utf8')
+  #elif isinstance(data, collections.Mapping):
+  #  return dict(list(map(convert_unicode, list(data.items()))))
+  #elif isinstance(data, collections.Iterable):
+  #  return type(data)(list(map(convert_unicode, data)))
+  #else:
+  return data

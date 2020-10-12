@@ -99,14 +99,17 @@ var DEVICE_PMA_INDEX = 'devicepma';
 var DEVICE_RECALL_INDEX = 'devicerecall';
 var DEVICE_UDI_INDEX = 'deviceudi';
 var DEVICE_SEROLOGY_INDEX = 'covid19serology';
+var DRUG_DRUGSFDA_INDEX = 'drugsfda';
 var DRUG_EVENT_INDEX = 'drugevent';
 var DRUG_LABEL_INDEX = 'druglabel';
 var DRUG_NDC_INDEX = 'ndc';
 var FOOD_EVENT_INDEX = 'foodevent';
+var TOBACCO_PROBLEM_INDEX = 'tobaccoproblem';
 var OTHER_NSDE_INDEX = 'othernsde';
 var PROCESS_METADATA_INDEX = 'openfdametadata';
 var EXPORT_DATA_INDEX = 'openfdadata';
 var SUBSTANCE_DATA_INDEX = 'substancedata';
+var DOWNLOAD_STATS_INDEX = 'downloadstats';
 
 // This data structure is the standard way to add an endpoint to the api, which
 // is to say, if there is a one-to-one mapping between an index and an endpoint,
@@ -188,6 +191,12 @@ var ENDPOINTS = [
     'name': 'drugenforcement'
   },
   {
+    'index': DRUG_DRUGSFDA_INDEX,
+    'endpoint': '/drug/drugsfda.json',
+    'name': 'drugsfda',
+    'basic' : true
+  },
+  {
     'index': DRUG_EVENT_INDEX,
     'endpoint': '/drug/event.json',
     'name': 'drugevent',
@@ -217,6 +226,12 @@ var ENDPOINTS = [
     'basic': true
   },
   {
+    'index': TOBACCO_PROBLEM_INDEX,
+    'endpoint': '/tobacco/problem.json',
+    'name': 'tobaccoproblem',
+    'basic': true
+  },
+  {
     'index': OTHER_NSDE_INDEX,
     'endpoint': '/other/nsde.json',
     'name': 'othernsde',
@@ -239,10 +254,12 @@ var ENDPOINTS = [
 var VALID_URLS = [
   'api.fda.gov/animalandveterinary/event.json',
   'api.fda.gov/animalandveterinary/',
+  'api.fda.gov/device/',
   'api.fda.gov/drug/',
   'api.fda.gov/food/',
-  'api.fda.gov/device/',
+  'api.fda.gov/tobacco/',
   'api.fda.gov/other/',
+  'api.fda.gov/drug/drugsfda.json',
   'api.fda.gov/drug/event.json',
   'api.fda.gov/drug/label.json',
   'api.fda.gov/drug/ndc.json',
@@ -258,6 +275,7 @@ var VALID_URLS = [
   'api.fda.gov/device/covid19serology.json',
   'api.fda.gov/food/enforcement.json',
   'api.fda.gov/food/event.json',
+  'api.fda.gov/tobacco/problem.json',
   'api.fda.gov/other/nsde.json',
   'api.fda.gov/other/substance.json'
 ];
@@ -492,139 +510,149 @@ app.get('/status', function (req, response) {
 // endpoint for the API statistics page - cached in memory for 1 hour.
 app.get('/usage.json', cache('1 hour'), function (req, res) {
 
-  var end_at = req.query.start_at || moment().format("YYYY-MM-DD");
-  var start_at = req.query.end_at || moment().subtract(30, 'day').format("YYYY-MM-DD");
-  var prefix = req.query.prefix || '0/';
-  var params = querystring.stringify({
-    start_at: start_at,
-    end_at: end_at,
-    interval: 'day',
-    prefix: prefix,
-    query: {
-      "condition": "AND",
-      "rules": [{
-        "field": "gatekeeper_denied_code",
-        "id": "gatekeeper_denied_code",
-        "input": "select",
-        "operator": "is_null",
-        "type": "string",
-        "value": null
-      }]
+  var downloadStats = {};
+  client.search({
+    index: DOWNLOAD_STATS_INDEX,
+    body: elasticsearch_query.BuildQuery({}),
+    size: 1
+  }).then(function (body) {
+    if (body && body.hits && body.hits.hits && body.hits.hits.length) {
+      downloadStats = body.hits.hits[0]._source;
     }
-  });
 
-  //NEVER expose this key to public
-  var options = {
-    method: "GET",
-    url: "https://api.data.gov/api-umbrella/v1/analytics/drilldown.json?" + params,
-    headers: {
-      "X-Api-Key": process.env.API_UMBRELLA_KEY,
-      "X-Admin-Auth-Token": process.env.API_UMBRELLA_ADMIN_TOKEN
+    var end_at = req.query.start_at || moment().format("YYYY-MM-DD");
+    var start_at = req.query.end_at || moment().subtract(30, 'day').format("YYYY-MM-DD");
+    var prefix = req.query.prefix || '0/';
+    var params = querystring.stringify({
+      start_at: start_at,
+      end_at: end_at,
+      interval: 'day',
+      prefix: prefix,
+      query: {
+        "condition": "AND",
+        "rules": [{
+          "field": "gatekeeper_denied_code",
+          "id": "gatekeeper_denied_code",
+          "input": "select",
+          "operator": "is_null",
+          "type": "string",
+          "value": null
+        }]
+      }
+    });
+
+    //NEVER expose this key to public
+    var options = {
+      method: "GET",
+      url: "https://api.data.gov/api-umbrella/v1/analytics/drilldown.json?" + params,
+      headers: {
+        "X-Api-Key": process.env.API_UMBRELLA_KEY,
+        "X-Admin-Auth-Token": process.env.API_UMBRELLA_ADMIN_TOKEN
+      }
     }
-  }
 
 
-  request(options, function (error, response, body) {
+    request(options, function (error, response, body) {
 
-    var indexInfo = {}
-    var filtered_endpoints = ENDPOINTS.filter(function (item) {
-      indexInfo[item.name] = 0
-      return item.download != true
-    })
-
-    Promise.all(filtered_endpoints.map(function (endpoint) {
-      var index = endpoint.index;
-      var info = index_info[index];
-      return new Promise(function (resolve, reject) {
-        request('http://localhost:8000' + endpoint.endpoint, function (error, response, body) {
-          if (error) {
-            reject(error)
-          } else {
-            try {
-              resolve(JSON.parse(body).meta.results.total)
-            } catch (err) {
-              reject(err)
-            }
-          }
-        })
-
-      }).then(function (document) {
-        indexInfo[endpoint.name] = document || 10
-
-      }).catch(function (err) {
-        log.error("Usage encountered error on : ", endpoint.name, ": ", err)
+      var indexInfo = {}
+      var filtered_endpoints = ENDPOINTS.filter(function (item) {
+        indexInfo[item.name] = 0
+        return item.download != true
       })
 
-    })).then(function () {
-      var usage = {
-        table: [],
-        stats: [],
-        others: [],
-        lastThirtyDayUsage: 0,
-        indexInfo: indexInfo
-      };
-
-      if (!error && response.statusCode == 200) {
-        var data = JSON.parse(body);
-        if (data.results) {
-          var unwanted = 0;
-          _.map(data.results, function (result) {
-            if (VALID_URLS.indexOf(result.path) > -1) {
-              usage.table.push(result);
+      Promise.all(filtered_endpoints.map(function (endpoint) {
+        var index = endpoint.index;
+        var info = index_info[index];
+        return new Promise(function (resolve, reject) {
+          request('http://localhost:8000' + endpoint.endpoint, function (error, response, body) {
+            if (error) {
+              reject(error)
             } else {
-              unwanted += result.hits;
-              usage.others.push(result);
-            }
-
-          });
-
-          if (unwanted > 0) {
-            usage.table.push({
-              "depth": 1,
-              "path": "others",
-              "terminal": true,
-              "descendent_prefix": "2/api.fda.gov/drug/",
-              "hits": unwanted
-            });
-          }
-
-          _.each(usage.table, function (row) {
-            usage.lastThirtyDayUsage += row.hits;
-          });
-
-        }
-        if (data.hits_over_time) {
-
-          _.each(data.hits_over_time.rows, function (row) {
-
-            var stat = {totalCount: 0, paths: []};
-            usage.stats.push(stat);
-
-            for (var i = 0; i < row.c.length; i++) {
-              if (i === 0) {
-                stat.day = row.c[i].f;
-              } else {
-                stat.totalCount += row.c[i].v;
-                stat.paths.push({path: data.hits_over_time.cols[i].label, count: row.c[i].v});
+              try {
+                resolve(JSON.parse(body).meta.results.total)
+              } catch (err) {
+                reject(err)
               }
             }
+          })
 
-          });
+        }).then(function (document) {
+          indexInfo[endpoint.name] = document || 10
+
+        }).catch(function (err) {
+          log.error("Usage encountered error on : ", endpoint.name, ": ", err)
+        })
+
+      })).then(function () {
+        var usage = {
+          table: [],
+          stats: [],
+          others: [],
+          lastThirtyDayUsage: 0,
+          indexInfo: indexInfo,
+          downloadStats: downloadStats
+        };
+
+        if (!error && response.statusCode == 200) {
+          var data = JSON.parse(body);
+          if (data.results) {
+            var unwanted = 0;
+            _.map(data.results, function (result) {
+              if (VALID_URLS.indexOf(result.path) > -1) {
+                usage.table.push(result);
+              } else {
+                unwanted += result.hits;
+                usage.others.push(result);
+              }
+
+            });
+
+            if (unwanted > 0) {
+              usage.table.push({
+                "depth": 1,
+                "path": "others",
+                "terminal": true,
+                "descendent_prefix": "2/api.fda.gov/drug/",
+                "hits": unwanted
+              });
+            }
+
+            _.each(usage.table, function (row) {
+              usage.lastThirtyDayUsage += row.hits;
+            });
+
+          }
+          if (data.hits_over_time) {
+
+            _.each(data.hits_over_time.rows, function (row) {
+
+              var stat = {totalCount: 0, paths: []};
+              usage.stats.push(stat);
+
+              for (var i = 0; i < row.c.length; i++) {
+                if (i === 0) {
+                  stat.day = row.c[i].f;
+                } else {
+                  stat.totalCount += row.c[i].v;
+                  stat.paths.push({path: data.hits_over_time.cols[i].label, count: row.c[i].v});
+                }
+              }
+
+            });
+          }
+        } else {
+          log.error(error);
+          log.error("The response is :");
+          log.error(response);
         }
-      } else {
-        log.error(error);
-        log.error("The response is :");
-        log.error(response);
-      }
-      res.setHeader('Cache-Control', 'public, max-age=' + 43200); //cache for 12 hours
-      res.json(usage);
+        res.setHeader('Cache-Control', 'public, max-age=' + 43200); //cache for 12 hours
+        res.json(usage);
 
-    }).catch(function (err) {
-      log.error("Usage encountered error: ", err)
-    })
-
+      }).catch(function (err) {
+        log.error("Usage encountered error: ", err)
+      })
+    });
   });
-
 });
 
 app.get('/healthcheck', function (request, response) {

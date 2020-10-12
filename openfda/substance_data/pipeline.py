@@ -7,21 +7,18 @@ Pipeline for converting Substance data to JSON and importing into Elasticsearch.
 import logging
 import os
 import re
-import sys
-import urllib2
 from os.path import join, dirname
 from dictsearch.search import iterate_dictionary
 from bs4 import BeautifulSoup
 import luigi
-import urlparse
+from urllib.parse import urljoin
+from urllib.request import urlopen
 from openfda import common, config, parallel, index_util
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 BASE_DIR = config.data_dir()
-GINAS_ROOT_URL = 'https://tripod.nih.gov/ginas/'
-SUBSTANCE_DATA_DOWNLOAD_PAGE_URL = urlparse.urljoin(GINAS_ROOT_URL, 'release/release.html')
+GINAS_ROOT_URL = 'https://gsrs.ncats.nih.gov/'
+SUBSTANCE_DATA_DOWNLOAD_PAGE_URL = urljoin(GINAS_ROOT_URL, 'release/release.html')
 SUBSTANCE_DATA_EXTRACT_DB = 'substancedata/substancedata.db'
 
 class DownloadSubstanceData(luigi.Task):
@@ -34,10 +31,10 @@ class DownloadSubstanceData(luigi.Task):
 
   def run(self):
     fileURL = None
-    soup = BeautifulSoup(urllib2.urlopen(SUBSTANCE_DATA_DOWNLOAD_PAGE_URL).read(), 'lxml')
+    soup = BeautifulSoup(urlopen(SUBSTANCE_DATA_DOWNLOAD_PAGE_URL).read(), 'lxml')
     for a in soup.find_all(href=re.compile('.*.gsrs')):
       if 'Full Public Data Dump' in a.text:
-        fileURL = urlparse.urljoin(GINAS_ROOT_URL, a['href'])
+        fileURL = urljoin(GINAS_ROOT_URL, a['href'])
 
     common.download(fileURL, self.output().path)
 
@@ -59,7 +56,7 @@ class ExtractZip(luigi.Task):
 
     gz_file = join(extract_dir, gz_filename)
     os.rename(gsrs_file, gz_file)
-    common.shell_cmd('gunzip ' + gz_file)
+    common.shell_cmd_quiet('gunzip ' + gz_file)
     os.rename(os.path.splitext(gz_file)[0], os.path.splitext(gz_file)[0] + ".json")
 
 class SubstanceData2JSONMapper(parallel.Mapper):
@@ -679,7 +676,7 @@ class SubstanceData2JSONMapper(parallel.Mapper):
           for o in parent_entry_obj:
             if iterate_dictionary(o, child_entry_path) is not None:
               # Pop fields with empty array value
-              if rename_map[entry] is "remove":
+              if rename_map[entry] == "remove":
                 o.pop(child_entry_path)
               elif o.get(child_entry_path) == []:
                 o.pop(child_entry_path)
@@ -691,7 +688,7 @@ class SubstanceData2JSONMapper(parallel.Mapper):
         else:
           if parent_entry_obj.get(child_entry_path) is not None:
             # Pop fields with empty array value
-            if rename_map[entry] is "remove":
+            if rename_map[entry] == "remove":
               parent_entry_obj.pop(child_entry_path)
             elif parent_entry_obj.get(child_entry_path) == []:
               parent_entry_obj.pop(child_entry_path)
@@ -729,7 +726,7 @@ class SubstanceData2JSON(luigi.Task):
   def run(self):
     parallel.mapreduce(
         parallel.Collection.from_glob(
-          self.input().path, parallel.JSONLineInputUnicode()),
+          self.input().path, parallel.JSONLineInput()),
         mapper=SubstanceData2JSONMapper(),
         reducer=parallel.IdentityReducer(),
         output_prefix=self.output().path)

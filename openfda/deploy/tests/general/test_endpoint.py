@@ -84,3 +84,14 @@ def test_limitless_count():
   error = expect_error(
     '/drug/label.json?count=active_ingredient&limit=1001')
   eq_(error['message'], "Limit cannot exceed 1000 results for count requests.")
+
+def test_skip_limit_ranges():
+  meta, results = fetch(
+    '/drug/label.json?skip=25000&limit=1000' )
+  eq_(len(results), 1000)
+
+  error = expect_error(
+    '/drug/label.json?skip=25000&limit=1001' )
+  eq_(error['message'], "Limit cannot exceed 1000 results for search requests. Use the skip or search_after param to get additional results.")
+
+

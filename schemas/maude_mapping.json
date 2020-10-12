@@ -53,6 +53,12 @@
         "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
+      "date_added": {
+        "type": "string"
+      },
+      "date_changed": {
+        "type": "string"
+      },
       "device": {
         "properties": {
           "openfda": {
@@ -953,7 +959,8 @@
             "fields": {
               "exact": {
                 "index": "not_analyzed",
-                "type": "string"
+                "type": "string",
+                "ignore_above": 8191
               }
             },
             "type": "string"

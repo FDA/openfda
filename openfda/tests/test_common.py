@@ -2,6 +2,7 @@ import random
 import string
 import unittest
 from openfda import common
+from six.moves import range
 class TestCommonMethods(unittest.TestCase):
 
   def test_extract_date(self):
@@ -20,10 +21,10 @@ class TestCommonMethods(unittest.TestCase):
     tmpFile = '/tmp/'+(''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32)))
     common.shell_cmd('touch %(tmpFile)s' % locals())
     assert len(common.shell_cmd('ls %(tmpFile)s' % locals())) > 0
-    assert common.shell_cmd('ls %(tmpFile)s' % locals()).startswith(tmpFile)
+    assert common.shell_cmd('ls %(tmpFile)s' % locals()).startswith(tmpFile.encode())
 
   def test_shell_cmd_quiet(self):
     tmpFile = '/tmp/'+(''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(32)))
     common.shell_cmd_quiet('touch %(tmpFile)s' % locals())
-    assert common.shell_cmd_quiet('ls %(tmpFile)s' % locals()).startswith(tmpFile)
+    assert common.shell_cmd_quiet('ls %(tmpFile)s' % locals()).startswith(tmpFile.encode())
 

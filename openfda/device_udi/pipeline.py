@@ -17,6 +17,7 @@ from openfda import common, config, index_util, parallel
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
                                                    DeviceAnnotateMapper)
 
+
 DEVICE_UDI_BUCKET = 's3://cdrh-data'
 DEVICE_UDI_LOCAL_DIR = config.data_dir('device_udi/s3_sync')
 BATCH = arrow.utcnow().floor('day').format('YYYYMMDD')
@@ -64,7 +65,7 @@ class ExtractXML(luigi.Task):
     common.shell_cmd('mkdir -p %s', output_dir)
     input_dir = self.local_dir
     for zip_filename in glob.glob(input_dir + '/*.zip'):
-      common.shell_cmd('unzip -ou %s -d %s', zip_filename, output_dir)
+      common.shell_cmd_quiet('unzip -ou %s -d %s', zip_filename, output_dir)
 
 
 class XML2JSONMapper(parallel.Mapper):
@@ -161,7 +162,7 @@ class XML2JSONMapper(parallel.Mapper):
             """
       if k in IGNORE: return None
       if v is None: return None
-      if type(v) == dict and len(v.keys()) == 0:
+      if type(v) == dict and len(list(v.keys())) == 0:
         return None
       if type(v) == list and len(v) == 1 and v[0] is None:
         return None
@@ -169,9 +170,9 @@ class XML2JSONMapper(parallel.Mapper):
         k = RENAME_MAP[k]
 
       if k in FLATTEN:
-        v = v[v.keys()[0]]
+        v = v[list(v.keys())[0]]
 
-      if type(v) == list and len(v) == 1 and type(v[0]) == dict and len(v[0].keys()) == 0:
+      if type(v) == list and len(v) == 1 and type(v[0]) == dict and len(list(v[0].keys())) == 0:
         return None
 
       return k, v
@@ -201,7 +202,7 @@ class XML2JSONMapper(parallel.Mapper):
         # print(json.dumps(device, indent=4 * ' '))
 
         # @id will be a concatenation of primary identifier's issuer with the ID number itself.
-        for identifier, idenList in xml["identifiers"].iteritems():
+        for identifier, idenList in iter(xml["identifiers"].items()):
           if type(idenList) == type([]):
             for iden in idenList:
               if 'deviceIdType' in iden and 'deviceIdIssuingAgency' in iden and 'Primary' == iden['deviceIdType']:
@@ -217,7 +218,7 @@ class XML2JSONMapper(parallel.Mapper):
         raise
 
     try:
-      xmltodict.parse(open(map_input.filename), encoding="utf-8", xml_attribs=True,
+      xmltodict.parse(open(map_input.filename, 'rb'), encoding="utf-8", xml_attribs=True,
                       force_list=("identifier", "customerContact", "gmdn", "fdaProductCode",
                                   "deviceSize", "storageHandling", "fei", "premarketSubmission"),
                       item_depth=2, item_callback=handle_device)

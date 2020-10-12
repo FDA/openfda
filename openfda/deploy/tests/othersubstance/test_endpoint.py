@@ -266,14 +266,14 @@ def test_references():
     '/other/substance.json?search=unii:X1468QSS0Q')
   eq_(len(results), 1)
 
-  references = results[0]["references"]
-  eq_(references[0]["citation"], "NCBI")
-  eq_(references[0]["uuid"], "ff641620-26d9-4cf9-81b1-0f8f95bc7ce9")
-  eq_(references[0]["tags"], ["NOMEN"])
-  eq_(references[0]["public_domain"], True)
-  # eq_(references[1]["document_type"], "SRS")
-  # eq_(references[1]["url"], "http://fdasis.nlm.nih.gov/srs/srsdirect.jsp?regno=X1468QSS0Q")
-  # eq_(references[1]["document_date"], 1493391472000)
+  references = sorted(results[0]["references"], key=lambda k: k['uuid'])
+  eq_(references[2]["citation"], "NCBI")
+  eq_(references[2]["uuid"], "ff641620-26d9-4cf9-81b1-0f8f95bc7ce9")
+  eq_(references[2]["tags"], ["NOMEN"])
+  eq_(references[2]["public_domain"], True)
+  eq_(references[0]["doc_type"], "SRS")
+  eq_(references[0]["url"], "http://fdasis.nlm.nih.gov/srs/srsdirect.jsp?regno=X1468QSS0Q")
+  eq_(references[0]["document_date"], 1493391472000)
 
 
 def test_relationships():
@@ -281,11 +281,11 @@ def test_relationships():
     '/other/substance.json?search=unii:981Y8SX18M')
   eq_(len(results), 1)
 
-  relationships = results[0]["relationships"][0]
-  eq_(relationships["type"], "PARENT->SALT/SOLVATE")
-  eq_(relationships["uuid"], "0d717420-619e-4e45-aa3e-d13593ea90c9")
+  rel = sorted(results[0]["relationships"], key=lambda k: k['uuid'])[1]
+  eq_(rel["type"], "PARENT->SALT/SOLVATE")
+  eq_(rel["uuid"], "0d717420-619e-4e45-aa3e-d13593ea90c9")
 
-  related_substance = relationships["related_substance"]
+  related_substance = rel["related_substance"]
   eq_(related_substance["unii"], "9266D9P3PQ")
   eq_(related_substance["uuid"], "294bf8e1-4639-4fc6-81ef-01e97dc51826")
   eq_(related_substance["substance_class"], "reference")

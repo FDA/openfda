@@ -20,14 +20,14 @@ def validate_date(date):
   try:
     date_obj = arrow.get(fixDate(year, month, day), DATE_FORMAT)
   except Exception as e:
-    if e.message == 'day is out of range for month':
+    if str(e) == 'day is out of range for month':
       if int(day) < 1:
         day = '01'
       elif int(day) > 31:
         day = '31'
       elif int(day) > 28:
         day = str((int(day) - 1))
-    elif e.message == 'month must be in 1..12':
+    elif str(e) == 'month must be in 1..12':
       if int(month) < 1:
         month = '01'
       if int(month) > 12:

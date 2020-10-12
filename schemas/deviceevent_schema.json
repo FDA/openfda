@@ -32,6 +32,14 @@
       "type": "string",
       "format": "date"
     },
+    "date_added": {
+      "type": "string",
+      "format": "date"
+    },
+    "date_changed": {
+      "type": "string",
+      "format": "date"
+    },
     "device": {
       "items": {
         "properties": {

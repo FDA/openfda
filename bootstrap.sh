@@ -3,20 +3,16 @@
 #
 # Python
 #
-rm -rf build/
+rm -rf build/ ./openfda.egg-info ./_python-env
 
 export LANG=C
+PYTHON_ENV='./_python-env'
 
-# We emulate readlink with python, so we can work on OSX without greadlink.
-# From: http://stackoverflow.com/questions/1055671/how-can-i-get-the-behavior-
-# of-gnus-readlink-f-on-a-mac
-PYTHON_ENV=$(python -c 'import os,sys;print os.path.realpath(sys.argv[1])' ./_python-env)
-
-PYTHON=$(which python)
-if [[ -n MACHTYPE ]]; then
-  PIP="pip install"
+PYTHON=$(which python3)
+if [[ -n $MACHTYPE ]]; then
+  PIP="pip3 install"
 else
-  PIP="pip install --user"
+  PIP="pip3 install --user"
 fi
 
 $PIP virtualenv
@@ -27,6 +23,7 @@ test -e $PYTHON_ENV || virtualenv -p $PYTHON $PYTHON_ENV
 
 # Install project sources and dependencies into the environment
 $PYTHON_ENV/bin/pip uninstall -y openfda || true
+$PYTHON_ENV/bin/pip install cython
 $PYTHON_ENV/bin/pip install -U -r  requirements.txt
 $PYTHON_ENV/bin/python setup.py develop
 

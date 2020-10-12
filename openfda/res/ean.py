@@ -20,6 +20,7 @@ UPC-E is a compressed (convoluted algorithm) UPC-A with extraneous
 middle 0 digits removed.
 
 """
+from functools import reduce
 
 __version__ = "$Revision: 0.4$"
 
