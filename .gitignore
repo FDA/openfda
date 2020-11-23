@@ -68,3 +68,6 @@ watchdog
 /cover/openfda_nsde_py.html
 /cover/openfda_py.html
 /openfda/spl/.idea/codeStyles/codeStyleConfig.xml
+/notebooks/.ipynb_checkpoints/historic_img_processing_expandv3_all_docs-checkpoint.ipynb
+/ppm_image_files/
+/notebooks/.ipynb_checkpoints/historic_img_analysis-gen_data-checkpoint.ipynb

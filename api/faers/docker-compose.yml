@@ -9,7 +9,7 @@ services:
     ports:
       - "9200"
   import:
-    image: elasticdump/elasticsearch-dump
+    image: elasticdump/elasticsearch-dump:v6.28.0
     command: >
       sh -c "chmod a+x /tmp/wait-for.sh &&
              /tmp/wait-for.sh es:9200 -t 120 &&
@@ -23,7 +23,7 @@ services:
     depends_on:
       - es
   test:
-    image: node:8-alpine
+    image: node:14-alpine
     working_dir: /api
     volumes:
       - ./:/api

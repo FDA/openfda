@@ -18,8 +18,9 @@ import arrow
 import luigi
 from bs4 import BeautifulSoup
 
-from openfda import parallel, config, index_util
+from openfda import parallel, config, index_util, common
 from openfda.annotation_table.pipeline import CombineHarmonization
+from openfda.common import newest_file_timestamp
 from openfda.faers import annotate
 from openfda.faers import xml_to_json
 from openfda.tasks import AlwaysRunTask, DependencyTriggeredTask
@@ -27,6 +28,7 @@ from openfda.tasks import AlwaysRunTask, DependencyTriggeredTask
 # this should be a symlink to wherever the real data directory is
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 BASE_DIR = config.data_dir()
+RAW_DIR = join(BASE_DIR, 'faers/raw')
 FAERS_HISTORIC = 's3://openfda-data-faers-historical'
 FAERS_CURRENT = 'https://fis.fda.gov/extensions/FPD-QDE-FAERS/FPD-QDE-FAERS.html'
 
@@ -49,8 +51,7 @@ class DownloadDataset(luigi.Task):
     for i in range(10):
       try:
         logging.info('Downloading: ' + url)
-        cmd = "curl '%s' > '%s'" % (url, target_name)
-        subprocess.check_call(cmd, shell=True)
+        common.download(url, target_name)
         subprocess.check_call('unzip -t %s' % target_name, shell=True)
         return
       except:
@@ -58,13 +59,13 @@ class DownloadDataset(luigi.Task):
     logging.fatal('Zip File: %s from URL :%s is not valid, stop all processing', target_name, url)
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'faers/raw'))
+    return luigi.LocalTarget(RAW_DIR)
 
   def run(self):
     os.system('mkdir -p "%s"' % self.output().path)
-    self._faers_current = BeautifulSoup(urlopen(FAERS_CURRENT).read())
+    self._faers_current = BeautifulSoup(urlopen(FAERS_CURRENT).read(), "lxml")
     for filename, url in list(self._fetch()):
-      target_name = join(BASE_DIR, 'faers/raw', filename.lower())
+      target_name = join(RAW_DIR, filename.lower())
       self._download_with_retry(url, target_name)
 
 
@@ -192,6 +193,7 @@ class LoadJSONQuarter(index_util.LoadJSONBase):
   mapping_file = './schemas/faers_mapping.json'
   docid_key='@case_number'
   use_checksum = True
+  last_update_date = lambda _: newest_file_timestamp(RAW_DIR)
 
   # Optimize after all quarters are finished.
   optimize_index = False

@@ -23,14 +23,12 @@ setuptools.setup(
     'mock<=2.0.0',
     'coverage',
     'python-gflags',
-    'pyyaml',
     'pyelasticsearch',
     'requests',
     'setproctitle',
     'simplejson',
     'xmltodict',
-    'dictsearch',
-    'pandas<1.1'
+    'dictsearch'
   ],
   description=('A research project to provide open APIs, raw data downloads, '
                'documentation and examples, and a developer community for an '

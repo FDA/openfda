@@ -12,7 +12,7 @@ import luigi
 from bs4 import BeautifulSoup
 
 from openfda import common, config, index_util, parallel
-from openfda.common import convert_unicode
+from openfda.common import convert_unicode, newest_file_timestamp
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 BASE_DIR = config.data_dir('caers')
@@ -195,6 +195,7 @@ class LoadJSON(index_util.LoadJSONBase):
   data_source = CSV2JSON()
   use_checksum = False
   optimize_index = True
+  last_update_date = lambda _: newest_file_timestamp(DOWNLOAD_DIR)
 
 
 if __name__ == '__main__':

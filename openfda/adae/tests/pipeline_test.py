@@ -30,18 +30,6 @@ class ADAEPipelineTests(unittest.TestCase):
     extract.run()
     ok_(os.path.isfile(os.path.join(self.test_dir, "file1.xml")))
 
-  def test_s3_sync(self):
-    s3_sync = SyncS3()
-    s3_sync.local_dir = self.test_dir
-
-    # Test marker file.
-    eq_(s3_sync.flag_file(), os.path.join(self.test_dir, '.last_sync_time'))
-    ok_(not s3_sync.complete())
-    with open(os.path.join(self.test_dir, '.last_sync_time'), 'w') as out_f:
-      out_f.write('')
-    ok_(s3_sync.complete())
-    os.remove(os.path.join(self.test_dir, '.last_sync_time'))
-    ok_(not s3_sync.complete())
 
   def test_normalize_product_ndc(self):
     eq_("57319-485", normalize_product_ndc("NDC57319-485-05"))

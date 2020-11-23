@@ -43,6 +43,18 @@
       },
       "type": "array"
     },
+    "adverse_reactions_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "animal_pharmacology_and_or_toxicology_table": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
     "alarms": {
       "items": {
         "type": "string"
@@ -635,7 +647,10 @@
           "type": "array"
         },
         "is_original_packager": {
-          "type": "boolean"
+          "items": {
+            "type": "boolean"
+          },
+          "type": "array"
         },
         "manufacturer_name": {
           "items": {

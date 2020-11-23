@@ -18,6 +18,7 @@ class NDCPipelineTests(unittest.TestCase):
   def setUp(self):
     self.test_dir = tempfile.mkdtemp()
     openfda.ndc.pipeline.BASE_DIR = self.test_dir
+    openfda.ndc.pipeline.RAW_DIR = join(openfda.ndc.pipeline.BASE_DIR, 'raw')
     openfda.ndc.pipeline.MERGED_PACKAGES = join(openfda.ndc.pipeline.BASE_DIR, 'merge/package.csv')
     openfda.ndc.pipeline.MERGED_PRODUCTS = join(openfda.ndc.pipeline.BASE_DIR, 'merge/product.csv')
     openfda.ndc.pipeline.NDC_PACKAGE_DB = join(openfda.ndc.pipeline.BASE_DIR, 'json/package.db')

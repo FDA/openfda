@@ -74,7 +74,7 @@ RANGE_ENDPOINT_MAP = {
   '/drug/event': {
     'date_key': '@timestamp',
     'start_date': '2004-01-01',
-    'end_date': '2020-07-01'
+    'end_date': '2020-10-01'
   },
   # Check here for device event:
   # https://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/PostmarketRequirements/ReportingAdverseEvents/ucm127891.htm
@@ -491,7 +491,7 @@ class LoadDownloadJSON(index_util.LoadJSONBase):
     es_client.index(**index_dict)
 
     elasticsearch_requests.update_process_datetime(
-      config.es_client(), self.index_name, arrow.utcnow().format('YYYY-MM-DD')
+      config.es_client(), self.index_name, arrow.utcnow().format('YYYY-MM-DD'), arrow.utcnow().format('YYYY-MM-DD')
     )
 
 

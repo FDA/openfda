@@ -17,11 +17,13 @@ import pandas as pd
 from bs4 import BeautifulSoup
 
 from openfda import common, config, parallel, index_util
+from openfda.common import newest_file_timestamp
 
 
 TOBACCO_PROBLEM_DOWNLOAD_PAGE = \
   'https://www.fda.gov/tobacco-products/tobacco-science-research/tobacco-product-problem-reports'
 TOBACCO_PROBLEM_EXTRACT_DB = 'tobacco_problem/tobacco_problem.db'
+TOBACCO_RAW_DIR = config.data_dir('tobacco_problem/raw')
 
 
 class DownloadTobaccoProblem(luigi.Task):
@@ -29,11 +31,11 @@ class DownloadTobaccoProblem(luigi.Task):
     return []
 
   def output(self):
-    return luigi.LocalTarget(config.data_dir('tobacco_problem/raw/tobacco_problem_raw.json'))
+    return luigi.LocalTarget(config.data_dir('tobacco_problem/json/tobacco_problem_raw.json'))
 
   def run(self):
     logging.basicConfig(level=logging.INFO)
-    output_dir = config.data_dir('tobacco_problem/raw')
+    output_dir = TOBACCO_RAW_DIR
     os.system('mkdir -p %s' % output_dir)
 
     # Download all csv source files (current year and archived years).
@@ -109,6 +111,7 @@ class LoadJSON(index_util.LoadJSONBase):
   data_source = TobaccoProblem2JSON()
   use_checksum = False
   optimize_index = True
+  last_update_date = lambda _: newest_file_timestamp(TOBACCO_RAW_DIR)
 
 
 if __name__ == '__main__':

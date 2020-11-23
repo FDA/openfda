@@ -12,6 +12,7 @@ import arrow
 
 from openfda import common, config, index_util, parallel
 from openfda.tasks import AlwaysRunTask
+from openfda.common import first_file_timestamp
 
 SEROLOGY_TEST_BUCKET = 's3://openfda-covid19serology/'
 SEROLOGY_TEST_SYNC_DIR = config.data_dir('covid19serology/s3_sync')
@@ -85,6 +86,7 @@ class LoadJSON(index_util.LoadJSONBase):
   data_source = SerologyCSV2JSON()
   use_checksum = False
   optimize_index = True
+  last_update_date = lambda _: first_file_timestamp(SEROLOGY_TEST_SYNC_DIR)
 
 
 if __name__ == '__main__':

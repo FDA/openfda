@@ -4,29 +4,22 @@
     loading into elasticsearch.
 '''
 
-import collections
 import glob
-import logging
 import os
-from os.path import basename, dirname, join
-import sys
+from os.path import dirname, join
 
-import arrow
-import elasticsearch
 import luigi
-import requests
-import simplejson as json
 
-from openfda import common, config, download_util, elasticsearch_requests, index_util, parallel
-
+from openfda import common, config, download_util, index_util, parallel
+from openfda.common import first_file_timestamp
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
-  DeviceAnnotateMapper)
+                                                   DeviceAnnotateMapper)
 from openfda.device_pma import transform
-from openfda.tasks import AlwaysRunTask
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 # A directory for holding files that track Task state
 META_DIR = config.data_dir('device_pma/meta')
+RAW_DIR = config.data_dir('device_pma/raw')
 common.shell_cmd('mkdir -p %s', META_DIR)
 
 DEVICE_PMA_ZIP = 'https://www.accessdata.fda.gov/premarket/ftparea/pma.zip'
@@ -36,7 +29,7 @@ class DownloadPMA(luigi.Task):
     return []
 
   def output(self):
-    return luigi.LocalTarget(config.data_dir('device_pma/raw'))
+    return luigi.LocalTarget(RAW_DIR)
 
   def run(self):
     output_filename = join(self.output().path, DEVICE_PMA_ZIP.split('/')[-1])
@@ -120,7 +113,7 @@ class LoadJSON(index_util.LoadJSONBase):
   data_source = AnnotateDevice()
   use_checksum = False
   optimize_index = True
-
+  last_update_date = lambda _: first_file_timestamp(RAW_DIR)
 
 if __name__ == '__main__':
   luigi.run()

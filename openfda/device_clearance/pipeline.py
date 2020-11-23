@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup
 
 from openfda import common, config, index_util, parallel
 from openfda import download_util
+from openfda.common import first_file_timestamp
 from openfda.device_clearance import transform
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
   DeviceAnnotateMapper)
@@ -23,6 +24,7 @@ from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 # A directory for holding files that track Task state
 META_DIR = config.data_dir('510k/meta')
+RAW_DIR = config.data_dir('510k/raw')
 common.shell_cmd('mkdir -p %s', META_DIR)
 
 CLEARED_DEVICE_URL = 'https://www.fda.gov/medical-devices/510k-clearances/downloadable-510k-files'
@@ -32,7 +34,7 @@ class Download_510K(luigi.Task):
     return []
 
   def output(self):
-    return luigi.LocalTarget(config.data_dir('510k/raw'))
+    return luigi.LocalTarget(RAW_DIR)
 
   def run(self):
     soup = BeautifulSoup(urlopen(CLEARED_DEVICE_URL).read(), 'lxml')
@@ -116,6 +118,7 @@ class LoadJSON(index_util.LoadJSONBase):
   data_source = AnnotateDevice()
   use_checksum = False
   optimize_index = True
+  last_update_date = lambda _: first_file_timestamp(RAW_DIR)
 
 if __name__ == '__main__':
   luigi.run()

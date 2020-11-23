@@ -449,6 +449,9 @@ class LoadJSONBase(AlwaysRunTask):
   'Should we optimize the index after adding documents.'
   optimize_index = False
 
+  'Last update date of the dataset (different from last_run_date which is merely when the pipeline last ran)'
+  last_update_date = arrow.utcnow().format('YYYY-MM-DD')
+
   def _data(self):
     '''
     Return a task that supplies the data files to load into ES.
@@ -505,7 +508,8 @@ class LoadJSONBase(AlwaysRunTask):
 
     # update metadata index
     elasticsearch_requests.update_process_datetime(
-      config.es_client(), self.index_name, arrow.utcnow().format('YYYY-MM-DD')
+      config.es_client(), self.index_name, last_run_date=arrow.utcnow().format('YYYY-MM-DD'),
+      last_update_date=self.last_update_date() if callable(self.last_update_date) else self.last_update_date
     )
 
     # optimize index, if requested

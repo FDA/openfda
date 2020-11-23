@@ -14,9 +14,10 @@ import luigi
 from urllib.parse import urljoin
 from urllib.request import urlopen
 from openfda import common, config, parallel, index_util
-
+from openfda.common import first_file_timestamp
 
 BASE_DIR = config.data_dir()
+RAW_DIR = config.data_dir('substancedata/raw')
 GINAS_ROOT_URL = 'https://gsrs.ncats.nih.gov/'
 SUBSTANCE_DATA_DOWNLOAD_PAGE_URL = urljoin(GINAS_ROOT_URL, 'release/release.html')
 SUBSTANCE_DATA_EXTRACT_DB = 'substancedata/substancedata.db'
@@ -27,7 +28,7 @@ class DownloadSubstanceData(luigi.Task):
     return []
 
   def output(self):
-    return luigi.LocalTarget(config.data_dir('substancedata/raw/dump-public.gsrs'))
+    return luigi.LocalTarget(os.path.join(RAW_DIR, 'dump-public.gsrs'))
 
   def run(self):
     fileURL = None
@@ -739,6 +740,7 @@ class LoadJSON(index_util.LoadJSONBase):
   data_source = SubstanceData2JSON()
   use_checksum = False
   optimize_index = True
+  last_update_date = lambda _: first_file_timestamp(RAW_DIR)
 
 
 if __name__ == '__main__':

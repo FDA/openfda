@@ -226,6 +226,7 @@ class AnnotateJSON(luigi.Task):
 
 class LoadJSON(index_util.LoadJSONBase):
   batch = luigi.Parameter()
+  last_update_date = luigi.Parameter()
   index_name = 'recall'
   type_name = 'enforcementreport'
   mapping_file = './schemas/res_mapping.json'
@@ -256,7 +257,7 @@ class RunWeeklyProcess(AlwaysRunTask):
     previous_task = None
 
     for batch in arrow.Arrow.range('week', start, end):
-      task = LoadJSON(batch=batch, previous_task=previous_task)
+      task = LoadJSON(batch=batch, last_update_date=end.format('YYYY-MM-DD'), previous_task=previous_task)
       previous_task = task
       yield task
 
