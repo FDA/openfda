@@ -17,6 +17,7 @@ from lxml import etree
 from openfda import common, config, index_util, parallel
 from openfda.adae import annotate
 from openfda.annotation_table.pipeline import CombineHarmonization
+from openfda.common import newest_file_timestamp
 
 ADAE_BUCKET = 's3://openfda-data-adae'
 ADAE_LOCAL_DIR = config.data_dir('adae/s3_sync')
@@ -43,16 +44,8 @@ class SyncS3(luigi.Task):
   local_dir = ADAE_LOCAL_DIR
   aws = AWS_CLI
 
-  def flag_file(self):
-    return os.path.join(self.local_dir, '.last_sync_time')
-
-  def complete(self):
-    # Only run S3 sync once per day.
-    if config.disable_downloads():
-      return True
-
-    return os.path.exists(self.flag_file()) and (
-      arrow.get(os.path.getmtime(self.flag_file())) > arrow.now().floor('day'))
+  def output(self):
+    return luigi.LocalTarget(ADAE_LOCAL_DIR)
 
   def run(self):
     common.quiet_cmd([self.aws,
@@ -60,9 +53,6 @@ class SyncS3(luigi.Task):
                 's3', 'sync',
                 self.bucket,
                 self.local_dir])
-
-    with open(self.flag_file(), 'w') as out_f:
-      out_f.write('')
 
 
 class ExtractXML(luigi.Task):
@@ -441,6 +431,7 @@ class LoadJSON(index_util.LoadJSONBase):
   data_source = XML2JSON()
   use_checksum = False
   optimize_index = True
+  last_update_date = lambda _: newest_file_timestamp(ADAE_LOCAL_DIR)
 
 
 if __name__ == '__main__':

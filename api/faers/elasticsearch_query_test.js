@@ -93,31 +93,42 @@ exports.testSupportedQueryString_Supported = function(test) {
   test.done();
 };
 
-exports.testBuildSort = function (test) {
-  test.equal(elasticsearch_query.BuildSort({}), '_uid')
-  test.equal(elasticsearch_query.BuildSort({sort: ''}), '_uid')
-  test.equal(elasticsearch_query.BuildSort({sort: ' report_date '}), 'report_date,_uid')
-  test.equal(elasticsearch_query.BuildSort({sort: 'report_date:asc'}), 'report_date:asc,_uid')
-  test.equal(elasticsearch_query.BuildSort({sort: 'report_date:desc'}), 'report_date:desc,_uid')
-  test.equal(elasticsearch_query.BuildSort({sort: 'report_date:desc,field.exact'}), 'report_date:desc,field.exact,_uid')
-    test.throws(function () {
-            // Unallowed character within sort param.
-            elasticsearch_query.BuildSort({sort: 'report_date`receiptdate'})
-        },
-        elasticsearch_query.ELASTICSEARCH_QUERY_ERROR);
-    test.throws(function () {
-            elasticsearch_query.BuildSort({sort: 'id'})
-        },
-        elasticsearch_query.ELASTICSEARCH_QUERY_ERROR);
-    test.throws(function () {
-            elasticsearch_query.BuildSort({sort: 'openfda.brand_name'})
-        },
-        elasticsearch_query.ELASTICSEARCH_QUERY_ERROR);
-    test.doesNotThrow(function () {
-            elasticsearch_query.BuildSort({sort: 'openfda.brand_name.exact'})
-        },
-        elasticsearch_query.ELASTICSEARCH_QUERY_ERROR);
-    test.done();
+exports.testBuildSort = async function (test) {
+  test.equal(await elasticsearch_query.BuildSort({}), '_uid')
+  test.equal(await elasticsearch_query.BuildSort({sort: ''}), '_uid')
+  test.equal(await elasticsearch_query.BuildSort({sort: ' report_date '}), 'report_date,_uid')
+  test.equal(await elasticsearch_query.BuildSort({sort: 'report_date:asc'}), 'report_date:asc,_uid')
+  test.equal(await elasticsearch_query.BuildSort({sort: 'report_date:desc'}), 'report_date:desc,_uid')
+  test.equal(await elasticsearch_query.BuildSort({sort: 'report_date:desc,field.exact'}), 'report_date:desc,field.exact,_uid')
+
+  try {
+    await elasticsearch_query.BuildSort({sort: 'report_date`receiptdate'});
+    test.fail();
+  } catch (e) {
+    test.equal(e.name, elasticsearch_query.ELASTICSEARCH_QUERY_ERROR);
+  }
+
+  try {
+    await elasticsearch_query.BuildSort({sort: 'id'});
+    test.fail();
+  } catch (e) {
+    test.equal(e.name, elasticsearch_query.ELASTICSEARCH_QUERY_ERROR);
+  }
+
+  try {
+    await elasticsearch_query.BuildSort({sort: 'openfda.brand_name'})
+    test.fail();
+  } catch (e) {
+    test.equal(e.name, elasticsearch_query.ELASTICSEARCH_QUERY_ERROR);
+  }
+
+  try {
+    await elasticsearch_query.BuildSort({sort: 'openfda.brand_name.exact'})
+  } catch (e) {
+    test.fail();
+  }
+
+  test.done();
 }
 
 exports.testHandleDeprecatedClauses = function (test) {

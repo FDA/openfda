@@ -4,28 +4,22 @@
     loading into elasticsearch.
 '''
 
-import collections
 import csv
 import glob
-import logging
 import os
-from os.path import basename, dirname, join
-import sys
+from os.path import dirname, join
 
-import arrow
-import elasticsearch
 import luigi
-import requests
-import simplejson as json
 
 from openfda import common, config, index_util, parallel
 from openfda import device_common, download_util
+from openfda.common import first_file_timestamp
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
-  DeviceAnnotateMapper)
-from openfda.tasks import AlwaysRunTask
+                                                   DeviceAnnotateMapper)
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 # A directory for holding files that track Task state
+RAW_DIR = config.data_dir('classification/raw')
 META_DIR = config.data_dir('classification/meta')
 common.shell_cmd('mkdir -p %s', META_DIR)
 
@@ -39,7 +33,7 @@ class DownloadFoiClass(luigi.Task):
     return []
 
   def output(self):
-    return luigi.LocalTarget(config.data_dir('classification/raw'))
+    return luigi.LocalTarget(RAW_DIR)
 
   def run(self):
     output_filename = join(self.output().path, DEVICE_CLASS_ZIP.split('/')[-1])
@@ -139,6 +133,7 @@ class LoadJSON(index_util.LoadJSONBase):
   data_source = AnnotateDevice()
   use_checksum = False
   optimize_index = True
+  last_update_date = lambda _: first_file_timestamp(RAW_DIR)
 
 
 if __name__ == '__main__':

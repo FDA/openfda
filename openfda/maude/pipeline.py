@@ -19,6 +19,7 @@ from bs4 import BeautifulSoup
 
 from openfda import common, parallel, index_util
 from openfda import download_util
+from openfda.common import newest_file_timestamp
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
                                                    DeviceAnnotateMapper)
 from openfda.tasks import AlwaysRunTask, DependencyTriggeredTask
@@ -28,6 +29,7 @@ csv.field_size_limit(sys.maxsize)
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 BASE_DIR = './data/'
+RAW_DIR = join(BASE_DIR, 'maude/raw/events')
 
 # See https://github.com/FDA/openfda/issues/27
 # Files for resolving device problem codes
@@ -302,11 +304,11 @@ class DownloadDeviceEvents(AlwaysRunTask):
     return []
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'maude/raw/events'))
+    return luigi.LocalTarget(RAW_DIR)
 
   def _run(self):
     zip_urls = []
-    soup = BeautifulSoup(urlopen(DEVICE_DOWNLOAD_PAGE).read())
+    soup = BeautifulSoup(urlopen(DEVICE_DOWNLOAD_PAGE).read(), "lxml")
     for a in soup.find_all(href=re.compile('.*.zip')):
       zip_urls.append(a['href'])
     if not zip_urls:
@@ -755,6 +757,8 @@ class LoadJSONByRunDate(index_util.LoadJSONBase):
   optimize_index = False
   docid_key='mdr_report_key'
   use_checksum = True
+  last_update_date = lambda _: newest_file_timestamp(RAW_DIR)
+
 
   def _data(self):
     return AnnotateReport(run_date=self.run_date)

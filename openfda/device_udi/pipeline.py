@@ -14,31 +14,22 @@ import arrow
 import luigi
 import xmltodict
 from openfda import common, config, index_util, parallel
+from openfda.common import first_file_timestamp
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
                                                    DeviceAnnotateMapper)
-
 
 DEVICE_UDI_BUCKET = 's3://cdrh-data'
 DEVICE_UDI_LOCAL_DIR = config.data_dir('device_udi/s3_sync')
 BATCH = arrow.utcnow().floor('day').format('YYYYMMDD')
 AWS_CLI = 'aws'
 
-
 class SyncS3DeviceUDI(luigi.Task):
   bucket = DEVICE_UDI_BUCKET
   local_dir = DEVICE_UDI_LOCAL_DIR
   aws = AWS_CLI
 
-  def flag_file(self):
-    return os.path.join(self.local_dir, '.last_sync_time')
-
-  def complete(self):
-    # Only run S3 sync once per day.
-    if config.disable_downloads():
-      return True
-
-    return os.path.exists(self.flag_file()) and (
-      arrow.get(os.path.getmtime(self.flag_file())) > arrow.now().floor('day'))
+  def output(self):
+    return luigi.LocalTarget(DEVICE_UDI_LOCAL_DIR)
 
   def run(self):
     common.cmd([self.aws,
@@ -46,9 +37,6 @@ class SyncS3DeviceUDI(luigi.Task):
                 's3', 'sync',
                 self.bucket,
                 self.local_dir])
-
-    with open(self.flag_file(), 'w') as out_f:
-      out_f.write('')
 
 
 class ExtractXML(luigi.Task):
@@ -310,10 +298,9 @@ class LoadJSON(index_util.LoadJSONBase):
   type_name = 'deviceudi'
   mapping_file = './schemas/deviceudi_mapping.json'
   data_source = AnnotateDevice()
-  #docid_key = '@id'
   use_checksum = False
   optimize_index = False
-
+  last_update_date = lambda _: first_file_timestamp(DEVICE_UDI_LOCAL_DIR)
 
 if __name__ == '__main__':
   luigi.run()

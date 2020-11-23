@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 
 from openfda import common, config, index_util, parallel
+from openfda.common import first_file_timestamp
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
                                                    DeviceAnnotateMapper)
 from openfda.tasks import AlwaysRunTask
@@ -195,6 +196,7 @@ class LoadJSON(index_util.LoadJSONBase):
   data_source = AnnotateDevice()
   use_checksum = False
   optimize_index = True
+  last_update_date = lambda _: first_file_timestamp(DEVICE_RECALL_LOCAL_DIR)
 
 
 if __name__ == '__main__':

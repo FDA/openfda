@@ -11,16 +11,17 @@ from os.path import join, dirname
 import luigi
 
 from openfda import common, config, parallel, index_util
+from openfda.common import newest_file_timestamp
 
 NSDE_DOWNLOAD = \
   'https://download.open.fda.gov/Comprehensive_NDC_SPL_Data_Elements_File.zip'
 NSDE_EXTRACT_DB = 'nsde/nsde.db'
-
+NSDE_RAW_DIR = config.data_dir('nsde/raw')
 
 class DownloadNSDE(luigi.Task):
 
   def output(self):
-    return luigi.LocalTarget(config.data_dir('nsde/raw/nsde.csv'))
+    return luigi.LocalTarget(join(NSDE_RAW_DIR, 'nsde.csv'))
 
   def run(self):
     output_dir = dirname(self.output().path)
@@ -87,6 +88,7 @@ class LoadJSON(index_util.LoadJSONBase):
   data_source = NSDE2JSON()
   use_checksum = False
   optimize_index = True
+  last_update_date = lambda _: newest_file_timestamp(NSDE_RAW_DIR)
 
 
 if __name__ == '__main__':

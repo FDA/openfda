@@ -50,24 +50,31 @@ def load_mapping(es, index_name, type_name, mapping_file_or_dict):
                    exc_info=1)
     raise
 
-def update_process_datetime(es, doc_id, timestamp):
-  ''' Updates the last_update_date for the document id passed into function.
+
+def update_process_datetime(es, doc_id, last_run_date, last_update_date):
+  ''' Updates the last_run_date and last_update_date for the document id passed into function.
     The document id in will be the name of another index in the cluster.
   '''
   _map = {
     'last_run': {
       'properties': {
-         'last_update_date': {
-           'type': 'date',
-           'format': 'dateOptionalTime'
-         }
+        'last_update_date': {
+          'type': 'date',
+          'format': 'dateOptionalTime'
+        },
+        'last_run_date': {
+          'type': 'date',
+          'format': 'dateOptionalTime'
+        }
       }
     }
   }
 
   load_mapping(es, METADATA_INDEX, METADATA_TYPE, _map)
-  new_doc = { 'last_update_date': timestamp }
-  logging.info("Updating last_update_date -  [index=%s, type=%s, id=%s, time=%s]", METADATA_INDEX, METADATA_TYPE, doc_id, timestamp)
+  new_doc = {'last_update_date': last_update_date, 'last_run_date': last_run_date}
+  logging.info(
+    "Updating last_run_date & last_update_date -  [index=%s, type=%s, id=%s, last_run_date=%s, last_update_date=%s]",
+    METADATA_INDEX, METADATA_TYPE, doc_id, last_run_date, last_update_date)
   es.index(index=METADATA_INDEX,
            doc_type=METADATA_TYPE,
            id=doc_id,

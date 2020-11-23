@@ -59,11 +59,13 @@ from bs4 import BeautifulSoup
 
 from openfda import common, config, index_util, parallel
 from openfda import download_util
+from openfda.common import newest_file_timestamp
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
                                                    DeviceAnnotateMapper)
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 BASE_DIR = config.data_dir('registration')
+RAW_DIR = config.data_dir('registration/raw')
 common.shell_cmd('mkdir -p %s', BASE_DIR)
 # A directory for holding files that track Task state
 META_DIR = config.data_dir('registration/meta')
@@ -169,7 +171,7 @@ class DownloadDeviceRegistrationAndListings(luigi.Task):
     return []
 
   def output(self):
-    return luigi.LocalTarget(config.data_dir('registration/raw'))
+    return luigi.LocalTarget(RAW_DIR)
 
   def run(self):
     zip_urls = []
@@ -236,7 +238,7 @@ class TXT2JSONMapper(parallel.Mapper):
         if k is None: return
         k = k.lower()
         if v is None: return (k, v)
-        if k in DATE_KEYS: return (k,  arrow.get(v, 'MM/DD/YYYY')\
+        if k in DATE_KEYS: return (k,  arrow.get(v, 'MM/DD/YYYY')
                                             .format('YYYY-MM-DD'))
         if isinstance(v, list): return (k, v)
         return (k, v.strip())
@@ -654,6 +656,7 @@ class LoadJSON(index_util.LoadJSONBase):
   data_source = AnnotateDevice()
   use_checksum = False
   optimize_index = True
+  last_update_date = lambda _: newest_file_timestamp(RAW_DIR)
 
 
 if __name__ == '__main__':

@@ -38,4 +38,23 @@ ignore:
     - elastic.js > elasticsearch > lodash:
         reason: None given
         expires: '2021-07-15T19:19:02.057Z'
+  SNYK-JS-Y18N-1021887:
+    - forever > yargs > y18n:
+        reason: No remediation available; threat low
+        expires: '2020-12-10T19:29:19.194Z'
+    - forever > nconf > yargs > y18n:
+        reason: No remediation available; threat low
+        expires: '2020-12-10T19:29:19.194Z'
+    - snyk > snyk-config > nconf > yargs > y18n:
+        reason: No remediation available; threat low
+        expires: '2020-12-10T19:29:19.194Z'
+    - snyk > snyk-nodejs-lockfile-parser > snyk-config > nconf > yargs > y18n:
+        reason: No remediation available; threat low
+        expires: '2020-12-10T19:29:19.194Z'
+    - snyk > snyk-docker-plugin > snyk-nodejs-lockfile-parser > snyk-config > nconf > yargs > y18n:
+        reason: No remediation available; threat low
+        expires: '2020-12-10T19:29:19.195Z'
+    - snyk > snyk-mvn-plugin > @snyk/java-call-graph-builder > snyk-config > nconf > yargs > y18n:
+        reason: No remediation available; threat low
+        expires: '2020-12-10T19:29:19.195Z'
 patch: {}

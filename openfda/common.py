@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import collections
 import logging
 import os
 import re
@@ -10,7 +9,9 @@ import time
 from io import BytesIO
 from os.path import dirname
 from threading import Thread
+
 import requests
+import arrow
 
 DEFAULT_BATCH_SIZE = 100
 
@@ -221,7 +222,7 @@ def get_p_number(data):
 
 def download(url, output_filename):
   shell_cmd('mkdir -p %s', dirname(output_filename))
-  shell_cmd("curl -fL '%s' > '%s.tmp'", url, output_filename)
+  shell_cmd("curl -fLR -o '%s.tmp' '%s'", output_filename, url)
   os.rename(output_filename + '.tmp', output_filename)
 
 def download_requests(url, output_filename):
@@ -291,3 +292,22 @@ def convert_unicode(data):
   #  return type(data)(list(map(convert_unicode, data)))
   #else:
   return data
+
+
+def first_file_timestamp(path):
+  '''
+  :param path: path to an existing directory
+  :return: timestamp of the first file found in the given directory as YYYY-MM-DD
+  '''
+  return arrow.get(os.path.getmtime(os.path.join(path, os.listdir(path)[0]))).format('YYYY-MM-DD') if len(
+    os.listdir(path)) > 0 else None
+
+
+def newest_file_timestamp(path):
+  '''
+  :param path: path to an existing directory
+  :return: timestamp of the newest file found in the given directory as YYYY-MM-DD
+  '''
+  return arrow.get(sorted(list(map(lambda file: os.path.getmtime(os.path.join(path, file)), os.listdir(path))))[-1]).format(
+    'YYYY-MM-DD') if len(
+    os.listdir(path)) > 0 else None

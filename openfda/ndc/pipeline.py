@@ -16,11 +16,13 @@ from bs4 import BeautifulSoup
 
 from openfda import common, config, parallel, index_util
 from openfda.annotation_table.pipeline import CombineHarmonization
+from openfda.common import newest_file_timestamp
 from openfda.ndc.annotate import AnnotateMapper
 
 NDC_DOWNLOAD_PAGE = \
   'https://www.fda.gov/drugs/drug-approvals-and-databases/national-drug-code-directory'
 BASE_DIR = join(config.data_dir(), 'ndc')
+RAW_DIR = join(BASE_DIR, 'raw')
 
 MERGED_PACKAGES = join(BASE_DIR, 'merge/package.csv')
 MERGED_PRODUCTS = join(BASE_DIR, 'merge/product.csv')
@@ -36,7 +38,7 @@ class DownloadNDCFiles(luigi.Task):
     return []
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'raw'))
+    return luigi.LocalTarget(RAW_DIR)
 
   def run(self):
     finished_ndc_url = None
@@ -54,8 +56,8 @@ class DownloadNDCFiles(luigi.Task):
     if not unfinished_ndc_url:
       logging.fatal('NDC unfinished drugs database file not found!')
 
-    common.download(finished_ndc_url, join(BASE_DIR, 'raw/finished.zip'))
-    common.download(unfinished_ndc_url, join(BASE_DIR, 'raw/unfinished.zip'))
+    common.download(finished_ndc_url, join(RAW_DIR, 'finished.zip'))
+    common.download(unfinished_ndc_url, join(RAW_DIR, 'unfinished.zip'))
 
 
 class ExtractNDCFiles(luigi.Task):
@@ -357,6 +359,7 @@ class LoadJSON(index_util.LoadJSONBase):
   data_source = AnnotateJSON()
   use_checksum = False
   optimize_index = True
+  last_update_date = lambda _: newest_file_timestamp(RAW_DIR)
 
 
 if __name__ == '__main__':

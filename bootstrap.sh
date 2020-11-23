@@ -3,12 +3,12 @@
 #
 # Python
 #
-rm -rf build/ ./openfda.egg-info ./_python-env
+rm -rf build openfda.egg-info _python-env
 
 export LANG=C
 PYTHON_ENV='./_python-env'
 
-PYTHON=$(which python3)
+PYTHON="python3"
 if [[ -n $MACHTYPE ]]; then
   PIP="pip3 install"
 else

@@ -12,6 +12,7 @@ import luigi
 
 from openfda import common, config, parallel, index_util
 from openfda.annotation_table.pipeline import CombineHarmonization
+from openfda.common import first_file_timestamp
 from openfda.drugsfda.annotate import AnnotateMapper
 
 DOWNLOAD_FILE = 'https://www.fda.gov/media/89850/download'
@@ -641,6 +642,7 @@ class LoadJSON(index_util.LoadJSONBase):
   data_source = AnnotateDrugsFDA()
   use_checksum = False
   optimize_index = True
+  last_update_date = lambda _: first_file_timestamp(os.path.dirname(RAW_DATA_FILE))
 
 
 if __name__ == '__main__':

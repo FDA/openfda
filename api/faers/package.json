@@ -18,9 +18,12 @@
     "elasticsearch": "^16.7.1",
     "escape-html": "^1.0.3",
     "express": "^4.17.1",
+    "express-async-handler": "^1.1.4",
     "fast-stats": "0.0.2",
     "forever": "^3.0.0",
+    "jsonpath": "^1.0.2",
     "moment": "^2.6.0",
+    "node-cache": "^5.1.2",
     "qs": "^6.9.4",
     "request": "^2.88.2",
     "snyk": "^1.377.2",
@@ -41,7 +44,7 @@
     "test:integration": "mocha --exit bdd test/integration"
   },
   "engines": {
-    "node": "6"
+    "node": "14"
   },
   "license": "CC0",
   "subdomain": "api",

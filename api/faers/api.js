@@ -1,8 +1,9 @@
 // OpenFDA APIs
 //
 
-var elasticsearch = require('elasticsearch');
+var elasticsearch = require('./elasticsearch_client');
 var express = require('express');
+const asyncHandler = require('express-async-handler')
 var cors = require('cors');
 var compression = require('compression')
 var moment = require('moment');
@@ -110,6 +111,8 @@ var PROCESS_METADATA_INDEX = 'openfdametadata';
 var EXPORT_DATA_INDEX = 'openfdadata';
 var SUBSTANCE_DATA_INDEX = 'substancedata';
 var DOWNLOAD_STATS_INDEX = 'downloadstats';
+var HISTORICAL_DOCUMENTS_INDEX = 'historicaldocument';
+var HISTORICAL_DOCUMENTS_ANALYTICS_INDEX = 'historicaldocumentanalytics';
 
 // This data structure is the standard way to add an endpoint to the api, which
 // is to say, if there is a one-to-one mapping between an index and an endpoint,
@@ -125,7 +128,7 @@ var DOWNLOAD_STATS_INDEX = 'downloadstats';
 // }
 // Results in an endpoint: /device/event.json hitting /deviceevent/maude index.
 
-var ENDPOINTS = [
+const ENDPOINTS = [
   {
     'index': ANIMAL_AND_VETERINARY_DRUG_EVENT_INDEX,
     'endpoint': '/animalandveterinary/event.json',
@@ -244,6 +247,21 @@ var ENDPOINTS = [
     'basic': true
   },
   {
+    'index': HISTORICAL_DOCUMENTS_INDEX,
+    'endpoint': '/other/historicaldocument.json',
+    'name': 'otherhistoricaldocument',
+    'basic': true,
+    'disabled': !process.env.API_HISTORICAL_DOCUMENTS_ENABLED
+  },
+  {
+    'index': HISTORICAL_DOCUMENTS_ANALYTICS_INDEX,
+    'endpoint': '/other/historicaldocumentanalytics.json',
+    'name': 'otherhistoricaldocumentanalytics',
+    'basic': true,
+    'disabled': !process.env.API_HISTORICAL_DOCUMENTS_ENABLED,
+    'auxiliary': true
+  },
+  {
     'index': EXPORT_DATA_INDEX,
     'endpoint': '/download.json',
     'name': 'openfdadata',
@@ -280,11 +298,6 @@ var VALID_URLS = [
   'api.fda.gov/other/substance.json'
 ];
 
-// For each endpoint, we track the success/failure status for the
-// last REQUEST_HISTORY_LENGTH requests; this is used to determine
-// the green/yellow/red status for an endpoint.
-var REQUEST_HISTORY_LENGTH = 10;
-
 
 // Set caching headers for Amazon Cloudfront
 CacheMiddleware = function (seconds) {
@@ -306,14 +319,15 @@ var UpdateIndexInformation = function (client, index_info) {
   client.search({
     index: PROCESS_METADATA_INDEX,
     type: 'last_run',
-    size: 20,
+    size: 30,
     _sourceInclude: ['last_update_date']
   }).then(function (body) {
     var util = require('util');
     for (var i = 0; i < body.hits.hits.length; ++i) {
       var hit = body.hits.hits[i];
       var id = hit._id;
-      index_info[id].last_updated = hit._source.last_update_date;
+      if (index_info[id])
+        index_info[id].last_updated = hit._source.last_update_date;
     }
   }, function (error) {
     console.log('Failed to fetch index update times:: ', error.message);
@@ -326,15 +340,6 @@ var UpdateIndexInformation = function (client, index_info) {
       .then(function (endpoint, body) {
         index_info[endpoint.index].document_count = body.count;
       }.bind(null, endpoint));
-  });
-};
-
-var TestAvailability = function () {
-  _.map(ENDPOINTS, function (endpoint) {
-    request(endpoint.endpoint, function (error, response, body) {
-      var info = index_info[endpoint.index];
-      info.status.push(!error);
-    });
   });
 };
 
@@ -398,14 +403,7 @@ app.set('json spaces', 2);
 app.set('json replacer', undefined);
 
 var log = logging.GetLogger();
-
-var client = new elasticsearch.Client({
-  host: process.env.ES_HOST || 'localhost:9200',
-  log: logging.ElasticsearchLogger,
-  apiVersion: '5.6',
-  // Note that this doesn't abort the query.
-  requestTimeout: 20000  // milliseconds
-});
+var client = elasticsearch.client;
 
 // Initialize our index information.  This is returned by the status API.
 _.map(ENDPOINTS, function (endpoint) {
@@ -430,7 +428,7 @@ setInterval(UpdateIndexInformation.bind(null, client, index_info),
 // the endpoint, and the average latency of the endpoint in milliseconds.
 app.get('/status', function (req, response) {
   var filtered_endpoints = ENDPOINTS.filter(function (item) {
-    return item.download != true
+    return item.download != true && !item.disabled && !item.auxiliary
   })
 
   Promise.all(filtered_endpoints.map(function (endpoint) {
@@ -556,11 +554,11 @@ app.get('/usage.json', cache('1 hour'), function (req, res) {
 
       var indexInfo = {}
       var filtered_endpoints = ENDPOINTS.filter(function (item) {
-        indexInfo[item.name] = 0
-        return item.download != true
+        return item.download != true && !item.disabled && !item.auxiliary
       })
 
       Promise.all(filtered_endpoints.map(function (endpoint) {
+        indexInfo[endpoint.name] = 0
         var index = endpoint.index;
         var info = index_info[index];
         return new Promise(function (resolve, reject) {
@@ -712,10 +710,10 @@ TryToCheckApiParams = function (request, response) {
   }
 };
 
-TryToBuildElasticsearchParams = function (params, es_index, response) {
+TryToBuildElasticsearchParams = async function (params, es_index, response) {
   try {
     var es_query = elasticsearch_query.BuildQuery(params);
-    var es_sort = elasticsearch_query.BuildSort(params);
+    var es_sort = await elasticsearch_query.BuildSort(params, es_index);
     log.info(es_query, 'Elasticsearch Query');
   } catch (e) {
     log.error(e);
@@ -868,7 +866,8 @@ GetDownload = function (response) {
 
 // Enforcement.
 EnforcementEndpoint = function (noun) {
-  app.get('/' + noun + '/enforcement.json', function (request, response) {
+  app.get('/' + noun + '/enforcement.json',
+    asyncHandler(async function (request, response, next) {
     LogRequest(request);
     SetHeaders(response);
 
@@ -892,13 +891,13 @@ EnforcementEndpoint = function (noun) {
 
     var index = ALL_ENFORCEMENT_INDEX;
     var es_search_params =
-      TryToBuildElasticsearchParams(params, index, response);
+      await TryToBuildElasticsearchParams(params, index, response);
     if (es_search_params === null) {
       return;
     }
 
     TrySearch(index, params, es_search_params, request, response);
-  });
+  }));
 };
 
 EnforcementEndpoint('drug');
@@ -914,7 +913,7 @@ BasicEndpoint = function (data) {
     && res.statusCode === 200;
   const cacheLimitlessCountReq = cache('1 day', limitlessCountReq);
 
-  app.get(endpoint, cacheLimitlessCountReq, function (request, response) {
+  app.get(endpoint, cacheLimitlessCountReq, asyncHandler(async function (request, response, next) {
     LogRequest(request);
     SetHeaders(response);
 
@@ -924,18 +923,18 @@ BasicEndpoint = function (data) {
     }
 
     var es_search_params =
-      TryToBuildElasticsearchParams(params, index, response);
+      await TryToBuildElasticsearchParams(params, index, response);
     if (es_search_params === null) {
       return;
     }
 
     TrySearch(index, params, es_search_params, request, response);
-  });
+  }));
 };
 
 // Make all of the basic endpoints
 _.map(ENDPOINTS, function (endpoint) {
-  if (endpoint.basic) {
+  if (endpoint.basic && !endpoint.disabled) {
     BasicEndpoint(endpoint);
   }
 });

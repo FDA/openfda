@@ -4,7 +4,13 @@ var ejs = require('elastic.js');
 var escape = require('escape-html');
 const qs = require('qs')
 const _ = require('underscore');
+const client = require('./elasticsearch_client').client;
+const jsonpath = require('jsonpath');
 var ELASTICSEARCH_QUERY_ERROR = 'ElasticsearchQueryError';
+const logging = require('./logging.js');
+const log = logging.GetLogger();
+const NodeCache = require( "node-cache" );
+const fieldMappingCache = new NodeCache();
 
 // Supported characters:
 // all letters and numbers
@@ -197,6 +203,8 @@ EXACT_FIELDS = [
   'reactions'
 ];
 
+const SORTABLE_FIELD_TYPES = ['keyword', 'short', 'integer', 'byte', 'date']
+
 exports.ELASTICSEARCH_QUERY_ERROR = ELASTICSEARCH_QUERY_ERROR;
 
 exports.SupportedQueryString = function(query) {
@@ -224,7 +232,7 @@ exports.HandleDeprecatedClauses = function(search) {
     return search.replace(/_missing_:("?[\w.]+"?)/g, "(NOT (_exists_:$1))");
 };
 
-exports.BuildSort = function(params) {
+exports.BuildSort = async function(params, index) {
     var sort = '';
     if (params.sort) {
         params.sort = params.sort.trim()
@@ -234,17 +242,50 @@ exports.BuildSort = function(params) {
                 message: 'Sort not supported: ' + escape(params.sort)
             };
         }
-        if (params.sort.indexOf('exact') == -1 && !DATE_FIELDS.find(f => params.sort.split(':')[0].endsWith(f))) {
-            throw {
-                name: ELASTICSEARCH_QUERY_ERROR,
-                message: 'Sorting allowed by exact or date fields only: ' + escape(params.sort.split(':')[0])
-            };
-        }
+      if (params.sort.indexOf('exact') == -1
+        && !DATE_FIELDS.find(f => params.sort.split(':')[0].endsWith(f))
+        && ! await isSortableField(params.sort.split(':')[0], index)) {
+        throw {
+          name: ELASTICSEARCH_QUERY_ERROR,
+          message: 'Sorting allowed by non-analyzed fields only: ' + escape(params.sort.split(':')[0])
+        };
+      }
         sort = exports.ReplaceExact(params.sort);
     }
 
   return sort ? sort + ',_uid' : '_uid';
 };
+
+async function isSortableField(field, index) {
+  if (index && field) {
+    const cacheKey = `${index}.${field}`;
+    if (!fieldMappingCache.has(cacheKey)) {
+      fieldMappingCache.set(cacheKey, await isFieldTypeAcceptableForSorting(field, index));
+    }
+    return fieldMappingCache.get(cacheKey);
+  }
+  return false;
+}
+
+async function isFieldTypeAcceptableForSorting(field, index) {
+  try {
+    const mappings = jsonpath.query(await client.indices.getFieldMapping({
+      index: index,
+      local: true,
+      fields: field
+    }), '$..mapping.*');
+    if (mappings.length > 0) {
+      const fieldType = mappings[0].type;
+      if (fieldType && SORTABLE_FIELD_TYPES.includes(fieldType)) {
+        return true;
+      }
+    }
+  } catch (e) {
+    log.error(e);
+    fieldMappingCache.flushAll();
+  }
+  return false;
+}
 
 var AddSearchAfter = function (ejsBody, params) {
   if (params.search_after) {
