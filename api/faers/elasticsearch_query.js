@@ -69,6 +69,9 @@ var DATE_FIELDS = [
 
   // Device Recall
   'event_date_terminated',
+  'event_date_initiated',
+  'event_date_created',
+  'event_date_posted',
 
   // Device PMA
   'decision_date',

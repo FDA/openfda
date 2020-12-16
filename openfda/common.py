@@ -9,9 +9,11 @@ import time
 from io import BytesIO
 from os.path import dirname
 from threading import Thread
+from urllib.request import urlopen
 
 import requests
 import arrow
+from bs4 import BeautifulSoup
 
 DEFAULT_BATCH_SIZE = 100
 
@@ -239,6 +241,18 @@ def download_to_file_with_retry(url, output_file):
       return
     except:
       logging.info('Timeout trying %s, retrying...', url)
+      time.sleep(5)
+      continue
+
+  raise Exception('Fetch of %s failed.' % url)
+
+
+def soup_with_retry(url):
+  for i in range(25):
+    try:
+      return BeautifulSoup(urlopen(url).read(), "lxml")
+    except:
+      logging.info('An error trying to cook soup from %s, retrying...', url)
       time.sleep(5)
       continue
 

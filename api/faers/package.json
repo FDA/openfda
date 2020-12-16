@@ -20,13 +20,13 @@
     "express": "^4.17.1",
     "express-async-handler": "^1.1.4",
     "fast-stats": "0.0.2",
-    "forever": "^3.0.0",
+    "forever": "^3.0.2",
     "jsonpath": "^1.0.2",
     "moment": "^2.6.0",
     "node-cache": "^5.1.2",
     "qs": "^6.9.4",
     "request": "^2.88.2",
-    "snyk": "^1.377.2",
+    "snyk": "^1.425.4",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
