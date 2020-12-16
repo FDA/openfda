@@ -20,20 +20,20 @@ This repository contains the code which powers all of the `api.fda.gov` end poin
 # Prerequisites
 
 * Elasticsearch 5.6
-* Python 3
+* Python 3.8
 * Node 14 or above
 
 # Packaging
 
-Run `bootstrap.sh` to download and setup a virtualenv for the `openfda` python package and to download and setup the `openfda-api` node package.
+Run `bootstrap.sh` to download and set up a virtualenv for the `openfda` python package and to download and set up the `openfda-api` node package.
 
 # Running in Docker
 
-If you intend to try and run openFDA yourself, we have put together a `docker-compose.yml` configuration
+If you intend to try running openFDA yourself, we have put together a `docker-compose.yml` configuration
  that can help you get started. `docker-compose up` will:
 1. Start an [Elasticsearch](http://www.elasticsearch.org/) container
 2. Start an API container, which will expose port `8000` for queries.
-3. Start a Python 3 container that will run the NSDE, CAERS, and Substance Data pipelines and
+3. Start a Python 3 container that will run the NSDE, CAERS, Substance Data, Device Clearance and Device Event pipelines and
 create corresponding indices in Elasticsearch.
 
 Note: even though the API container starts right away, it will not serve any data until some or all
@@ -43,11 +43,18 @@ endpoint becomes available, it can be queried using the standard openFDA
 [query syntax](https://open.fda.gov/apis/query-syntax/).
 For example: `curl -g 'http://localhost:8000/food/event.json?search=products.industry_name:"Soft+Drink/Water"+AND+reactions.exact:DEHYDRATION&limit=10'`
 
-At this point the Python container only runs the NSDE, CAERS, and Substance Data pipelines because those
-are relatively lightweight and require no access to internal FDA networks. We will add more pipelines
-in case there is substantial interest from the community. However, the three pipelines above provide a good starting
+At this point the Python container only runs the NSDE, CAERS, Substance Data, Device Clearance and Device Event pipelines because most of those
+are relatively lightweight (except Device Event) and require no access to internal FDA networks. We will add more pipelines
+in case there is substantial interest from the community. However, the pipelines above provide a good starting
 point into understanding openFDA internals and/or customizing openFDA.
+
+## Linux Users
+`vm.max_map_count` needs to be increased as follows before Elasticsearch can start successfully:
+```shell
+sudo sysctl -w vm.max_map_count=262144
+echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
+```
 
 ## Windows Users
 
-Clone the repository with `git clone https://github.com/FDA/openfda.git --config core.autocrlf=input` in order to circumvent docker issues with building images on a Windows computer.
+Clone the repository with `git clone https://github.com/FDA/openfda.git --config core.autocrlf=input` in order to circumvent Docker issues with building images on a Windows computer.

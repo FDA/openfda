@@ -1,10 +1,12 @@
 #!/bin/bash
 
 set -x
+source ./_python-env/bin/activate
 
 export LUIGI_CONFIG_PATH=./config/luigi.cfg
 export PYTHON=./_python-env/bin/python
 export LOGDIR=./logs
+export PYTHONUNBUFFERED=true
 
 mkdir -p $LOGDIR
 
@@ -15,10 +17,11 @@ $BASEDIR/wait-for.sh $es_host -t 120
 $PYTHON openfda/nsde/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 $PYTHON openfda/caers/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 $PYTHON openfda/substance_data/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
+$PYTHON openfda/device_clearance/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
+$PYTHON openfda/maude/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 
 #$PYTHON openfda/classification/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 #$PYTHON openfda/device_pma/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
-#$PYTHON openfda/device_clearance/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 #$PYTHON openfda/registration/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 #$PYTHON openfda/annotation_table/pipeline.py CombineHarmonization --FDAConfig-es-host=$es_host > $LOGDIR/annotation.log 2>&1
 #$PYTHON openfda/ndc/pipeline.py LoadJSON --FDAConfig-es-host=$es_host > $LOGDIR/ndc.log 2>&1

@@ -11,7 +11,6 @@ setuptools.setup(
   python_requires='>=3.6',
   install_requires=[
     'arrow<0.16.0',
-    'beautifulsoup4<=4.4.0',
     'boto',
     'click',
     'elasticsearch<=1.6.0',

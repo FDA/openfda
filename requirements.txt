@@ -1,5 +1,6 @@
 setuptools
 backports.ssl-match-hostname==3.4.0.2
+beautifulsoup4
 certifi
 dictsearch==3.2.0
 docutils==0.12
@@ -23,4 +24,5 @@ fuzzywuzzy
 python-Levenshtein
 imageio
 profanity-filter
+usaddress
 

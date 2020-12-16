@@ -584,7 +584,7 @@ class JoinAllMapper(parallel.Mapper):
     db_name = basename(dirname(self.filename))
     prefix, lookup_key = ID_PREFIX_DB_MAP[db_name]
     if not value:
-      logging.warning('Bad value for map input: %s, %s', db_name, key)
+      #logging.warning('Bad value for map input: %s, %s', db_name, key)
       return
     if not isinstance(value, list): value = [value]
     for val in value:
@@ -592,8 +592,8 @@ class JoinAllMapper(parallel.Mapper):
       set_id = self.get_set_id(lookup_value)
       if set_id:
         output.add(set_id, (db_name, val))
-      else:
-        logging.warning('Missing set id for %s', lookup_value)
+      #else:
+      #  logging.warning('Missing set id for %s', lookup_value)
 
 
 class JoinAllReducer(parallel.Reducer):
@@ -651,8 +651,8 @@ class JoinAllReducer(parallel.Reducer):
     # out key field and simply writes one value per line.
     for row in self._join(values):
       output.put(key, row)
-    else:
-      logging.warning('No data for key: %s', key)
+    #else:
+    #  logging.warning('No data for key: %s', key)
 
 
 class CombineHarmonization(DependencyTriggeredTask):

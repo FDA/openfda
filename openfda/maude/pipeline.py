@@ -299,14 +299,14 @@ def _exact_split(key, value, sep):
   return [(key, value), (new_key, new_value)]
 
 
-class DownloadDeviceEvents(AlwaysRunTask):
+class DownloadDeviceEvents(luigi.Task):
   def requires(self):
     return []
 
   def output(self):
     return luigi.LocalTarget(RAW_DIR)
 
-  def _run(self):
+  def run(self):
     zip_urls = []
     soup = BeautifulSoup(urlopen(DEVICE_DOWNLOAD_PAGE).read(), "lxml")
     for a in soup.find_all(href=re.compile('.*.zip')):
@@ -318,7 +318,7 @@ class DownloadDeviceEvents(AlwaysRunTask):
       common.download(zip_url, join(self.output().path, filename))
 
 
-class ExtractAndCleanDownloadsMaude(AlwaysRunTask):
+class ExtractAndCleanDownloadsMaude(luigi.Task):
   ''' Unzip each of the download files and remove all the non-UTF8 characters.
       Unzip -p streams the data directly to iconv which then writes to disk.
   '''
@@ -328,7 +328,7 @@ class ExtractAndCleanDownloadsMaude(AlwaysRunTask):
   def output(self):
     return luigi.LocalTarget(join(BASE_DIR, 'maude/extracted'))
 
-  def _run(self):
+  def run(self):
     output_dir = self.output().path
     common.shell_cmd('mkdir -p %s', output_dir)
     for i in range(len(self.input())):
@@ -587,8 +587,8 @@ class CSV2JSON(luigi.Task):
       mapper=CSV2JSONMapper(problem_codes_reference=problem_codes_reference, device_problem_codes=device_problem_codes),
       reducer=CSV2JSONJoinReducer(),
       output_prefix=self.output().path,
-      map_workers=int(multiprocessing.cpu_count() / 5),
-      num_shards=int(multiprocessing.cpu_count() / 5))
+      map_workers=int(multiprocessing.cpu_count() / 6) + 1,
+      num_shards=int(multiprocessing.cpu_count() / 6) + 1)
 
 
 class MergeUpdatesMapper(parallel.Mapper):

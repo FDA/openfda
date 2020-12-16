@@ -1,11 +1,59 @@
 {
   "$schema": "http://json-schema.org/draft-03/schema",
   "properties": {
+    "event_date_initiated": {
+      "type": "string",
+      "format": "date"
+    },
+    "event_date_created": {
+      "type": "string",
+      "format": "date"
+    },
+    "event_date_posted": {
+      "type": "string",
+      "format": "date"
+    },
     "event_date_terminated": {
       "type": "string",
       "format": "date"
     },
+    "recall_status": {
+      "type": "string"
+    },
+    "recalling_firm": {
+      "type": "string"
+    },
+    "address_1": {
+      "type": "string"
+    },
+    "address_2": {
+      "type": "string"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "postal_code": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string"
+    },
+    "additional_info_contact": {
+      "type": "string"
+    },
     "firm_fei_number": {
+      "type": "string"
+    },
+    "reason_for_recall": {
+      "type": "string"
+    },
+    "product_description": {
+      "type": "string"
+    },
+    "code_info": {
       "type": "string"
     },
     "k_numbers": {
@@ -13,6 +61,15 @@
         "type": "string"
       },
       "type": "array"
+    },
+    "action": {
+      "type": "string"
+    },
+    "product_quantity": {
+      "type": "string"
+    },
+    "distribution_pattern": {
+      "type": "string"
     },
     "openfda": {
       "properties": {

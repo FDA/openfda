@@ -75,11 +75,8 @@ DEVICE_REG_PAGE = ('https://www.fda.gov/medical-devices/'
                    'device-registration-and-listing/'
                    'establishment-registration-and-medical-device-listing-files-download')
 
-S3_BUCKET = 's3://openfda-data-reglist/'
-S3_LOCAL_DIR = config.data_dir('registration/s3_sync')
-
-common.shell_cmd('mkdir -p %s', S3_LOCAL_DIR)
-
+REG_LISTING_URL = 'https://download.open.fda.gov/reglist/registration_listing.txt'
+REG_LISTING_LOCAL_DIR = config.data_dir('registration/reg_listing')
 REMAPPED_FILES = {
  'registration_listing.txt': 'remapped_registration_listing.txt',
  }
@@ -96,31 +93,15 @@ EXCLUDED_FILES = [
 # TODO(hansnelsen): copied from spl/pipeline.py, consolidate to a common place.
 #                   This version has been slightly altered, so we will need to
 #                   do this refactor once all of the S3 requirements are in.
-class SyncS3(luigi.Task):
-  bucket = S3_BUCKET
-  local_dir = S3_LOCAL_DIR
+class DownloadRegListing(luigi.Task):
+  url = REG_LISTING_URL
+  local_dir = REG_LISTING_LOCAL_DIR
 
   def output(self):
     return luigi.LocalTarget(self.local_dir)
 
-  def flag_file(self):
-    return os.path.join(self.local_dir, '.last_sync_time')
-
-  def complete(self):
-    'Only run S3 sync once per day.'
-    return os.path.exists(self.flag_file()) and (
-      arrow.get(os.path.getmtime(self.flag_file())) > arrow.now().floor('day'))
-
   def run(self):
-    common.cmd(['aws',
-                '--profile=' + config.aws_profile(),
-                's3',
-                'sync',
-                self.bucket,
-                self.local_dir])
-
-    with open(self.flag_file(), 'w') as out_f:
-      out_f.write('')
+    common.download(self.url, os.path.join(self.local_dir, 'registration_listing.txt'))
 
 def remap_supplemental_files(original, supplemental, output_file):
   orig = pandas.read_csv(original, sep='|')
@@ -197,7 +178,7 @@ class ExtractAndCleanDownloadsReg(luigi.Task):
   ]
 
   def requires(self):
-    return [DownloadDeviceRegistrationAndListings(), SyncS3()]
+    return [DownloadDeviceRegistrationAndListings(), DownloadRegListing()]
 
   def output(self):
     return luigi.LocalTarget(config.data_dir('registration/extracted'))

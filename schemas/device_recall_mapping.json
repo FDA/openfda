@@ -1,9 +1,6 @@
 {
   "recall": {
     "_source": {
-      "excludes": [
-        "*_exact"
-      ],
       "includes": [
         "*"
       ]
@@ -13,13 +10,68 @@
         "index": "not_analyzed",
         "type": "string"
       },
+      "@id": {
+        "type": "keyword"
+      },
+      "event_date_initiated": {
+        "format": "basic_date||date||epoch_millis",
+        "type": "date"
+      },
+      "event_date_created": {
+        "format": "basic_date||date||epoch_millis",
+        "type": "date"
+      },
+      "event_date_posted": {
+        "format": "basic_date||date||epoch_millis",
+        "type": "date"
+      },
       "event_date_terminated": {
         "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
+      "recall_status": {
+        "type": "keyword"
+      },
+      "recalling_firm": {
+        "fields": {
+          "exact": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "address_1": {
+        "type": "keyword"
+      },
+      "address_2": {
+        "type": "keyword"
+      },
+      "city": {
+        "type": "keyword"
+      },
+      "state": {
+        "type": "keyword"
+      },
+      "postal_code": {
+        "type": "keyword"
+      },
+      "country": {
+        "type": "keyword"
+      },
+      "additional_info_contact": {
+        "type": "keyword"
+      },
       "firm_fei_number": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
+      },
+      "reason_for_recall": {
+        "type": "text"
+      },
+      "product_description": {
+        "type": "text"
+      },
+      "code_info": {
+        "type": "text"
       },
       "product_code": {
         "index": "not_analyzed",
@@ -35,12 +87,10 @@
         "type": "string"
       },
       "pma_numbers": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "k_numbers": {
-        "index": "not_analyzed",
-        "type": "string"
+         "type": "keyword"
       },
       "other_submission_description": {
         "index": "analyzed",
@@ -53,11 +103,19 @@
       "root_cause_description": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
+      },
+      "action": {
+        "type": "text"
+      },
+      "product_quantity": {
+        "type": "keyword"
+      },
+      "distribution_pattern": {
+        "type": "text"
       },
       "openfda": {
         "properties": {
