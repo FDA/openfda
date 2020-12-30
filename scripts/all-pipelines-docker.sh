@@ -18,10 +18,10 @@ $PYTHON openfda/nsde/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 $PYTHON openfda/caers/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 $PYTHON openfda/substance_data/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 $PYTHON openfda/device_clearance/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
+$PYTHON openfda/device_pma/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 $PYTHON openfda/maude/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 
 #$PYTHON openfda/classification/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
-#$PYTHON openfda/device_pma/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 #$PYTHON openfda/registration/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 #$PYTHON openfda/annotation_table/pipeline.py CombineHarmonization --FDAConfig-es-host=$es_host > $LOGDIR/annotation.log 2>&1
 #$PYTHON openfda/ndc/pipeline.py LoadJSON --FDAConfig-es-host=$es_host > $LOGDIR/ndc.log 2>&1
