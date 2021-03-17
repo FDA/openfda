@@ -2,7 +2,6 @@
 '''
 import logging
 import os
-import types
 from os.path import join, dirname
 
 import elasticsearch

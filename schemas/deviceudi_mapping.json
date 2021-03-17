@@ -1,43 +1,35 @@
 {
   "deviceudi": {
     "_source": {
-      "excludes": [
-        "*_exact"
-      ],
       "includes": [
         "*"
       ]
     },
     "properties": {
       "@id": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "@checksum": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "identifiers": {
         "properties": {
           "id": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "issuing_agency": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "unit_of_use_id": {
-            "type": "string"
+            "type": "text"
           },
           "quantity_per_package": {
             "type": "integer"
@@ -49,40 +41,34 @@
           "package_status": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "package_type": {
-            "type": "string"
+            "type": "text"
           }
         }
       },
       "public_version_status": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "public_device_record_key": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "public_version_number": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "public_version_date": {
         "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "labeler_duns_number": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "record_status": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "publish_date": {
         "format": "basic_date||date||epoch_millis",
@@ -95,47 +81,42 @@
       "commercial_distribution_status": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "brand_name": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "version_or_model_number": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "catalog_number": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "company_name": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "device_count_in_base_package": {
         "type": "integer"
@@ -143,11 +124,10 @@
       "device_description": {
         "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-        "type": "string"
+        "type": "text"
       },
       "is_direct_marking_exempt": {
         "type": "boolean"
@@ -197,25 +177,21 @@
       "mri_safety": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "customer_contacts": {
         "properties": {
           "phone": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "ext": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "email": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         }
       },
@@ -224,14 +200,13 @@
           "name": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "definition": {
-            "type": "string"
+            "type": "text"
           }
         }
       },
@@ -240,47 +215,42 @@
           "code": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
             "type": "keyword"
           },
           "name": {
-            "type": "string"
+            "type": "text"
           },
           "openfda": {
             "properties": {
               "device_class": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "device_name": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "medical_specialty_description": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "regulation_number": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               }
             }
           }
@@ -289,24 +259,21 @@
       "device_sizes": {
         "properties": {
           "unit": {
-            "type": "string",
-            "index": "not_analyzed"
+            "type": "keyword"
           },
           "value": {
-            "type": "string",
-            "index": "not_analyzed"
+            "type": "keyword"
           },
           "type": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "text": {
-            "type": "string"
+            "type": "text"
           }
         }
       },
@@ -315,44 +282,38 @@
           "type": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "high": {
             "properties": {
               "unit": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "value": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "low": {
             "properties": {
               "unit": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "value": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "special_conditions": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           }
         }
       },
@@ -365,27 +326,23 @@
             "type": "boolean"
           },
           "sterilization_methods": {
-            "type": "string"
+            "type": "text"
           }
         }
       },
       "fei_numbers": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "premarket_submissions": {
         "properties": {
           "submission_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "supplement_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "submission_type": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         }
       }

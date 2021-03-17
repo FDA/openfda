@@ -19,7 +19,7 @@ This repository contains the code which powers all of the `api.fda.gov` end poin
 
 # Prerequisites
 
-* Elasticsearch 5.6
+* Elasticsearch 6.8
 * Python 3.8
 * Node 14 or above
 

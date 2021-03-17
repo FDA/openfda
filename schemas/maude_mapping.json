@@ -1,12 +1,6 @@
 {
   "maude": {
     "_source": {
-      "excludes": [
-        "*_exact",
-        "patient.*_exact",
-        "device.*_exact",
-        "mdr_text.*_exact"
-      ],
       "includes": [
         "*"
       ]
@@ -906,16 +900,28 @@
             "type": "text"
           },
           "sequence_number_outcome": {
-            "type": "keyword"
-          },
-          "sequence_number_outcome_exact": {
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
             "type": "keyword"
           },
           "sequence_number_treatment": {
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
             "type": "keyword"
           },
-          "sequence_number_treatment_exact": {
-            "type": "keyword"
+          "patient_problems": {
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           }
         }
       },
@@ -944,10 +950,12 @@
         "type": "text"
       },
       "remedial_action": {
+        "fields": {
+          "exact": {
+            "type": "keyword"
+          }
+        },
         "type": "text"
-      },
-      "remedial_action_exact": {
-        "type": "keyword"
       },
       "removal_correction_number": {
         "fields": {
@@ -1018,16 +1026,20 @@
         "type": "text"
       },
       "source_type": {
+        "fields": {
+          "exact": {
+            "type": "keyword"
+          }
+        },
         "type": "text"
-      },
-      "source_type_exact": {
-        "type": "keyword"
       },
       "type_of_report": {
+        "fields": {
+          "exact": {
+            "type": "keyword"
+          }
+        },
         "type": "text"
-      },
-      "type_of_report_exact": {
-        "type": "keyword"
       }
     }
   }

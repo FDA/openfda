@@ -3,10 +3,11 @@
 '''
 Pipeline for converting Drugs@FDA files to JSON and importing into Elasticsearch.
 '''
+import glob
 import os
 import re
 from os.path import join
-
+import logging
 import arrow
 import luigi
 
@@ -53,6 +54,45 @@ class ExtractDrugsFDAFiles(luigi.Task):
     zip_filename = RAW_DATA_FILE
     output_dir = self.output().path
     os.system('unzip -o %(zip_filename)s -d %(output_dir)s' % locals())
+
+
+class CleanDrugsFDAFiles(luigi.Task):
+  def requires(self):
+    return ExtractDrugsFDAFiles()
+
+  def output(self):
+    return luigi.LocalTarget(EXTRACTED_DIR)
+
+  def run(self):
+    for filename in glob.glob(self.input().path + '/ApplicationDocs.txt'):
+      logging.info('Pre-processing %s', filename)
+      filtered = filename + '.filtered'
+      out = open(filtered, 'w')
+      line_num = 0
+      bad_lines = 0
+      with open(filename, 'rU', errors='ignore') as fp:
+        for line in fp:
+          line = line.strip()
+          if line_num < 1:
+            # First line is usually the header
+            out.write(line)
+          else:
+            if len(line.strip()) > 0:
+              if re.search(r'^\d{1,}', line):
+                # Properly formatted line. Append it and move on.
+                out.write('\n' + line)
+              else:
+                # Bad line, most likely due to an unescaped carriage return. Tuck it onto the previous line
+                out.write(' ' + line)
+                bad_lines += 1
+
+          line_num += 1
+
+      logging.info('Issues found & fixed: %s', bad_lines)
+      out.close()
+      os.remove(filename)
+      os.rename(filtered, filename)
+
 
 
 class Applications2JSONMapper(parallel.Mapper):
@@ -346,8 +386,8 @@ class ApplicationsDocs2JSONMapper(parallel.Mapper):
     del json['type_id']
 
     # Convert date to format used throughout openFDA (yyyymmdd)
-    json['date'] = arrow.get(json['date']).strftime("%Y%m%d")
-    json['url'] = common.convert_unicode(json['url'])
+    json['date'] = arrow.get(json['date']).strftime("%Y%m%d") if json.get('date') is not None else ""
+    json['url'] = common.convert_unicode(json['url']) if json.get('url') is not None else ""
 
     # Assign application number as the key, since all three drugs@FDA files can be joined by this key.
     key = build_submissions_key(json['application_number'], json)
@@ -358,7 +398,7 @@ class ApplicationsDocs2JSONMapper(parallel.Mapper):
 
 class Applications2JSON(luigi.Task):
   def requires(self):
-    return ExtractDrugsFDAFiles()
+    return CleanDrugsFDAFiles()
 
   def output(self):
     return luigi.LocalTarget(APPLICATIONS_DB)
@@ -374,7 +414,7 @@ class Applications2JSON(luigi.Task):
 
 class Products2JSON(luigi.Task):
   def requires(self):
-    return ExtractDrugsFDAFiles()
+    return CleanDrugsFDAFiles()
 
   def output(self):
     return luigi.LocalTarget(PRODUCTS_DB)
@@ -390,7 +430,7 @@ class Products2JSON(luigi.Task):
 
 class MarketingStatus2JSON(luigi.Task):
   def requires(self):
-    return ExtractDrugsFDAFiles()
+    return CleanDrugsFDAFiles()
 
   def output(self):
     return luigi.LocalTarget(MARKETING_STATUS_DB)
@@ -410,7 +450,7 @@ class MarketingStatus2JSON(luigi.Task):
 
 class TE2JSON(luigi.Task):
   def requires(self):
-    return ExtractDrugsFDAFiles()
+    return CleanDrugsFDAFiles()
 
   def output(self):
     return luigi.LocalTarget(TE_DB)
@@ -430,7 +470,7 @@ class TE2JSON(luigi.Task):
 
 class Submissions2JSON(luigi.Task):
   def requires(self):
-    return ExtractDrugsFDAFiles()
+    return CleanDrugsFDAFiles()
 
   def output(self):
     return luigi.LocalTarget(SUBMISSIONS_DB)
@@ -450,7 +490,7 @@ class Submissions2JSON(luigi.Task):
 
 class SubmissionPropertyType2JSON(luigi.Task):
   def requires(self):
-    return ExtractDrugsFDAFiles()
+    return CleanDrugsFDAFiles()
 
   def output(self):
     return luigi.LocalTarget(SUBMISSION_PROPERTY_TYPE_DB)
@@ -466,7 +506,7 @@ class SubmissionPropertyType2JSON(luigi.Task):
 
 class ApplicationsDocs2JSON(luigi.Task):
   def requires(self):
-    return ExtractDrugsFDAFiles()
+    return CleanDrugsFDAFiles()
 
   def output(self):
     return luigi.LocalTarget(APPLICATIONS_DOCS_DB)

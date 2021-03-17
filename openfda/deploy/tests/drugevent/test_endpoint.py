@@ -4,6 +4,18 @@ import requests
 from openfda.tests.api_test_helpers import *
 from nose.tools import *
 
+EXACT_FIELDS = ['openfda.application_number.exact', 'openfda.brand_name.exact',
+                'openfda.generic_name.exact', 'openfda.manufacturer_name.exact',
+                'openfda.nui.exact', 'openfda.pharm_class_cs.exact',
+                'openfda.pharm_class_epc.exact', 'openfda.pharm_class_moa.exact', 'openfda.pharm_class_pe.exact',
+                'openfda.product_type.exact', 'openfda.route.exact', 'openfda.rxcui.exact',
+                'openfda.substance_name.exact', 'openfda.unii.exact']
+
+def test_exact_field_queries_after_fda_253():
+  for field in EXACT_FIELDS:
+    print(field)
+    meta, counts = fetch_counts('/drug/event.json?count=patient.drug.%s&limit=1' % field)
+    eq_(len(counts), 1)
 
 def test_not_analyzed_0():
   assert_total('/drug/event.json?search=patient.drug.openfda.spl_id:d08e6fbf-9162-47cd-9cf6-74ea24d48214', 65410)
@@ -14,7 +26,7 @@ def test_date_1():
 
 
 def test_date_range_2():
-  assert_total('/drug/event.json?search=receivedate:([20040319+TO+20041231])', 167000)
+  assert_total('/drug/event.json?search=receivedate:([20040319+TO+20041231])', 166000)
 
 
 def test_openfda_3():
@@ -36,10 +48,12 @@ def test_histogram():
   eq_(counts[0].term, '20040101')
   eq_(counts[0].count, 1)
   eq_(counts[1].term, '20040102')
-  eq_(counts[1].count, 544)
+  ok_(counts[1].count > 540)
   eq_(counts[2].term, '20040103')
   eq_(counts[2].count, 2)
   assert_greater_equal(len(counts), 4920)
+
+# Uncomment once FDA-250 is fixed.
 
 def test_nonsteriodial_drug_reactions():
   assert_count_top('/drug/event.json?search=patient.drug.openfda.pharm_class_epc:'
@@ -49,6 +63,7 @@ def test_nonsteriodial_drug_reactions():
     'FATIGUE',
     'PAIN'
   ])
+
 
 def test_nonsteriodial_drug_reactions():
   assert_count_top('/drug/event.json?search=patient.drug.openfda.pharm_class_epc:'
@@ -64,8 +79,6 @@ def test_nonsteriodial_drug_reactions():
                      'HEART RATE INCREASED',
                      'SEPSIS'
                    ])
-
-
 
 
 def test_date_formats_after_migration():

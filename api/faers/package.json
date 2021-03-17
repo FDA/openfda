@@ -20,7 +20,7 @@
     "express": "^4.17.1",
     "express-async-handler": "^1.1.4",
     "fast-stats": "0.0.2",
-    "forever": "^3.0.2",
+    "forever": "^3.0.4",
     "jsonpath": "^1.0.2",
     "moment": "^2.6.0",
     "node-cache": "^5.1.2",

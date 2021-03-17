@@ -69,7 +69,8 @@ class ClassificationMapper(parallel.Mapper):
       'medicalspecialty': 'medical_specialty',
       'thirdpartyflag': 'third_party_flag',
       'gmpexemptflag': 'gmp_exempt_flag',
-      'deviceclass': 'device_class'
+      'deviceclass': 'device_class',
+      'summarymalfunctionreporting': 'summary_malfunction_reporting'
     }
 
     MEDICAL_SPECIALTY = device_common.MED_SPECIALTY_ADVISORY_COMMITTEE

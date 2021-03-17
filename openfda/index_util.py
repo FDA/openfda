@@ -286,8 +286,8 @@ def index_with_checksum(es, index, doc_type, batch):
 
   # mapping from docid to checksum
   existing_docs = {}
-  status, found_docs = es.transport.perform_request('GET', _make_path(index, doc_type, '_mget'),
-                                               params={'_source_include': '@checksum'},
+  found_docs = es.transport.perform_request('GET', _make_path(index, doc_type, '_mget'),
+                                               params={'_source_includes': '@checksum'},
                                                body={'ids': [docid for (docid, _, _) in batch_with_checksum]})
   for match in found_docs['docs']:
     if 'error' in match:

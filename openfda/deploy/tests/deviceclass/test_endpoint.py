@@ -10,6 +10,13 @@ def test_exact_count():
       'Catheter Introducer Kit'
       ])
 
+def test_summary_malfunction_reporting_counts():
+  assert_count_contains('/device/classification.json?count=summary_malfunction_reporting',
+    [ 'Eligible',
+      'Ineligible'
+      ])
+
+
 def test_exact_count_desc():
   assert_count_top('/device/classification.json?count=medical_specialty_description.exact',
   [ 'Unknown',

@@ -15,12 +15,11 @@ cluster.routing.allocation.node_initial_primaries_recoveries: 32
 cluster.routing.allocation.node_concurrent_recoveries: 32
 cluster.routing.allocation.disk.watermark.low: 95%
 cluster.routing.allocation.disk.watermark.high: 99%
+cluster.routing.allocation.disk.watermark.flood_stage: 99%
 
 indices.recovery.max_bytes_per_sec: 1000mb
-indices.store.throttle.max_bytes_per_sec: 1000mb
-indices.store.throttle.type: none
 
-cloud.aws.region: 'us-east-1'
-#discovery.type: zen
-#discovery.zen.minimum_master_nodes: 0
-#discovery.zen.ping_timeout: 1s
+xpack.security.enabled: false
+xpack.watcher.enabled: false
+xpack.ml.enabled: false
+xpack.monitoring.enabled: false

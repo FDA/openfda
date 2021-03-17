@@ -1,24 +1,21 @@
 {
   "registration": {
     "_source": {
-      "excludes": [
-        "*_exact"
-      ],
       "includes": [
         "*"
       ]
     },
     "properties": {
       "@checksum": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "establishment_type": {
-        "type": "string"
-      },
-      "establishment_type_exact": {
-        "index": "not_analyzed",
-        "type": "string"
+        "fields": {
+          "exact": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
       },
       "products": {
         "properties": {
@@ -27,374 +24,326 @@
             "type": "date"
           },
           "exempt": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "pma_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "k_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "openfda": {
             "properties": {
               "device_class": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "device_name": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "fei_number": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "k_number": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "medical_specialty_description": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "pma_number": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "registration_number": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "regulation_number": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               }
             }
           },
           "owner_operator_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "product_code": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         }
       },
       "proprietary_name": {
-        "type": "string"
-      },
-      "proprietary_name_exact": {
-        "index": "not_analyzed",
-        "type": "string"
+        "fields": {
+          "exact": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
       },
       "registration": {
         "properties": {
           "address_line_1": {
-            "type": "string"
+            "type": "text"
           },
           "address_line_2": {
-            "type": "string"
+            "type": "text"
           },
           "city": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "fei_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "initial_importer_flag": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "iso_country_code": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "name": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "owner_operator": {
             "properties": {
               "contact_address": {
                 "properties": {
                   "address_1": {
-                    "type": "string"
+                    "type": "text"
                   },
                   "address_2": {
-                    "type": "string"
+                    "type": "text"
                   },
                   "city": {
                     "fields": {
                       "exact": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       }
                     },
-                    "type": "string"
+                    "type": "text"
                   },
                   "iso_country_code": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   },
                   "postal_code": {
                     "fields": {
                       "exact": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       }
                     },
-                    "type": "string"
+                    "type": "text"
                   },
                   "state_code": {
                     "fields": {
                       "exact": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       }
                     },
-                    "type": "string"
+                    "type": "text"
                   },
                   "state_province": {
                     "fields": {
                       "exact": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       }
                     },
-                    "type": "string"
+                    "type": "text"
                   }
                 }
               },
               "firm_name": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "official_correspondent": {
                 "properties": {
                   "first_name": {
                     "fields": {
                       "exact": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       }
                     },
-                    "type": "string"
+                    "type": "text"
                   },
                   "last_name": {
                     "fields": {
                       "exact": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       }
                     },
-                    "type": "string"
+                    "type": "text"
                   },
                   "middle_initial": {
                     "fields": {
                       "exact": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       }
                     },
-                    "type": "string"
+                    "type": "text"
                   },
                   "phone_number": {
                     "fields": {
                       "exact": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       }
                     },
-                    "type": "string"
+                    "type": "text"
                   },
                   "subaccount_company_name": {
                     "fields": {
                       "exact": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       }
                     },
-                    "type": "string"
+                    "type": "text"
                   }
                 }
               },
               "owner_operator_number": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             }
           },
           "postal_code": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "reg_expiry_date_year": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "registration_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "state_code": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "status_code": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "us_agent": {
             "properties": {
               "address_line_1": {
-                "type": "string"
+                "type": "text"
               },
               "address_line_2": {
-                "type": "string"
+                "type": "text"
               },
               "bus_phone_area_code": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "bus_phone_extn": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "bus_phone_num": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "business_name": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "city": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "email_address": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "fax_area_code": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "fax_num": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "iso_country_code": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "name": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "postal_code": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "state_code": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               },
               "zip_code": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               }
             }
           },
           "zip_code": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           }
         }
       }

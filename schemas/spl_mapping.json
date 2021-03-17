@@ -1,17 +1,13 @@
 {
   "spl": {
     "_source": {
-      "excludes": [
-        "openfda.*_exact"
-      ],
       "includes": [
         "*"
       ]
     },
     "properties": {
       "@checksum": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "@epoch": {
         "null_value": 0,
@@ -22,989 +18,901 @@
         "type": "date"
       },
       "abuse": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "abuse_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "accessories": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "accessories_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "active_ingredient": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "active_ingredient_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "adverse_reactions": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "adverse_reactions_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "alarms": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "alarms_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "animal_pharmacology_and_or_toxicology": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "animal_pharmacology_and_or_toxicology_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "ask_doctor": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "ask_doctor_or_pharmacist": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "ask_doctor_or_pharmacist_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "ask_doctor_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "assembly_or_installation_instructions": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "assembly_or_installation_instructions_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "boxed_warning": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "boxed_warning_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "calibration_instructions": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "calibration_instructions_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "carcinogenesis_and_mutagenesis_and_impairment_of_fertility": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "carcinogenesis_and_mutagenesis_and_impairment_of_fertility_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "cleaning": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "cleaning_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "clinical_pharmacology": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "clinical_pharmacology_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "clinical_studies": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "clinical_studies_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "compatible_accessories": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "compatible_accessories_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "components": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "components_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "contraindications": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "contraindications_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "controlled_substance": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "controlled_substance_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "dependence": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "dependence_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "description": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "description_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "diagram_of_device": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "diagram_of_device_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "disposal_and_waste_handling": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "disposal_and_waste_handling_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "do_not_use": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "do_not_use_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "dosage_and_administration": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "dosage_and_administration_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "dosage_forms_and_strengths": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "dosage_forms_and_strengths_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "drug_abuse_and_dependence": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "drug_abuse_and_dependence_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "drug_and_or_laboratory_test_interactions": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "drug_and_or_laboratory_test_interactions_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "drug_interactions": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "drug_interactions_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "effective_time": {
         "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "environmental_warning": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "environmental_warning_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "food_safety_warning": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "food_safety_warning_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "general_precautions": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "general_precautions_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "geriatric_use": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "geriatric_use_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "guaranteed_analysis_of_feed": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "guaranteed_analysis_of_feed_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "health_care_provider_letter": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "health_care_provider_letter_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "health_claim": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "health_claim_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "how_supplied": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "how_supplied_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "id": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "inactive_ingredient": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "inactive_ingredient_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "indications_and_usage": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "indications_and_usage_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "information_for_owners_or_caregivers": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "information_for_owners_or_caregivers_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "information_for_patients": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "information_for_patients_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "instructions_for_use": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "instructions_for_use_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "intended_use_of_the_device": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "intended_use_of_the_device_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "keep_out_of_reach_of_children": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "keep_out_of_reach_of_children_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "labor_and_delivery": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "labor_and_delivery_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "laboratory_tests": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "laboratory_tests_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "mechanism_of_action": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "mechanism_of_action_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "microbiology": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "microbiology_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "nonclinical_toxicology": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "nonclinical_toxicology_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "nonteratogenic_effects": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "nonteratogenic_effects_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "nursing_mothers": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "nursing_mothers_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "openfda": {
         "properties": {
           "application_number": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "application_number_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "brand_name": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "brand_name_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "dosage_form": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "dosage_form_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "generic_name": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "generic_name_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "is_original_packager": {
-            "type": "boolean"
-          },
-          "is_original_packager_exact": {
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
             "type": "boolean"
           },
           "manufacturer_name": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "manufacturer_name_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "nui": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "nui_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "package_ndc": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "package_ndc_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "pharm_class_cs": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "pharm_class_cs_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "pharm_class_epc": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "pharm_class_epc_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "pharm_class_moa": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "pharm_class_moa_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "pharm_class_pe": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "pharm_class_pe_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "product_ndc": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "product_ndc_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "product_type": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "product_type_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "route": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "route_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "rxcui": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "rxcui_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "rxstring": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "rxstring_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "rxtty": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "rxtty_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "spl_id": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "spl_id_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "spl_set_id": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "spl_set_id_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "substance_name": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "substance_name_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "unii": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "unii_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           },
           "upc": {
-            "index": "analyzed",
-            "type": "string"
-          },
-          "upc_exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
           }
         }
       },
       "other_safety_information": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "other_safety_information_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "overdosage": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "overdosage_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "package_label_principal_display_panel": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "package_label_principal_display_panel_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "patient_medication_information": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "patient_medication_information_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "pediatric_use": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "pediatric_use_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "pharmacodynamics": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "pharmacodynamics_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "pharmacogenomics": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "pharmacogenomics_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "pharmacokinetics": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "pharmacokinetics_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "precautions": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "precautions_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "pregnancy": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "pregnancy_or_breast_feeding": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "pregnancy_or_breast_feeding_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "pregnancy_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "purpose": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "purpose_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "questions": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "questions_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "recent_major_changes": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "recent_major_changes_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "references": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "references_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "residue_warning": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "residue_warning_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "risks": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "risks_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "route": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "route_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "safe_handling_warning": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "safe_handling_warning_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "set_id": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "spl_indexing_data_elements": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "spl_indexing_data_elements_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "spl_medguide": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "spl_medguide_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "spl_patient_package_insert": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "spl_patient_package_insert_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "spl_product_data_elements": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "spl_product_data_elements_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "spl_unclassified_section": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "spl_unclassified_section_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "statement_of_identity": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "statement_of_identity_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "stop_use": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "stop_use_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "storage_and_handling": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "storage_and_handling_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "summary_of_safety_and_effectiveness": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "summary_of_safety_and_effectiveness_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "teratogenic_effects": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "teratogenic_effects_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "troubleshooting": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "troubleshooting_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "use_in_specific_populations": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "use_in_specific_populations_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "user_safety_warnings": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "user_safety_warnings_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "version": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "veterinary_indications": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "veterinary_indications_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "warnings": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "warnings_and_cautions": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "warnings_and_cautions_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "warnings_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       },
       "when_using": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "when_using_table": {
-        "include_in_all": false,
-        "index": "no",
-        "type": "string"
+
+        "index": false,
+        "type": "text"
       }
     }
   }

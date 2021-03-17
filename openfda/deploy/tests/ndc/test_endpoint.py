@@ -4,6 +4,21 @@ import sys
 
 from openfda.tests.api_test_helpers import *
 
+EXACT_FIELDS = [
+  'openfda.manufacturer_name.exact',
+  'openfda.nui.exact', 'openfda.pharm_class_cs.exact',
+  'openfda.pharm_class_epc.exact', 'openfda.pharm_class_moa.exact', 'openfda.pharm_class_pe.exact',
+  'openfda.rxcui.exact',
+  'openfda.spl_set_id.exact',
+  'openfda.unii.exact']
+
+
+def test_exact_field_queries_after_fda_253():
+  for field in EXACT_FIELDS:
+    print(field)
+    meta, counts = fetch_counts('/drug/ndc.json?count=%s&limit=1' % field)
+    eq_(len(counts), 1)
+
 
 def test_total_count():
   assert_total('/drug/ndc.json', 100000)
@@ -109,7 +124,6 @@ def test_DENTAL_route_drugs():
   assert_total('/drug/ndc.json?search=route:"DENTAL"', 1000)
 
 def test_drugs_expiring_in_date_range():
-  assert_total('/drug/ndc.json?search=marketing_end_date:([20191001+TO+20201231])', 800)
   assert_total('/drug/ndc.json?search=marketing_end_date:([20001001+TO+20251231])', 4000)
 
 def test_drugs_with_original_packager():

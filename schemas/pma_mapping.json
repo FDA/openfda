@@ -2,59 +2,51 @@
   "pma": {
     "properties": {
       "@checksum": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "advisory_committee": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "advisory_committee_description": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "ao_statement": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "applicant": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "city": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "date_received": {
         "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "decision_code": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "decision_date": {
         "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "docket_number": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "fed_reg_notice_date": {
         "format": "basic_date||date||epoch_millis",
@@ -63,120 +55,99 @@
       "generic_name": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "openfda": {
         "properties": {
           "device_class": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "device_name": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "fei_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "k_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "medical_specialty_description": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "pma_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "registration_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "regulation_number": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           }
         }
       },
       "pma_number": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "product_code": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "expedited_review_flag": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "state": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "street_1": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "street_2": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "supplement_number": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "supplement_reason": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "supplement_type": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "trade_name": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "zip": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "zip_ext": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       }
     }
   }

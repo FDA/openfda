@@ -46,9 +46,9 @@ class DownloadNDCFiles(luigi.Task):
 
     soup = BeautifulSoup(urlopen(NDC_DOWNLOAD_PAGE).read(), 'lxml')
     for a in soup.find_all(href=re.compile('.*.zip')):
-      if 'NDC Database File' in a.text and 'text' in a['href']:
+      if 'ndc database file' in a.text.lower() and 'text' in a['href']:
         finished_ndc_url = urljoin('https://www.fda.gov', a['href'])
-      if 'NDC Unfinished' in a.text and 'unfinished.zip' in a['href']:
+      if 'ndc unfinished' in a.text.lower() and 'unfinished.zip' in a['href']:
         unfinished_ndc_url = urljoin('https://www.fda.gov', a['href'])
 
     if not finished_ndc_url:

@@ -3,17 +3,15 @@
 #
 # It has been modified to support multiple data directories
 
-FROM docker.elastic.co/elasticsearch/elasticsearch:5.6.16
+FROM docker.elastic.co/elasticsearch/elasticsearch:6.8.13
 
 ADD elasticsearch.yml /usr/share/elasticsearch/config/
 ADD log4j2.properties /usr/share/elasticsearch/config/
 
-# Remove annoying X-Pack
-RUN bin/elasticsearch-plugin remove x-pack
-
 # Install AWS plugins
 # RUN bin/elasticsearch-plugin install discovery-ec2
-RUN bin/elasticsearch-plugin install repository-s3
+RUN bin/elasticsearch-plugin install -b repository-s3
+RUN bin/elasticsearch-plugin list
 
 
 USER root
@@ -23,7 +21,5 @@ USER elasticsearch
 
 ENV ES_JAVA_OPTS ""
 ENV MAX_LOCKED_MEMORY unlimited
-ENV AWS_ACCESS_KEY_ID ""
-ENV AWS_SECRET_ACCESS_KEY ""
 
 VOLUME ["/data0"]

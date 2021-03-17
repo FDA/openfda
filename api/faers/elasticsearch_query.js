@@ -124,88 +124,6 @@ var DATE_FIELDS = [
 
 ];
 
-// Fields which should be rewritten from field.exact to field_exact
-EXACT_FIELDS = [
-  'establishment_type',
-  'proprietary_name',
-  'openfda.dosage_form',
-  'openfda.rxcui',
-  'openfda.package_ndc',
-  'openfda.rxstring',
-  'openfda.nui',
-  'openfda.original_packager_product_ndc',
-  'openfda.pharm_class_pe',
-  'openfda.route',
-  'openfda.product_ndc',
-  'openfda.unii',
-  'openfda.product_type',
-  'openfda.pharm_class_moa',
-  'openfda.pharm_class_cs',
-  'openfda.application_number',
-  'openfda.is_original_packager',
-  'openfda.upc',
-  'openfda.pharm_class_epc',
-  'openfda.manufacturer_name',
-  'openfda.rxtty',
-  'openfda.spl_id',
-  'openfda.brand_name',
-  'openfda.spl_set_id',
-  'openfda.generic_name',
-  'openfda.substance_name',
-  'openfda.dosage_form',
-  'openfda.rxcui',
-  'openfda.package_ndc',
-  'openfda.rxstring',
-  'openfda.nui',
-  'openfda.original_packager_product_ndc',
-  'openfda.pharm_class_pe',
-  'openfda.route',
-  'openfda.product_ndc',
-  'openfda.unii',
-  'openfda.pharm_class_moa',
-  'openfda.product_type',
-  'openfda.pharm_class_cs',
-  'openfda.pharm_class_epc',
-  'openfda.application_number',
-  'openfda.is_original_packager',
-  'openfda.upc',
-  'openfda.rxtty',
-  'openfda.manufacturer_name',
-  'openfda.spl_id',
-  'openfda.brand_name',
-  'openfda.spl_set_id',
-  'openfda.generic_name',
-  'openfda.substance_name',
-  'type_of_report',
-  'patient.sequence_number_outcome',
-  'remedial_action',
-  'source_type',
-  'patient.sequence_number_treatment',
-  'patient.drug.openfda.brand_name',
-  'patient.drug.openfda.rxstring',
-  'patient.drug.openfda.pharm_class_pe',
-  'patient.drug.openfda.manufacturer_name',
-  'patient.drug.openfda.rxcui',
-  'patient.drug.openfda.generic_name',
-  'patient.drug.openfda.application_number',
-  'patient.drug.openfda.nui',
-  'patient.drug.openfda.substance_name',
-  'patient.drug.openfda.product_ndc',
-  'patient.drug.openfda.spl_id',
-  'patient.drug.openfda.dosage_form',
-  'patient.drug.openfda.pharm_class_cs',
-  'patient.drug.openfda.package_ndc',
-  'patient.drug.openfda.rxtty',
-  'patient.drug.openfda.pharm_class_moa',
-  'patient.drug.openfda.spl_set_id',
-  'patient.drug.openfda.route',
-  'patient.drug.openfda.product_type',
-  'patient.drug.openfda.unii',
-  'patient.drug.openfda.pharm_class_epc',
-  'outcomes', //  Food Event
-  'reactions'
-];
-
 const SORTABLE_FIELD_TYPES = ['keyword', 'short', 'integer', 'byte', 'date']
 
 exports.ELASTICSEARCH_QUERY_ERROR = ELASTICSEARCH_QUERY_ERROR;
@@ -213,20 +131,6 @@ exports.ELASTICSEARCH_QUERY_ERROR = ELASTICSEARCH_QUERY_ERROR;
 exports.SupportedQueryString = function(query) {
   var supported_query_re = new RegExp(SUPPORTED_QUERY_RE);
   return supported_query_re.test(query);
-};
-
-// For the openfda section, we have field_exact rather than field.exact stored
-// in elasticsearch.
-exports.ReplaceExact = function(search_or_count) {
-  for (i = 0; i < EXACT_FIELDS.length; i++) {
-    var field = EXACT_FIELDS[i];
-    var field_before = field + '.exact';
-    var field_after = field + '_exact';
-    search_or_count = search_or_count.replace(new RegExp(field_before, 'g'),
-      field_after);
-  }
-
-  return search_or_count;
 };
 
 // _missing_ is gone from Elasticsearch 5 and up, but we still have to support it in the API.
@@ -253,7 +157,7 @@ exports.BuildSort = async function(params, index) {
           message: 'Sorting allowed by non-analyzed fields only: ' + escape(params.sort.split(':')[0])
         };
       }
-        sort = exports.ReplaceExact(params.sort);
+      sort = params.sort;
     }
 
   return sort ? sort + ',_uid' : '_uid';
@@ -309,7 +213,7 @@ exports.BuildQuery = function (params) {
           message: 'Search not supported: ' + escape(params.search)
         };
       }
-      q.query(ejs.QueryStringQuery(exports.HandleDeprecatedClauses(exports.ReplaceExact(params.search))));
+      q.query(ejs.QueryStringQuery(exports.HandleDeprecatedClauses((params.search))));
     }
 
     if (params.count) {
@@ -326,7 +230,7 @@ exports.BuildQuery = function (params) {
         // the limit, this number will need to be increased. We currently only
         // allow a max limit of 1k, so this setting is overkill.
         var limit = parseInt(params.limit) + 1000;
-        q.agg(ejs.TermsAggregation('count').field(exports.ReplaceExact(params.count)).size(limit));
+        q.agg(ejs.TermsAggregation('count').field((params.count)).size(limit));
       }
     }
   }

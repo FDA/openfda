@@ -74,19 +74,19 @@ RANGE_ENDPOINT_MAP = {
   '/drug/event': {
     'date_key': '@timestamp',
     'start_date': '2004-01-01',
-    'end_date': '2020-10-01'
+    'end_date': '2021-01-01'
   },
   # Check here for device event:
   # https://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/PostmarketRequirements/ReportingAdverseEvents/ucm127891.htm
   '/device/event': {
     'date_key': 'date_received',
     'start_date': '1991-10-01',
-    'end_date': '2020-10-01'
+    'end_date': '2021-01-01'
   },
   '/animalandveterinary/event': {
     'date_key': 'original_receive_date',
     'start_date': '1987-01-01',
-    'end_date': '2020-07-01'
+    'end_date': '2021-01-01'
   }
 }
 
@@ -352,8 +352,8 @@ class ParallelExportMapper(parallel.Mapper):
                           query=ep.query,
                           chunks=ep.chunks)
     # Copy the current JSON schema to the zip location so that it is included
-    # in the sync to s3
-    common.shell_cmd_quiet('cp %s %s', schema_file, endpoint_dir)
+    # in the sync to s3. flock is required to avoid a race condition when copying the schema file.
+    common.shell_cmd_quiet('flock --verbose %s cp %s %s', schema_file, schema_file, endpoint_dir)
 
 
 class ParallelExport(luigi.Task):
@@ -375,7 +375,7 @@ class ParallelExport(luigi.Task):
       reducer=parallel.NullReducer(),
       output_prefix=join(BASE_DIR, 'tmp'),
       output_format=parallel.NullOutput(),
-      map_workers=11)
+      map_workers=10)
 
 
 class CopyIndexToS3(luigi.Task):

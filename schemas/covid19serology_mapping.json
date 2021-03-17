@@ -7,138 +7,108 @@
     },
     "properties": {
       "evaluation_id": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "manufacturer": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "device": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "date_performed": {
         "format": "M/d/yyyy||basic_date||date_time_no_millis||date||epoch_millis",
         "type": "date"
       },
       "lot_number": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "panel": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "sample_no": {
-        "index": "not_analyzed",
         "type": "integer"
       },
       "sample_id": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "type": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "group": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "days_from_symptom": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "igm_result": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "igg_result": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "iga_result": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "pan_result": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "igm_igg_result": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "igm_iga_result": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "control": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "pan_titer": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "igm_titer": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "igg_titer": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "igm_truth": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "igg_truth": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "antibody_truth": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "igm_agree": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "igg_agree": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "iga_agree": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "pan_agree": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "igm_igg_agree": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "igm_iga_agree": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "antibody_agree": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       }
     }
   }

@@ -53,10 +53,6 @@ def _add_field(openfda, field, value):
     if field not in openfda:
       openfda[field] = {}
     openfda[field][v] = True
-    exact_field = field + '_exact'
-    if exact_field not in openfda:
-      openfda[exact_field] = {}
-    openfda[exact_field][v] = True
   return
 
 def _get_ndc_type(value):
@@ -82,17 +78,14 @@ def _insert_or_update(recall, code_type, code_value):
         ndc_type = _get_ndc_type(code_value)
         if ndc_type in ['product_ndc', 'package_ndc']:
           recall['openfda'][ndc_type].append(code_value)
-          recall['openfda'][ndc_type + '_exact'].append(code_value)
 
   if code_type == 'upc':
     if len(recall['openfda']) > 0:
       if 'upc' in recall['openfda']:
         if code_value not in recall['openfda']['upc']:
           recall['openfda']['upc'].append(code_value)
-          recall['openfda']['upc_exact'].append(code_value)
       else:
         recall['openfda']['upc'] = [code_value]
-        recall['openfda']['upc_exact'] = [code_value]
 
 # TODO(hansnelsen): Looks very similiar to the code in faers/annotate.py, we
 # should consider refactoring this into a general piece of code for generating
@@ -142,7 +135,7 @@ def AddHarmonizedRowToOpenfda(openfda, row):
               if va_key == 'name':
                 if va_value.find('[MoA]') != -1:
                   _add_field(openfda, 'pharm_class_moa', va_value)
-                if va_value.find('[Chemical/Ingredient]') != -1:
+                if va_value.find('[Chemical/Ingredient]') != -1 or va_value.find('[CS]') != -1:
                   _add_field(openfda, 'pharm_class_cs', va_value)
                 if va_value.find('[PE]') != -1:
                   _add_field(openfda, 'pharm_class_pe', va_value)

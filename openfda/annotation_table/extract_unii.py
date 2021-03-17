@@ -25,7 +25,9 @@ from lxml import etree
 
 # http://www.fda.gov/ForIndustry/DataStandards/StructuredProductLabeling/ucm162061.htm
 UNII_OID = '2.16.840.1.113883.4.9'
-UNII_OTHER_OID = '2.16.840.1.113883.3.26.1.5'
+UNII_OTHER_OID1 = '2.16.840.1.113883.3.26.1.5'
+UNII_OTHER_OID2 = '2.16.840.1.113883.6.177'
+UNII_OTHER_OID3 = '2.16.840.1.113883.6.345'
 
 def remove_namespace(xml_file):
   """SPL have namespaces that don't play nice with python's libxml. For now
@@ -75,15 +77,18 @@ def extract_unii_name(tree):
   unii_name_xpath = '//identifiedSubstance/name/descendant::text()'
   return first_match_or_empty_string(tree.getroot().xpath(unii_name_xpath))
 
+
 def extract_unii_other_code(tree):
   """Extract the codes for other ingredients"""
   unii_other_xpath = \
-  '//generalizedMaterialKind/code[@codeSystem="%s"]/@code' % UNII_OTHER_OID
+    '//generalizedMaterialKind/code[@codeSystem="%s" or @codeSystem="%s" or @codeSystem="%s"]/@code' \
+    % (UNII_OTHER_OID1, UNII_OTHER_OID2, UNII_OTHER_OID3)
   return tree.getroot().xpath(unii_other_xpath)
+
 
 def extract_unii_other_name(tree):
   """Extract the display names for other ingredients"""
   unii_other_xpath = \
-  '//generalizedMaterialKind/code[@codeSystem="%s"]/@displayName' \
-  % UNII_OTHER_OID
+    '//generalizedMaterialKind/code[@codeSystem="%s" or @codeSystem="%s" or @codeSystem="%s"]/@displayName' \
+    % (UNII_OTHER_OID1, UNII_OTHER_OID2, UNII_OTHER_OID3)
   return tree.getroot().xpath(unii_other_xpath)

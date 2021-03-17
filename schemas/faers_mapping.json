@@ -1,9 +1,6 @@
 {
   "safetyreport": {
     "_source": {
-      "excludes": [
-        "patient.drug.openfda.*_exact"
-      ],
       "includes": [
         "*"
       ]
@@ -11,16 +8,13 @@
     "dynamic": "strict",
     "properties": {
       "@version": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "@case_number": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "@checksum": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "@epoch": {
         "null_value": 0,
@@ -33,20 +27,18 @@
       "authoritynumb": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "companynumb": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "duplicate": {
         "type": "short"
@@ -57,11 +49,10 @@
       "occurcountry": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "patient": {
         "properties": {
@@ -75,11 +66,10 @@
                   "activesubstancename": {
                     "fields": {
                       "exact": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       }
                     },
-                    "type": "string"
+                    "type": "text"
                   }
                 }
               },
@@ -89,29 +79,26 @@
               "drugadministrationroute": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "drugauthorizationnumb": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "drugbatchnumb": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "drugcharacterization": {
                 "type": "byte"
@@ -120,41 +107,38 @@
                 "type": "float"
               },
               "drugcumulativedosageunit": {
-                "type": "string"
+                "type": "text"
               },
               "drugdosageform": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "drugdosagetext": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "drugenddate": {
                 "format": "basic_date||date||epoch_millis",
                 "type": "date"
               },
               "drugenddateformat": {
-                "type": "string"
+                "type": "text"
               },
               "drugindication": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "drugintervaldosagedefinition": {
                 "type": "short"
@@ -170,11 +154,10 @@
                   "drugrecuraction": {
                     "fields": {
                       "exact": {
-                        "index": "not_analyzed",
-                        "type": "string"
+                        "type": "keyword"
                       }
                     },
-                    "type": "string"
+                    "type": "text"
                   }
                 }
               },
@@ -186,186 +169,223 @@
                 "type": "date"
               },
               "drugstartdateformat": {
-                "type": "string"
+                "type": "text"
               },
               "drugstructuredosagenumb": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "drugstructuredosageunit": {
-                "type": "string"
+                "type": "text"
               },
               "drugtreatmentduration": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "drugtreatmentdurationunit": {
-                "type": "string"
+                "type": "text"
               },
               "medicinalproduct": {
                 "fields": {
                   "exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "type": "keyword"
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "openfda": {
                 "properties": {
                   "application_number": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "application_number_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "brand_name": {
-                    "index": "analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
-                  "brand_name_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                  "dosage_form": {
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "generic_name": {
-                    "index": "analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
-                  "generic_name_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                  "is_original_packager": {
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "boolean"
                   },
                   "manufacturer_name": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "manufacturer_name_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "nui": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "nui_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "package_ndc": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "package_ndc_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "pharm_class_cs": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "pharm_class_cs_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "pharm_class_epc": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "pharm_class_epc_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "pharm_class_moa": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "pharm_class_moa_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "pharm_class_pe": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "pharm_class_pe_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "product_ndc": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "product_ndc_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "product_type": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "product_type_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "route": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "route_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "rxcui": {
-                    "index": "analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
-                  "rxcui_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                  "rxstring": {
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
+                  },
+                  "rxtty": {
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "spl_id": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "spl_id_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "spl_set_id": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "spl_set_id_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "substance_name": {
-                    "index": "analyzed",
-                    "type": "string"
-                  },
-                  "substance_name_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
                   "unii": {
-                    "index": "analyzed",
-                    "type": "string"
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   },
-                  "unii_exact": {
-                    "index": "not_analyzed",
-                    "type": "string"
+                  "upc": {
+                    "fields": {
+                      "exact": {
+                        "type": "keyword"
+                      }
+                    },
+                    "type": "text"
                   }
                 }
               }
@@ -381,7 +401,7 @@
                 "type": "date"
               },
               "patientdeathdateformat": {
-                "type": "string"
+                "type": "text"
               }
             }
           },
@@ -389,7 +409,7 @@
             "type": "float"
           },
           "patientonsetageunit": {
-            "type": "string"
+            "type": "text"
           },
           "patientsex": {
             "type": "byte"
@@ -402,15 +422,15 @@
               "reactionmeddrapt": {
                 "fields": {
                   "exact": {
-                    "index": "analyzed",
-                    "type": "string",
-                    "analyzer": "uppercase_not_tokenized"
+                    "type": "text",
+                    "analyzer": "uppercase_not_tokenized",
+                    "fielddata": true
                   }
                 },
-                "type": "string"
+                "type": "text"
               },
               "reactionmeddraversionpt": {
-                "type": "string"
+                "type": "text"
               },
               "reactionoutcome": {
                 "type": "byte"
@@ -420,7 +440,7 @@
           "summary": {
             "properties": {
               "narrativeincludeclinical": {
-                "type": "string"
+                "type": "text"
               }
             }
           }
@@ -429,7 +449,7 @@
       "primarysource": {
         "properties": {
           "literaturereference": {
-            "type": "string"
+            "type": "text"
           },
           "qualification": {
             "type": "byte"
@@ -437,47 +457,44 @@
           "reportercountry": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           }
         }
       },
       "primarysourcecountry": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "receiptdate": {
         "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "receiptdateformat": {
-        "type": "string"
+        "type": "text"
       },
       "receivedate": {
         "format": "basic_date||date||epoch_millis",
         "type": "date"
       },
       "receivedateformat": {
-        "type": "string"
+        "type": "text"
       },
       "receiver": {
         "properties": {
           "receiverorganization": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "receivertype": {
             "type": "short"
@@ -489,20 +506,18 @@
           "duplicatenumb": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "duplicatesource": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           }
         }
       },
@@ -512,25 +527,23 @@
       "safetyreportid": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "safetyreportversion": {
-        "type": "byte"
+        "type": "integer"
       },
       "sender": {
         "properties": {
           "senderorganization": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "sendertype": {
             "type": "byte"
@@ -563,7 +576,7 @@
         "type": "date"
       },
       "transmissiondateformat": {
-        "type": "string"
+        "type": "text"
       }
     }
   }

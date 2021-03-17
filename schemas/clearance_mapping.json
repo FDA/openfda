@@ -1,40 +1,32 @@
 {
   "device510k": {
     "_source": {
-      "excludes": [
-        "*_exact"
-      ],
       "includes": [
         "*"
       ]
     },
     "properties": {
       "@checksum": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "address_1": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "address_2": {
-        "index": "analyzed",
-        "type": "string"
+        "type": "text"
       },
       "advisory_committee": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "advisory_committee_description": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
         "type": "keyword"
@@ -42,44 +34,39 @@
       "applicant": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "city": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "clearance_type": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "contact": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "country_code": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
         "type": "keyword"
@@ -91,11 +78,10 @@
       "decision_code": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "decision_date": {
         "format": "basic_date||date||epoch_millis",
@@ -104,134 +90,116 @@
       "device_name": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "expedited_review_flag": {
-        "type": "string",
+        "type": "text",
         "fields" : {
-          "exact": { "index": "not_analyzed", "type": "string" }
+          "exact": { "type": "keyword" }
         }
       },
       "k_number": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "openfda": {
         "properties": {
           "device_class": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "device_name": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "fei_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "k_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "medical_specialty_description": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "pma_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "registration_number": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           },
           "regulation_number": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           }
         }
       },
       "postal_code": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "product_code": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "review_advisory_committee": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "ssp_indicator": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "state": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "statement_or_summary": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "third_party_flag": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "zip": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       }
     }
   }

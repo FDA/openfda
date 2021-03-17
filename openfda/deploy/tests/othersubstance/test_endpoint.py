@@ -27,7 +27,7 @@ def test_codes():
     '/other/substance.json?search=unii:981Y8SX18M')
   eq_(len(results), 1)
 
-  codes = results[0]["codes"][2]
+  codes = sorted(results[0]["codes"], key=lambda code: code['code'])[0]
   eq_(codes["code"], "1114693")
   eq_(codes["uuid"], "a41a68ed-9232-44b6-a1e7-b5e2e837c32d")
   eq_(codes["url"], "https://rxnav.nlm.nih.gov/REST/rxcui/1114693/allProperties.xml?prop=all")
@@ -86,7 +86,7 @@ def test_moieties():
   moieties = results[0]["moieties"][0]
   eq_(moieties["count"], 1)
   eq_(moieties["smiles"], "Cl")
-  eq_(moieties["molfile"], "\n  Marvin  02272022262D          \n\n  1  0  0  0  0  0            999 V2000\n   -2.3335   -4.9698    0.0000 Cl  0  0  0  0  0  0  0  0  0  0  0  0\nM  END")
+  eq_(moieties["molfile"], "\n  Marvin  01132110552D          \n\n  1  0  0  0  0  0            999 V2000\n   -2.3335   -4.9698    0.0000 Cl  0  0  0  0  0  0  0  0  0  0  0  0\nM  END")
   eq_(moieties["defined_stereo"], 0)
   eq_(moieties["molecular_weight"], "36.461")
   eq_(moieties["ez_centers"], 0)

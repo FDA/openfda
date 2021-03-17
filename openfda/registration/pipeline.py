@@ -521,20 +521,12 @@ class JoinAllReducer(parallel.Reducer):
       'state_id': 'state_code'
     }
 
-    EXPANSION_MAP = {
-      'establishment_type': 'establishment_type_exact',
-      'proprietary_name': 'proprietary_name_exact'
-    }
-
     def _prune(k, v):
       ''' A helper function used for removing and renaming dictionary keys.
       '''
       if k in IGNORE: return None
       if k in RENAME_MAP:
         k = RENAME_MAP[k]
-      if k in EXPANSION_MAP:
-        ek, ev = EXPANSION_MAP[k], v
-        return [(k, v), (ek, ev)]
       return (k, v)
 
     key_prefix = 'final_result:' + key

@@ -35,6 +35,8 @@ RAW_DIR = join(BASE_DIR, 'maude/raw/events')
 # Files for resolving device problem codes
 DEVICE_PROBLEM_CODES_FILE = join(BASE_DIR, 'maude/extracted/events/deviceproblemcodes.txt')
 DEVICE_PROBLEMS_FILE = join(BASE_DIR, 'maude/extracted/events/foidevproblem.txt')
+PATIENT_PROBLEM_CODES_FILE = join(BASE_DIR, 'maude/extracted/events/patientproblemdata.txt')
+PATIENT_PROBLEMS_FILE = join(BASE_DIR, 'maude/extracted/events/patientproblemcode.txt')
 
 # Use to ensure a standard naming of level db outputs is achieved across tasks.
 DATE_FMT = 'YYYY-MM-DD'
@@ -285,7 +287,7 @@ def _fix_date(input_date):
   return None
 
 
-def _exact_split(key, value, sep):
+def _split(key, value, sep):
   ''' Helper function that splits a string into an array, swaps the encoded
       values for more descriptive ones and then generates an _exact field
   '''
@@ -294,9 +296,7 @@ def _exact_split(key, value, sep):
   if key in ENUM:
     value = [ENUM[key].get(val, val) for val in value]
 
-  new_key, new_value = key + '_exact', value
-
-  return [(key, value), (new_key, new_value)]
+  return key, value
 
 
 class DownloadDeviceEvents(luigi.Task):
@@ -384,10 +384,12 @@ class PreprocessFilesToFixIssues(AlwaysRunTask):
       os.rename(filtered, filename)
 
 class CSV2JSONMapper(parallel.Mapper):
-  def __init__(self, problem_codes_reference, device_problem_codes):
+  def __init__(self, device_problem_codes_ref, device_problem_codes, patient_problem_codes_ref, patient_problem_codes):
     parallel.Mapper.__init__(self)
-    self.problem_codes_reference = problem_codes_reference
+    self.device_problem_codes_ref = device_problem_codes_ref
     self.device_problem_codes = device_problem_codes
+    self.patient_problem_codes_ref = patient_problem_codes_ref
+    self.patient_problem_codes = patient_problem_codes
 
   def map_shard(self, map_input, map_output):
     self.filename = map_input.filename
@@ -403,10 +405,10 @@ class CSV2JSONMapper(parallel.Mapper):
       return (k, new_date) if new_date else None
 
     if k in SPLIT_KEYS:
-      return _exact_split(k, v, ';')
+      return _split(k, v, ';')
 
     if k in MULTI_SUBMIT:
-      return _exact_split(k, v, ',')
+      return _split(k, v, ',')
 
     # The DEVICE files have mdr_report_key padded with a space and in decimal format with a ".0" at the end.
     if k in MALFORMED_KEYS:
@@ -486,8 +488,15 @@ class CSV2JSONMapper(parallel.Mapper):
     if file_type == 'mdrfoi':
       problem_codes = self.device_problem_codes.get(mdr_key)
       if problem_codes is not None:
-        product_problems = [self.problem_codes_reference.get(code) for code in problem_codes]
+        product_problems = [self.device_problem_codes_ref.get(code) for code in problem_codes]
         new_value['product_problems'] = product_problems
+
+    # Same applies to patient problem codes.
+    if file_type == 'patient':
+      problem_codes = self.patient_problem_codes.get(mdr_key + '-' + new_value['patient_sequence_number'])
+      if problem_codes is not None:
+        patient_problems = [self.patient_problem_codes_ref.get(code) for code in problem_codes]
+        new_value['patient_problems'] = patient_problems
 
     output.add(mdr_key, (file_type, new_value))
 
@@ -567,13 +576,13 @@ class CSV2JSON(luigi.Task):
       input_files = [f for f in files if self.loader_task in f]
 
     # Load and cache device problem codes.
-    problem_codes_reference = {}
+    device_problem_codes_ref = {}
     device_problem_codes = {}
 
     reader = csv.reader(open(DEVICE_PROBLEM_CODES_FILE), quoting=csv.QUOTE_NONE, delimiter='|')
     for idx, line in enumerate(reader):
       if len(line) > 1:
-        problem_codes_reference[line[0]] = line[1].strip()
+        device_problem_codes_ref[line[0]] = line[1].strip()
 
     reader = csv.reader(open(DEVICE_PROBLEMS_FILE), quoting=csv.QUOTE_NONE, delimiter='|')
     for idx, line in enumerate(reader):
@@ -581,14 +590,32 @@ class CSV2JSON(luigi.Task):
         device_problem_codes[line[0]] = [line[1]] if device_problem_codes.get(line[0]) is None else \
         device_problem_codes[line[0]] + [line[1]]
 
+    # Load and cache patient problem codes.
+    patient_problem_codes_ref = {}
+    patient_problem_codes = {}
+
+    reader = csv.reader(open(PATIENT_PROBLEM_CODES_FILE), quoting=csv.QUOTE_NONE, delimiter='|')
+    for idx, line in enumerate(reader):
+      if len(line) > 1:
+        patient_problem_codes_ref[line[0]] = line[1].strip()
+
+    reader = csv.reader(open(PATIENT_PROBLEMS_FILE), quoting=csv.QUOTE_NONE, delimiter='|')
+    for idx, line in enumerate(reader):
+      if len(line) > 1:
+        key = line[0].strip().replace('.0', '') + '-' +line[1].strip().replace('.0', '')
+        patient_problem_codes[key] = [line[2]] if patient_problem_codes.get(key) is None else \
+        patient_problem_codes[key] + [line[2]]
+
+
     parallel.mapreduce(
       parallel.Collection.from_glob(
         input_files, parallel.CSVLineInput(quoting=csv.QUOTE_NONE, delimiter='|')),
-      mapper=CSV2JSONMapper(problem_codes_reference=problem_codes_reference, device_problem_codes=device_problem_codes),
+      mapper=CSV2JSONMapper(device_problem_codes_ref=device_problem_codes_ref, device_problem_codes=device_problem_codes,
+                            patient_problem_codes_ref=patient_problem_codes_ref, patient_problem_codes=patient_problem_codes),
       reducer=CSV2JSONJoinReducer(),
       output_prefix=self.output().path,
-      map_workers=int(multiprocessing.cpu_count() / 6) + 1,
-      num_shards=int(multiprocessing.cpu_count() / 6) + 1)
+      map_workers=int(multiprocessing.cpu_count() / 10) + 1,
+      num_shards=int(multiprocessing.cpu_count() / 10) + 1)
 
 
 class MergeUpdatesMapper(parallel.Mapper):

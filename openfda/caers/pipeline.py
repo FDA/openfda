@@ -41,7 +41,6 @@ RENAME_MAP = {
 # _transform() in CSV2JSONReducer()
 CONSUMER = ['age', 'age_unit', 'gender']
 PRODUCTS = ['role', 'name_brand', 'industry_code', 'industry_name']
-EXACT = ['outcomes', 'reactions']
 DATES = ['date_created', 'date_started']
 
 
@@ -73,8 +72,7 @@ class CSV2JSONMapper(parallel.Mapper):
         both (by returning None).
 
         In this case: renaming all fields, returning None on empty keys to
-          avoid blowing up downstream transforms, formatting dates and creating
-          _exact fields.
+          avoid blowing up downstream transforms, formatting dates.
     '''
     if k.lower() in RENAME_MAP:
       k = RENAME_MAP[k.lower()]
@@ -94,9 +92,6 @@ class CSV2JSONMapper(parallel.Mapper):
       else:
         return None
 
-    if k in EXACT:
-      nk = k + '_exact'
-      return [(k, v), (nk, v)]
 
     return (k, v)
 
@@ -125,9 +120,7 @@ class CSV2JSONReducer(parallel.Reducer):
       'consumer': {},
       'products': [],
       'reactions': {}, # reactions and outcomes get pivoted to arrays of keys
-      'reactions_exact': {},
-      'outcomes': {},
-      'outcomes_exact': {}
+      'outcomes': {}
     }
 
     track_consumer = []
@@ -151,21 +144,16 @@ class CSV2JSONReducer(parallel.Reducer):
         reaction = reaction.strip()
         if reaction:
           result['reactions'][reaction] = True
-          result['reactions_exact'][reaction] = True
 
       # Eliminating duplicate outcomes
       for outcome in outcomes:
         outcome = outcome.strip()
         if outcome:
           result['outcomes'][outcome] = True
-          result['outcomes_exact'][outcome] = True
 
     # Now that each list is unique, revert to list of strings
     result['reactions'] = list(result['reactions'].keys())
-    result['reactions_exact'] = list(result['reactions_exact'].keys())
     result['outcomes'] = list(result['outcomes'].keys())
-    result['outcomes_exact'] = list(result['outcomes_exact'].keys())
-
     return result
 
   def reduce(self, key, values, output):

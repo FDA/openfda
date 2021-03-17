@@ -94,9 +94,7 @@ class AnnotationPipelineTests(unittest.TestCase):
     db_iter = db.range_iter(None, None)
     (k, v) = next(db_iter)
     v['openfda']['upc'].sort()
-    v['openfda']['upc_exact'].sort()
     eq_(v['openfda']['upc'], ['0300694200305', '0300694210304', '0300694220303'])
-    eq_(v['openfda']['upc_exact'], ['0300694200305', '0300694210304', '0300694220303'])
 
 
 

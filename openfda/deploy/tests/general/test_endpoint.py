@@ -32,7 +32,7 @@ def test_device_enforcement():
   assert_enough_results('/device/enforcement.json?search=_missing_:openfda', 8500)
 
 def test_device_recall():
-  assert_enough_results('/device/recall.json?search=_exists_:openfda', 55000)
+  assert_enough_results('/device/recall.json?search=_exists_:openfda', 42000)
 
 def test_drug_event():
   assert_enough_results('/drug/event.json?search=_exists_:patient.drug.openfda', 10000000)
@@ -54,11 +54,13 @@ def test_zero_limit_handling():
   eq_(len(results), 0)
   ok_(meta['results']['total'] > 0)
 
+'''
+# Commenting this test out. Elasticsearch 6 no longer throws parse exceptions for bad dates in queries.
 def test_detailed_error_message():
   error = expect_error(
     '/food/enforcement.json?limit=1&search=report_date:[2000-10-01+TO+2013-09-31]')
   eq_(error['details'], "[parse_exception] failed to parse date field [2013-09-31] with format [basic_date||date||epoch_millis]")
-
+'''
 
 def test_limitless_count():
   def test_limitless_field(field):
@@ -76,8 +78,7 @@ def test_limitless_count():
       '/drug/label.json?count=%s&limit=2147482648' % (field))
     eq_(error['message'], "Limit cannot exceed 1000 results for count requests.")
 
-  for field in ['openfda.generic_name.exact', 'openfda.brand_name.exact', 'openfda.substance_name.exact',
-                'openfda.generic_name', 'openfda.brand_name', 'openfda.substance_name']:
+  for field in ['openfda.generic_name.exact', 'openfda.brand_name.exact', 'openfda.substance_name.exact']:
     test_limitless_field(field)
 
   # Other fields should still be subject to 1000 max limit

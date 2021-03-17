@@ -1,9 +1,6 @@
 {
   "rareport": {
     "_source": {
-      "excludes": [
-        "*_exact"
-      ],
       "includes": [
         "*"
       ]
@@ -25,52 +22,51 @@
         "type": "date"
       },
       "outcomes": {
-        "type": "string"
-      },
-      "outcomes_exact": {
-        "index": "not_analyzed",
-        "type": "string"
+        "fields": {
+          "exact": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
       },
       "products": {
         "properties": {
-          "industry_code": {"type": "string"},
+          "industry_code": {"type": "text"},
           "industry_name": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "name_brand": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           },
           "role": {
             "fields": {
               "exact": {
-                "index": "not_analyzed",
-                "type": "string"
+                "type": "keyword"
               }
             },
-            "type": "string"
+            "type": "text"
           }
         }
       },
       "reactions": {
-        "type": "string"
+        "fields": {
+          "exact": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
       },
-      "reactions_exact": {
-        "index": "not_analyzed",
-        "type": "string"
-      },
-      "report_number": {"type": "string"}
+      "report_number": {"type": "text"}
     }
   }
 }

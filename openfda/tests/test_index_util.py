@@ -12,8 +12,7 @@ import elasticsearch
 from openfda import index_util
 
 from nose.plugins.skip import SkipTest
-from six.moves import range
-from six.moves import zip
+
 
 
 ES_HOST = 'localhost:9200'
@@ -45,7 +44,7 @@ def test_fresh_index():
   index_util.index_with_checksum(es, 'index_util_test1', doc_type, batch)
 
   for i in range(4):
-    fetched = es.get('index_util_test1', i, 'user_message')
+    fetched = es.get(index='index_util_test1', id=i, doc_type='user_message')
     doc = dict(fetched['_source'])
     assert docs[i] == doc, (p(docs[i]), p(fetched))
 
@@ -68,7 +67,7 @@ def test_replace_some_docs():
   index_util.index_with_checksum(es, 'index_util_test1', doc_type, batch)
 
   for i in range(4):
-    fetched = es.get('index_util_test1', i, 'user_message')
+    fetched = es.get(index='index_util_test1', id=i, doc_type='user_message')
     doc = dict(fetched['_source'])
     assert docs[i] == doc, (p(docs[i]), p(fetched))
 

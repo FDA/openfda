@@ -113,9 +113,6 @@
         "is_original_packager": {
           "type": "boolean"
         },
-        "is_original_packager_exact": {
-          "type": "boolean"
-        },
         "manufacturer_name": {
           "type": "string"
         },

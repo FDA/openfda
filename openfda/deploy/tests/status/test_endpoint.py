@@ -18,7 +18,7 @@ def test_all_green():
 def test_counts():
   status = api_test_helpers.json('/status')
   assert (next(x for x in status if x['endpoint'] == 'deviceevent'))['documents'] >= 9400000
-  assert (next(x for x in status if x['endpoint'] == 'devicerecall'))['documents'] >= 65000
+  assert (next(x for x in status if x['endpoint'] == 'devicerecall'))['documents'] >= 43000
   assert (next(x for x in status if x['endpoint'] == 'deviceclass'))['documents'] >= 6176
   assert (next(x for x in status if x['endpoint'] == 'devicereglist'))['documents'] >= 227602
   assert (next(x for x in status if x['endpoint'] == 'deviceclearance'))['documents'] >= 145930

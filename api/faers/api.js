@@ -393,7 +393,7 @@ var trim_middleware = function (req, res, next) {
 app.use(trim_middleware);
 
 // Set global cache-control header to 1 hour.
-app.use(CacheMiddleware(3600));
+app.use(CacheMiddleware(600));
 
 // Use gzip compression
 app.use(compression());
@@ -655,9 +655,7 @@ app.get('/usage.json', cache('1 hour'), function (req, res) {
 
 app.get('/healthcheck', function (request, response) {
   client.cluster.health({
-    index: DRUG_EVENT_INDEX,
-    timeout: '60s',
-    waitForStatus: 'yellow'
+    local: true
   }, function (error, health_response, status) {
     health_json = JSON.stringify(health_response, undefined, 2);
     response.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')

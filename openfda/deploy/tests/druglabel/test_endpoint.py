@@ -4,13 +4,27 @@ import requests
 from openfda.tests.api_test_helpers import *
 from nose.tools import *
 
+EXACT_FIELDS = ['openfda.application_number.exact', 'openfda.brand_name.exact',
+                'openfda.generic_name.exact', 'openfda.is_original_packager.exact', 'openfda.manufacturer_name.exact',
+                'openfda.nui.exact', 'openfda.package_ndc.exact', 'openfda.pharm_class_cs.exact',
+                'openfda.pharm_class_epc.exact', 'openfda.pharm_class_moa.exact', 'openfda.pharm_class_pe.exact',
+                'openfda.product_ndc.exact', 'openfda.product_type.exact', 'openfda.route.exact', 'openfda.rxcui.exact',
+                'openfda.spl_id.exact', 'openfda.spl_set_id.exact',
+                'openfda.substance_name.exact', 'openfda.unii.exact', 'openfda.upc.exact']
+
+def test_exact_field_queries_after_fda_253():
+  for field in EXACT_FIELDS:
+    print(field)
+    meta, counts = fetch_counts('/drug/label.json?count=%s&limit=1' % field)
+    eq_(len(counts), 1)
+
 
 def test_not_analyzed_0():
   assert_total('/drug/label.json?search=id:d08e6fbf-9162-47cd-9cf6-74ea24d48214', 1)
 
 
 def test_exact_count_0():
-  assert_count_top('/drug/label.json?count=openfda.brand_name.exact', ['Oxygen', 'Ibuprofen', 'Gabapentin', 'Allergy Relief', 'Amoxicillin'])
+  assert_count_top('/drug/label.json?count=openfda.brand_name.exact', ['Oxygen', 'Ibuprofen', 'Gabapentin', 'Allergy Relief', 'Hand Sanitizer'])
 
 
 def test_date_1():
@@ -61,3 +75,34 @@ def test_single_upc():
   eq_(len(results), 1)
   upcs = results[0]['openfda']['upc']
   eq_(['0740640391006'], upcs)
+
+def test_pharma_classes():
+  meta, results = fetch(
+    '/drug/label.json?search=openfda.spl_set_id.exact:15b0b56d-6188-4937-b541-902022e35b24')
+  eq_(len(results), 1)
+  openfda = results[0]['openfda']
+  eq_(['IBUPROFEN'], openfda['generic_name'])
+  eq_(['WK2XYI10QM'], openfda['unii'])
+  eq_(['Cyclooxygenase Inhibitors [MoA]'], openfda['pharm_class_moa'])
+  eq_(['Anti-Inflammatory Agents, Non-Steroidal [CS]'], openfda['pharm_class_cs'])
+  eq_(['Nonsteroidal Anti-inflammatory Drug [EPC]'], openfda['pharm_class_epc'])
+
+
+  meta, results = fetch(
+    '/drug/label.json?search=openfda.spl_set_id.exact:143a5ba8-0ee9-43be-a0da-2c455c1a46bd')
+  eq_(len(results), 1)
+  openfda = results[0]['openfda']
+  eq_(['BENZONATATE'], openfda['generic_name'])
+  eq_(['5P4DHS6ENR'], openfda['unii'])
+  eq_(['Decreased Tracheobronchial Stretch Receptor Activity [PE]'], openfda['pharm_class_pe'])
+  eq_(['Non-narcotic Antitussive [EPC]'], openfda['pharm_class_epc'])
+
+  meta, results = fetch(
+    '/drug/label.json?search=openfda.unii.exact:10X0709Y6I&limit=1')
+  eq_(len(results), 1)
+  openfda = results[0]['openfda']
+  eq_(['BISACODYL'], openfda['substance_name'])
+  eq_(['10X0709Y6I'], openfda['unii'])
+  eq_(['Increased Large Intestinal Motility [PE]', 'Stimulation Large Intestine Fluid/Electrolyte Secretion [PE]'],
+      sorted(openfda['pharm_class_pe']))
+  eq_(['Stimulant Laxative [EPC]'], openfda['pharm_class_epc'])

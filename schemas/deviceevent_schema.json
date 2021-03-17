@@ -420,6 +420,12 @@
           },
           "sequence_number_treatment": {
             "type": "string"
+          },
+          "patient_problems": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           }
         },
         "type": "object"

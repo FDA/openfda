@@ -452,6 +452,7 @@
             "type": "string"
           },
           "openfda": {
+            "type": "object",
             "properties": {
               "device_class": {
                 "description": "A risk based classification system for all medical devices ((Federal Food, Drug, and Cosmetic Act, section 513).",
@@ -696,6 +697,7 @@
       "type": "array"
     },
     "sterilization": {
+      "type": "object",
       "properties": {
         "is_sterile": {
           "description": "Indicates that the device is packaged as sterile.",

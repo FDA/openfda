@@ -2,9 +2,10 @@ language: python
 python:
 - '3.8'
 before_install:
-- curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.3.0/elasticsearch-2.3.0.deb
-  && sudo dpkg -i --force-confnew elasticsearch-2.3.0.deb && sudo service elasticsearch
-  restart
+- curl -O https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.8.13.deb
+  && sudo dpkg -i --force-confnew elasticsearch-6.8.13.deb
+  && sudo chown -R elasticsearch:elasticsearch /etc/default/elasticsearch
+  && sudo service elasticsearch restart
 - npm install -g grunt-cli
 install:
 - pip install -U -r requirements.txt

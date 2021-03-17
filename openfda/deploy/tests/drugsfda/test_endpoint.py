@@ -4,6 +4,18 @@ import sys
 
 from openfda.tests.api_test_helpers import *
 
+EXACT_FIELDS = ['openfda.application_number.exact', 'openfda.brand_name.exact',
+                'openfda.generic_name.exact', 'openfda.manufacturer_name.exact',
+                'openfda.nui.exact', 'openfda.package_ndc.exact', 'openfda.pharm_class_cs.exact',
+                'openfda.pharm_class_epc.exact', 'openfda.pharm_class_moa.exact',
+                'openfda.product_ndc.exact', 'openfda.product_type.exact', 'openfda.route.exact', 'openfda.rxcui.exact',
+                'openfda.spl_id.exact', 'openfda.spl_set_id.exact',
+                'openfda.substance_name.exact', 'openfda.unii.exact']
+
+def test_exact_field_queries_after_fda_253():
+  for field in EXACT_FIELDS:
+    meta, counts = fetch_counts('/drug/drugsfda.json?count=%s&limit=1' % field)
+    eq_(len(counts), 1)
 
 def test_total_count():
   assert_total('/drug/drugsfda.json', 24000)
@@ -79,7 +91,7 @@ def test_multiple_application_docs():
 
   app = results[0]
   submissions = sorted(app['submissions'], key=lambda p: int(p['submission_number']))
-  eq_(len(submissions), 16)
+  eq_(len(submissions), 17)
   sub = submissions[0]
 
   docs = sorted(sub["application_docs"], key=lambda p: int(p['id']))

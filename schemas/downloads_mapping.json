@@ -15,8 +15,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                   }
                 }
             }
@@ -32,8 +32,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                   }
                 }
             }
@@ -49,8 +49,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                   }
                 }
             }
@@ -66,8 +66,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                   }
                 }
             }
@@ -83,8 +83,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                   }
                 }
             }
@@ -100,8 +100,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                   }
                 }
             }
@@ -117,8 +117,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                   }
                 }
             }
@@ -134,8 +134,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                   }
                 }
             }
@@ -151,8 +151,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                   }
                 }
             }
@@ -172,8 +172,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                 }
               }
             }
@@ -189,8 +189,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                 }
               }
             }
@@ -210,8 +210,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                 }
               }
             }
@@ -227,8 +227,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                 }
               }
             }
@@ -244,8 +244,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                 }
               }
             }
@@ -261,8 +261,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                 }
               }
             }
@@ -278,8 +278,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                 }
               }
             }
@@ -299,8 +299,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                 }
               }
             }
@@ -316,8 +316,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                 }
               }
             }
@@ -337,8 +337,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                 }
               }
             }
@@ -358,8 +358,8 @@
                 "properties": {
                   "size_mb": { "type": "float" },
                   "records": { "type": "integer" },
-                  "display_name": { "type": "string" },
-                  "file": { "type": "string" }
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
                 }
               }
             }

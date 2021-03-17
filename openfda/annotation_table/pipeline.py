@@ -10,6 +10,7 @@ import glob
 import logging
 import os
 import re
+import shutil
 import subprocess
 import traceback
 from os.path import basename, dirname, join
@@ -20,9 +21,10 @@ import arrow
 import luigi
 import simplejson as json
 from bs4 import BeautifulSoup
-
+from lxml import etree
 from openfda import common, config, parallel, spl
 from openfda.annotation_table import unii_harmonization
+from openfda.parallel import NullOutput
 from openfda.spl import process_barcodes, extract
 from openfda.tasks import DependencyTriggeredTask
 
@@ -74,12 +76,13 @@ class DownloadNDC(luigi.Task):
     zip_url = None
     soup = BeautifulSoup(urlopen(NDC_DOWNLOAD_PAGE).read(), 'lxml')
     for a in soup.find_all(href=re.compile('.*.zip')):
-      if 'NDC Database File - Text' in a.text:
+      if 'ndc database file - text' in a.text.lower():
         zip_url = urljoin('https://www.fda.gov', a['href'])
         break
 
     if not zip_url:
       logging.fatal('NDC database file not found!')
+      raise
 
     common.download(zip_url, self.output().path)
 
@@ -187,6 +190,40 @@ class ExtractPharmaClass(luigi.Task):
     common.shell_cmd_quiet('mkdir -p %s' % output_dir)
     ExtractXMLFromNestedZip(zip_filename, output_dir)
 
+'''
+We need to make sure we take the latest version for each Pharmacologic Class Indexing SPL Set Id. The pharma class file
+we download from DailyMed may contain multiple versions for the same SPL Set ID, which causes problems down the line.
+This task will go over all the files, extract the current versions only, and discard the rest (also normalizing the
+directory structure in the process).
+'''
+class NormalizePharmaClass(parallel.MRTask):
+  NS = {'ns': 'urn:hl7-org:v3'}
+  def requires(self):
+    return ExtractPharmaClass()
+
+  def output(self):
+    return luigi.LocalTarget(join(BASE_DIR, 'pharma_class/normalized'))
+
+  def mapreduce_inputs(self):
+    return parallel.Collection.from_glob(join(self.input().path, '*/*.xml'))
+
+  def map(self, xml_file, value, output):
+    p = etree.XMLParser()
+    tree = etree.parse(open(xml_file), parser=p)
+    spl_id = tree.xpath('//ns:document/ns:id/@root', namespaces=self.NS)[0].lower()
+    spl_set_id = tree.xpath('//ns:document/ns:setId/@root', namespaces=self.NS)[0].lower()
+    version = tree.xpath('//ns:document/ns:versionNumber/@value', namespaces=self.NS)[0]
+    output.add(spl_set_id, {'spl_id': spl_id, 'version': version, 'file': xml_file})
+
+  def reduce(self, key, values, output):
+    values.sort(key=lambda spl: int(spl['version']))
+    output.put(key, values[-1])
+    os.makedirs(name=self.output().path, exist_ok=True)
+    shutil.copy2(values[-1]['file'], self.output().path)
+
+  def output_format(self):
+    return NullOutput()
+
 class ExtractUNII(luigi.Task):
   def requires(self):
     return DownloadUNII()
@@ -264,7 +301,7 @@ class RXNorm2JSON(luigi.Task):
 #                   go directly to leveldb, avoiding the JSON step.
 class UNIIHarmonizationJSON(luigi.Task):
   def requires(self):
-    return [ExtractNDC(), ExtractPharmaClass(), ExtractUNII()]
+    return [ExtractNDC(), NormalizePharmaClass(), ExtractUNII()]
 
   def output(self):
     return luigi.LocalTarget(join(BASE_DIR, 'unii_extract.json'))

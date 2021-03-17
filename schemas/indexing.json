@@ -12,7 +12,10 @@
       }
     },
     "index": {
-      "refresh_interval": "30s"
+      "refresh_interval": "30s",
+      "max_result_window" : "26000",
+      "number_of_shards" : "10",
+      "number_of_replicas" : "2"
     }
   }
 }

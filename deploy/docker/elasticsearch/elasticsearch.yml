@@ -13,15 +13,20 @@ cluster.routing.allocation.node_initial_primaries_recoveries: 32
 cluster.routing.allocation.node_concurrent_recoveries: 32
 cluster.routing.allocation.disk.watermark.low: 90%
 cluster.routing.allocation.disk.watermark.high: 96%
+cluster.routing.allocation.disk.watermark.flood_stage: 98%
 
 indices.recovery.max_bytes_per_sec: 1000mb
 
-cloud.aws.region: ${AWS_REGION}
-discovery.type: ec2
+xpack.security.enabled: false
+xpack.watcher.enabled: false
+xpack.ml.enabled: false
+xpack.monitoring.enabled: false
+
+discovery.zen.hosts_provider: ec2
 discovery.ec2.any_group: false
 discovery.ec2.availability_zones: ${ES_AVAILABILITY_ZONES}
 discovery.ec2.groups: ${ES_SEC_GROUP_ID}
 discovery.ec2.tag.tree: ${CLUSTER_TAG}
 
-discovery.zen.minimum_master_nodes: 2
+discovery.zen.minimum_master_nodes: 1
 discovery.zen.ping_timeout: 30s

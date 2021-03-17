@@ -30,8 +30,8 @@ def test_missing_clause_es5():
   assert_total_exact('/device/recall.json?search='
                '_missing_:openfda+AND+root_cause_description:Design'
                '+AND+_missing_:pma_numbers'
-               '+AND+event_date_terminated:[2012-01-8+TO+2012-01-30]'
-               '+AND+NOT+_missing_:firm_fei_number+AND+product_res_number.exact:Z-1373-2010', 3)
+               '+AND+event_date_terminated:[2012-01-8+TO+2012-03-30]'
+               '+AND+NOT+_missing_:firm_fei_number+AND+product_res_number.exact:Z-0866-2011', 1)
 
 
 def test_malformed_dates():

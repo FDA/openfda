@@ -106,7 +106,7 @@ def test_date_fields():
   # commercial_distribution_end_date
   meta, results = fetch(
     '/device/udi.json?search=commercial_distribution_end_date:[2014-01-01+TO+2014-12-31]&limit=100')
-  eq_(meta["results"]["total"], 144)
+  eq_(meta["results"]["total"], 145)
 
 
 def test_identifiers():
@@ -227,7 +227,7 @@ def test_device_sizes():
 
 def test_CoRoent():
   meta, results = fetch(
-    '/device/udi.json?search=identifiers.id:00887517567062+AND+identifiers.type=Primary+AND+identifiers.issuing_agency.exact=GS1')
+    '/device/udi.json?search=identifiers.id:00887517567062+AND+identifiers.type:Primary+AND+identifiers.issuing_agency.exact:GS1')
   eq_(len(results), 1)
 
   udi = results[0]

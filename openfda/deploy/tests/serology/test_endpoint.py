@@ -12,7 +12,7 @@ def test_total_count():
 def test_basic_search():
   meta, results = fetch(
     '/device/covid19serology.json?search=manufacturer.exact:Euroimmun+AND+date_performed:([20200421+TO+20200421])'
-    '+AND+panel:"Panel 1"+AND+sample_id:C0001+AND+sample_no:[1+TO+1]')
+    '+AND+panel:"Panel 1"+AND+sample_id:C0001+AND+sample_no:[1+TO+1]+AND+lot_number:E200330DT')
   eq_(len(results), 1)
 
   row = results[0]

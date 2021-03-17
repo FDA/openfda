@@ -4,6 +4,21 @@ import requests
 from openfda.tests.api_test_helpers import *
 from nose.tools import *
 
+
+EXACT_FIELDS = ['openfda.application_number.exact', 'openfda.brand_name.exact',
+                'openfda.generic_name.exact', 'openfda.manufacturer_name.exact',
+                'openfda.nui.exact', 'openfda.package_ndc.exact', 'openfda.pharm_class_cs.exact',
+                'openfda.pharm_class_epc.exact', 'openfda.pharm_class_moa.exact', 'openfda.pharm_class_pe.exact',
+                'openfda.product_ndc.exact', 'openfda.product_type.exact', 'openfda.route.exact', 'openfda.rxcui.exact',
+                'openfda.spl_id.exact', 'openfda.spl_set_id.exact',
+                'openfda.substance_name.exact', 'openfda.unii.exact']
+
+def test_exact_field_queries_after_fda_253():
+  for field in EXACT_FIELDS:
+    print(field)
+    meta, counts = fetch_counts('/drug/enforcement.json?count=%s&limit=1' % field)
+    eq_(len(counts), 1)
+
 def test_no_reports_before_2012():
   assert_total('/drug/enforcement.json?search=report_date:[19600101+TO+20120630]', 0)
   assert_total('/drug/enforcement.json?search=report_date:[1960-01-01+TO+2012-06-30]', 0)

@@ -1,60 +1,49 @@
 {
   "tobaccoproblem": {
     "_source": {
-      "excludes": [
-        "*_exact"
-      ],
       "includes": [
         "*"
       ]
     },
     "properties": {
       "nonuser_affected": {
-        "index": "not_analyzed",
-        "type": "string"
+        "type": "keyword"
       },
       "number_health_problems": {
-        "index": "not_analyzed",
         "type": "integer"
       },
       "number_product_problems": {
-        "index": "not_analyzed",
         "type": "integer"
       },
       "number_tobacco_products": {
-        "index": "not_analyzed",
         "type": "integer"
       },
       "tobacco_products": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "report_id": {
-        "index": "not_analyzed",
         "type": "integer"
       },
       "reported_health_problems": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "reported_product_problems": {
         "fields": {
           "exact": {
-            "index": "not_analyzed",
-            "type": "string"
+            "type": "keyword"
           }
         },
-        "type": "string"
+        "type": "text"
       },
       "date_submitted": {
         "type": "date",

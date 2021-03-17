@@ -52,10 +52,6 @@ def _add_field(openfda, field, value):
     if field not in openfda:
       openfda[field] = {}
     openfda[field][v] = True
-    exact_field = field + '_exact'
-    if exact_field not in openfda:
-      openfda[exact_field] = {}
-    openfda[exact_field][v] = True
   return
 
 
@@ -105,7 +101,7 @@ def AddHarmonizedRowToOpenfda(openfda, row):
                 if va_key == 'name':
                   if va_value.find('[MoA]') != -1:
                     _add_field(openfda, 'pharm_class_moa', va_value)
-                  if va_value.find('[Chemical/Ingredient]') != -1:
+                  if va_value.find('[Chemical/Ingredient]') != -1 or va_value.find('[CS]') != -1:
                     _add_field(openfda, 'pharm_class_cs', va_value)
                   if va_value.find('[PE]') != -1:
                     _add_field(openfda, 'pharm_class_pe', va_value)
