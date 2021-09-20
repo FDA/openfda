@@ -58,7 +58,8 @@ def extract_set_id(tree):
 
 def load_unii_from_csv(file):
   unii_rows = {}
-  df = pd.read_csv(file, header=0, names=['Name', 'Type', 'UNII', 'PT'], sep='\t', index_col=False, encoding='utf-8',
+  df = pd.read_csv(open(file, 'r', encoding='utf-8', errors='ignore'), header=0, names=['Name', 'Type', 'UNII', 'PT'],
+                   sep='\t', index_col=False, encoding='utf-8',
                    dtype=str, low_memory=False, na_values=[], keep_default_na=False)
   for row in df.itertuples():
     unii_rows[row.Name.lower()] = {'va': [], 'name': row.Name, 'set_id': '',

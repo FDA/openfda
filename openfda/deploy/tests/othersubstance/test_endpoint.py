@@ -28,13 +28,12 @@ def test_codes():
   eq_(len(results), 1)
 
   codes = sorted(results[0]["codes"], key=lambda code: code['code'])[0]
-  eq_(codes["code"], "1114693")
-  eq_(codes["uuid"], "a41a68ed-9232-44b6-a1e7-b5e2e837c32d")
-  eq_(codes["url"], "https://rxnav.nlm.nih.gov/REST/rxcui/1114693/allProperties.xml?prop=all")
-  eq_(codes["comments"], "RxNorm")
-  eq_(codes["references"], ["2646b7ec-4e71-45d9-90c3-df756de57a3e"])
+  eq_(codes["code"], "1065221")
+  eq_(codes["uuid"], "7040e30b-b3d2-ae4b-d8d2-2ab72578fa6b")
+  eq_(codes["url"], "https://store.usp.org/product/1065221")
+  eq_(codes["references"], ["2bec6c3a-ce05-37bb-b4f3-8770aedd51f7"])
   eq_(codes["type"], "PRIMARY")
-  eq_(codes["code_system"], "RXCUI")
+  eq_(codes["code_system"], "RS_ITEM_NUM")
 
 
 def test_mixture():
@@ -175,11 +174,10 @@ def test_polymer():
   classification = polymer["classification"]
   eq_(classification["uuid"], "445904ab-14d8-415b-bc22-5c39f65a3bd8")
   eq_(classification["polymer_class"], "HOMOPOLYMER")
-  eq_(classification["polymer_geometry"], "BRANCHED")
+  eq_(classification["polymer_geometry"], "STAR")
 
   idealized_structure = polymer["idealized_structure"]
   eq_(idealized_structure["count"], 1)
-  eq_(idealized_structure["hash"], "QDZABZ7QJ2FU")
   eq_(idealized_structure["id"], "3c203a89-60f6-43f6-8658-b73047f20485")
   eq_(idealized_structure["references"], [])
 
@@ -204,7 +202,6 @@ def test_polymer():
 
   display_structure = polymer["display_structure"]
   eq_(display_structure["count"], 1)
-  eq_(display_structure["hash"], "QDZABZ7QJ2FU")
   eq_(display_structure["id"], "c522848e-6de9-4b93-83f0-e00e0980fe56")
 
 
@@ -327,7 +324,7 @@ def test_structure():
   eq_(structure["count"], 1)
   eq_(structure["smiles"], "Cl.CN1C(CCCC(O)=O)=NC2=CC(=CC=C12)N(CCCl)CCCl")
   eq_(structure["defined_stereo"], 0)
-  eq_(structure["molecular_weight"], "394.724")
+  eq_(structure["molecular_weight"], "394.721")
   eq_(structure["atropisomerism"], "No")
   eq_(structure["ez_centers"], 0)
   eq_(structure["charge"], 0)

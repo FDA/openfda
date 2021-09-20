@@ -1,4 +1,9 @@
 cluster.name: openfda
+cluster.initial_master_nodes:
+   - node-us-east-1a
+   - node-us-east-1b
+   - node-us-east-1c
+node.name: ${NODE_NAME}
 node.master: true
 node.data: true
 
@@ -22,11 +27,13 @@ xpack.watcher.enabled: false
 xpack.ml.enabled: false
 xpack.monitoring.enabled: false
 
-discovery.zen.hosts_provider: ec2
+discovery.seed_providers: ec2
+discovery.zen.ping_timeout: 30s
 discovery.ec2.any_group: false
 discovery.ec2.availability_zones: ${ES_AVAILABILITY_ZONES}
 discovery.ec2.groups: ${ES_SEC_GROUP_ID}
 discovery.ec2.tag.tree: ${CLUSTER_TAG}
 
-discovery.zen.minimum_master_nodes: 1
-discovery.zen.ping_timeout: 30s
+ingest.geoip.downloader.enabled: false
+
+

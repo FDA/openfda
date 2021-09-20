@@ -32,7 +32,7 @@ RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 SPL_JS = join(RUN_DIR, 'spl/spl_to_json.js')
 LOINC = join(RUN_DIR, 'spl/data/sections.csv')
 
-SPL_S3_BUCKET = 's3://openfda-data-spl/data/'
+SPL_S3_BUCKET = 's3://openfda-data-spl/'
 SPL_STAGING_S3_BUCKET = 's3://openfda-data-spl-staging/'
 SPL_S3_LOCAL_DIR = config.data_dir('spl/s3_sync')
 SPL_INDEX_DIR = config.data_dir('spl/index.db')
@@ -145,7 +145,7 @@ class AddInDailyMedSPL(luigi.Task):
 
 
 class SyncS3SPL(luigi.Task):
-  bucket = SPL_S3_BUCKET
+  # bucket = SPL_S3_BUCKET
   staging_bucket = SPL_STAGING_S3_BUCKET
   local_dir = SPL_S3_LOCAL_DIR
 
@@ -161,18 +161,20 @@ class SyncS3SPL(luigi.Task):
         arrow.get(os.path.getmtime(self.flag_file())) > arrow.now().floor('day'))
 
   def run(self):
+    # Copying from the staging bucket to the archival bucket is now being done via S3 replication.
+    '''
     common.quiet_cmd(['aws',
                 '--cli-read-timeout=3600',
                 '--profile=' + config.aws_profile(),
                 's3', 'sync',
                 self.staging_bucket,
                 self.bucket])
-
+    '''
     common.quiet_cmd(['aws',
                 '--cli-read-timeout=3600',
 		'--profile=' + config.aws_profile(),
                 's3', 'sync',
-                self.bucket,
+                self.staging_bucket,
                 self.local_dir])
 
     with open(self.flag_file(), 'w') as out_f:

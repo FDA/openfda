@@ -388,7 +388,10 @@ class JoinEstablishmentTypesReducer(parallel.Reducer):
     intermediate = parallel.pivot_values(values)
     result = []
     # There should be only one estblishment type streamed
-    est_type = intermediate.get('estabtypes', [])[0]
+    # However, establishment type with ID of 4 no longer exists in estabtypes.txt, but there
+    # were at least two listing_estabtypes records still referring to this non-existent value.
+    # Likely a data issue on the FDA side, which we need to handle here too.
+    est_type = intermediate.get('estabtypes', [{'description': ''}])[0]
     for data in intermediate.get('listing_estabtypes', []):
       final = dict(list(data.items()) + list(est_type.items()))
       result.append(final)

@@ -2,20 +2,22 @@ version: '3'
 
 services:
   es:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.8.13
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.1
     environment:
       - ES_JAVA_OPTS=-Xms1g -Xmx1g
       - xpack.security.enabled=false
+      - discovery.type=single-node
     ports:
       - "9200"
   import:
-    image: elasticdump/elasticsearch-dump:v6.28.0
+    image: elasticdump/elasticsearch-dump:v6.39.0
     command: >
-      sh -c "chmod a+x /tmp/wait-for.sh &&
+      sh -c "apk --no-cache add curl &&
+             chmod a+x /tmp/wait-for.sh &&
              /tmp/wait-for.sh es:9200 -t 120 &&
              elasticdump --input=/tmp/downloadstats_mapping.json --output=http://es:9200/downloadstats --type=mapping &&
              elasticdump --input=/tmp/downloadstats_data.json --output=http://es:9200/downloadstats --type=data &&
-             elasticdump --input=/tmp/covid19serology_mapping.json --output=http://es:9200/covid19serology --type=mapping &&
+             curl -X PUT 'es:9200/covid19serology?include_type_name=true' -H 'Content-Type: application/json' --data '@/tmp/covid19serology_mapping.json' &&
              elasticdump --input=/tmp/covid19serology_data.json --output=http://es:9200/covid19serology --type=data &&
              sleep 3600"
     volumes:

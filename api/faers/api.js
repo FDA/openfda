@@ -111,8 +111,6 @@ var PROCESS_METADATA_INDEX = 'openfdametadata';
 var EXPORT_DATA_INDEX = 'openfdadata';
 var SUBSTANCE_DATA_INDEX = 'substancedata';
 var DOWNLOAD_STATS_INDEX = 'downloadstats';
-var HISTORICAL_DOCUMENTS_INDEX = 'historicaldocument';
-var HISTORICAL_DOCUMENTS_ANALYTICS_INDEX = 'historicaldocumentanalytics';
 
 // This data structure is the standard way to add an endpoint to the api, which
 // is to say, if there is a one-to-one mapping between an index and an endpoint,
@@ -247,21 +245,6 @@ const ENDPOINTS = [
     'basic': true
   },
   {
-    'index': HISTORICAL_DOCUMENTS_INDEX,
-    'endpoint': '/other/historicaldocument.json',
-    'name': 'otherhistoricaldocument',
-    'basic': true,
-    'disabled': !process.env.API_HISTORICAL_DOCUMENTS_ENABLED
-  },
-  {
-    'index': HISTORICAL_DOCUMENTS_ANALYTICS_INDEX,
-    'endpoint': '/other/historicaldocumentanalytics.json',
-    'name': 'otherhistoricaldocumentanalytics',
-    'basic': true,
-    'disabled': !process.env.API_HISTORICAL_DOCUMENTS_ENABLED,
-    'auxiliary': true
-  },
-  {
     'index': EXPORT_DATA_INDEX,
     'endpoint': '/download.json',
     'name': 'openfdadata',
@@ -319,8 +302,7 @@ var UpdateIndexInformation = function (client, index_info) {
   client.search({
     index: PROCESS_METADATA_INDEX,
     type: 'last_run',
-    size: 30,
-    _sourceInclude: ['last_update_date']
+    size: 30
   }).then(function (body) {
     var util = require('util');
     for (var i = 0; i < body.hits.hits.length; ++i) {
@@ -729,7 +711,8 @@ TryToBuildElasticsearchParams = async function (params, es_index, response) {
   var es_search_params = {
     index: es_index,
     body: es_query,
-    sort: es_sort
+    sort: es_sort,
+    track_total_hits: true
   };
 
   if (!params.count) {
@@ -743,7 +726,7 @@ TryToBuildElasticsearchParams = async function (params, es_index, response) {
 TrySearch = function (index, params, es_search_params, request, response) {
   client.search(es_search_params)
     .then(function (body) {
-      if (body.hits.hits.length == 0 && !(params.limit === 0 && body.hits.total > 0)) {
+      if (body.hits.hits.length == 0 && !(params.limit === 0 && body.hits.total.value > 0)) {
         return ApiError(response, ErrorTypes.NOT_FOUND, 'No matches found!');
       }
 
@@ -764,7 +747,7 @@ TrySearch = function (index, params, es_search_params, request, response) {
         response_json.meta.results = {
           'skip': params.skip,
           'limit': params.limit,
-          'total': body.hits.total
+          'total': body.hits.total.value
         };
 
         response_json.results = [];

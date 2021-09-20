@@ -3,7 +3,7 @@
 #
 # It has been modified to support multiple data directories
 
-FROM docker.elastic.co/elasticsearch/elasticsearch:6.8.13
+FROM docker.elastic.co/elasticsearch/elasticsearch:7.14.1
 
 ADD elasticsearch.yml /usr/share/elasticsearch/config/
 ADD log4j2.properties /usr/share/elasticsearch/config/
@@ -13,6 +13,7 @@ ENV AWS_REGION ""
 ENV ES_AVAILABILITY_ZONES ""
 ENV ES_SEC_GROUP_ID ""
 ENV CLUSTER_TAG ""
+ENV NODE_NAME ""
 ENV MAX_LOCKED_MEMORY unlimited
 
 # Install AWS plugins

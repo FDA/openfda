@@ -6,7 +6,6 @@ import collections
 import csv
 import glob
 import logging
-import multiprocessing
 import os
 import re
 import sys
@@ -34,14 +33,12 @@ RAW_DIR = join(BASE_DIR, 'maude/raw/events')
 # See https://github.com/FDA/openfda/issues/27
 # Files for resolving device problem codes
 DEVICE_PROBLEM_CODES_FILE = join(BASE_DIR, 'maude/extracted/events/deviceproblemcodes.txt')
-DEVICE_PROBLEMS_FILE = join(BASE_DIR, 'maude/extracted/events/foidevproblem.txt')
 PATIENT_PROBLEM_CODES_FILE = join(BASE_DIR, 'maude/extracted/events/patientproblemdata.txt')
-PATIENT_PROBLEMS_FILE = join(BASE_DIR, 'maude/extracted/events/patientproblemcode.txt')
 
 # Use to ensure a standard naming of level db outputs is achieved across tasks.
 DATE_FMT = 'YYYY-MM-DD'
-CATEGORIES = ['mdrfoi', 'patient', 'foidev', 'foitext', 'device']
-IGNORE_FILES = ['problem', 'add', 'change']
+CATEGORIES = ['foidevproblem', 'patientproblemcode', 'mdrfoi', 'patient', 'foidev', 'foitext', 'device']
+IGNORE_FILES = ['deviceproblemcodes', 'patientproblemdata', 'add', 'change']
 
 DEVICE_DOWNLOAD_PAGE = ('https://www.fda.gov/medical-devices/'
                         'mandatory-reporting-requirements-manufacturers-importers-and-device-user-facilities/'
@@ -61,6 +58,15 @@ for row in enum_csv:
 
 # patient and text records are missing header rows
 FILE_HEADERS = {
+  'foidevproblem': [
+    'mdr_report_key',
+    'problem_code'],
+  'patientproblemcode': [
+    'mdr_report_key',
+    'patient_sequence_number',
+    'problem_code',
+    'date_added',
+    'date_changed'],
   'patient': [
     'mdr_report_key',
     'patient_sequence_number',
@@ -260,7 +266,7 @@ SPLIT_KEYS = ['sequence_number_treatment', 'sequence_number_outcome']
 # multiple submits are separated by ',' need to split these keys on ','
 MULTI_SUBMIT = ['source_type', 'remedial_action', 'type_of_report']
 # These keys have malformed integers in them: left-padded with a space and decimal point added.
-MALFORMED_KEYS = ['mdr_report_key', 'device_event_key', 'device_sequence_number']
+MALFORMED_KEYS = ['mdr_report_key', 'device_event_key', 'device_sequence_number', 'patient_sequence_number']
 
 def _fix_date(input_date):
   ''' Converts input dates for known formats to a standard format that is
@@ -384,12 +390,10 @@ class PreprocessFilesToFixIssues(AlwaysRunTask):
       os.rename(filtered, filename)
 
 class CSV2JSONMapper(parallel.Mapper):
-  def __init__(self, device_problem_codes_ref, device_problem_codes, patient_problem_codes_ref, patient_problem_codes):
+  def __init__(self, device_problem_codes_ref,  patient_problem_codes_ref):
     parallel.Mapper.__init__(self)
     self.device_problem_codes_ref = device_problem_codes_ref
-    self.device_problem_codes = device_problem_codes
     self.patient_problem_codes_ref = patient_problem_codes_ref
-    self.patient_problem_codes = patient_problem_codes
 
   def map_shard(self, map_input, map_output):
     self.filename = map_input.filename
@@ -485,18 +489,14 @@ class CSV2JSONMapper(parallel.Mapper):
     # We need to see if device problem code is available for this report in the
     # foidevproblem.txt file, resolve it to a problem description, and add it to the
     # master record.
-    if file_type == 'mdrfoi':
-      problem_codes = self.device_problem_codes.get(mdr_key)
-      if problem_codes is not None:
-        product_problems = [self.device_problem_codes_ref.get(code) for code in problem_codes]
-        new_value['product_problems'] = product_problems
+    if file_type == 'foidevproblem':
+      product_problem = self.device_problem_codes_ref.get(new_value['problem_code'])
+      new_value['product_problem'] = product_problem
 
     # Same applies to patient problem codes.
-    if file_type == 'patient':
-      problem_codes = self.patient_problem_codes.get(mdr_key + '-' + new_value['patient_sequence_number'])
-      if problem_codes is not None:
-        patient_problems = [self.patient_problem_codes_ref.get(code) for code in problem_codes]
-        new_value['patient_problems'] = patient_problems
+    if file_type == 'patientproblemcode':
+      patient_problem = self.patient_problem_codes_ref.get(new_value['problem_code'])
+      new_value['patient_problem'] = patient_problem
 
     output.add(mdr_key, (file_type, new_value))
 
@@ -520,7 +520,7 @@ class CSV2JSONJoinReducer(parallel.Reducer):
     }
 
     if not val.get('mdrfoi', []):
-      logging.info('MDR REPORT %s: Missing mdrfoi record, Skipping join', key)
+      # logging.info('MDR REPORT %s: Missing mdrfoi record, Skipping join', key)
       return
 
     for i, main_report in enumerate(val.get('mdrfoi', [])):
@@ -536,6 +536,16 @@ class CSV2JSONJoinReducer(parallel.Reducer):
       for row in val.get(source_file, []):
         row.pop('mdr_report_key', 0) # No need to keep join key on nested data
         final[target_key].append(row)
+
+    # Now tuck the device and patient problem codes onto the final record
+    if val.get('foidevproblem', []):
+      final['product_problems'] = list(map(lambda x: x['product_problem'], val['foidevproblem']))
+
+    for patient in final['patient']:
+      for patient_problem in val.get('patientproblemcode', []):
+        if patient['patient_sequence_number'] == patient_problem['patient_sequence_number']:
+          patient['patient_problems'] = [patient_problem['patient_problem']] if patient.get(
+            'patient_problems') is None else patient['patient_problems'] + [patient_problem['patient_problem']]
 
     return final
 
@@ -569,53 +579,37 @@ class CSV2JSON(luigi.Task):
 
   def run(self):
     files = glob.glob(self.input().path + '/*/*.txt')
+    device_problems = glob.glob(self.input().path + '/*/foidevproblem*.txt')
+    patient_problems = glob.glob(self.input().path + '/*/patientproblemcode*.txt')
 
     if self.loader_task == 'init':
       input_files = [f for f in files if not any(i for i in IGNORE_FILES if i in f)]
     else:
-      input_files = [f for f in files if self.loader_task in f]
+      input_files = [f for f in files if self.loader_task in f] + device_problems + patient_problems
 
     # Load and cache device problem codes.
     device_problem_codes_ref = {}
-    device_problem_codes = {}
-
     reader = csv.reader(open(DEVICE_PROBLEM_CODES_FILE), quoting=csv.QUOTE_NONE, delimiter='|')
     for idx, line in enumerate(reader):
       if len(line) > 1:
         device_problem_codes_ref[line[0]] = line[1].strip()
 
-    reader = csv.reader(open(DEVICE_PROBLEMS_FILE), quoting=csv.QUOTE_NONE, delimiter='|')
-    for idx, line in enumerate(reader):
-      if len(line) > 1:
-        device_problem_codes[line[0]] = [line[1]] if device_problem_codes.get(line[0]) is None else \
-        device_problem_codes[line[0]] + [line[1]]
-
     # Load and cache patient problem codes.
     patient_problem_codes_ref = {}
-    patient_problem_codes = {}
-
     reader = csv.reader(open(PATIENT_PROBLEM_CODES_FILE), quoting=csv.QUOTE_NONE, delimiter='|')
     for idx, line in enumerate(reader):
       if len(line) > 1:
         patient_problem_codes_ref[line[0]] = line[1].strip()
 
-    reader = csv.reader(open(PATIENT_PROBLEMS_FILE), quoting=csv.QUOTE_NONE, delimiter='|')
-    for idx, line in enumerate(reader):
-      if len(line) > 1:
-        key = line[0].strip().replace('.0', '') + '-' +line[1].strip().replace('.0', '')
-        patient_problem_codes[key] = [line[2]] if patient_problem_codes.get(key) is None else \
-        patient_problem_codes[key] + [line[2]]
-
-
     parallel.mapreduce(
       parallel.Collection.from_glob(
-        input_files, parallel.CSVLineInput(quoting=csv.QUOTE_NONE, delimiter='|')),
-      mapper=CSV2JSONMapper(device_problem_codes_ref=device_problem_codes_ref, device_problem_codes=device_problem_codes,
-                            patient_problem_codes_ref=patient_problem_codes_ref, patient_problem_codes=patient_problem_codes),
+        input_files, parallel.CSVSplitLineInput(quoting=csv.QUOTE_NONE, delimiter='|')),
+      mapper=CSV2JSONMapper(device_problem_codes_ref=device_problem_codes_ref,
+                            patient_problem_codes_ref=patient_problem_codes_ref
+                            ),
       reducer=CSV2JSONJoinReducer(),
-      output_prefix=self.output().path,
-      map_workers=int(multiprocessing.cpu_count() / 10) + 1,
-      num_shards=int(multiprocessing.cpu_count() / 10) + 1)
+      output_prefix=self.output().path
+    )
 
 
 class MergeUpdatesMapper(parallel.Mapper):

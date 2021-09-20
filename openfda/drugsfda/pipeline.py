@@ -331,8 +331,7 @@ class SubmissionPropertyType2JSONMapper(parallel.Mapper):
     'ApplNo': 'application_number',
     'SubmissionType': 'submission_type',
     'SubmissionNo': 'submission_number',
-    'SubmissionPropertyTypeCode': 'code',
-    'SubmissionPropertyTypeID': 'id'
+    'SubmissionPropertyTypeCode': 'code'
   }
 
   def map(self, key, value, output):
@@ -349,8 +348,8 @@ class SubmissionPropertyType2JSONMapper(parallel.Mapper):
     # Assign application number as the key, since all three drugs@FDA files can be joined by this key.
     key = build_submissions_key(json['application_number'], json)
     del json['application_number'], json['submission_number'], json['submission_type']
-
-    output.add(key, json)
+    if json != {}:
+      output.add(key, json)
 
 
 class ApplicationsDocs2JSONMapper(parallel.Mapper):

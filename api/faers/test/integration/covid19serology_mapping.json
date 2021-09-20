@@ -1,119 +1,118 @@
 {
-  "covid19serology": {
-    "mappings": {
-      "covid19serology": {
-        "_source": {
-          "includes": [
-            "*"
-          ]
+  "mappings": {
+    "covid19serology": {
+      "_source": {
+        "includes": [
+          "*"
+        ]
+      },
+      "properties": {
+        "antibody_agree": {
+          "type": "keyword"
         },
-        "properties": {
-          "antibody_agree": {
-            "type": "keyword"
-          },
-          "antibody_truth": {
-            "type": "keyword"
-          },
-          "control": {
-            "type": "keyword"
-          },
-          "date_performed": {
-            "type": "date",
-            "format": "M/d/yyyy||basic_date||date_time_no_millis||date||epoch_millis"
-          },
-          "days_from_symptom": {
-            "type": "keyword"
-          },
-          "device": {
-            "type": "text",
-            "fields": {
-              "exact": {
-                "type": "keyword"
-              }
+        "antibody_truth": {
+          "type": "keyword"
+        },
+        "control": {
+          "type": "keyword"
+        },
+        "date_performed": {
+          "type": "date",
+          "format": "M/d/yyyy||basic_date||date_time_no_millis||date||epoch_millis"
+        },
+        "days_from_symptom": {
+          "type": "keyword"
+        },
+        "device": {
+          "type": "text",
+          "fields": {
+            "exact": {
+              "type": "keyword"
             }
-          },
-          "group": {
-            "type": "keyword"
-          },
-          "iga_agree": {
-            "type": "keyword"
-          },
-          "iga_resul": {
-            "type": "keyword"
-          },
-          "iga_result": {
-            "type": "text",
-            "fields": {
-              "keyword": {
-                "type": "keyword",
-                "ignore_above": 256
-              }
-            }
-          },
-          "igg_agree": {
-            "type": "keyword"
-          },
-          "igg_result": {
-            "type": "keyword"
-          },
-          "igg_titer": {
-            "type": "keyword"
-          },
-          "igg_truth": {
-            "type": "keyword"
-          },
-          "igm_agree": {
-            "type": "keyword"
-          },
-          "igm_igg_agree": {
-            "type": "keyword"
-          },
-          "igm_igg_result": {
-            "type": "keyword"
-          },
-          "igm_result": {
-            "type": "keyword"
-          },
-          "igm_titer": {
-            "type": "keyword"
-          },
-          "igm_truth": {
-            "type": "keyword"
-          },
-          "lot_number": {
-            "type": "keyword"
-          },
-          "manufacturer": {
-            "type": "text",
-            "fields": {
-              "exact": {
-                "type": "keyword"
-              }
-            }
-          },
-          "pan_agree": {
-            "type": "keyword"
-          },
-          "pan_result": {
-            "type": "keyword"
-          },
-          "pan_titer": {
-            "type": "keyword"
-          },
-          "panel": {
-            "type": "keyword"
-          },
-          "sample_id": {
-            "type": "keyword"
-          },
-          "sample_no": {
-            "type": "integer"
-          },
-          "type": {
-            "type": "keyword"
           }
+        },
+        "group": {
+          "type": "keyword"
+        },
+        "iga_agree": {
+          "type": "keyword"
+        },
+        "iga_resul": {
+          "type": "keyword"
+        },
+        "iga_result": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "igg_agree": {
+          "type": "keyword"
+        },
+        "igg_result": {
+          "type": "keyword"
+        },
+        "igg_titer": {
+          "type": "keyword"
+        },
+        "igg_truth": {
+          "type": "keyword"
+        },
+        "igm_agree": {
+          "type": "keyword"
+        },
+        "igm_igg_agree": {
+          "type": "keyword"
+        },
+        "igm_igg_result": {
+          "type": "keyword"
+        },
+        "igm_result": {
+          "type": "keyword"
+        },
+        "igm_titer": {
+          "type": "keyword"
+        },
+        "igm_truth": {
+          "type": "keyword"
+        },
+        "lot_number": {
+          "type": "keyword"
+        },
+        "manufacturer": {
+          "type": "text",
+          "fields": {
+            "exact": {
+              "type": "keyword"
+            }
+          }
+        },
+        "pan_agree": {
+          "type": "keyword"
+        },
+        "pan_result": {
+          "type": "keyword"
+        },
+        "pan_titer": {
+          "type": "keyword"
+        },
+        "panel": {
+          "type": "keyword"
+        },
+        "sample_id": {
+          "type": "keyword"
+        },
+        "sample_no": {
+          "type": "integer"
+        },
+        "type": {
+          "type": "keyword"
         }
       }
     }
   }
 }
+

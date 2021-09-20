@@ -74,19 +74,19 @@ RANGE_ENDPOINT_MAP = {
   '/drug/event': {
     'date_key': '@timestamp',
     'start_date': '2004-01-01',
-    'end_date': '2021-01-01'
+    'end_date': '2021-10-01'
   },
   # Check here for device event:
   # https://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/PostmarketRequirements/ReportingAdverseEvents/ucm127891.htm
   '/device/event': {
     'date_key': 'date_received',
     'start_date': '1991-10-01',
-    'end_date': '2021-01-01'
+    'end_date': '2021-10-01'
   },
   '/animalandveterinary/event': {
     'date_key': 'original_receive_date',
     'start_date': '1987-01-01',
-    'end_date': '2021-01-01'
+    'end_date': '2021-07-01'
   }
 }
 
@@ -375,7 +375,7 @@ class ParallelExport(luigi.Task):
       reducer=parallel.NullReducer(),
       output_prefix=join(BASE_DIR, 'tmp'),
       output_format=parallel.NullOutput(),
-      map_workers=10)
+      map_workers=14)
 
 
 class CopyIndexToS3(luigi.Task):

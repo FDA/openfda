@@ -124,7 +124,7 @@ def test_DENTAL_route_drugs():
   assert_total('/drug/ndc.json?search=route:"DENTAL"', 1000)
 
 def test_drugs_expiring_in_date_range():
-  assert_total('/drug/ndc.json?search=marketing_end_date:([20001001+TO+20251231])', 4000)
+  assert_total('/drug/ndc.json?search=marketing_end_date:([20001001+TO+20251231])', 3900)
 
 def test_drugs_with_original_packager():
   assert_total('/drug/ndc.json?search=openfda.is_original_packager:true', 1000)
@@ -207,7 +207,7 @@ def test_drug_with_most_number_of_packaging():
 
 def test_active_ingredients():
   meta, results = fetch(
-    '/drug/ndc.json?search=product_ndc:65966-011')
+    '/drug/ndc.json?search=product_ndc:0942-6316')
 
   eq_(len(results), 1)
 
@@ -215,20 +215,20 @@ def test_active_ingredients():
   active_ingredients = ndc["active_ingredients"]
   eq_(len(active_ingredients), 5)
 
-  eq_(active_ingredients[0]["name"], "AVOBENZONE")
-  eq_(active_ingredients[0]["strength"], ".0312 g/mL")
+  eq_(active_ingredients[0]["name"], "DEXTROSE MONOHYDRATE")
+  eq_(active_ingredients[0]["strength"], "2.23 g/70mL")
 
-  eq_(active_ingredients[1]["name"], "HOMOSALATE")
-  eq_(active_ingredients[1]["strength"], ".052 g/mL")
+  eq_(active_ingredients[1]["name"], "TRISODIUM CITRATE DIHYDRATE")
+  eq_(active_ingredients[1]["strength"], "1.84 g/70mL")
 
-  eq_(active_ingredients[2]["name"], "OCTISALATE")
-  eq_(active_ingredients[2]["strength"], ".052 g/mL")
+  eq_(active_ingredients[2]["name"], "ANHYDROUS CITRIC ACID")
+  eq_(active_ingredients[2]["strength"], "209 mg/70mL")
 
-  eq_(active_ingredients[3]["name"], "OCTOCRYLENE")
-  eq_(active_ingredients[3]["strength"], ".02808 g/mL")
+  eq_(active_ingredients[3]["name"], "SODIUM PHOSPHATE, MONOBASIC, MONOHYDRATE")
+  eq_(active_ingredients[3]["strength"], "155 mg/70mL")
 
-  eq_(active_ingredients[4]["name"], "OXYBENZONE")
-  eq_(active_ingredients[4]["strength"], ".0312 g/mL")
+  eq_(active_ingredients[4]["name"], "ADENINE")
+  eq_(active_ingredients[4]["strength"], "19.3 mg/70mL")
 
 if __name__ == '__main__':
   all_functions = inspect.getmembers(sys.modules[__name__], inspect.isfunction)

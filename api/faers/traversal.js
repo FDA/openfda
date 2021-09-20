@@ -17,7 +17,7 @@ exports.BuildLinkRelNext = function (request, params, esResponseBody) {
     // skip parameter is present, which means we cannot rely on search_after.
     // search_after and skip do not work together.
     let nextSkip = params.skip + params.limit;
-    if (esResponseBody.hits.total > nextSkip) {
+    if (esResponseBody.hits.total.value > nextSkip) {
       const nextQuery = Object.assign({}, request.query);
       nextQuery.skip = nextSkip;
       return buildURL(nextQuery);
