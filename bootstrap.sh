@@ -7,19 +7,11 @@ rm -rf build openfda.egg-info _python-env
 
 export LANG=C
 PYTHON_ENV='./_python-env'
-
-PYTHON="python3"
-if [[ -n $MACHTYPE ]]; then
-  PIP="pip3 install"
-else
-  PIP="pip3 install --user"
-fi
-
-$PIP virtualenv
-$PIP awscli
+python3 -m pip install --user virtualenv
+python3 -m pip install awscli
 
 # Setup virtualenv if it doesn't exist.
-test -e $PYTHON_ENV || virtualenv -p $PYTHON $PYTHON_ENV
+test -e $PYTHON_ENV || python3 -m venv $PYTHON_ENV
 
 # Install project sources and dependencies into the environment
 $PYTHON_ENV/bin/pip uninstall -y openfda || true

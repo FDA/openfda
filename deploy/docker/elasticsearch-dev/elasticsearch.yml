@@ -1,5 +1,7 @@
 cluster.name: openfda
+cluster.initial_master_nodes: elasticsearch-dev
 
+node.name: elasticsearch-dev
 node.master: true
 node.data: true
 
@@ -23,3 +25,5 @@ xpack.security.enabled: false
 xpack.watcher.enabled: false
 xpack.ml.enabled: false
 xpack.monitoring.enabled: false
+
+ingest.geoip.downloader.enabled: false

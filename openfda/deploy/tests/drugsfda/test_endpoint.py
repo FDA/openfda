@@ -33,10 +33,10 @@ def test_malformed_dosage_in_products():
   drug = products[0]
   ingredients = drug['active_ingredients']
   eq_(len(ingredients), 3)
-  eq_(drug["brand_name"], "LANSOPRAZOLE, AMOXICILLIN AND CLARITHROMYCIN")
-  eq_(drug["dosage_form"], "CAPSULE; CAPSULE, DELAYED REL PELLETS; TABLET;ORAL")
+  eq_(drug["brand_name"], "LANSOPRAZOLE, AMOXICILLIN AND CLARITHROMYCIN (COPACKAGED)")
+  eq_(drug["dosage_form"], "CAPSULE, TABLET, CAPSULE, DELAYED REL PELLETS")
   eq_(drug["product_number"], "001")
-  eq_(drug.get("route"), None)
+  eq_(drug.get("route"), "ORAL")
 
 
 def test_unknowns_in_product():
@@ -67,7 +67,6 @@ def test_orphan_submission():
   app = results[0]
   submissions = sorted(app['submissions'], key=lambda p: int(p['submission_number']))
   sub = submissions[0]
-  eq_(sub["submission_property_type"][0]["id"], "5")
   eq_(sub["submission_property_type"][0]["code"], "Orphan")
 
 
@@ -192,7 +191,7 @@ def test_one_record_in_detail():
   eq_(sub["submission_status_date"], "20170512")
   eq_(sub["review_priority"], "STANDARD")
   eq_(sub["submission_type"], "ORIG")
-  eq_(sorted([int(type['id']) for type in sub['submission_property_type']]), [7, 15, 31])
+
 
   sub = submissions[1]
   eq_(sub["submission_class_code"], "LABELING")
@@ -203,7 +202,7 @@ def test_one_record_in_detail():
   eq_(sub["submission_status_date"], "20190919")
   eq_(sub["review_priority"], "STANDARD")
   eq_(sub["submission_type"], "SUPPL")
-  eq_(sorted([int(type['id']) for type in sub['submission_property_type']]), [7, 15, 31])
+
 
   sub = submissions[2]
   eq_(sub["submission_class_code"], "LABELING")
@@ -214,7 +213,7 @@ def test_one_record_in_detail():
   eq_(sub["submission_status_date"], "20190919")
   eq_(sub["review_priority"], "STANDARD")
   eq_(sub["submission_type"], "SUPPL")
-  eq_(sorted([int(type['id']) for type in sub['submission_property_type']]), [7, 15, 31])
+
 
   sub = submissions[3]
   eq_(sub["submission_class_code"], "LABELING")
@@ -225,7 +224,7 @@ def test_one_record_in_detail():
   eq_(sub["submission_status_date"], "20190919")
   eq_(sub["review_priority"], "STANDARD")
   eq_(sub["submission_type"], "SUPPL")
-  eq_(sorted([int(type['id']) for type in sub['submission_property_type']]), [7, 15, 31])
+
 
 
 if __name__ == '__main__':

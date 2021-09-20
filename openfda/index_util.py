@@ -25,6 +25,13 @@ from openfda.common import BatchHelper
 from openfda.tasks import AlwaysRunTask
 import simplejson as json
 
+def refresh_index(index_name):
+  logging.info('Refreshing: %s', index_name)
+  resp = requests.post('http://%s/%s/_refresh' %
+    (config.es_host(), index_name), timeout=100000)
+  resp.raise_for_status()
+
+
 def optimize_index(index_name, wait_for_merge=1):
   # elasticsearch client throws a timeout error when waiting for an optimize
   # command to finish, so we use requests instead
@@ -511,6 +518,9 @@ class LoadJSONBase(AlwaysRunTask):
       config.es_client(), self.index_name, last_run_date=arrow.utcnow().format('YYYY-MM-DD'),
       last_update_date=self.last_update_date() if callable(self.last_update_date) else self.last_update_date
     )
+
+    # Refresh the index to make the documents visible to searches.
+    refresh_index(self.index_name)
 
     # optimize index, if requested
     if self.optimize_index:

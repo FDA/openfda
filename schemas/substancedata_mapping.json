@@ -571,7 +571,7 @@
                 "type": "keyword"
               },
               "sequence": {
-                "type": "keyword"
+                "type": "text"
               },
               "subunit_index": {
                 "type": "keyword"

@@ -42,7 +42,8 @@ def load_mapping(es, index_name, type_name, mapping_file_or_dict):
 
     es.indices.put_mapping(index=index_name,
                            doc_type=type_name,
-                           body=mapping_dict)
+                           body=mapping_dict,
+                           include_type_name=True)
     es.indices.clear_cache(index=index_name)
   except:
     logging.fatal('Something has gone wrong making the mapping for %s', type_name,

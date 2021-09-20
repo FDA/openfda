@@ -160,7 +160,7 @@ exports.BuildSort = async function(params, index) {
       sort = params.sort;
     }
 
-  return sort ? sort + ',_uid' : '_uid';
+  return sort ? sort + ',_id' : '_id';
 };
 
 async function isSortableField(field, index) {

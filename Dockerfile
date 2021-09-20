@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.9
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install -y nodejs netcat
 WORKDIR /usr/src/openfda

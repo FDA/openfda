@@ -48,7 +48,7 @@ def test_histogram():
   eq_(counts[0].term, '20040101')
   eq_(counts[0].count, 1)
   eq_(counts[1].term, '20040102')
-  ok_(counts[1].count > 540)
+  ok_(counts[1].count > 500)
   eq_(counts[2].term, '20040103')
   eq_(counts[2].count, 2)
   assert_greater_equal(len(counts), 4920)

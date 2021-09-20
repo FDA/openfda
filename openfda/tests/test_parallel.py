@@ -1,6 +1,9 @@
+import csv
 import json
 import os
+import shutil
 import unittest
+from os.path import dirname
 
 from openfda import parallel, app
 
@@ -12,6 +15,10 @@ class KeyMapper(parallel.Mapper):
 class BadMapper(parallel.Mapper):
   def map(self, key, value, output):
     raise Exception('I crashed!')
+
+class CsvMapper(parallel.Mapper):
+  def map(self, key, value, output):
+    output.add('code', int(value[0]))
 
 class ParallelTest(unittest.TestCase):
   def make_files(self, input_prefix, data, input_format):
@@ -124,6 +131,43 @@ class ParallelTest(unittest.TestCase):
           ['hello' for i in range(10)],
           mapper=BadMapper())
 
+
+  def test_csv_line_split(self):
+    dir = '/tmp/openfda-test-csv-line-split'
+    level_db_prefix = os.path.join(dir, 'leveldb')
+    file = 'csv_split.csv'
+
+    os.system('rm -rf "%s"' % level_db_prefix)
+    os.makedirs(dir, exist_ok=True)
+    shutil.copyfile(
+      os.path.join(dirname(os.path.abspath(__file__)), 'data/%s' % file),
+      os.path.join(dir, file))
+
+    col = parallel.Collection.from_glob(
+      os.path.join(dir, file), parallel.CSVSplitLineInput(quoting=csv.QUOTE_NONE, delimiter='|', fixed_splits=3))
+    splits = list(col)
+    assert len(splits) == 3
+    # Check every split's start and end. Start must be at the beginning of a line, end must be after carriage return or EOF.
+    assert(splits[0].start_pos) == 0
+    assert (splits[0].end_pos) == 81
+    assert(splits[1].start_pos) == 81
+    assert (splits[1].end_pos) == 169
+    assert(splits[2].start_pos) == 169
+    assert (splits[2].end_pos) == 196
+
+    # Run M/R with these splits and ensure the result is as expected
+    parallel.mapreduce(col,
+                       mapper=CsvMapper(),
+                       reducer=parallel.SumReducer(),
+                       map_workers=len(splits),
+                       output_format=parallel.LevelDBOutput(),
+                       output_prefix=level_db_prefix,
+                       num_shards=len(splits))
+
+    result = sorted(list(parallel.ShardedDB.open(level_db_prefix)))
+    print(result)
+    # if we got the sum right we know all the splits have been processed correctly
+    assert (result[0][1]) == 401 + 402 + 403 + 404 + 405 + 407 + 408 + 409 + 410
 
 def main(argv):
   unittest.main(argv=argv)

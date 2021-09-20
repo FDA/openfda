@@ -1,8 +1,6 @@
 openFDA
 =======
 
-[![Build Status](https://travis-ci.org/FDA/openfda.svg?branch=master)](https://travis-ci.org/FDA/openfda)
-
 openFDA is a research project to provide open APIs, raw data downloads, documentation and examples, and a developer community for an important collection of FDA public datasets.
 
 *Please note: Do not rely on openFDA to make decisions regarding medical care. Always speak to your health provider about the risks and benefits of FDA-regulated products. We may limit or otherwise restrict your access to the API in line with our [Terms of Service](https://open.fda.gov/terms/).*
@@ -19,8 +17,8 @@ This repository contains the code which powers all of the `api.fda.gov` end poin
 
 # Prerequisites
 
-* Elasticsearch 6.8
-* Python 3.8
+* Elasticsearch 7
+* Python 3.6 or above
 * Node 14 or above
 
 # Packaging

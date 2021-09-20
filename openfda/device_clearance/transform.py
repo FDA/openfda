@@ -5,11 +5,10 @@
     be loaded into Elasticsearch.
 '''
 
-import arrow
 import collections
 import csv
 import logging
-import simplejson as json
+import arrow
 
 from openfda import common, device_common
 
@@ -59,19 +58,25 @@ def _cleaner(k, v):
   ''' A helper function that is used for renaming dictionary keys and
       formatting dates.
   '''
+  if k is None: return None # malformed record most likely due to unescaped pipe character.
+
   k = k.lower()
   if k in IGNORE: return None
   if k in RENAME_MAP:
     k = RENAME_MAP[k]
   if v != None:
     if k in DATE_KEYS:
-      dt = arrow.get(v, 'MM/DD/YYYY').format('YYYY-MM-DD')
-      return (k, dt)
+      try:
+        dt = arrow.get(v, 'MM/DD/YYYY').format('YYYY-MM-DD')
+        return (k, dt)
+      except arrow.parser.ParserMatchError:
+        logging.warning("Unparseable date likely due to a malformed CSV record: "+v)
+        return (k, v)
   if k == 'decision_code':
     ek, ev = 'decision_description', get_description(v)
     return [(k, v.strip()), (ek, ev)]
   if k == 'advisory_committee':
-    ek, ev = 'advisory_committee_description', ADVISORY_COMMITTEE[v]
+    ek, ev = 'advisory_committee_description', ADVISORY_COMMITTEE.get(v, "")
     return [(k, v.strip()), (ek, ev)]
   else: return (k, v.strip())
   return (k, v)

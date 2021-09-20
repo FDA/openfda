@@ -94,12 +94,12 @@ exports.testSupportedQueryString_Supported = function(test) {
 };
 
 exports.testBuildSort = async function (test) {
-  test.equal(await elasticsearch_query.BuildSort({}), '_uid')
-  test.equal(await elasticsearch_query.BuildSort({sort: ''}), '_uid')
-  test.equal(await elasticsearch_query.BuildSort({sort: ' report_date '}), 'report_date,_uid')
-  test.equal(await elasticsearch_query.BuildSort({sort: 'report_date:asc'}), 'report_date:asc,_uid')
-  test.equal(await elasticsearch_query.BuildSort({sort: 'report_date:desc'}), 'report_date:desc,_uid')
-  test.equal(await elasticsearch_query.BuildSort({sort: 'report_date:desc,field.exact'}), 'report_date:desc,field.exact,_uid')
+  test.equal(await elasticsearch_query.BuildSort({}), '_id')
+  test.equal(await elasticsearch_query.BuildSort({sort: ''}), '_id')
+  test.equal(await elasticsearch_query.BuildSort({sort: ' report_date '}), 'report_date,_id')
+  test.equal(await elasticsearch_query.BuildSort({sort: 'report_date:asc'}), 'report_date:asc,_id')
+  test.equal(await elasticsearch_query.BuildSort({sort: 'report_date:desc'}), 'report_date:desc,_id')
+  test.equal(await elasticsearch_query.BuildSort({sort: 'report_date:desc,field.exact'}), 'report_date:desc,field.exact,_id')
 
   try {
     await elasticsearch_query.BuildSort({sort: 'report_date`receiptdate'});

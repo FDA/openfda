@@ -3,6 +3,7 @@
     by the different data source on the openFDA project: XML, CSV, and JSON.
 '''
 import csv
+import io
 import logging
 import os
 import pickle
@@ -117,6 +118,51 @@ class LineInput(MRInput):
           return
 
         yield str(f.tell()), line.rstrip()
+
+
+class CSVSplitLineInput(MRInput):
+
+  def __init__(self, delimiter, quoting, fixed_splits=None):
+    MRInput.__init__(self)
+    self.delimiter = delimiter
+    self.quoting = quoting
+    self.fixed_splits = fixed_splits
+
+  def create_reader(self, split):
+    return CSVSplitLineInput.Reader(split, delimiter=self.delimiter, quoting=self.quoting)
+
+  def compute_splits(self, filename, desired_splits):
+    '''
+    The default behavior for splitting files is to have one split per file.
+    '''
+    file_len = os.path.getsize(filename)
+    split_size = max(1, int(file_len / (desired_splits if self.fixed_splits is None else self.fixed_splits)))
+    splits = []
+    last_pos = 0
+
+    logger.info('Calculating splits for %s each sized %s' % (filename, split_size))
+    with open(filename, 'rb') as f:
+      while f.tell() < file_len:
+        f.seek(split_size, 1)
+        f.readline()
+        splits.append(
+          FileSplit(filename, self, last_pos, f.tell() if f.tell() < file_len else file_len))
+        last_pos = f.tell()
+
+    logger.info('Got %s splits for %s:' % (len(splits), filename))
+    logger.info(splits)
+    return splits
+
+  class Reader(MRInput.Reader):
+    def entries(self):
+      f = open(self.filename)
+      f.seek(self.start_pos)
+      while f.tell() < self.end_pos:
+        line = f.readline()
+        if not line:
+          f.close()
+          return
+        yield str(f.tell()), csv.reader(io.StringIO(line), delimiter=self.delimiter, quoting=self.quoting).__next__()
 
 
 class FilenameInput(MRInput):

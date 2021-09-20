@@ -14,7 +14,7 @@ wheel==0.35.1
 xlrd==1.0.0
 flask==1.1.1
 requests==2.24.0
-numpy==1.19.2
+numpy==1.18.5
 pandas==1.0.5
 pytesseract
 pdf2image
