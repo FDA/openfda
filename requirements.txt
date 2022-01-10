@@ -6,10 +6,10 @@ dictsearch==3.2.0
 docutils==0.12
 nose2[coverage_plugin]
 python-dateutil==2.8.1
-urllib3==1.26.5
+urllib3
 wheel==0.35.1
 xlrd==1.0.0
-requests==2.24.0
+requests==2.27.1
 numpy
 pandas
 requests_aws4auth
