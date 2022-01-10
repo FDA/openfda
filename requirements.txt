@@ -6,7 +6,7 @@ dictsearch==3.2.0
 docutils==0.12
 nose2[coverage_plugin]
 python-dateutil==2.8.1
-urllib3==1.25.9
+urllib3==1.26.5
 wheel==0.35.1
 xlrd==1.0.0
 requests==2.24.0
