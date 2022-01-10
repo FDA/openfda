@@ -1,5 +1,5 @@
 {
-  "safetyreport": {
+  "_doc": {
     "_source": {
       "includes": [
         "*"

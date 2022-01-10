@@ -211,7 +211,6 @@ class TotalStats(parallel.MRTask):
 
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'downloadstats'
-  type_name = 'downloadstats'
   mapping_file = './schemas/downloadstats_mapping.json'
   data_source = TotalStats()
   use_checksum = False

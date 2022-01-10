@@ -90,7 +90,7 @@ def test_multiple_application_docs():
 
   app = results[0]
   submissions = sorted(app['submissions'], key=lambda p: int(p['submission_number']))
-  eq_(len(submissions), 17)
+  eq_(len(submissions), 19)
   sub = submissions[0]
 
   docs = sorted(sub["application_docs"], key=lambda p: int(p['id']))

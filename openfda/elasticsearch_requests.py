@@ -8,7 +8,7 @@ import elasticsearch
 import simplejson as json
 
 METADATA_INDEX = 'openfdametadata'
-METADATA_TYPE = 'last_run'
+METADATA_TYPE = '_doc'
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 INDEX_SETTINGS = join(RUN_DIR, 'schemas/indexing.json')
@@ -24,26 +24,21 @@ def clear_and_load(es, index_name, type_name, mapping_file):
 
 
 def load_mapping(es, index_name, type_name, mapping_file_or_dict):
+  if es.indices.exists(index_name):
+    logging.info('Index %s already exists, skipping creation.', index_name)
+    return
+
   if not isinstance(mapping_file_or_dict, dict):
     mapping = open(mapping_file_or_dict, 'r').read().strip()
     mapping_dict = json.loads(mapping)
   else:
     mapping_dict = mapping_file_or_dict
 
-  if es.indices.exists(index_name):
-    logging.info('Index %s already exists, skipping creation.', index_name)
-    return
-
   try:
-    settings_dict = json.loads(open(INDEX_SETTINGS).read())
-    # Ignore "index already exists" error
-    es.indices.create(index=index_name,
-                      body=settings_dict, ignore=400)
-
-    es.indices.put_mapping(index=index_name,
-                           doc_type=type_name,
-                           body=mapping_dict,
-                           include_type_name=True)
+    settings_dict = json.loads(open(INDEX_SETTINGS).read())['settings']
+    es.indices.create(index=index_name, mappings=mapping_dict,
+                      settings=settings_dict,
+                      include_type_name=True)
     es.indices.clear_cache(index=index_name)
   except:
     logging.fatal('Something has gone wrong making the mapping for %s', type_name,
@@ -56,15 +51,15 @@ def update_process_datetime(es, doc_id, last_run_date, last_update_date):
     The document id in will be the name of another index in the cluster.
   '''
   _map = {
-    'last_run': {
+    '_doc': {
       'properties': {
         'last_update_date': {
           'type': 'date',
-          'format': 'dateOptionalTime'
+          'format': 'strict_date_optional_time'
         },
         'last_run_date': {
           'type': 'date',
-          'format': 'dateOptionalTime'
+          'format': 'strict_date_optional_time'
         }
       }
     }

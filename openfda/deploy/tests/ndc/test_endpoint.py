@@ -50,7 +50,7 @@ def test_record_with_multiple_packaging():
   eq_(ndc["active_ingredients"][0]['strength'], "650 mg/1")
   eq_(ndc.get("pharm_class"), None)
   eq_(ndc.get("dea_schedule"), None)
-  eq_(ndc["listing_expiration_date"], "20211231")
+  eq_(ndc["listing_expiration_date"], "20221231")
 
   packaging = sorted(ndc["packaging"], key=lambda k: k['package_ndc'])
   eq_(len(packaging), 2)
@@ -65,10 +65,9 @@ def test_record_with_multiple_packaging():
   eq_(packaging[1]["sample"], False)
 
   openfda = ndc["openfda"]
-  # SPL and NDC got out of sync again. TODO: uncomment once they are back in sync or dependency on change log is removed
   eq_(openfda["is_original_packager"][0], True)
   eq_(openfda["manufacturer_name"][0], "Amerisource Bergen")
-  # eq_(openfda["rxcui"][0], "1148399")
+  eq_(openfda["rxcui"][0], "1148399")
   eq_(openfda["spl_set_id"][0], "c0f4d7f1-aa17-4233-bc47-41c280fdd7ce")
   eq_(openfda["unii"][0], "362O9ITL9D")
 

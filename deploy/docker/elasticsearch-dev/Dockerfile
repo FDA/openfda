@@ -3,7 +3,7 @@
 #
 # It has been modified to support multiple data directories
 
-FROM docker.elastic.co/elasticsearch/elasticsearch:7.14.1
+FROM docker.elastic.co/elasticsearch/elasticsearch:7.10.2
 
 ADD elasticsearch.yml /usr/share/elasticsearch/config/
 ADD log4j2.properties /usr/share/elasticsearch/config/

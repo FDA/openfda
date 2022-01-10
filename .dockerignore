@@ -1,0 +1,6 @@
+_python-env
+data
+logs
+openfda.egg-info
+watchdog
+

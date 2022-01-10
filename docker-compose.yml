@@ -1,9 +1,9 @@
-version: '3'
-
+version: "3.9"
 services:
   es:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.14.1
     environment:
+      - ES_JAVA_OPTS=-Xms2g -Xmx2g
       - xpack.security.enabled=false
       - discovery.type=single-node
     ports:
@@ -27,3 +27,13 @@ services:
       nofile:
         soft: 65535
         hard: 65535
+  test:
+    profiles: ["test"]
+    build: .
+    command: ["./scripts/run_unit_tests.sh"]
+    volumes:
+      - ./:/opt/openfda
+    environment:
+      - ES_HOST=es:9200
+    depends_on:
+      - es

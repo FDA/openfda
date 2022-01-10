@@ -8,23 +8,27 @@ longer than that, but it is in an unparseable form or at least would require a
 handful of parsers. This date represents the centers switch to a structured
 data format.
 '''
-
+import csv
 import glob
 import hashlib
 import logging
 import os
+import sys
 from os.path import join, dirname, basename
-import simplejson as json
 
 import arrow
 import luigi
+import pandas as pd
+import simplejson as json
 
 from openfda import common, config, parallel, index_util
 from openfda.annotation_table.pipeline import CombineHarmonization
 from openfda.common import download_to_file_with_retry
-from openfda.tasks import AlwaysRunTask
 from openfda.res import annotate, extract
+from openfda.tasks import AlwaysRunTask, NoopTask
 
+# Exceed default field_size limit, need to set to sys.maxsize
+csv.field_size_limit(sys.maxsize)
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 
@@ -38,10 +42,7 @@ DATE_KEYS = [
 # Fields to be used to derive a Document ID for Elasticsearch
 ID_FIELDS = [
   'product-type',
-  'recall-number',
-  'event-id',
-  'recall-initiation-date',
-  'report-date'
+  'recall-number'
 ]
 
 # Enforcement data changed from XML to CSV the week of 2016-03-10
@@ -85,7 +86,7 @@ class DownloadCSVReports(luigi.Task):
     return []
 
   def output(self):
-    file_name = 'res/batches/%s/enforcement.csv' % self.batch.strftime('%Y%m%d')
+    file_name = 'res/batches/%s/enforcement.csv' % arrow.get(self.batch).strftime('%Y%m%d')
     return luigi.LocalTarget(config.data_dir(file_name))
 
   def run(self):
@@ -113,8 +114,22 @@ class CleanCSV(luigi.Task):
   def run(self):
     cmd = 'iconv -f %s -t %s -c %s > %s' % \
       ('ISO-8859-1//TRANSLIT', 'UTF-8', self.input().path, self.output().path)
-
     common.shell_cmd_quiet(cmd)
+
+    # CSV exported by FDA iRes is often malformed because it can contain multiple columns
+    # with the same name: More Code Info. Most likely iRes does this when the code information is
+    # deemed too large to fit into a single column; but in any case the columns should have been named
+    # distinctly, e.g. "More Code Info 01", "More Code Info 02" etc.
+    # We handle this case here with Pandas and give the columns distinct names.
+    df = pd.read_csv(self.output().path, index_col=False, encoding='utf-8',
+                     dtype=str)
+    code_info_columns = list(filter(lambda col: col.startswith('More Code Info'), list(df.columns)))
+    if len(code_info_columns) > 1:
+      df['Code Info All'] = df[code_info_columns].apply(
+        lambda row: ' '.join(list(filter(lambda v: not pd.isna(v), list(row.values)))).strip(), axis=1)
+      df.drop(code_info_columns, axis=1, inplace=True)
+      df.rename(columns={"Code Info All": "More Code Info"}, inplace=True)
+      df.to_csv(self.output().path, encoding='utf-8', index=False, quoting=csv.QUOTE_ALL)
 
 
 class CSV2JSONMapper(parallel.Mapper):
@@ -149,6 +164,9 @@ class CSV2JSONMapper(parallel.Mapper):
 
       if isinstance(v, str):
         v = v.strip()
+
+      if v is None:
+        v = ''
 
       return (k, v)
 
@@ -228,7 +246,6 @@ class LoadJSON(index_util.LoadJSONBase):
   batch = luigi.Parameter()
   last_update_date = luigi.Parameter()
   index_name = 'recall'
-  type_name = 'enforcementreport'
   mapping_file = './schemas/res_mapping.json'
   use_checksum = True
   optimize_index = False
@@ -254,10 +271,10 @@ class RunWeeklyProcess(AlwaysRunTask):
     # arrow.Arrow.range() likes the dates in particular datetime format
     start = arrow.get(2012, 0o6, 20)
     end = arrow.get(end_date.year, end_date.month, end_date.day)
-    previous_task = None
+    previous_task = NoopTask()
 
     for batch in arrow.Arrow.range('week', start, end):
-      task = LoadJSON(batch=batch, last_update_date=end.format('YYYY-MM-DD'), previous_task=previous_task)
+      task = LoadJSON(batch=batch.format(), last_update_date=end.format('YYYY-MM-DD'), previous_task=previous_task)
       previous_task = task
       yield task
 

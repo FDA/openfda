@@ -83,7 +83,6 @@ class NSDE2JSON(luigi.Task):
 
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'othernsde'
-  type_name = 'othernsde'
   mapping_file = './schemas/othernsde_mapping.json'
   data_source = NSDE2JSON()
   use_checksum = False

@@ -1,8 +1,6 @@
-from nose.tools import *
 import requests
-
 from openfda.tests.api_test_helpers import *
-from nose.tools import *
+
 
 def test_openfda_section():
   meta, results = fetch('/device/510k.json?search=openfda.registration_number:3006630150')

@@ -27,7 +27,7 @@ class ADAEPipelineTests(unittest.TestCase):
     extract.local_dir = self.test_dir
     extract.output = MagicMock(
       return_value=luigi.LocalTarget(self.test_dir))
-    extract.run()
+    extract.map(os.path.join(self.test_dir, "file.zip"),'', [])
     ok_(os.path.isfile(os.path.join(self.test_dir, "file1.xml")))
 
 

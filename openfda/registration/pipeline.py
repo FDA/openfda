@@ -627,7 +627,6 @@ class AnnotateDevice(luigi.Task):
 
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'devicereglist'
-  type_name = 'registration'
   mapping_file = './schemas/registration_mapping.json'
   data_source = AnnotateDevice()
   use_checksum = False

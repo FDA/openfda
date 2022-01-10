@@ -3,18 +3,6 @@ version: v1.22.1
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   SNYK-JS-MINIMIST-559764:
-    - forever > optimist > minimist:
-        reason: None given
-        expires: '2021-10-15T19:04:47.451Z'
-    - forever > flatiron > optimist > minimist:
-        reason: None given
-        expires: '2021-10-15T19:04:47.451Z'
-    - forever > flatiron > broadway > nconf > optimist > minimist:
-        reason: None given
-        expires: '2021-10-15T19:04:47.452Z'
-    - forever > forever-monitor > broadway > nconf > optimist > minimist:
-        reason: None given
-        expires: '2021-10-15T19:04:47.452Z'
     - coveralls > minimist:
         reason: None given
         expires: '2021-09-09T14:50:59.805Z'
@@ -22,21 +10,6 @@ ignore:
         reason: None given
         expires: '2021-09-09T14:50:59.805Z'
   'npm:utile:20180614':
-    - forever > flatiron > broadway > utile:
-        reason: None given
-        expires: '2022-10-08T14:50:26.607Z'
-    - forever > forever-monitor > broadway > utile:
-        reason: None given
-        expires: '2021-07-15T19:04:47.452Z'
-    - forever > flatiron > prompt > utile:
-        reason: None given
-        expires: '2021-07-15T19:04:47.452Z'
-    - forever > utile:
-        reason: None given
-        expires: '2021-07-15T19:04:47.452Z'
-    - forever > forever-monitor > utile:
-        reason: None given
-        expires: '2021-07-15T19:04:47.452Z'
     - broadway > utile:
         reason: None given
         expires: '2021-07-09T14:50:59.805Z'
@@ -46,12 +19,6 @@ ignore:
     - flatiron > prompt > utile:
         reason: None given
         expires: '2021-07-09T14:50:59.805Z'
-    - forever > flatiron > prompt > utile:
-        reason: Not available
-        expires: '2021-09-05T16:28:41.290Z'
-    - forever > flatiron > prompt > utile:
-        reason: Not available
-        expires: '2022-10-08T14:50:26.607Z'
   SNYK-JS-LODASH-567746:
     - elasticsearch > lodash:
         reason: None given
@@ -60,12 +27,6 @@ ignore:
         reason: None given
         expires: '2021-07-15T19:19:02.057Z'
   SNYK-JS-Y18N-1021887:
-    - forever > yargs > y18n:
-        reason: no patch available
-        expires: '2021-09-16T17:52:27.988Z'
-    - forever > nconf > yargs > y18n:
-        reason: no patch available
-        expires: '2021-09-16T17:52:27.988Z'
     - snyk > snyk-config > nconf > yargs > y18n:
         reason: no patch available
         expires: '2021-03-13T14:03:25.344Z'
@@ -78,44 +39,7 @@ ignore:
     - snyk > snyk-mvn-plugin > @snyk/java-call-graph-builder > snyk-config > nconf > yargs > y18n:
         reason: No remediation available; threat low
         expires: '2020-12-10T19:29:19.195Z'
-  SNYK-JS-CACHEBASE-1054631:
-    - forever > forever-monitor > chokidar > braces > snapdragon > base > cache-base:
-        reason: No remediation available; threat low
-        expires: '2021-03-28T17:31:12.670Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > snapdragon > base > cache-base:
-        reason: No remediation available; threat low
-        expires: '2021-03-28T17:31:12.670Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > snapdragon > base > cache-base:
-        reason: No remediation available; threat low
-        expires: '2021-03-28T17:31:12.670Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > braces > snapdragon > base > cache-base:
-        reason: No remediation available; threat low
-        expires: '2021-03-28T17:31:12.670Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > braces > snapdragon > base > cache-base:
-        reason: No remediation available; threat low
-        expires: '2021-03-28T17:31:12.670Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > extglob > snapdragon > base > cache-base:
-        reason: No remediation available; threat low
-        expires: '2021-03-28T17:31:12.670Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > extglob > snapdragon > base > cache-base:
-        reason: No remediation available; threat low
-        expires: '2021-03-28T17:31:12.670Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > nanomatch > snapdragon > base > cache-base:
-        reason: No remediation available; threat low
-        expires: '2021-03-28T17:31:12.670Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > nanomatch > snapdragon > base > cache-base:
-        reason: No remediation available; threat low
-        expires: '2021-03-28T17:31:12.670Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > extglob > expand-brackets > snapdragon > base > cache-base:
-        reason: No remediation available; threat low
-        expires: '2021-03-28T17:31:12.671Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > extglob > expand-brackets > snapdragon > base > cache-base:
-        reason: No remediation available; threat low
-        expires: '2021-03-28T17:31:12.671Z'
   SNYK-JS-GLOBPARENT-1016905:
-    - forever > forever-monitor > chokidar > glob-parent:
-        reason: No remediation available; threat low
-        expires: '2022-10-08T14:50:26.607Z'
     - grunt-contrib-nodeunit > nodeunit > tap > nyc > test-exclude > micromatch > parse-glob > glob-base > glob-parent:
         reason: None given
         expires: '2021-07-09T14:50:59.805Z'
@@ -313,33 +237,6 @@ ignore:
     - coveralls > request > hawk > cryptiles > boom > hoek:
         reason: None given
         expires: '2021-07-09T14:50:59.803Z'
-    - forever > winston > request > hawk > boom > hoek:
-        reason: None given
-        expires: '2021-07-09T14:50:59.805Z'
-    - forever > winston > request > hawk > sntp > hoek:
-        reason: None given
-        expires: '2021-07-09T14:50:59.805Z'
-    - forever > winston > request > hawk > cryptiles > boom > hoek:
-        reason: None given
-        expires: '2021-07-09T14:50:59.805Z'
-    - forever > winston > request > hawk > hoek:
-        reason: None given
-        expires: '2021-07-09T14:50:59.805Z'
-  'npm:mime:20170907':
-    - forever > winston > request > mime:
-        reason: None given
-        expires: '2021-07-09T14:50:59.803Z'
-    - forever > winston > request > form-data > mime:
-        reason: None given
-        expires: '2021-07-09T14:50:59.803Z'
-  'npm:qs:20140806-1':
-    - forever > winston > request > qs:
-        reason: None given
-        expires: '2021-07-09T14:50:59.803Z'
-  'npm:qs:20140806':
-    - forever > winston > request > qs:
-        reason: None given
-        expires: '2021-07-09T14:50:59.803Z'
   'npm:request:20160119':
     - broadway > winston > request:
         reason: None given
@@ -356,34 +253,16 @@ ignore:
     - flatiron > broadway > cliff > winston > request:
         reason: None given
         expires: '2021-07-09T14:50:59.803Z'
-    - forever > winston > request:
-        reason: None given
-        expires: '2021-07-09T14:50:59.803Z'
   'npm:tunnel-agent:20170305':
     - coveralls > request > tunnel-agent:
         reason: None given
         expires: '2021-07-09T14:50:59.804Z'
-    - forever > winston > request > tunnel-agent:
-        reason: None given
-        expires: '2021-07-09T14:50:59.805Z'
   SNYK-JS-JSYAML-173999:
     - coveralls > js-yaml:
         reason: None given
         expires: '2021-07-09T14:50:59.805Z'
   SNYK-JS-JSYAML-174129:
     - coveralls > js-yaml:
-        reason: None given
-        expires: '2021-07-09T14:50:59.805Z'
-  'npm:hawk:20160119':
-    - forever > winston > request > hawk:
-        reason: None given
-        expires: '2021-07-09T14:50:59.805Z'
-  'npm:qs:20170213':
-    - forever > winston > request > qs:
-        reason: None given
-        expires: '2021-07-09T14:50:59.805Z'
-  'npm:timespan:20170907':
-    - forever > timespan:
         reason: None given
         expires: '2021-07-09T14:50:59.805Z'
   SNYK-JS-NORMALIZEURL-1296539:
@@ -413,101 +292,8 @@ ignore:
     - elastic.js > elasticsearch > chalk > strip-ansi > ansi-regex:
         reason: None given
         expires: '2022-01-15T14:50:51.015Z'
-    - forever > yargs > string-width > strip-ansi > ansi-regex:
+  SNYK-JS-JSONSCHEMA-1920922:
+    - request > http-signature > jsprim > json-schema:
         reason: None given
         expires: '2022-01-15T14:50:51.015Z'
-    - forever > yargs > cliui > strip-ansi > ansi-regex:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > yargs > cliui > string-width > strip-ansi > ansi-regex:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > nconf > yargs > string-width > strip-ansi > ansi-regex:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > yargs > cliui > wrap-ansi > strip-ansi > ansi-regex:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > nconf > yargs > cliui > strip-ansi > ansi-regex:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > yargs > cliui > wrap-ansi > string-width > strip-ansi > ansi-regex:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > nconf > yargs > cliui > string-width > strip-ansi > ansi-regex:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > nconf > yargs > cliui > wrap-ansi > strip-ansi > ansi-regex:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > nconf > yargs > cliui > wrap-ansi > string-width > strip-ansi > ansi-regex:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-  SNYK-JS-SETVALUE-1540541:
-    - forever > forever-monitor > chokidar > braces > snapdragon > base > cache-base > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > forever-monitor > chokidar > braces > snapdragon > base > cache-base > union-value > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > snapdragon > base > cache-base > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > snapdragon > base > cache-base > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > snapdragon > base > cache-base > union-value > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > snapdragon > base > cache-base > union-value > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > braces > snapdragon > base > cache-base > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > braces > snapdragon > base > cache-base > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.015Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > extglob > snapdragon > base > cache-base > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.016Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > extglob > snapdragon > base > cache-base > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.016Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > nanomatch > snapdragon > base > cache-base > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.016Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > nanomatch > snapdragon > base > cache-base > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.016Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > braces > snapdragon > base > cache-base > union-value > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.016Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > braces > snapdragon > base > cache-base > union-value > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.016Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > extglob > snapdragon > base > cache-base > union-value > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.016Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > extglob > snapdragon > base > cache-base > union-value > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.016Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > nanomatch > snapdragon > base > cache-base > union-value > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.016Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > nanomatch > snapdragon > base > cache-base > union-value > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.016Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > extglob > expand-brackets > snapdragon > base > cache-base > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.016Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > extglob > expand-brackets > snapdragon > base > cache-base > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.016Z'
-    - forever > forever-monitor > chokidar > anymatch > micromatch > extglob > expand-brackets > snapdragon > base > cache-base > union-value > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.017Z'
-    - forever > forever-monitor > chokidar > readdirp > micromatch > extglob > expand-brackets > snapdragon > base > cache-base > union-value > set-value:
-        reason: None given
-        expires: '2022-01-15T14:50:51.017Z'
 patch: {}

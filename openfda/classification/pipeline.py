@@ -129,7 +129,6 @@ class AnnotateDevice(luigi.Task):
 
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'deviceclass'
-  type_name = 'classification'
   mapping_file = './schemas/classification_mapping.json'
   data_source = AnnotateDevice()
   use_checksum = False

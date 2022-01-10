@@ -1,6 +1,4 @@
 // OpenFDA APIs
-//
-
 var elasticsearch = require('./elasticsearch_client');
 var express = require('express');
 const asyncHandler = require('express-async-handler')
@@ -8,16 +6,13 @@ var cors = require('cors');
 var compression = require('compression')
 var moment = require('moment');
 var _ = require('underscore');
-var request = require('request');
+var request = require('request-promise');
 var querystring = require('querystring');
-var url = require('url');
 var Promise = require('bluebird');
 
 var apicache = require('apicache');
 apicache.options({debug: true});
 var cache = require('apicache').middleware;
-var qs = require('qs')
-
 var Stats = require('fast-stats').Stats;
 
 const traversal = require('./traversal.js');
@@ -130,119 +125,105 @@ const ENDPOINTS = [
   {
     'index': ANIMAL_AND_VETERINARY_DRUG_EVENT_INDEX,
     'endpoint': '/animalandveterinary/event.json',
-    'name': 'animalandveterinarydrugevent',
-    'basic': true
+    'name': 'animalandveterinarydrugevent'
   },
   {
     'index': DEVICE_CLASSIFICATION_INDEX,
     'endpoint': '/device/classification.json',
-    'name': 'deviceclass',
-    'basic': true
+    'name': 'deviceclass'
   },
   {
     'index': DEVICE_CLEARANCE_INDEX,
     'endpoint': '/device/510k.json',
-    'name': 'deviceclearance',
-    'basic': true
+    'name': 'deviceclearance'
   },
   {
     'index': ALL_ENFORCEMENT_INDEX,
     'endpoint': '/device/enforcement.json',
-    'name': 'deviceenforcement'
+    'name': 'deviceenforcement',
+    'filter': 'product_type:devices'
   },
   {
     'index': DEVICE_EVENT_INDEX,
     'endpoint': '/device/event.json',
-    'name': 'deviceevent',
-    'basic': true
+    'name': 'deviceevent'
   },
   {
     'index': DEVICE_PMA_INDEX,
     'endpoint': '/device/pma.json',
-    'name': 'devicepma',
-    'basic': true
+    'name': 'devicepma'
   },
   {
     'index': DEVICE_RECALL_INDEX,
     'endpoint': '/device/recall.json',
-    'name': 'devicerecall',
-    'basic': true
+    'name': 'devicerecall'
   },
   {
     'index': DEVICE_REGISTRATION_INDEX,
     'endpoint': '/device/registrationlisting.json',
-    'name': 'devicereglist',
-    'basic': true
+    'name': 'devicereglist'
   },
   {
     'index': DEVICE_UDI_INDEX,
     'endpoint': '/device/udi.json',
-    'name': 'deviceudi',
-    'basic': true
+    'name': 'deviceudi'
   },
   {
     'index': DEVICE_SEROLOGY_INDEX,
     'endpoint': '/device/covid19serology.json',
-    'name': 'covid19serology',
-    'basic': true
+    'name': 'covid19serology'
   },
   {
     'index': ALL_ENFORCEMENT_INDEX,
     'endpoint': '/drug/enforcement.json',
-    'name': 'drugenforcement'
+    'name': 'drugenforcement',
+    'filter': 'product_type:drugs'
   },
   {
     'index': DRUG_DRUGSFDA_INDEX,
     'endpoint': '/drug/drugsfda.json',
-    'name': 'drugsfda',
-    'basic' : true
+    'name': 'drugsfda'
   },
   {
     'index': DRUG_EVENT_INDEX,
     'endpoint': '/drug/event.json',
-    'name': 'drugevent',
-    'basic': true
+    'name': 'drugevent'
   },
   {
     'index': DRUG_LABEL_INDEX,
     'endpoint': '/drug/label.json',
-    'name': 'druglabel',
-    'basic': true
+    'name': 'druglabel'
   },
   {
     'index': DRUG_NDC_INDEX,
     'endpoint': '/drug/ndc.json',
-    'name': 'ndc',
-    'basic': true
+    'name': 'ndc'
   },
   {
     'index': ALL_ENFORCEMENT_INDEX,
     'endpoint': '/food/enforcement.json',
-    'name': 'foodenforcement'
+    'name': 'foodenforcement',
+    'filter': 'product_type:food'
   },
   {
     'index': FOOD_EVENT_INDEX,
     'endpoint': '/food/event.json',
-    'name': 'foodevent',
-    'basic': true
+    'name': 'foodevent'
   },
   {
     'index': TOBACCO_PROBLEM_INDEX,
     'endpoint': '/tobacco/problem.json',
-    'name': 'tobaccoproblem',
-    'basic': true
+    'name': 'tobaccoproblem'
   },
   {
     'index': OTHER_NSDE_INDEX,
     'endpoint': '/other/nsde.json',
-    'name': 'othernsde',
-    'basic': true
+    'name': 'othernsde'
   },
   {
     'index': SUBSTANCE_DATA_INDEX,
     'endpoint': '/other/substance.json',
-    'name': 'othersubstance',
-    'basic': true
+    'name': 'othersubstance'
   },
   {
     'index': EXPORT_DATA_INDEX,
@@ -301,7 +282,7 @@ var UpdateIndexInformation = function (client, index_info) {
   console.log("Updating index information.");
   client.search({
     index: PROCESS_METADATA_INDEX,
-    type: 'last_run',
+    type: '_doc',
     size: 30
   }).then(function (body) {
     var util = require('util');
@@ -321,7 +302,9 @@ var UpdateIndexInformation = function (client, index_info) {
       .count({index: endpoint.index})
       .then(function (endpoint, body) {
         index_info[endpoint.index].document_count = body.count;
-      }.bind(null, endpoint));
+      }.bind(null, endpoint), function (error) {
+        console.log('Failed to fetch document counts: ', error.message);
+      });
   });
 };
 
@@ -408,12 +391,12 @@ setInterval(UpdateIndexInformation.bind(null, client, index_info),
 // includes the last time the index was updated, a green/yellow/red "status"
 // field indicating the recent health of the endpoint, the number of requests to
 // the endpoint, and the average latency of the endpoint in milliseconds.
-app.get('/status', function (req, response) {
-  var filtered_endpoints = ENDPOINTS.filter(function (item) {
+app.get('/status', asyncHandler(async function (req, response) {
+  let filtered_endpoints = ENDPOINTS.filter(function (item) {
     return item.download != true && !item.disabled && !item.auxiliary
   })
 
-  Promise.all(filtered_endpoints.map(function (endpoint) {
+  let status = await Promise.all(filtered_endpoints.map(async (endpoint) => {
     var index = endpoint.index;
     var info = index_info[index];
     var errorCount = 0;
@@ -440,70 +423,57 @@ app.get('/status', function (req, response) {
       requestCount += buckets[i].count;
     }
 
-    return new Promise(function (resolve, reject) {
-      request('http://localhost:8000' + endpoint.endpoint, function (error, response, body) {
-        if (error) {
-          reject(error)
-        } else {
-          try {
-            resolve(JSON.parse(body).meta.results.total)
-          } catch (err) {
-            reject(err)
-          }
-        }
-      })
-
-    }).then(function (document) {
-      return new Promise(function (resolve, reject) {
-        try {
-          resolve({
-            endpoint: endpoint.name,
-            status: status,
-            last_updated: info.last_updated,
-            documents: document,
-            requests: requestCount,
-            latency: info.latency.amean()
-          })
-        } catch (err) {
-          reject(err)
-        }
-      }).then(function (promised_status_object) {
-        return promised_status_object
-      }).catch(function (err) {
-        log.error("Encountered error: ", err)
-      });
-
-    }).catch(function (err) {
-      log.error("Encountered error: ", err)
-    })
-
-  })).then(function (status_object) {
-    response.json(status_object.filter(function (item) {
-      return item != undefined
-    }))
-
-  }).catch(function (err) {
-    log.error("Encountered error: ", err)
-  });
-});
+    let docCount = await GetEndpointDocCount(endpoint);
+    return {
+      endpoint: endpoint.name,
+      status: status,
+      last_updated: info.last_updated,
+      documents: docCount,
+      requests: requestCount,
+      latency: info.latency.amean()
+    };
+  }));
+  return response.status(HTTP_CODE.OK).json(status.filter(o => !!o));
+}));
 
 // endpoint for the API statistics page - cached in memory for 1 hour.
-app.get('/usage.json', cache('1 hour'), function (req, res) {
+app.get('/usage.json', cache('1 hour'), asyncHandler(async (req, res) => {
 
-  var downloadStats = {};
-  client.search({
-    index: DOWNLOAD_STATS_INDEX,
-    body: elasticsearch_query.BuildQuery({}),
-    size: 1
-  }).then(function (body) {
+  // Main object to be returned
+  const downloadStats = {};
+  const indexInfo = {}
+  const usage = {
+    table: [],
+    stats: [],
+    others: [],
+    lastThirtyDayUsage: 0,
+    indexInfo: indexInfo,
+    downloadStats: downloadStats
+  };
+
+  try {
+    // Get downloads stats.
+    const body = await client.search({
+      index: DOWNLOAD_STATS_INDEX,
+      body: elasticsearch_query.BuildQuery({}),
+      size: 1
+    });
     if (body && body.hits && body.hits.hits && body.hits.hits.length) {
-      downloadStats = body.hits.hits[0]._source;
+      _.assign(downloadStats, body.hits.hits[0]._source);
     }
 
-    var end_at = req.query.start_at || moment().format("YYYY-MM-DD");
-    var start_at = req.query.end_at || moment().subtract(30, 'day').format("YYYY-MM-DD");
-    var prefix = req.query.prefix || '0/';
-    var params = querystring.stringify({
+    // Get doc counts
+    const filtered_endpoints = ENDPOINTS.filter(item => item.download != true && !item.disabled && !item.auxiliary);
+    await Promise.all(filtered_endpoints.map(async (endpoint) => {
+        indexInfo[endpoint.name] = await GetEndpointDocCount(endpoint);
+      }
+    ));
+
+    // Get usage info from API Umbrella.
+    const end_at = req.query.start_at || moment().format("YYYY-MM-DD");
+    const start_at = req.query.end_at || moment().subtract(30, 'day').format("YYYY-MM-DD");
+    const prefix = req.query.prefix || '0/';
+    const params = querystring.stringify({
       start_at: start_at,
       end_at: end_at,
       interval: 'day',
@@ -522,118 +492,62 @@ app.get('/usage.json', cache('1 hour'), function (req, res) {
     });
 
     //NEVER expose this key to public
-    var options = {
+    const options = {
       method: "GET",
       url: "https://api.data.gov/api-umbrella/v1/analytics/drilldown.json?" + params,
+      json: true,
       headers: {
         "X-Api-Key": process.env.API_UMBRELLA_KEY,
         "X-Admin-Auth-Token": process.env.API_UMBRELLA_ADMIN_TOKEN
       }
     }
-
-
-    request(options, function (error, response, body) {
-
-      var indexInfo = {}
-      var filtered_endpoints = ENDPOINTS.filter(function (item) {
-        return item.download != true && !item.disabled && !item.auxiliary
-      })
-
-      Promise.all(filtered_endpoints.map(function (endpoint) {
-        indexInfo[endpoint.name] = 0
-        var index = endpoint.index;
-        var info = index_info[index];
-        return new Promise(function (resolve, reject) {
-          request('http://localhost:8000' + endpoint.endpoint, function (error, response, body) {
-            if (error) {
-              reject(error)
-            } else {
-              try {
-                resolve(JSON.parse(body).meta.results.total)
-              } catch (err) {
-                reject(err)
-              }
-            }
-          })
-
-        }).then(function (document) {
-          indexInfo[endpoint.name] = document || 10
-
-        }).catch(function (err) {
-          log.error("Usage encountered error on : ", endpoint.name, ": ", err)
-        })
-
-      })).then(function () {
-        var usage = {
-          table: [],
-          stats: [],
-          others: [],
-          lastThirtyDayUsage: 0,
-          indexInfo: indexInfo,
-          downloadStats: downloadStats
-        };
-
-        if (!error && response.statusCode == 200) {
-          var data = JSON.parse(body);
-          if (data.results) {
-            var unwanted = 0;
-            _.map(data.results, function (result) {
-              if (VALID_URLS.indexOf(result.path) > -1) {
-                usage.table.push(result);
-              } else {
-                unwanted += result.hits;
-                usage.others.push(result);
-              }
-
-            });
-
-            if (unwanted > 0) {
-              usage.table.push({
-                "depth": 1,
-                "path": "others",
-                "terminal": true,
-                "descendent_prefix": "2/api.fda.gov/drug/",
-                "hits": unwanted
-              });
-            }
-
-            _.each(usage.table, function (row) {
-              usage.lastThirtyDayUsage += row.hits;
-            });
-
-          }
-          if (data.hits_over_time) {
-
-            _.each(data.hits_over_time.rows, function (row) {
-
-              var stat = {totalCount: 0, paths: []};
-              usage.stats.push(stat);
-
-              for (var i = 0; i < row.c.length; i++) {
-                if (i === 0) {
-                  stat.day = row.c[i].f;
-                } else {
-                  stat.totalCount += row.c[i].v;
-                  stat.paths.push({path: data.hits_over_time.cols[i].label, count: row.c[i].v});
-                }
-              }
-
-            });
-          }
+    let data = await request(options);
+    if (data.results) {
+      let unwanted = 0;
+      _.map(data.results, function (result) {
+        if (VALID_URLS.indexOf(result.path) > -1) {
+          usage.table.push(result);
         } else {
-          log.error(error);
-          log.error("The response is :");
-          log.error(response);
+          unwanted += result.hits;
+          usage.others.push(result);
         }
-        res.setHeader('Cache-Control', 'public, max-age=' + 43200); //cache for 12 hours
-        res.json(usage);
+      });
 
-      }).catch(function (err) {
-        log.error("Usage encountered error: ", err)
-      })
-    });
-  });
-});
+      if (unwanted > 0) {
+        usage.table.push({
+          "depth": 1,
+          "path": "others",
+          "terminal": true,
+          "descendent_prefix": "2/api.fda.gov/drug/",
+          "hits": unwanted
+        });
+      }
+
+      _.each(usage.table, function (row) {
+        usage.lastThirtyDayUsage += row.hits;
+      });
+
+    }
+    if (data.hits_over_time) {
+      _.each(data.hits_over_time.rows, function (row) {
+        let stat = {totalCount: 0, paths: []};
+        usage.stats.push(stat);
+        for (var i = 0; i < row.c.length; i++) {
+          if (i === 0) {
+            stat.day = row.c[i].f;
+          } else {
+            stat.totalCount += row.c[i].v;
+            stat.paths.push({path: data.hits_over_time.cols[i].label, count: row.c[i].v});
+          }
+        }
+      });
+    }
+  } catch (e) {
+    log.error(e);
+  }
+  res.setHeader('Cache-Control', 'public, max-age=' + 43200); //cache for 12 hours
+  return res.json(usage);
+}));
 
 app.get('/healthcheck', function (request, response) {
   client.cluster.health({
@@ -675,6 +589,15 @@ SetHeaders = function (response) {
   response.header('X-Frame-Options', 'deny');
   response.header('X-XSS-Protection', '1; mode=block');
 };
+
+GetEndpointDocCount = async function (endpoint) {
+  try {
+    return (await client.count({index: endpoint.index, q: !!endpoint.filter ? endpoint.filter : undefined})).count;
+  } catch (e) {
+    log.error(e);
+  }
+  return 0;
+}
 
 TryToCheckApiParams = function (request, response) {
   try {
@@ -823,7 +746,7 @@ GetDownload = function (response) {
 
   client.get({
     index: index,
-    type: 'downloads',
+    type: '_doc',
     id: 'current',
   }).then(function (body) {
     if (!body) {
@@ -845,46 +768,6 @@ GetDownload = function (response) {
   });
 };
 
-// Enforcement.
-EnforcementEndpoint = function (noun) {
-  app.get('/' + noun + '/enforcement.json',
-    asyncHandler(async function (request, response, next) {
-    LogRequest(request);
-    SetHeaders(response);
-
-    var params = TryToCheckApiParams(request, response);
-    if (params === null) {
-      return;
-    }
-
-    var product_type_filter = 'product_type:';
-    if (noun == 'drug' || noun == 'device') {
-      product_type_filter += noun + 's';
-    } else if (noun == 'food') {
-      product_type_filter += noun;
-    }
-
-    if (!params.search) {
-      params.search = product_type_filter;
-    } else {
-      params.search += ' AND ' + product_type_filter;
-    }
-
-    var index = ALL_ENFORCEMENT_INDEX;
-    var es_search_params =
-      await TryToBuildElasticsearchParams(params, index, response);
-    if (es_search_params === null) {
-      return;
-    }
-
-    TrySearch(index, params, es_search_params, request, response);
-  }));
-};
-
-EnforcementEndpoint('drug');
-EnforcementEndpoint('food');
-EnforcementEndpoint('device');
-
 BasicEndpoint = function (data) {
   var endpoint = data['endpoint'];
   var index = data['index'];
@@ -903,6 +786,14 @@ BasicEndpoint = function (data) {
       return;
     }
 
+    if (data.filter) {
+      if (!params.search) {
+        params.search = data.filter;
+      } else {
+        params.search += ' AND ' + data.filter;
+      }
+    }
+
     var es_search_params =
       await TryToBuildElasticsearchParams(params, index, response);
     if (es_search_params === null) {
@@ -915,7 +806,7 @@ BasicEndpoint = function (data) {
 
 // Make all of the basic endpoints
 _.map(ENDPOINTS, function (endpoint) {
-  if (endpoint.basic && !endpoint.disabled) {
+  if (!endpoint.download) {
     BasicEndpoint(endpoint);
   }
 });
@@ -941,18 +832,11 @@ _.map(ENDPOINTS, function (endpoint) {
   }
 });
 
-// From http://strongloop.com/strongblog/
-// robust-node-applications-error-handling/
-if (process.env.NODE_ENV === 'production') {
-  process.on('uncaughtException', function (e) {
-    log.error(e);
-    process.exit(1);
-  });
-}
-
 var port = process.env.PORT || 8000;
-app.listen(port, function () {
+const server = app.listen(port, function () {
   console.log('Listening on ' + port);
 });
+// Dealing with intermittent HTTP 502s. See https://www.tessian.com/blog/how-to-fix-http-502-errors/
+server.keepAliveTimeout = 65000
 
 module.exports = app;

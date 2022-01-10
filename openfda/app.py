@@ -3,8 +3,6 @@
 # Helper for running python programs. Invokes flag parsing logic.
 #
 # Author: Matt Mohebbi
-
-from __future__ import print_function
 import inspect
 import sys
 

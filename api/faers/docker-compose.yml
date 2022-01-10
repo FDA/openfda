@@ -32,7 +32,7 @@ services:
     command: >
       sh -c "chmod a+x ./test/integration/wait-for.sh &&
              ./test/integration/wait-for.sh es:9200 -t 120 &&
-             npm i && npm install -g grunt-cli && npm test && npm run test:integration"
+             npm ci && npm install -g grunt-cli && npm test && npm run test:integration"
     environment:
       - ES_HOST=es:9200
       - SNYK_TOKEN=${SNYK_TOKEN}

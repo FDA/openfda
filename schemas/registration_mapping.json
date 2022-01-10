@@ -1,5 +1,5 @@
 {
-  "registration": {
+  "_doc": {
     "_source": {
       "includes": [
         "*"

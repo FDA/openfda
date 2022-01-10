@@ -20,7 +20,7 @@ from openfda import common, config, index_util, parallel
 from openfda.common import soup_with_retry
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
                                                    DeviceAnnotateMapper)
-from openfda.tasks import AlwaysRunTask
+from openfda.tasks import AlwaysRunTask, NoopTask
 
 DEVICE_RECALL_DATA_DIR = config.data_dir('device_recall')
 SUMMARY_DOWNLOAD_URL = "https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfRes/res.cfm?" \
@@ -40,6 +40,8 @@ DEVICE_RECALL_LOCAL_DIR = config.data_dir('device_recall/s3_sync')
 DEVICE_RECALL_FILTERED_DIR = config.data_dir('device_recall/filtered')
 DEVICE_CSV_TO_JSON_DIR = config.data_dir('device_recall/csv2json.db')
 
+def batch_dir(batch):
+  return arrow.get(batch[0]).strftime('%Y%m%d') + '_' + arrow.get(batch[1]).strftime('%Y%m%d')
 
 class SyncS3DeviceRecall(luigi.Task):
   bucket = DEVICE_RECALL_BUCKET
@@ -134,21 +136,21 @@ class CSV2JSON(parallel.MRTask):
 
 
 class DownloadWeeklyRecallSummary(luigi.Task):
-  batch = luigi.Parameter()
+  batch = luigi.TupleParameter()
 
   def requires(self):
     return []
 
   def output(self):
-    file_name = '%s/recalls.csv' % self.batch.strftime('%Y%m%d')
+    file_name = '%s/recalls.csv' % batch_dir(self.batch)
     return luigi.LocalTarget(os.path.join(DEVICE_RECALL_DATA_DIR, file_name))
 
   def run(self):
     output_dir = dirname(self.output().path)
     common.shell_cmd('mkdir -p %s', output_dir)
 
-    end = arrow.get(self.batch)
-    start = end.shift(days=-6)
+    end = arrow.get(self.batch[1])
+    start = arrow.get(self.batch[0])
 
     id_list = self._fetch_ids(start, end)
     if len(id_list) >= 500:
@@ -273,6 +275,7 @@ class RecallDownloaderAndMapper(parallel.Mapper):
     soup = soup_with_retry(url)
 
     recall['@id'] = id
+    recall['cfres_id'] = id
     recall_number = self.field_val_str(soup, 'Recall Number')
     recall['product_res_number'] = recall_number
     recall['event_date_initiated'] = self.field_val_date(soup, 'Date Initiated by Firm')
@@ -315,13 +318,13 @@ class RecallDownloaderAndMapper(parallel.Mapper):
 
 
 class ProcessWeeklyBatch(luigi.Task):
-  batch = luigi.Parameter()
+  batch = luigi.TupleParameter()
 
   def requires(self):
     return [DownloadWeeklyRecallSummary(self.batch), CSV2JSON()]
 
   def output(self):
-    file_name = '%s/json.db' % self.batch.strftime('%Y%m%d')
+    file_name = '%s/json.db' % batch_dir(self.batch)
     return luigi.LocalTarget(os.path.join(DEVICE_RECALL_DATA_DIR, file_name))
 
   def run(self):
@@ -351,13 +354,13 @@ class DeviceRecallAnnotateMapper(DeviceAnnotateMapper):
 
 
 class AnnotateWeeklyBatch(luigi.Task):
-  batch = luigi.Parameter()
+  batch = luigi.TupleParameter()
 
   def requires(self):
     return [Harmonized2OpenFDA(), ProcessWeeklyBatch(self.batch)]
 
   def output(self):
-    file_name = '%s/annotate.db' % self.batch.strftime('%Y%m%d')
+    file_name = '%s/annotate.db' % batch_dir(self.batch)
     return luigi.LocalTarget(os.path.join(DEVICE_RECALL_DATA_DIR, file_name))
 
   def run(self):
@@ -371,10 +374,9 @@ class AnnotateWeeklyBatch(luigi.Task):
 
 
 class LoadJSON(index_util.LoadJSONBase):
-  batch = luigi.Parameter()
+  batch = luigi.TupleParameter()
   last_update_date = luigi.Parameter()
   index_name = 'devicerecall'
-  type_name = 'recall'
   mapping_file = './schemas/device_recall_mapping.json'
   use_checksum = True
   optimize_index = False
@@ -391,19 +393,13 @@ class RunWeeklyProcess(AlwaysRunTask):
 
   def requires(self):
     run_date = arrow.utcnow()
-    dow = run_date.isoweekday()
-    # Always run for the most recent sunday (iso 7) that has passed
-    # Reminder: iso day of weeks are Monday (1) through Sunday (7)
-    end_date = run_date.shift(days=-dow)
-
-    # start = arrow.get("2012-04-01")
-    # end = arrow.get("2014-12-21")
     start = arrow.get(2002, 12, 8)
-    end = arrow.get(end_date.year, end_date.month, end_date.day)
-    previous_task = None
+    end = arrow.get(run_date.year, run_date.month, run_date.day)
+    previous_task = NoopTask()
 
-    for batch in arrow.Arrow.range('week', start, end):
-      task = LoadJSON(batch=batch, last_update_date=end.format('YYYY-MM-DD'), previous_task=previous_task)
+    for batch in arrow.Arrow.span_range('week', start, end, bounds='[]', exact=True):
+      task = LoadJSON(batch=(batch[0].format(), batch[1].format()), last_update_date=end.format('YYYY-MM-DD'),
+                      previous_task=previous_task)
       previous_task = task
       yield task
 

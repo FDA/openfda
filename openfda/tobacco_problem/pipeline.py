@@ -106,7 +106,6 @@ class TobaccoProblem2JSON(luigi.Task):
 
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'tobaccoproblem'
-  type_name = 'tobaccoproblem'
   mapping_file = './schemas/tobaccoproblem_mapping.json'
   data_source = TobaccoProblem2JSON()
   use_checksum = False

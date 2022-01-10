@@ -354,7 +354,6 @@ class AnnotateJSON(luigi.Task):
 
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'ndc'
-  type_name = 'ndc'
   mapping_file = './schemas/ndc_mapping.json'
   data_source = AnnotateJSON()
   use_checksum = False

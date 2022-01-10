@@ -1,6 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-03/schema",
   "properties": {
+    "cfres_id": {
+       "type": "string"
+    },
     "event_date_initiated": {
       "type": "string",
       "format": "date"

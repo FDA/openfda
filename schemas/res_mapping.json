@@ -1,5 +1,5 @@
 {
-  "enforcementreport": {
+  "_doc": {
     "_source": {
       "includes": [
         "*"
@@ -15,7 +15,7 @@
         "type": "double"
       },
       "@id": {
-        "type": "text"
+        "type": "keyword"
       },
       "@timestamp": {
         "format": "dateOptionalTime||epoch_millis",

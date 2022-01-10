@@ -71,3 +71,5 @@ watchdog
 /notebooks/.ipynb_checkpoints/historic_img_processing_expandv3_all_docs-checkpoint.ipynb
 /ppm_image_files/
 /notebooks/.ipynb_checkpoints/historic_img_analysis-gen_data-checkpoint.ipynb
+/nose2-junit.xml
+/coverage.xml

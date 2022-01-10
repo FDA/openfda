@@ -1,5 +1,5 @@
 {
-  "pma": {
+  "_doc": {
     "properties": {
       "@checksum": {
         "type": "keyword"

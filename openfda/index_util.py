@@ -22,7 +22,7 @@ from elasticsearch.client.utils import  _make_path
 
 from openfda import config, elasticsearch_requests, parallel
 from openfda.common import BatchHelper
-from openfda.tasks import AlwaysRunTask
+from openfda.tasks import AlwaysRunTask, NoopTask
 import simplejson as json
 
 def refresh_index(index_name):
@@ -143,6 +143,7 @@ def dump_index(es,
   # Tracking data structure that will eventually be written to ES for the
   # downloads API.
   manifest = {
+    'index_stamp': get_stamp(es, index),
     domain: {
       subdomain: {
         'export_date': update_date,
@@ -354,6 +355,19 @@ def get_mapping(es, index):
 
   return indices.get_mapping(index=index)
 
+def get_stamp(es, index):
+  ''' Generates a "stamp" (or a hash) for the ES index that could be used to determine whether or not any updates have been made to the index
+  since the last export. Elasticsearch itself does not offer such a capability -- see the discussion here for example https://github.com/elastic/elasticsearch/issues/13462 --
+  and we don't want to introduce a new metadata field to track index updates. So we are going to use the _stats API and rely on
+  a combination of a number of fields that is very likely to change when any updates are made to the index.
+  '''
+  stats = es.indices.stats(index=index)
+  uuid = stats['indices'][index]['uuid']
+  total_docs = stats['indices'][index]['total']['docs']['count']
+  total_deleted = stats['indices'][index]['total']['docs']['deleted']
+  total_store = stats['indices'][index]['total']['store']['size_in_bytes']
+  return f'{uuid}_{total_docs}_{total_deleted}_{total_store}'
+
 
 def copy_mapping(es, source_index, target_index):
   '''
@@ -381,7 +395,7 @@ class ResetElasticSearch(AlwaysRunTask):
   target_index_name = luigi.Parameter()
   target_type_name = luigi.Parameter()
   target_mapping_file = luigi.Parameter()
-  delete_index = luigi.Parameter(default=False)
+  delete_index = luigi.BoolParameter(default=False)
 
   def _run(self):
     logging.info('Create index and loading mapping: %s/%s',
@@ -435,7 +449,7 @@ class LoadJSONBase(AlwaysRunTask):
 
   'The index and type to load into.'
   index_name = None
-  type_name = None
+  type_name = '_doc'
   mapping_file = None
 
   'Load data incrementally, using a checksum?'
@@ -448,10 +462,10 @@ class LoadJSONBase(AlwaysRunTask):
   data_source = None
 
   'If specified, this task will be ordered after `previous_task`'
-  previous_task = luigi.Parameter(default=None)
+  previous_task = luigi.TaskParameter(default=NoopTask())
 
   'The number of processes to use when loading JSON into ES'
-  load_json_workers = luigi.Parameter(default=4)
+  load_json_workers = luigi.IntParameter(default=4)
 
   'Should we optimize the index after adding documents.'
   optimize_index = False

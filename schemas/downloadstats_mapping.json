@@ -1,5 +1,5 @@
 {
-  "downloadstats": {
+  "_doc": {
     "_source": {
       "includes": [
         "*"

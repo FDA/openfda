@@ -33,7 +33,7 @@ def timestamp_from_filename(filename):
   '''Returns a timestamp corresponding to the year/quarter in `filename`. '''
   match = re.search(r'/([0-9]+)q([0-4])/', filename)
   year, quarter = int(match.group(1)), int(match.group(2))
-  return arrow.get('%04d.%02d' % (year, quarter), 'YYYY.MM').timestamp
+  return arrow.get('%04d.%02d' % (year, quarter), 'YYYY.MM').int_timestamp
 
 
 def parse_demo_file(demo_filename):

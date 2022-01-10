@@ -21,10 +21,11 @@ class FDAConfig(luigi.WrapperTask):
   tmp_dir = Parameter(default='./data/openfda-tmp')
   es_host = Parameter(default='localhost:9200')
   aws_profile = luigi.Parameter(default='openfda')
-  disable_downloads = luigi.Parameter(default=False)
+  disable_downloads = luigi.BoolParameter(default=False)
 
-  snapshot_path = luigi.Parameter(default='elasticsearch-snapshots/es-7')
+  snapshot_path = luigi.Parameter(default='elasticsearch-snapshots/opensearch')
   snapshot_bucket = luigi.Parameter(default='openfda-prod')
+  role_arn = luigi.Parameter(default="arn:aws:iam::806972138196:role/OpenSearchS3Access")
 
 
 class Context(object):
@@ -37,14 +38,15 @@ class Context(object):
 def snapshot_path(): return FDAConfig().snapshot_path
 def snapshot_bucket(): return FDAConfig().snapshot_bucket
 def es_host(): return FDAConfig().es_host
+def role_arn(): return FDAConfig().role_arn
 def disable_downloads(): return FDAConfig().disable_downloads
 
-def es_client(host=None):
+def es_client(host=None, port=9200):
   import elasticsearch
   if host is None:
     host = es_host()
 
-  return elasticsearch.Elasticsearch(host, timeout=180)
+  return elasticsearch.Elasticsearch(host, timeout=180, port=port)
 
 def data_dir(*subdirs):
   return os.path.join(FDAConfig().data_dir, *subdirs)

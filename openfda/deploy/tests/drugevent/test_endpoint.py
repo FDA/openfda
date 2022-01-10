@@ -1,8 +1,8 @@
-from nose.tools import *
+
 import requests
 
 from openfda.tests.api_test_helpers import *
-from nose.tools import *
+
 
 EXACT_FIELDS = ['openfda.application_number.exact', 'openfda.brand_name.exact',
                 'openfda.generic_name.exact', 'openfda.manufacturer_name.exact',

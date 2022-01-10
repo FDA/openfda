@@ -69,3 +69,10 @@ class AlwaysRunTask(luigi.Task):
     os.system('mkdir -p "/tmp/always-run-task"')
     with open(self._nonce_file(), 'w') as nonce_file:
       nonce_file.write('finished.')
+
+class NoopTask(luigi.Task):
+  '''
+  A task that does absolutely nothing.
+  '''
+  def complete(self):
+      return True

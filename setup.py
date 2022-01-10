@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import setuptools
+import os
 
 setuptools.setup(
   name='openfda',
@@ -10,23 +11,27 @@ setuptools.setup(
   url='http://github.com/fda/openfda',
   python_requires='>=3.6',
   install_requires=[
-    'arrow<0.16.0',
+    'arrow',
     'boto',
     'click',
-    'elasticsearch>=6.0.0,<7.0.0',
-    'flask',
+    'elasticsearch<=7.15.1',
     'leveldb',
-    'luigi<=2.1.1',
+    'luigi<=2.8.13',
     'lxml',
-    'nose',
     'mock<=2.0.0',
-    'coverage',
+    'nose2[coverage_plugin]',
     'python-gflags',
     'requests',
     'setproctitle',
     'simplejson',
     'xmltodict',
-    'dictsearch'
+    'dictsearch',
+    'usaddress',
+    'python-crfsuite==0.9.8'
+  ],
+  dependency_links=[
+    'file://' + os.path.join(os.getcwd(), 'dependencies',
+                             'python-crfsuite-0.9.8.tar.gz') + '#python_crfsuite-0.9.8'
   ],
   description=('A research project to provide open APIs, raw data downloads, '
                'documentation and examples, and a developer community for an '
@@ -37,5 +42,5 @@ setuptools.setup(
               'openfda.spl',
               ],
   zip_safe=False,
-  test_suite = 'nose.collector',
+  test_suite = 'nose2.collector.collector',
 )

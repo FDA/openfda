@@ -676,7 +676,6 @@ class AnnotateDrugsFDA(luigi.Task):
 
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'drugsfda'
-  type_name = 'drugsfda'
   mapping_file = './schemas/drugsfda_mapping.json'
   data_source = AnnotateDrugsFDA()
   use_checksum = False

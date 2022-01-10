@@ -47,6 +47,8 @@ def extract_ndc_from_recall(recall):
   desc = recall['product-description']
   if 'code-info' in recall:
     desc += ' ' + recall['code-info']
+  if recall.get('more-code-info', ''):
+    desc += ' ' + recall['more-code-info']
   return extract_ndc(desc)
 
 def is_valid_upc(upc):
@@ -74,4 +76,6 @@ def extract_upc_from_recall(recall):
   desc = recall['product-description']
   if 'code-info' in recall:
     desc += ' ' + recall['code-info']
+  if recall.get('more-code-info', ''):
+    desc += ' ' + recall['more-code-info']
   return extract_upc(desc)

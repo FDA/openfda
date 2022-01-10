@@ -1,8 +1,8 @@
-from nose.tools import *
+
 import requests
 
 from openfda.tests.api_test_helpers import *
-from nose.tools import *
+
 
 EXACT_FIELDS = ['openfda.application_number.exact', 'openfda.brand_name.exact',
                 'openfda.generic_name.exact', 'openfda.is_original_packager.exact', 'openfda.manufacturer_name.exact',
@@ -32,8 +32,8 @@ def test_date_1():
 
 
 def test_date_range_2():
-  assert_total('/drug/label.json?search=effective_time:([20140320+TO+20141231])', 4000)
-  assert_total('/drug/label.json?search=effective_time:([2014-03-20+TO+2014-12-31])', 4000)
+  assert_total('/drug/label.json?search=effective_time:([20140320+TO+20141231])', 3900)
+  assert_total('/drug/label.json?search=effective_time:([2014-03-20+TO+2014-12-31])', 3900)
 
 
 def test_openfda_3():

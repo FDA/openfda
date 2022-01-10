@@ -1,5 +1,5 @@
 {
-  "spl": {
+  "_doc": {
     "_source": {
       "includes": [
         "*"

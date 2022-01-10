@@ -1,5 +1,5 @@
 {
-  "rareport": {
+  "_doc": {
     "_source": {
       "includes": [
         "*"

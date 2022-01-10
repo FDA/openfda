@@ -1,8 +1,8 @@
-from nose.tools import *
+
 import requests
 
 from openfda.tests.api_test_helpers import *
-from nose.tools import *
+
 
 
 EXACT_FIELDS = ['openfda.application_number.exact', 'openfda.brand_name.exact',
@@ -68,3 +68,18 @@ def test_no_dupes():
 def test_no_whitespace_in_zip_codes():
   meta, results = fetch('/device/enforcement.json?search=recall_number.exact:Z-0031-2018')
   eq_(results[0]['postal_code'], '91342-3577')
+
+
+def test_multiple_more_code_info_handling_fda_347():
+  meta, results = fetch('/device/enforcement.json?search=recall_number.exact:Z-2483-2021')
+  ok_('21)US919C1149 US919C1150' in results[0]['more_code_info'])
+  ok_('15B0470 N/A US215B0471 N/A US215B0472' in results[0]['more_code_info'])
+  ok_('B1987 (01)00884838047693(21)US818B1987' in results[0]['more_code_info'])
+  ok_('S418B0848 US419B0778 (01)00884838047693' in results[0]['more_code_info'])
+  ok_('4838088658(21)US119B1422' in results[0]['more_code_info'])
+  ok_('37 (01)00884838088658(21)US718B1337' in results[0]['more_code_info'])
+  ok_('(01)00884838088658(21)USD19B0624' in results[0]['more_code_info'])
+  ok_('USO20B0661 (01)00884838088658(21)USO20B0661' in results[0]['more_code_info'])
+
+  meta, results = fetch('/device/enforcement.json?search=recall_number.exact:Z-2469-2021')
+  eq_(results[0]['more_code_info'], '')

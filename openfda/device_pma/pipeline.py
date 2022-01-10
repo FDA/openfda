@@ -108,7 +108,6 @@ class AnnotateDevice(luigi.Task):
 
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'devicepma'
-  type_name = 'pma'
   mapping_file = './schemas/pma_mapping.json'
   data_source = AnnotateDevice()
   use_checksum = False

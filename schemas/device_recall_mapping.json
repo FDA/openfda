@@ -1,5 +1,5 @@
 {
-  "recall": {
+  "_doc": {
     "_source": {
       "includes": [
         "*"
@@ -10,6 +10,9 @@
         "type": "keyword"
       },
       "@id": {
+        "type": "keyword"
+      },
+      "cfres_id": {
         "type": "keyword"
       },
       "event_date_initiated": {

@@ -26,4 +26,4 @@ xpack.watcher.enabled: false
 xpack.ml.enabled: false
 xpack.monitoring.enabled: false
 
-ingest.geoip.downloader.enabled: false
+#ingest.geoip.downloader.enabled: false

@@ -183,7 +183,7 @@ def test_commercial_distribution_end_date():
   eq_(len(results), 1)
 
   udi = results[0]
-  eq_(udi.get("commercial_distribution_end_date"), "2016-08-16")
+  eq_(udi.get("commercial_distribution_end_date"), "2021-10-12")
   eq_(udi["commercial_distribution_status"], "Not in Commercial Distribution")
 
 

@@ -735,7 +735,6 @@ class SubstanceData2JSON(luigi.Task):
 
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'substancedata'
-  type_name = 'substancedata'
   mapping_file = './schemas/substancedata_mapping.json'
   data_source = SubstanceData2JSON()
   use_checksum = False

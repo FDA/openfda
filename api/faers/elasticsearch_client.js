@@ -5,6 +5,6 @@ const client = new elasticsearch.Client({
   log: logging.ElasticsearchLogger,
   apiVersion: '5.6',
   // Note that this doesn't abort the query.
-  requestTimeout: 20000  // milliseconds
+  requestTimeout: 30000  // milliseconds
 });
 exports.client = client;

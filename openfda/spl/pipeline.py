@@ -293,7 +293,6 @@ class AnnotateJSON(luigi.Task):
 
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'druglabel'
-  type_name = 'spl'
   mapping_file = './schemas/spl_mapping.json'
   use_checksum = True
   docid_key = 'set_id'

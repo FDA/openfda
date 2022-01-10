@@ -23,7 +23,7 @@ from openfda.annotation_table.pipeline import CombineHarmonization
 from openfda.common import newest_file_timestamp
 from openfda.faers import annotate
 from openfda.faers import xml_to_json
-from openfda.tasks import AlwaysRunTask, DependencyTriggeredTask
+from openfda.tasks import AlwaysRunTask, DependencyTriggeredTask, NoopTask
 
 # this should be a symlink to wherever the real data directory is
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
@@ -171,6 +171,7 @@ class XML2JSON(luigi.Task):
 
 class AnnotateJSON(DependencyTriggeredTask):
   quarter = luigi.Parameter()
+
   def requires(self):
     return [CombineHarmonization(), XML2JSON(self.quarter)]
 
@@ -189,7 +190,6 @@ class AnnotateJSON(DependencyTriggeredTask):
 class LoadJSONQuarter(index_util.LoadJSONBase):
   quarter = luigi.Parameter()
   index_name = 'drugevent'
-  type_name = 'safetyreport'
   mapping_file = './schemas/faers_mapping.json'
   docid_key='@case_number'
   use_checksum = True
@@ -203,11 +203,12 @@ class LoadJSONQuarter(index_util.LoadJSONBase):
 
 
 class LoadJSON(AlwaysRunTask):
-  quarter = luigi.Parameter()
+  quarter = luigi.Parameter(default='all')
+
   def requires(self):
     if self.quarter == 'all':
       now = arrow.now()
-      previous_task = None
+      previous_task = NoopTask()
       for year in range(2004, now.year + 1):
         for quarter in range(1, 5):
           task = LoadJSONQuarter(quarter='%4dq%d' % (year, quarter), previous_task=previous_task)

@@ -1,8 +1,8 @@
-from nose.tools import *
+from openfda.tests.api_test_helpers import *
 import requests
 
 from openfda.tests.api_test_helpers import *
-from nose.tools import *
+
 
 def test_uppercase_filter():
   assert_count_top(

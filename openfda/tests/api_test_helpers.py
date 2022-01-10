@@ -1,8 +1,8 @@
 import collections
-import requests
 import os
-from nose.tools import assert_greater, assert_greater_equal, eq_, ok_
 from unittest.case import SkipTest
+
+import requests
 
 ENDPOINT = os.getenv('OPENFDA_ENDPOINT_URL', 'http://localhost:8000')
 Count = collections.namedtuple('Count', ['term', 'count'])
@@ -26,9 +26,9 @@ def extract_counts(results):
 def assert_total(query, minimum):
   meta, results = fetch(query)
   assert_greater_equal(meta['results']['total'], minimum,
-    'Query %s had fewer results than expected.  %s < %s' % (
-      query, meta['results']['total'], minimum
-    ))
+                       'Query %s had fewer results than expected.  %s < %s' % (
+                         query, meta['results']['total'], minimum
+                       ))
 
 
 def assert_total_exact(query, total):
@@ -45,8 +45,9 @@ def assert_count_top(query, expected_terms, N=10):
   count_terms = set([count.term for count in counts[:N]])
   for term in expected_terms:
     assert term in count_terms, 'Query %s missing expected term %s; terms=%s' % (
-        query, term, '\n'.join(list(count_terms))
+      query, term, '\n'.join(list(count_terms))
     )
+
 
 def assert_count_contains(query, expected_terms):
   meta, counts = fetch_counts(query)
@@ -101,9 +102,62 @@ def fetch_counts(query):
 
 def not_circle(fn):
   'Skip this test when running under CI.'
+
   def _fn(*args, **kw):
     if 'CIRCLECI' in os.environ:
       raise SkipTest
     fn(*args, **kw)
 
   return _fn
+
+
+def ok_(expr, msg=None):
+  """Shorthand for assert. Saves 3 whole characters!
+  """
+  if not expr:
+    raise AssertionError(msg)
+
+
+def eq_(a, b, msg=None):
+  """Shorthand for 'assert a == b, "%r != %r" % (a, b)
+  """
+  if not a == b:
+    raise AssertionError(msg or "%r != %r" % (a, b))
+
+
+def assert_greater(a, b, msg=None):
+    """Just like self.assertTrue(a > b), but with a nicer default message."""
+    if not a > b:
+        standardMsg = '%s not greater than %s' % (repr(a), repr(b))
+        fail(_formatMessage(msg, standardMsg))
+
+def assert_greater_equal(a, b, msg=None):
+  """Just like self.assertTrue(a >= b), but with a nicer default message."""
+  if not a >= b:
+    standardMsg = '%s not greater than or equal to %s' % (repr(a), repr(b))
+    fail(_formatMessage(msg, standardMsg))
+
+
+def fail(msg):
+  raise AssertionError(msg)
+
+
+def _formatMessage(msg, standardMsg):
+  """Honour the longMessage attribute when generating failure messages.
+  If longMessage is False this means:
+  * Use only an explicit message if it is provided
+  * Otherwise use the standard message for the assert
+
+  If longMessage is True:
+  * Use the standard message
+  * If an explicit message is provided, plus ' : ' and the explicit message
+  """
+  if msg is None:
+    return standardMsg
+  try:
+    # don't switch to '{}' formatting in Python 2.X
+    # it changes the way unicode input is handled
+    return '%s : %s' % (standardMsg, msg)
+  except UnicodeDecodeError:
+    return '%s : %s' % (repr(standardMsg), repr(msg))
+

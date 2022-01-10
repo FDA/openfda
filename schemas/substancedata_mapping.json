@@ -1,6 +1,10 @@
 {
-  "substancedata": {
-    "dynamic": false,
+  "_doc": {
+    "_source": {
+      "includes": [
+        "*"
+      ]
+    },
     "properties": {
       "definition_level": {
         "type":  "keyword"

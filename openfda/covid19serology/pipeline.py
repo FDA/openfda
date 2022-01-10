@@ -81,7 +81,6 @@ class SerologyCSV2JSON(luigi.Task):
 
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'covid19serology'
-  type_name = 'covid19serology'
   mapping_file = './schemas/covid19serology_mapping.json'
   data_source = SerologyCSV2JSON()
   use_checksum = False

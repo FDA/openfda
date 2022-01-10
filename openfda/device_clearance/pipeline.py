@@ -113,7 +113,6 @@ class AnnotateDevice(luigi.Task):
 
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'deviceclearance'
-  type_name = 'device510k'
   mapping_file = './schemas/clearance_mapping.json'
   data_source = AnnotateDevice()
   use_checksum = False

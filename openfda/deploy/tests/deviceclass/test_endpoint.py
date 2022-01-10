@@ -1,8 +1,8 @@
-from nose.tools import *
+
 import requests
 
 from openfda.tests.api_test_helpers import *
-from nose.tools import *
+
 
 def test_exact_count():
   assert_count_contains('/device/classification.json?count=device_name.exact',

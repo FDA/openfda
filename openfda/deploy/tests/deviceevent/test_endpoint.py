@@ -1,5 +1,5 @@
 from openfda.tests.api_test_helpers import *
-from nose.tools import *
+
 
 
 def assert_enough_results(query, count):
@@ -1913,7 +1913,8 @@ def test_single_product_problem():
     '/device/event.json?search=report_number:"0001313525-2021-00110"')
   eq_(len(results), 1)
   event = results[0]
-  eq_(event["product_problems"], ["Insufficient Information"])
+  problems = sorted(event["product_problems"], key=lambda k: k)
+  eq_(problems, ['Adverse Event Without Identified Device or Use Problem', 'Insufficient Information'])
 
   meta, results = fetch(
     '/device/event.json?search=report_number:"1057985-2021-00146"')
@@ -1937,6 +1938,7 @@ def test_multiple_patient_problems():
     '/device/event.json?search=mdr_report_key:1945090')
   eq_(len(results), 1)
   event = results[0]
+  eq_(len(event["patient"]), 1)
   problems = sorted(event["patient"][0]["patient_problems"], key=lambda k: k)
   eq_(problems, ["Device Embedded In Tissue or Plaque", "No Information"])
 
@@ -1944,13 +1946,15 @@ def test_multiple_patient_problems():
     '/device/event.json?search=report_number:"0001313525-2021-00110"')
   eq_(len(results), 1)
   event = results[0]
+  eq_(len(event["patient"]), 1)
   problems = sorted(event["patient"][0]["patient_problems"], key=lambda k: k)
-  eq_(problems, ["Corneal Ulcer", "Keratitis"])
+  eq_(problems, ['Corneal Infiltrates', 'Corneal Ulcer', 'Keratitis'])
 
   meta, results = fetch(
     '/device/event.json?search=report_number:"1057985-2021-00146"')
   eq_(len(results), 1)
   event = results[0]
+  eq_(len(event["patient"]), 1)
   problems = sorted(event["patient"][0]["patient_problems"], key=lambda k: k)
   eq_(problems,
       ["Blurred Vision", "Excessive Tear Production", "Eye Pain", "Foreign Body Sensation in Eye", "Itching Sensation",
@@ -1968,6 +1972,25 @@ def test_multiple_patients_with_same_problem():
   for idx, patient in enumerate(sorted(event["patient"], key=lambda k: k["patient_sequence_number"])):
     eq_(patient['patient_sequence_number'], str(idx + 1))
     eq_(patient['patient_problems'], ["No Known Impact Or Consequence To Patient"])
+
+
+def test_multiple_patient_problems_without_patient_record_issue_179():
+  meta, results = fetch(
+    '/device/event.json?search=mdr_report_key:11339476')
+  eq_(len(results), 1)
+  event = results[0]
+  eq_(len(event["patient"]), 1)
+  problems = sorted(event["patient"][0]["patient_problems"], key=lambda k: k)
+  eq_(problems, ["Blurred Vision", "Visual Disturbances"])
+
+  meta, results = fetch(
+    '/device/event.json?search=mdr_report_key:11131671')
+  eq_(len(results), 1)
+  event = results[0]
+  eq_(len(event["patient"]), 1)
+  problems = sorted(event["patient"][0]["patient_problems"], key=lambda k: k)
+  eq_(problems, ["Visual Disturbances"])
+
 
 
 def test_foitext_present():

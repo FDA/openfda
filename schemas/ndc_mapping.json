@@ -1,5 +1,5 @@
 {
-  "ndc": {
+  "_doc": {
     "_source": {
       "includes": [
         "*"

@@ -4,6 +4,7 @@ ADD . /app
 WORKDIR /app
 
 EXPOSE 8000
-RUN rm -rf node_modules
-RUN npm install
-CMD ["node","./node_modules/.bin/forever","api.js"]
+
+RUN npm install pm2 -g
+RUN npm ci
+CMD ["pm2-runtime", "api.js"]

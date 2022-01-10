@@ -534,12 +534,23 @@ class CSV2JSONJoinReducer(parallel.Reducer):
 
     for source_file, target_key in self.join_map.items():
       for row in val.get(source_file, []):
-        row.pop('mdr_report_key', 0) # No need to keep join key on nested data
-        final[target_key].append(row)
+        row.pop('mdr_report_key', 0)  # No need to keep join key on nested data
+        if target_key != 'mdr_text' or len(
+          [txt for txt in final[target_key] if txt['mdr_text_key'] == row['mdr_text_key']]) == 0:
+          final[target_key].append(row)
 
     # Now tuck the device and patient problem codes onto the final record
     if val.get('foidevproblem', []):
       final['product_problems'] = list(map(lambda x: x['product_problem'], val['foidevproblem']))
+
+    # https://github.com/FDA/openfda/issues/179
+    # In some cases we have patient problem codes without the actual patient.
+    # We create a 'placeholder' empty patient record in this case just to hold the problem codes.
+    for patient_problem in val.get('patientproblemcode', []):
+      if len([patient for patient in final['patient'] if
+              patient['patient_sequence_number'] == patient_problem['patient_sequence_number']]) == 0:
+        patient = {'patient_sequence_number': patient_problem['patient_sequence_number']}
+        final['patient'].append(patient)
 
     for patient in final['patient']:
       for patient_problem in val.get('patientproblemcode', []):
@@ -773,7 +784,6 @@ class AnnotateReport(DependencyTriggeredTask):
 class LoadJSONByRunDate(index_util.LoadJSONBase):
   run_date = luigi.Parameter()
   index_name = 'deviceevent'
-  type_name = 'maude'
   mapping_file = 'schemas/maude_mapping.json'
   optimize_index = False
   docid_key='mdr_report_key'

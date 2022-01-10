@@ -1,5 +1,5 @@
 {
-  "animalandveterinarydrugevent": {
+  "_doc": {
     "_source": {
       "includes": [
         "*"

@@ -1,5 +1,5 @@
 {
-  "covid19serology": {
+  "_doc": {
     "_source": {
       "includes": [
         "*"

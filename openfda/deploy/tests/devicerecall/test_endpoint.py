@@ -1,8 +1,8 @@
-from nose.tools import *
+
 import requests
 
 from openfda.tests.api_test_helpers import *
-from nose.tools import *
+
 
 
 def test_pma_parsed_out():
@@ -51,6 +51,7 @@ def test_unparseable_address_flattened():
 
 def test_one_complete_record():
   meta, results = fetch('/device/recall.json?search=product_res_number.exact:Z-0164-2014')
+  eq_(results[0]['cfres_id'], '122136')
   eq_(results[0]['res_event_number'], '66351')
   eq_(results[0]['product_res_number'], 'Z-0164-2014')
   eq_(results[0]['firm_fei_number'], '1217052')

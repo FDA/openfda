@@ -3,7 +3,6 @@
 """ Animal Drug Adverse Event pipeline.
 """
 
-import glob
 import logging
 import os
 import re
@@ -12,12 +11,14 @@ import traceback
 
 import arrow
 import luigi
+import lxml
 from lxml import etree
 
 from openfda import common, config, index_util, parallel
 from openfda.adae import annotate
 from openfda.annotation_table.pipeline import CombineHarmonization
 from openfda.common import newest_file_timestamp
+from openfda.parallel import NullOutput
 
 ADAE_BUCKET = 's3://openfda-data-adae'
 ADAE_LOCAL_DIR = config.data_dir('adae/s3_sync')
@@ -42,7 +43,17 @@ NULLIFIED = ['US-FDACVM-2018-US-045311.xml', 'US-FDACVM-2018-US-048571.xml', 'US
              'US-FDACVM-2020-US-045820.xml', 'US-FDACVM-2020-US-045824.xml', 'US-FDACVM-2016-US-054799.xml',
              'US-FDACVM-2017-US-060740.xml',
              'US-FDACVM-2016-US-062923.xml', 'US-FDACVM-2017-US-001483.xml', 'US-FDACVM-2017-US-009155.xml',
-             'US-FDACVM-2017-US-028125.xml', 'US-FDACVM-2017-US-033030.xml']
+             'US-FDACVM-2017-US-028125.xml', 'US-FDACVM-2017-US-033030.xml', 'US-FDACVM-2012-US-031040.xml',
+             'US-FDACVM-2012-US-031016.xml',
+             'US-FDACVM-2014-US-011762.xml',
+             'US-FDACVM-2012-US-045510.xml',
+             'US-FDACVM-2012-US-031080.xml',
+             'US-FDACVM-2012-US-030987.xml',
+             'US-FDACVM-2012-US-031012.xml',
+             'US-FDACVM-2018-US-026106.xml',
+             'US-FDACVM-2019-US-063566.xml',
+             'US-FDACVM-2020-US-035313.xml',
+             'US-FDACVM-2021-US-024914.xml']
 
 
 class SyncS3(luigi.Task):
@@ -61,7 +72,7 @@ class SyncS3(luigi.Task):
                 self.local_dir])
 
 
-class ExtractXML(luigi.Task):
+class ExtractXML(parallel.MRTask):
   local_dir = ADAE_LOCAL_DIR
 
   def requires(self):
@@ -70,13 +81,16 @@ class ExtractXML(luigi.Task):
   def output(self):
     return luigi.LocalTarget(os.path.join(config.data_dir('adae/extracted'), BATCH))
 
-  def run(self):
+  def mapreduce_inputs(self):
+    return parallel.Collection.from_glob(os.path.join(self.local_dir, '*.zip'))
+
+  def map(self, zip_file, value, output):
     output_dir = self.output().path
     common.shell_cmd_quiet('mkdir -p %s', output_dir)
-    input_dir = self.local_dir
-    for zip_filename in glob.glob(input_dir + '/*.zip'):
-      common.shell_cmd_quiet('unzip -ouq "%s" -d %s', zip_filename, output_dir)
+    common.shell_cmd_quiet('7z x "%s" -aoa -bd -y -o%s', zip_file, output_dir)
 
+  def output_format(self):
+    return NullOutput()
 
 class XML2JSONMapper(parallel.Mapper):
   UNIT_OF_MEASUREMENTS_MAP = {
@@ -200,6 +214,8 @@ class XML2JSONMapper(parallel.Mapper):
         map_output.add(ae["unique_aer_id_number"], ae)
       else:
         logging.warning("Zero length input file: " + map_input.filename)
+    except lxml.etree.XMLSyntaxError as err:
+      logging.warning("Malformed input file: " + map_input.filename + ". Error was " + str(err))
     except Exception:
       traceback.print_exc()
       logging.error(sys.exc_info()[0])
@@ -432,7 +448,6 @@ class AnnotateEvent(luigi.Task):
 
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'animalandveterinarydrugevent'
-  type_name = 'animalandveterinarydrugevent'
   mapping_file = './schemas/animalandveterinarydrugevent_mapping.json'
   data_source = XML2JSON()
   use_checksum = False

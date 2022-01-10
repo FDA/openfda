@@ -1,5 +1,6 @@
 
 import collections
+import shutil
 from itertools import tee
 import glob
 import os.path
@@ -10,11 +11,12 @@ import luigi
 import simplejson as json
 from openfda import common, config, index_util, elasticsearch_requests, parallel
 from openfda.tasks import AlwaysRunTask
-
+import logging
 
 
 RUN_DIR = dirname(dirname(dirname(os.path.abspath(__file__))))
 BASE_DIR = os.path.abspath(join(RUN_DIR, './data/export/'))
+FILES_DIR = os.path.abspath(join(BASE_DIR, './files/'))
 SCHEMA_DIR = os.path.abspath(join(RUN_DIR, './schemas/'))
 
 
@@ -86,7 +88,7 @@ RANGE_ENDPOINT_MAP = {
   '/animalandveterinary/event': {
     'date_key': 'original_receive_date',
     'start_date': '1987-01-01',
-    'end_date': '2021-07-01'
+    'end_date': '2021-10-01'
   }
 }
 
@@ -181,7 +183,7 @@ def walk_glob(file_pattern, crawl_dir):
 
   for dirpath, dirs, filenames in os.walk(crawl_dir):
     for name in filenames:
-      if name.endswith(file_pattern):
+      if name.startswith(file_pattern):
         results.append(join(dirpath, name))
 
   return results
@@ -278,16 +280,16 @@ def omit_internal_keys(data):
 
 
 class MakeExportBatches(AlwaysRunTask):
-  date_str = luigi.Parameter()
 
   def requires(self):
     return []
 
   def output(self):
-    return luigi.LocalTarget(join(BASE_DIR, 'batches', self.date_str))
+    return luigi.LocalTarget(join(BASE_DIR, 'batches'))
 
   def _run(self):
-    common.shell_cmd('mkdir -p %s', self.output().path)
+    shutil.rmtree(self.output().path, ignore_errors=True)
+    os.makedirs(self.output().path)
     # Get all of the endpoints served by this index
     # Create an `EndpointExport` object for each endpoint in order to export
     # each endpoint properly.
@@ -333,6 +335,7 @@ class MakeExportBatches(AlwaysRunTask):
           json_out.write(json_dict + '\n')
 
 
+
 class ParallelExportMapper(parallel.Mapper):
   def __init__(self, output_dir):
     self.output_dir = output_dir
@@ -344,30 +347,40 @@ class ParallelExportMapper(parallel.Mapper):
     endpoint_dir = join(self.output_dir, ep.endpoint[1:])
     target_dir = join(endpoint_dir, ep.partition)
     common.shell_cmd('mkdir -p %s', target_dir)
-    index_util.dump_index(es_client,
-                          ep.index_name,
-                          ep.endpoint,
-                          target_dir,
-                          cleaner=omit_internal_keys,
-                          query=ep.query,
-                          chunks=ep.chunks)
+    if self.index_changed_since_last_export(es_client, ep.index_name, target_dir):
+      index_util.dump_index(es_client,
+                            ep.index_name,
+                            ep.endpoint,
+                            target_dir,
+                            cleaner=omit_internal_keys,
+                            query=ep.query,
+                            chunks=ep.chunks)
     # Copy the current JSON schema to the zip location so that it is included
     # in the sync to s3. flock is required to avoid a race condition when copying the schema file.
     common.shell_cmd_quiet('flock --verbose %s cp %s %s', schema_file, schema_file, endpoint_dir)
 
+  def index_changed_since_last_export(self, es_client, index_name, target_dir):
+    manifest_path = join(target_dir, 'manifest.json')
+    if (os.path.isfile(manifest_path)):
+      with open(manifest_path, 'r') as manifest_file:
+        manifest = json.load(manifest_file)
+        if manifest.get('index_stamp', ''):
+          stamp = manifest['index_stamp']
+          if stamp == index_util.get_stamp(es_client, index_name):
+            logging.info('Index %s has not changed since last export; skipping %s', index_name, target_dir)
+            return False
+    return True
 
-class ParallelExport(luigi.Task):
-  date_str = luigi.Parameter()
+
+class ParallelExport(AlwaysRunTask):
 
   def requires(self):
-    return MakeExportBatches(date_str=self.date_str)
+    return MakeExportBatches()
 
   def output(self):
-    target_dir = join(BASE_DIR, self.date_str)
-    return luigi.LocalTarget(target_dir)
+    return luigi.LocalTarget(FILES_DIR)
 
-  def run(self):
-    common.shell_cmd('mkdir -p %s', join(BASE_DIR, 'tmp'))
+  def _run(self):
     files = glob.glob(self.input().path + '/*/*.json')
     parallel.mapreduce(
       parallel.Collection.from_glob(files, parallel.JSONLineInput()),
@@ -375,21 +388,18 @@ class ParallelExport(luigi.Task):
       reducer=parallel.NullReducer(),
       output_prefix=join(BASE_DIR, 'tmp'),
       output_format=parallel.NullOutput(),
-      map_workers=14)
+      map_workers=12)
 
 
-class CopyIndexToS3(luigi.Task):
+class CopyIndexToS3(AlwaysRunTask):
   date_str = luigi.Parameter()
   download_bucket = luigi.Parameter()
 
   def requires(self):
-    return ParallelExport(date_str=self.date_str)
+    return ParallelExport()
 
-  def output(self):
-    return luigi.LocalTarget(join(self.input().path, '.s3_sync_done'))
-
-  def run(self):
-    sync_path = join(BASE_DIR, self.date_str)
+  def _run(self):
+    sync_path = FILES_DIR
     target_bucket =  's3://%s/%s/' % (self.download_bucket, self.date_str)
     s3_cmd = [
       'aws',
@@ -404,10 +414,9 @@ class CopyIndexToS3(luigi.Task):
       '--include "*schema.json"']
 
     common.shell_cmd_quiet(' '.join(s3_cmd))
-    common.shell_cmd_quiet('touch %s', self.output().path)
 
 
-class CombineManifests(luigi.Task):
+class CombineManifests(index_util.AlwaysRunTask):
   date_str = luigi.Parameter()
   download_bucket = luigi.Parameter()
 
@@ -416,10 +425,10 @@ class CombineManifests(luigi.Task):
                          download_bucket=self.download_bucket)
 
   def output(self):
-    target_dir = join(BASE_DIR, self.date_str, 'manifest/final_manifest.json')
+    target_dir = join(FILES_DIR, 'manifest/final_manifest.json')
     return luigi.LocalTarget(target_dir)
 
-  def run(self):
+  def _run(self):
     crawl_dir = dirname(dirname(self.output().path))
     common.shell_cmd('mkdir -p %s', dirname(self.output().path))
 
@@ -443,6 +452,7 @@ class CombineManifests(luigi.Task):
 
     # Walk over all of the manifests and create a single dictionary
     for row in records:
+      row.pop('index_stamp', None)
       for domain, value in row.items():
         for sub, val in value.items():
           combined[domain][sub]['export_date'] = val.get('export_date', '')
@@ -458,7 +468,6 @@ class LoadDownloadJSON(index_util.LoadJSONBase):
   download_bucket = luigi.Parameter(default='download.open.fda.gov')
 
   index_name = 'openfdadata'
-  type_name = 'downloads'
   mapping_file = './schemas/downloads_mapping.json'
   use_checksum = True
   delete_index = False

@@ -178,7 +178,6 @@ class CSV2JSON(luigi.Task):
 
 class LoadJSON(index_util.LoadJSONBase):
   index_name = 'foodevent'
-  type_name = 'rareport'
   mapping_file = './schemas/foodevent_mapping.json'
   data_source = CSV2JSON()
   use_checksum = False

@@ -30,5 +30,5 @@ def test_counts():
   assert (next(x for x in status if x['endpoint'] == 'deviceenforcement'))['documents'] >= 10000
   assert (next(x for x in status if x['endpoint'] == 'drugenforcement'))['documents'] >= 5000
   assert (next(x for x in status if x['endpoint'] == 'foodenforcement'))['documents'] >= 1000
-  assert (next(x for x in status if x['endpoint'] == 'animalandveterinarydrugevent'))['documents'] >= 919100
+  assert (next(x for x in status if x['endpoint'] == 'animalandveterinarydrugevent'))['documents'] >= 1040000
   assert (next(x for x in status if x['endpoint'] == 'drugsfda'))['documents'] >= 24000

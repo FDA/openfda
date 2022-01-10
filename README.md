@@ -56,3 +56,7 @@ echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
 ## Windows Users
 
 Clone the repository with `git clone https://github.com/FDA/openfda.git --config core.autocrlf=input` in order to circumvent Docker issues with building images on a Windows computer.
+
+# Running unit tests
+
+`docker-compose --profile test up test` will run Python unit tests.
