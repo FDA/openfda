@@ -5,6 +5,7 @@ Execution pipeline for generating the openfda harmonization json file
 (aka the annotation table).
 """
 
+import requests
 import collections
 import glob
 import logging
@@ -47,8 +48,8 @@ PHARM_CLASS_DOWNLOAD = \
 RXNORM_DOWNLOAD = \
   DAILYMED_PREFIX + 'rxnorm_mappings.zip'
 
-UNII_DOWNLOAD = \
-  'https://fdasis.nlm.nih.gov/srs/download/srs/UNIIs.zip'
+UNII_WEBSITE = 'https://precision.fda.gov'
+UNII_DOWNLOAD_PAGE = UNII_WEBSITE + '/uniisearch/archive'
 
 NDC_DOWNLOAD_PAGE = \
   'https://www.fda.gov/drugs/drug-approvals-and-databases/national-drug-code-directory'
@@ -105,7 +106,31 @@ class DownloadUNII(luigi.Task):
     return luigi.LocalTarget(join(BASE_DIR, 'unii/raw/unii.zip'))
 
   def run(self):
-    common.download_requests(UNII_DOWNLOAD, self.output().path)
+    '''
+    UNII downloading has changed from being a simple URL pull to a SPA application backed by a Lambda and AWS S3 pre-signed
+    URLs. So we brute force into the HTML/JS here, construct the AWS Lambda URL, obtain a pre-signed URL and finally
+    pull the file. This works, but is fragile and will break if FDA makes significant changes to the SPA structure. We'd
+    need something like Cypress to make this more flexible.
+    '''
+    # SPA Main HTML
+    soup = BeautifulSoup(urlopen(UNII_DOWNLOAD_PAGE).read(), 'lxml')
+    # This script tag has the file name we need
+    script_tag = soup.find(id="__NEXT_DATA__")
+    script_content = json.loads(script_tag.contents[0])
+    unii_file_name = script_content['props']['pageProps']['namesRecords'][0]['fileName']
+
+    # Now go through the page scripts and find the AWS Lambda endpoint URL.
+    for tag in soup.find_all('script'):
+      script_src = tag.get('src')
+      if script_src and '/static/chunks/pages/archive-' in script_src:
+        full_script_url = UNII_WEBSITE + script_src
+        script_content = requests.get(full_script_url).text
+        lambda_endpoint = re.compile('https://\\w+.execute-api.us-east-1.amazonaws.com/production/v\\d').search(
+          script_content).group(0)
+        get_file_url = lambda_endpoint + '/get-file/' + unii_file_name
+        # The lambda endpoint will return a pre-signed S3 URL to download from
+        aws_file_url = requests.get(get_file_url).json()['url']
+        common.download_requests(aws_file_url, self.output().path)
 
 
 class DownloadRXNorm(luigi.Task):

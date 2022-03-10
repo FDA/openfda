@@ -179,7 +179,7 @@ def test_storage():
 
 def test_commercial_distribution_end_date():
   meta, results = fetch(
-    '/device/udi.json?search=commercial_distribution_status:"Not+in+Commercial+Distribution"+AND+brand_name:LARYNGOTEC')
+    '/device/udi.json?search=commercial_distribution_status:"Not+in+Commercial+Distribution"+AND+brand_name:DURACUFF+AND+identifiers.id:04051948012811')
   eq_(len(results), 1)
 
   udi = results[0]

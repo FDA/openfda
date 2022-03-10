@@ -325,3 +325,12 @@ def newest_file_timestamp(path):
   return arrow.get(sorted(list(map(lambda file: os.path.getmtime(os.path.join(path, file)), os.listdir(path))))[-1]).format(
     'YYYY-MM-DD') if len(
     os.listdir(path)) > 0 else None
+
+def oldest_file_timestamp(path):
+  '''
+  :param path: path to an existing directory
+  :return: timestamp of the oldest file found in the given directory as YYYY-MM-DD
+  '''
+  return arrow.get(sorted(list(map(lambda file: os.path.getmtime(os.path.join(path, file)), os.listdir(path))))[0]).format(
+    'YYYY-MM-DD') if len(
+    os.listdir(path)) > 0 else None

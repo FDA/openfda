@@ -25,7 +25,7 @@ const fieldMappingCache = new NodeCache();
 // + for boolean
 // space for terms
 // @ for internal fields.
-var SUPPORTED_QUERY_RE = '^[0-9a-zA-Z@%/\'\,\.\_\:\(\)\"\\[\\]\{\}\\-\\+\>\<\= ]+$';
+var SUPPORTED_QUERY_RE = '^[&0-9a-zA-Z@%/\'\,\.\_\:\(\)\"\\[\\]\{\}\\-\\+\>\<\= ]+$';
 
 var DATE_FIELDS = [
   // FAERS

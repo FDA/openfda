@@ -83,7 +83,7 @@ RANGE_ENDPOINT_MAP = {
   '/device/event': {
     'date_key': 'date_received',
     'start_date': '1991-10-01',
-    'end_date': '2021-10-01'
+    'end_date': '2022-04-01'
   },
   '/animalandveterinary/event': {
     'date_key': 'original_receive_date',

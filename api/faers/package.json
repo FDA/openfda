@@ -27,7 +27,7 @@
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
     "serverless-http": "^2.7.0",
-    "snyk": "^1.667.0",
+    "snyk": "^1.864.0",
     "underscore": "^1.12.1"
   },
   "devDependencies": {
@@ -45,7 +45,7 @@
     "test:integration": "mocha --timeout 5000 --exit bdd test/integration"
   },
   "engines": {
-    "node": "14"
+    "node": ">=14"
   },
   "license": "CC0",
   "subdomain": "api",

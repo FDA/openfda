@@ -11,7 +11,7 @@ from os.path import join, dirname
 import luigi
 
 from openfda import common, config, parallel, index_util
-from openfda.common import newest_file_timestamp
+from openfda.common import oldest_file_timestamp
 
 NSDE_DOWNLOAD = \
   'https://download.open.fda.gov/Comprehensive_NDC_SPL_Data_Elements_File.zip'
@@ -87,7 +87,7 @@ class LoadJSON(index_util.LoadJSONBase):
   data_source = NSDE2JSON()
   use_checksum = False
   optimize_index = True
-  last_update_date = lambda _: newest_file_timestamp(NSDE_RAW_DIR)
+  last_update_date = lambda _: oldest_file_timestamp(NSDE_RAW_DIR)
 
 
 if __name__ == '__main__':

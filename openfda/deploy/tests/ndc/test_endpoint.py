@@ -211,23 +211,24 @@ def test_active_ingredients():
   eq_(len(results), 1)
 
   ndc = results[0]
-  active_ingredients = ndc["active_ingredients"]
+  active_ingredients = sorted(ndc["active_ingredients"], key=lambda k: k['name'])
   eq_(len(active_ingredients), 5)
 
-  eq_(active_ingredients[0]["name"], "DEXTROSE MONOHYDRATE")
-  eq_(active_ingredients[0]["strength"], "2.23 g/70mL")
+  eq_(active_ingredients[0]["name"], "ADENINE")
+  eq_(active_ingredients[0]["strength"], "19.3 mg/70mL")
 
-  eq_(active_ingredients[1]["name"], "TRISODIUM CITRATE DIHYDRATE")
-  eq_(active_ingredients[1]["strength"], "1.84 g/70mL")
+  eq_(active_ingredients[1]["name"], "ANHYDROUS CITRIC ACID")
+  eq_(active_ingredients[1]["strength"], "209 mg/70mL")
 
-  eq_(active_ingredients[2]["name"], "ANHYDROUS CITRIC ACID")
-  eq_(active_ingredients[2]["strength"], "209 mg/70mL")
+  eq_(active_ingredients[2]["name"], "DEXTROSE MONOHYDRATE")
+  eq_(active_ingredients[2]["strength"], "2.23 g/70mL")
 
   eq_(active_ingredients[3]["name"], "SODIUM PHOSPHATE, MONOBASIC, MONOHYDRATE")
   eq_(active_ingredients[3]["strength"], "155 mg/70mL")
 
-  eq_(active_ingredients[4]["name"], "ADENINE")
-  eq_(active_ingredients[4]["strength"], "19.3 mg/70mL")
+  eq_(active_ingredients[4]["name"], "TRISODIUM CITRATE DIHYDRATE")
+  eq_(active_ingredients[4]["strength"], "1.84 g/70mL")
+
 
 if __name__ == '__main__':
   all_functions = inspect.getmembers(sys.modules[__name__], inspect.isfunction)

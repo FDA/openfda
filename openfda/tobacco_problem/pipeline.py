@@ -48,7 +48,11 @@ class DownloadTobaccoProblem(luigi.Task):
     all_csv_files = [i for i in glob.glob((output_dir + '/*.{}').format('csv'))]
     logging.info("Reading csv files: %s", (all_csv_files))
     os.system('mkdir -p %s' % dirname(self.output().path))
-    df = pd.concat(pd.read_csv(f, encoding='cp1252', skiprows=3) for f in all_csv_files)
+    df = pd.concat(
+      pd.read_csv(f, encoding='cp1252', skiprows=3).rename(
+        columns={"REPORT_ID (ICSR)": "REPORT_ID", "REPORT ID": "REPORT_ID"}, errors="ignore")
+      for f
+      in all_csv_files)
     df.to_json(self.output().path, orient='records')
     with open(self.output().path, "w") as f:
       for row in df.iterrows():
@@ -58,7 +62,7 @@ class DownloadTobaccoProblem(luigi.Task):
 
 class TobaccoProblem2JSONMapper(parallel.Mapper):
   rename_map = {
-    "REPORT_ID (ICSR)": "report_id",
+    "REPORT_ID": "report_id",
     "DATE_SUBMITTED": "date_submitted",
     "NUMBER_TOBACCO_PRODUCTS": "number_tobacco_products",
     "TOBACCO_PRODUCTS": "tobacco_products",
@@ -76,7 +80,7 @@ class TobaccoProblem2JSONMapper(parallel.Mapper):
       '''
       if k in self.rename_map and v is not None:
         if "DATE" in k:
-          return self.rename_map[k], str(arrow.get(v, 'M/D/YYYY').format("MM/DD/YYYY"))
+          return self.rename_map[k], str(arrow.get(v, ['M/D/YYYY', 'D-MMM-YYYY', 'D-MMM-YY']).format("MM/DD/YYYY"))
         # Make arrays of these three fields.
         if k in ["TOBACCO_PRODUCTS", "REPORTED_HEALTH_PROBLEMS", "REPORTED_PRODUCT_PROBLEMS"]:
           return self.rename_map[k], list(set(v.split(' / ')))

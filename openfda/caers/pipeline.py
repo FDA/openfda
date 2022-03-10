@@ -170,7 +170,7 @@ class CSV2JSON(luigi.Task):
   def run(self):
     parallel.mapreduce(
       parallel.Collection.from_glob(glob.glob(join(self.input().path, '*.csv')),
-                                    parallel.CSVDictLineInput(delimiter=',', quoting=csv.QUOTE_MINIMAL)),
+                                    parallel.CSVDictLineInput(delimiter=',', quoting=csv.QUOTE_MINIMAL, strip_str='\ufeff')),
       mapper=CSV2JSONMapper(),
       reducer=CSV2JSONReducer(),
       output_prefix=self.output().path)

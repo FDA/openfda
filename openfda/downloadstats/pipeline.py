@@ -5,6 +5,7 @@
 
 import glob
 import gzip
+import io
 import json
 import os
 import re
@@ -109,22 +110,24 @@ class CFAccessLogsStats(parallel.MRTask):
 
   def map(self, log_file, value, output):
     stats = {}
-    df = pd.read_csv(
-      gzip.open(log_file, 'rb'),
-      sep='\t', skiprows=(0, 1),
-      names=['date', 'time', 'edge', 'bytes', 'ip', 'method', 'host', 'uri',
-             'status', 'referer', 'ua'],
-      usecols=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-      low_memory=False, na_values=[], keep_default_na=False, index_col=False,
-      engine='c', memory_map=True)
-    for row in df.itertuples():
-      if row.method == 'GET' and (200 <= int(row.status) <= 299) and not isBot(row.ua):
-        for path, endpoint in ENDPOINT_INDEX_MAP.items():
-          if row.uri.startswith('/' + path):
-            if endpoint in stats:
-              stats[endpoint] = stats[endpoint] + 1
-            else:
-              stats[endpoint] = 1
+    with gzip.open(log_file, 'rt', encoding="utf-8") as file:
+      df = pd.read_csv(
+        io.StringIO(file.read()),
+        sep='\t', skiprows=(0, 1),
+        names=['date', 'time', 'edge', 'bytes', 'ip', 'method', 'host', 'uri',
+               'status', 'referer', 'ua'],
+        usecols=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        low_memory=False, na_values=[], keep_default_na=False, index_col=False,
+        engine='c', memory_map=False)
+      for row in df.itertuples():
+        if row.method == 'GET' and (200 <= int(row.status) <= 299) and not isBot(row.ua):
+          for path, endpoint in ENDPOINT_INDEX_MAP.items():
+            if row.uri.startswith('/' + path):
+              if endpoint in stats:
+                stats[endpoint] = stats[endpoint] + 1
+              else:
+                stats[endpoint] = 1
+
     if len(stats) > 0:
       output.add('stats', stats)
 

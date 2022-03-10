@@ -22,7 +22,7 @@ def test_date_1():
 
 
 def test_date_range_2():
-  assert_total('/device/registrationlisting.json?search=products.created_date:([20080117+TO+20081231])', 15000)
+  assert_total('/device/registrationlisting.json?search=products.created_date:([20080117+TO+20081231])', 14000)
 
 
 def test_openfda_3():

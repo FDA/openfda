@@ -134,7 +134,7 @@ describe('GET /device/covid19serology.json', () => {
       .get('/device/covid19serology.json?limit=1000')
       .end((err, res) => {
         res.should.have.status(200);
-        expect(res.body.results).to.have.lengthOf(770);
+        expect(res.body.results).to.have.lengthOf(771);
         done();
       });
   });
