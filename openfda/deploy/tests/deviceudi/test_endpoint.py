@@ -106,7 +106,7 @@ def test_date_fields():
   # commercial_distribution_end_date
   meta, results = fetch(
     '/device/udi.json?search=commercial_distribution_end_date:[2014-01-01+TO+2014-12-31]&limit=100')
-  eq_(meta["results"]["total"], 149)
+  eq_(meta["results"]["total"], 145)
 
 
 def test_identifiers():
