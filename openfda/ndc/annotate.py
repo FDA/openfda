@@ -2,8 +2,6 @@
 
 import simplejson as json
 from openfda import parallel
-from openfda import common
-from openfda.spl.fix_date import validate_date
 
 
 def read_json_file(json_file):

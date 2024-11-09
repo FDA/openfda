@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import os
 import unittest
 
 from openfda.spl import extract

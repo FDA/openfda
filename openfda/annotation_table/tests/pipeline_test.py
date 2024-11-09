@@ -6,7 +6,6 @@ import unittest
 import simplejson
 
 import openfda.annotation_table.pipeline
-from openfda import spl
 from openfda.annotation_table.pipeline import *
 from openfda.spl.pipeline import *
 from openfda.tests.api_test_helpers import *

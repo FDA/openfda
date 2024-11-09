@@ -6,8 +6,7 @@
 
 import glob
 import logging
-import os
-from os.path import basename, dirname, join
+from os.path import dirname
 
 from openfda import common
 

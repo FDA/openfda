@@ -9,7 +9,6 @@ from os.path import dirname
 import luigi
 from mock import MagicMock
 from openfda.device_udi.pipeline import (
-    SyncS3DeviceUDI,
     ExtractXML,
     XML2JSONMapper,
     UDIAnnotateMapper,

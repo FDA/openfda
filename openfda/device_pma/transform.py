@@ -6,8 +6,6 @@
 """
 
 import arrow
-import csv
-import simplejson as json
 
 from openfda import common, device_common
 

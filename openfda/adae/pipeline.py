@@ -520,7 +520,7 @@ class XML2JSON(luigi.Task):
         for subdir, dirs, files in os.walk(input_dir):
             for file in files:
                 if file.endswith(".xml"):
-                    if not file in NULLIFIED:
+                    if file not in NULLIFIED:
                         input_shards.append(os.path.join(subdir, file))
                     else:
                         logging.info("Skipping a nullified case: " + file)

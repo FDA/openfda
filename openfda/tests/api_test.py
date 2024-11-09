@@ -12,7 +12,6 @@ against a wider test set.
 
 import os
 import pprint
-import requests
 
 from openfda.tests.api_test_helpers import *
 

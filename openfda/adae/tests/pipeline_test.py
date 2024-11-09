@@ -8,7 +8,7 @@ from os.path import dirname
 
 import luigi
 from mock import MagicMock
-from openfda.adae.pipeline import ExtractXML, SyncS3, XML2JSONMapper
+from openfda.adae.pipeline import ExtractXML, XML2JSONMapper
 from openfda.adae.annotate import normalize_product_ndc
 from openfda.tests.api_test_helpers import *
 

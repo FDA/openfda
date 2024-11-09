@@ -1,4 +1,3 @@
-import requests
 
 from openfda.tests.api_test_helpers import *
 

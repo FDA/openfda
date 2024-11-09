@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import unittest
-import shutil, tempfile, json
+import shutil
+import tempfile
+import json
 from os import path
 from openfda.test_common import data_filename
 from openfda.spl.process_barcodes import XML2JSON

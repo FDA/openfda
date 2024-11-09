@@ -24,8 +24,6 @@ from openfda.annotation_table.pipeline import CombineHarmonization
 from openfda.common import ProcessException
 from openfda.parallel import NullOutput
 from openfda.spl import annotate
-from openfda.tasks import AlwaysRunTask
-from bs4 import BeautifulSoup
 import urllib.request
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))

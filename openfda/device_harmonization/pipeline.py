@@ -30,10 +30,8 @@ import collections
 import logging
 import os
 from os.path import basename, dirname, join
-import sys
 
 import luigi
-import simplejson as json
 
 from openfda import common, config, parallel
 from openfda.parallel import mapreduce, Collection, Mapper, PivotReducer

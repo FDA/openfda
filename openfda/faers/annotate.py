@@ -3,7 +3,6 @@
 import collections
 import re
 
-import leveldb
 import simplejson as json
 from openfda import parallel
 

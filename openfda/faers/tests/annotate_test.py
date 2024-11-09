@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-import os
 import simplejson as json
 import unittest
 

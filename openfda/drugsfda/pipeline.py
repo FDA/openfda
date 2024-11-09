@@ -671,7 +671,7 @@ class MergeAllMapper(parallel.Mapper):
                 te_json = self.te_dict.get(key)
                 if te_json.get("te_code"):
                     product["te_code"] = te_json["te_code"].rstrip()
-                if not "marketing_status" in product and "marketing_status" in te_json:
+                if "marketing_status" not in product and "marketing_status" in te_json:
                     product["marketing_status"] = te_json["marketing_status"].rstrip()
         return products
 
