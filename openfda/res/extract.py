@@ -9,9 +9,11 @@ import re
 # http://en.wikipedia.org/wiki/National_Drug_Code
 #
 # Supports NDC10 and NDC11
-NDC_RE = (r'\d{10}|\d{11}|\d{4}-\d{4}-\d{2}|\d{5}-\d{3}-\d{2}|'
-          r'\d{5}-\d{4}-\d{2}|'
-          r'\d{5}-\d{4}-\d{1}')
+NDC_RE = (
+    r"\d{10}|\d{11}|\d{4}-\d{4}-\d{2}|\d{5}-\d{3}-\d{2}|"
+    r"\d{5}-\d{4}-\d{2}|"
+    r"\d{5}-\d{4}-\d{1}"
+)
 
 # http://en.wikipedia.org/wiki/Universal_Product_Code
 #
@@ -23,59 +25,67 @@ NDC_RE = (r'\d{10}|\d{11}|\d{4}-\d{4}-\d{2}|\d{5}-\d{3}-\d{2}|'
 #
 # Note: We can be very flexible in parsing UPCs as it's easy to verify
 # if they are valid.
-UPC_RE = r'(?:\d[\- ]?){12}'
+UPC_RE = r"(?:\d[\- ]?){12}"
+
 
 # TODO(mattmo): Load in a whitelist of valid NDCs from the NDC dataset or
 # from SPL.
 def is_valid_ndc(ndc):
-  return True
+    return True
+
 
 # TODO(mattmo): Use whitelist to map NDCs without dashes to NDCs with dashes.
 def clean_ndc(ndc):
-  return ndc
+    return ndc
+
 
 def extract_ndc(text):
-  raw_ndcs = re.findall(NDC_RE, text)
-  ndcs = {}
-  for raw_ndc in raw_ndcs:
-    ndc = clean_ndc(raw_ndc)
-    if is_valid_ndc(ndc):
-      ndcs[ndc] = True
-  return list(ndcs.keys())
+    raw_ndcs = re.findall(NDC_RE, text)
+    ndcs = {}
+    for raw_ndc in raw_ndcs:
+        ndc = clean_ndc(raw_ndc)
+        if is_valid_ndc(ndc):
+            ndcs[ndc] = True
+    return list(ndcs.keys())
+
 
 def extract_ndc_from_recall(recall):
-  desc = recall['product-description']
-  if 'code-info' in recall:
-    desc += ' ' + recall['code-info']
-  if recall.get('more-code-info', ''):
-    desc += ' ' + recall['more-code-info']
-  return extract_ndc(desc)
+    desc = recall["product-description"]
+    if "code-info" in recall:
+        desc += " " + recall["code-info"]
+    if recall.get("more-code-info", ""):
+        desc += " " + recall["more-code-info"]
+    return extract_ndc(desc)
+
 
 def is_valid_upc(upc):
-  return ean.upca_valid(upc)
+    return ean.upca_valid(upc)
+
 
 def clean_upc(upc):
-  # Remove spaces
-  upc = upc.replace(' ', '')
+    # Remove spaces
+    upc = upc.replace(" ", "")
 
-  # Remove dashes
-  upc = upc.replace('-', '')
+    # Remove dashes
+    upc = upc.replace("-", "")
 
-  return upc
+    return upc
+
 
 def extract_upc(text):
-  raw_upcs = re.findall(UPC_RE, text)
-  upcs = {}
-  for raw_upc in raw_upcs:
-    upc = clean_upc(raw_upc)
-    if is_valid_upc(upc):
-      upcs[upc] = True
-  return list(upcs.keys())
+    raw_upcs = re.findall(UPC_RE, text)
+    upcs = {}
+    for raw_upc in raw_upcs:
+        upc = clean_upc(raw_upc)
+        if is_valid_upc(upc):
+            upcs[upc] = True
+    return list(upcs.keys())
+
 
 def extract_upc_from_recall(recall):
-  desc = recall['product-description']
-  if 'code-info' in recall:
-    desc += ' ' + recall['code-info']
-  if recall.get('more-code-info', ''):
-    desc += ' ' + recall['more-code-info']
-  return extract_upc(desc)
+    desc = recall["product-description"]
+    if "code-info" in recall:
+        desc += " " + recall["code-info"]
+    if recall.get("more-code-info", ""):
+        desc += " " + recall["more-code-info"]
+    return extract_upc(desc)

@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
-'''This utility prints out a mapping string that is syntactically correct
+"""This utility prints out a mapping string that is syntactically correct
 to be used in the schemas/spl_mapping.json file.
-'''
+"""
 import logging
 import sys
 
@@ -13,9 +13,9 @@ import simplejson as json
 # TODO(hansnelsen): Add writing directly to schemas/spl_mapping.json once it is
 #                   pretty
 def generate_mapping():
-  sections = open('../openfda/spl/data/sections.csv', 'r')
-  mapping_list = []
-  openfda = '''
+    sections = open("../openfda/spl/data/sections.csv", "r")
+    mapping_list = []
+    openfda = """
                 "openfda": {
                     "properties": {
                         "application_number": {
@@ -201,8 +201,8 @@ def generate_mapping():
                             "type": "boolean"
                         }
                     }
-                }'''
-  mapping_header = '''{
+                }"""
+    mapping_header = """{
       "spl": {
         "_source": {
           "includes": [
@@ -229,28 +229,31 @@ def generate_mapping():
             "type": "date",
             "format": "basic_date||date"
           },
-        '''
-  mapping_footer = ''',
+        """
+    mapping_footer = """,
             "@timestamp": {
               "type": "date",
               "format": "basic_date||date"
               }
           }
           }
-      }'''
-  mapping_list.append(mapping_header)
+      }"""
+    mapping_list.append(mapping_header)
 
-  for row in sections:
-    name = row.split(',')[1]\
-              .replace(':', '')\
-              .replace(' & ', ' and ')\
-              .replace('/', ' or ')\
-              .replace(' ', '_')\
-              .lower()\
-              .replace('spl_unclassified', 'spl_unclassified_section')\
-              .strip()
+    for row in sections:
+        name = (
+            row.split(",")[1]
+            .replace(":", "")
+            .replace(" & ", " and ")
+            .replace("/", " or ")
+            .replace(" ", "_")
+            .lower()
+            .replace("spl_unclassified", "spl_unclassified_section")
+            .strip()
+        )
 
-    row_string = ''' "%(name)s": {
+        row_string = (
+            """ "%(name)s": {
                          "type": "string",
                          "index": "analyzed"
                         },
@@ -258,22 +261,23 @@ def generate_mapping():
                          "type": "string",
                          "index": "no",
                          "include_in_all": false
-                      },''' % locals()
-    mapping_list.append(row_string)
+                      },"""
+            % locals()
+        )
+        mapping_list.append(row_string)
 
-  mapping_list.append(openfda)
-  mapping_list.append(mapping_footer)
+    mapping_list.append(openfda)
+    mapping_list.append(mapping_footer)
 
-  try:
-    mapping_string = '\n'.join(mapping_list)
-    json.loads(mapping_string)
-    return mapping_string
-  except:
-    logging.info('It appears that something is wrong with your json string')
+    try:
+        mapping_string = "\n".join(mapping_list)
+        json.loads(mapping_string)
+        return mapping_string
+    except:
+        logging.info("It appears that something is wrong with your json string")
 
-if __name__ == '__main__':
-  fmt_string = '%(created)f %(filename)s:%(lineno)s [%(funcName)s] %(message)s'
-  logging.basicConfig(stream=sys.stderr,
-                      format=fmt_string,
-                      level=logging.DEBUG)
-  print(generate_mapping())
+
+if __name__ == "__main__":
+    fmt_string = "%(created)f %(filename)s:%(lineno)s [%(funcName)s] %(message)s"
+    logging.basicConfig(stream=sys.stderr, format=fmt_string, level=logging.DEBUG)
+    print(generate_mapping())
