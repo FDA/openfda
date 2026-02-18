@@ -118,10 +118,15 @@ class ExtractSafetyReportsMapper(parallel.Mapper):
             safety_report['patient']['reaction']]
 
         # Ensure drugrecurrence is always an array in response to https://github.com/FDA/openfda/issues/139
+        # Also ensure drugadditional is always numerical in response to https://icf.atlassian.net/browse/FDA-492,
+        # i.e. drop non-numerical values.
         for drug in safety_report['patient']['drug']:
           if 'drugrecurrence' in drug:
             if type(drug['drugrecurrence']) != type([]):
               drug['drugrecurrence'] = [drug['drugrecurrence']]
+          if 'drugadditional' in drug:
+            if not drug['drugadditional'].isnumeric():
+              del drug['drugadditional']
 
         # add timestamp for kibana
         try:

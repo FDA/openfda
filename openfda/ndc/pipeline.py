@@ -8,9 +8,9 @@ import os
 import re
 from os.path import join, dirname
 from urllib.parse import urljoin
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
+
 import luigi
-import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup
 
@@ -19,8 +19,11 @@ from openfda.annotation_table.pipeline import CombineHarmonization
 from openfda.common import newest_file_timestamp
 from openfda.ndc.annotate import AnnotateMapper
 
-NDC_DOWNLOAD_PAGE = \
-  'https://www.fda.gov/drugs/drug-approvals-and-databases/national-drug-code-directory'
+NDC_FINISHED_URL = \
+  'https://www.accessdata.fda.gov/cder/ndctext.zip'
+NDC_UNFINISHED_URL = \
+  'https://www.accessdata.fda.gov/cder/ndc_unfinished.zip'
+
 BASE_DIR = join(config.data_dir(), 'ndc')
 RAW_DIR = join(BASE_DIR, 'raw')
 
@@ -41,20 +44,8 @@ class DownloadNDCFiles(luigi.Task):
     return luigi.LocalTarget(RAW_DIR)
 
   def run(self):
-    finished_ndc_url = None
-    unfinished_ndc_url = None
-
-    soup = BeautifulSoup(urlopen(NDC_DOWNLOAD_PAGE).read(), 'lxml')
-    for a in soup.find_all(href=re.compile('.*.zip')):
-      if 'ndc database file' in a.text.lower() and 'text' in a['href']:
-        finished_ndc_url = urljoin('https://www.fda.gov', a['href'])
-      if 'ndc unfinished' in a.text.lower() and 'unfinished.zip' in a['href']:
-        unfinished_ndc_url = urljoin('https://www.fda.gov', a['href'])
-
-    if not finished_ndc_url:
-      logging.fatal('NDC finished database file not found!')
-    if not unfinished_ndc_url:
-      logging.fatal('NDC unfinished drugs database file not found!')
+    finished_ndc_url = NDC_FINISHED_URL
+    unfinished_ndc_url = NDC_UNFINISHED_URL
 
     common.download(finished_ndc_url, join(RAW_DIR, 'finished.zip'))
     common.download(unfinished_ndc_url, join(RAW_DIR, 'unfinished.zip'))
@@ -102,7 +93,7 @@ class MergePackageNDC(luigi.Task):
     output_dir = dirname(MERGED_PACKAGES)
     os.system('mkdir -p %s' % output_dir)
 
-    dtype = {'STARTMARKETINGDATE': np.unicode, 'ENDMARKETINGDATE': np.unicode}
+    dtype = {'STARTMARKETINGDATE': str, 'ENDMARKETINGDATE': str}
     finished = pd.read_csv(join(self.input().path, 'package.txt'), sep='\t', index_col=False, encoding='utf-8',
                            dtype=dtype)
     unfinished = pd.read_csv(join(self.input().path, 'unfinished_package.txt'), sep='\t', index_col=False,
@@ -126,9 +117,9 @@ class MergeProductNDC(luigi.Task):
     output_dir = dirname(MERGED_PRODUCTS)
     os.system('mkdir -p %s' % output_dir)
 
-    dtype = {'STARTMARKETINGDATE': np.unicode, 'ENDMARKETINGDATE': np.unicode, 'APPLICATIONNUMBER': np.unicode
-      , 'ACTIVE_NUMERATOR_STRENGTH': np.unicode, 'LISTING_RECORD_CERTIFIED_THROUGH': np.unicode
-      , 'PROPRIETARYNAMESUFFIX': np.unicode}
+    dtype = {'STARTMARKETINGDATE': str, 'ENDMARKETINGDATE': str, 'APPLICATIONNUMBER': str
+      , 'ACTIVE_NUMERATOR_STRENGTH': str, 'LISTING_RECORD_CERTIFIED_THROUGH': str
+      , 'PROPRIETARYNAMESUFFIX': str}
     finished = pd.read_csv(join(self.input().path, 'product.txt'), sep='\t', index_col=False, encoding='utf-8',
                            dtype=dtype)
     unfinished = pd.read_csv(join(self.input().path, 'unfinished_product.txt'), sep='\t', index_col=False,

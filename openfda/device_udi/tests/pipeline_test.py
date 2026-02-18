@@ -108,10 +108,17 @@ class UDIPipelineTests(unittest.TestCase):
       eq_(None, json["customer_contacts"][1].get("ext"))
       eq_("jdoe@example.com", json["customer_contacts"][1]["email"])
 
+      eq_("43691", json["gmdn_terms"][0]["code"])
+      eq_("true", json["gmdn_terms"][0]["implantable"])
+      eq_("Active", json["gmdn_terms"][0]["code_status"])
       eq_("Non-constrained polyethylene acetabular liner", json["gmdn_terms"][0]["name"])
       eq_(
         "A sterile, implantable component of a two-piece acetabulum prosthesis that is inserted\n                    into an acetabular shell prosthesis to provide the articulating surface with a femoral head\n                    prosthesis as part of a total hip arthroplasty (THA). It is made of polyethylene (includes hylamer,\n                    cross-linked polyethylene), and does not include a stabilizing component to limit the range of\n                    motion of the hip.",
         json["gmdn_terms"][0]["definition"])
+
+      eq_("43692", json["gmdn_terms"][1]["code"])
+      eq_("false", json["gmdn_terms"][1]["implantable"])
+      eq_("Obsolete", json["gmdn_terms"][1]["code_status"])
       eq_("Bone-screw internal spinal fixation system, non-sterile", json["gmdn_terms"][1]["name"])
       eq_(
         "An assembly of non-sterile implantable devices intended to provide immobilization and\n                    stabilization of spinal segments in the treatment of various spinal instabilities or deformities,\n                    also used as an adjunct to spinal fusion [e.g., for degenerative disc disease (DDD)]. Otherwise\n                    known as a pedicle screw instrumentation system, it typically consists of a combination of anchors\n                    (e.g., bolts, hooks, pedicle screws or other types), interconnection mechanisms (incorporating nuts,\n                    screws, sleeves, or bolts), longitudinal members (e.g., plates, rods, plate/rod combinations),\n                    and/or transverse connectors. Non-sterile disposable devices associated with implantation may be\n                    included.",

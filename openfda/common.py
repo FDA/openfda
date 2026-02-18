@@ -9,11 +9,9 @@ import time
 from io import BytesIO
 from os.path import dirname
 from threading import Thread
-from urllib.request import urlopen
 
-import requests
 import arrow
-from bs4 import BeautifulSoup
+import requests
 
 DEFAULT_BATCH_SIZE = 100
 
@@ -223,21 +221,35 @@ def get_p_number(data):
 
 
 def download(url, output_filename):
-  shell_cmd('mkdir -p %s', dirname(output_filename))
-  shell_cmd("curl -fLR -o '%s.tmp' '%s'", output_filename, url)
-  os.rename(output_filename + '.tmp', output_filename)
+  try:
+    shell_cmd('mkdir -p %s', dirname(output_filename))
+    shell_cmd("curl -fLR "
+              " -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36' -H 'From: Open@fda.hhs.gov' -o '%s.tmp' '%s'",
+              output_filename, url)
+    os.rename(output_filename + '.tmp', output_filename)
+  except Exception as e:
+    logging.error('Failed to download file %s: %s', url, e)
+    raise e
+
 
 def download_requests(url, output_filename):
   shell_cmd('mkdir -p %s', dirname(output_filename))
-  r = requests.get(url)
+  headers = {
+    'From': 'Open@fda.hhs.gov',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.360'
+  }
+  r = requests.get(url, headers=headers)
   with open(output_filename, 'wb') as output_file:
     output_file.write(r.content)
 
 
 def download_to_file_with_retry(url, output_file):
-  for i in range(25):
+  for i in range(10):
     try:
       download(url, output_file)
+      if os.path.isfile(output_file) and b"An error occurred.  Our developers have been notified." in open(output_file,
+                                                                                                           "rb").read(): raise ValueError(
+        "Server returned error page")
       return
     except:
       logging.info('Timeout trying %s, retrying...', url)
@@ -246,17 +258,6 @@ def download_to_file_with_retry(url, output_file):
 
   raise Exception('Fetch of %s failed.' % url)
 
-
-def soup_with_retry(url):
-  for i in range(25):
-    try:
-      return BeautifulSoup(urlopen(url).read(), "lxml")
-    except:
-      logging.info('An error trying to cook soup from %s, retrying...', url)
-      time.sleep(5)
-      continue
-
-  raise Exception('Fetch of %s failed.' % url)
 
 
 def strip_unicode(raw_str, remove_crlf = False):
@@ -309,12 +310,28 @@ def convert_unicode(data):
 
 
 def first_file_timestamp(path):
-  '''
+  """
   :param path: path to an existing directory
   :return: timestamp of the first file found in the given directory as YYYY-MM-DD
-  '''
-  return arrow.get(os.path.getmtime(os.path.join(path, os.listdir(path)[0]))).format('YYYY-MM-DD') if len(
-    os.listdir(path)) > 0 else None
+           - If the file name ends with YYYYMMDD, use that as the date
+           - Otherwise, use the file's last modified time
+           - Return None if the directory is empty
+  """
+  files = os.listdir(path)
+  if not files:
+    return None
+
+  first_file = files[0]
+  full_path = os.path.join(path, first_file)
+
+  # Check if filename ends with YYYYMMDD
+  match = re.search(r'(\d{8})(?=\.[^.]+$)', first_file)
+  if match:
+    return arrow.get(match.group(1), "YYYYMMDD").format("YYYY-MM-DD")
+
+  # Fallback: use modification time
+  mtime = os.path.getmtime(full_path)
+  return arrow.get(mtime).format("YYYY-MM-DD")
 
 
 def newest_file_timestamp(path):

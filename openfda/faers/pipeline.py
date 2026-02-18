@@ -12,7 +12,7 @@ import os
 import re
 import subprocess
 from os.path import join, dirname
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 import arrow
 import luigi
@@ -63,7 +63,10 @@ class DownloadDataset(luigi.Task):
 
   def run(self):
     os.system('mkdir -p "%s"' % self.output().path)
-    self._faers_current = BeautifulSoup(urlopen(FAERS_CURRENT).read(), "lxml")
+    req = Request(FAERS_CURRENT)
+    req.add_header('From', 'Open@fda.hhs.gov')
+    req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
+    self._faers_current = BeautifulSoup(urlopen(req).read(), 'lxml')
     for filename, url in list(self._fetch()):
       target_name = join(RAW_DIR, filename.lower())
       self._download_with_retry(url, target_name)

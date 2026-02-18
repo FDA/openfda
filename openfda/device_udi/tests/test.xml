@@ -70,6 +70,7 @@
         </contacts>
         <gmdnTerms>
             <gmdn>
+                <gmdnCode>43691</gmdnCode>
                 <gmdnPTName>Non-constrained polyethylene acetabular liner</gmdnPTName>
                 <gmdnPTDefinition>A sterile, implantable component of a two-piece acetabulum prosthesis that is inserted
                     into an acetabular shell prosthesis to provide the articulating surface with a femoral head
@@ -77,8 +78,11 @@
                     cross-linked polyethylene), and does not include a stabilizing component to limit the range of
                     motion of the hip.
                 </gmdnPTDefinition>
+                <implantable>true</implantable>
+                <gmdnCodeStatus>Active</gmdnCodeStatus>
             </gmdn>
             <gmdn>
+                <gmdnCode>43692</gmdnCode>
                 <gmdnPTName>Bone-screw internal spinal fixation system, non-sterile</gmdnPTName>
                 <gmdnPTDefinition>An assembly of non-sterile implantable devices intended to provide immobilization and
                     stabilization of spinal segments in the treatment of various spinal instabilities or deformities,
@@ -89,6 +93,8 @@
                     and/or transverse connectors. Non-sterile disposable devices associated with implantation may be
                     included.
                 </gmdnPTDefinition>
+                <implantable>false</implantable>
+                <gmdnCodeStatus>Obsolete</gmdnCodeStatus>
             </gmdn>
         </gmdnTerms>
         <productCodes>

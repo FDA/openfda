@@ -318,6 +318,14 @@
             },
             "type": "text"
           },
+          "udi_di": {
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
+          },
           "implant_flag": {
             "fields": {
               "exact": {
@@ -415,6 +423,14 @@
             "type": "text"
           },
           "other_id_number": {
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
+          },
+          "udi_public": {
             "fields": {
               "exact": {
                 "type": "keyword"
@@ -869,6 +885,30 @@
           }
         }
       },
+      "noe_summarized": {
+        "fields": {
+          "exact": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "suppl_dates_fda_received": {
+        "fields": {
+          "exact": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "suppl_dates_mfr_received": {
+        "fields": {
+          "exact": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
       "number_devices_in_event": {
         "fields": {
           "exact": {
@@ -916,6 +956,46 @@
             "type": "keyword"
           },
           "patient_problems": {
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
+          },
+          "patient_age": {
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
+          },
+          "patient_sex": {
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
+          },
+          "patient_weight": {
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
+          },
+          "patient_ethnicity": {
+            "fields": {
+              "exact": {
+                "type": "keyword"
+              }
+            },
+            "type": "text"
+          },
+          "patient_race": {
             "fields": {
               "exact": {
                 "type": "keyword"

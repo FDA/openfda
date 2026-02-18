@@ -10,6 +10,7 @@ mkdir -p $LOGDIR
 
 $PYTHON openfda/annotation_table/pipeline.py CombineHarmonization > $LOGDIR/annotation.log 2>&1
 $PYTHON openfda/nsde/pipeline.py LoadJSON > $LOGDIR/nsde.log 2>&1
+$PYTHON openfda/unii/pipeline.py LoadJSON > $LOGDIR/unii.log 2>&1
 $PYTHON openfda/drugsfda/pipeline.py LoadJSON > $LOGDIR/drugsfda.log 2>&1
 $PYTHON openfda/ndc/pipeline.py LoadJSON > $LOGDIR/ndc.log 2>&1
 $PYTHON openfda/faers/pipeline.py LoadJSON --quarter=all > $LOGDIR/faers.log 2>&1

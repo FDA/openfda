@@ -6,20 +6,20 @@ Pipeline for converting Substance data to JSON and importing into Elasticsearch.
 
 import logging
 import os
-import re
 from os.path import join, dirname
-from dictsearch.search import iterate_dictionary
-from bs4 import BeautifulSoup
-import luigi
 from urllib.parse import urljoin
-from urllib.request import urlopen
+
+import luigi
+from dictsearch.search import iterate_dictionary
+
 from openfda import common, config, parallel, index_util
 from openfda.common import first_file_timestamp
 
 BASE_DIR = config.data_dir()
 RAW_DIR = config.data_dir('substancedata/raw')
 GINAS_ROOT_URL = 'https://gsrs.ncats.nih.gov/'
-SUBSTANCE_DATA_DOWNLOAD_PAGE_URL = urljoin(GINAS_ROOT_URL, 'release/release.html')
+SUBSTANCE_DATA_DOWNLOAD_PAGE_URL = GINAS_ROOT_URL # urljoin(GINAS_ROOT_URL, 'release/version.html')
+SUBSTANCE_DATA_FILE_URL = urljoin(GINAS_ROOT_URL, 'assets/downloads/dump-public-2025-03-06.gsrs')
 SUBSTANCE_DATA_EXTRACT_DB = 'substancedata/substancedata.db'
 
 class DownloadSubstanceData(luigi.Task):
@@ -31,13 +31,7 @@ class DownloadSubstanceData(luigi.Task):
     return luigi.LocalTarget(os.path.join(RAW_DIR, 'dump-public.gsrs'))
 
   def run(self):
-    fileURL = None
-    soup = BeautifulSoup(urlopen(SUBSTANCE_DATA_DOWNLOAD_PAGE_URL).read(), 'lxml')
-    for a in soup.find_all(href=re.compile('.*.gsrs')):
-      if 'Full Public Data Dump' in a.text:
-        fileURL = urljoin(GINAS_ROOT_URL, a['href'])
-
-    common.download(fileURL, self.output().path)
+    common.download(SUBSTANCE_DATA_FILE_URL, self.output().path)
 
 class ExtractZip(luigi.Task):
 

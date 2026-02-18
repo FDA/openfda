@@ -12,15 +12,6 @@ notSupported = function(test, query) {
 // query-dsl-query-string-query.html#query-string-syntax
 // that we don't want to support at this time for performance reasons.
 exports.testSupportedQueryString_NotSupported = function(test) {
-  // wildcard field
-  notSupported(test, 'city.\*:something');
-  notSupported(test, 'book.\*:(quick brown)');
-
-  // wildcard
-  notSupported(test, 'qu?ck bro*');
-
-  // leading wildcard
-  notSupported(test, '*ing');
 
   // regular expression
   notSupported(test, 'name:/joh?n(ath[oa]n)/');
@@ -30,19 +21,6 @@ exports.testSupportedQueryString_NotSupported = function(test) {
 
   // proximity
   notSupported(test, '"fox quick"~5');
-
-  // -------------------------------------------------------------
-  // We support most range queries except for those with wildcards.
-  // These can be rewritten using a supported alternative syntax.
-
-  // alternative: count:>=10
-  notSupported(test, 'count:[10 TO *]');
-
-  // alternative: date:<2012-01-01
-  notSupported(test, 'date:{* TO 2012/01/01}');
-
-
-  // -------------------------------------------------------------
 
   // boosting
   notSupported(test, 'quick^2 fox');
@@ -60,6 +38,16 @@ supported = function(test, query) {
 
 // All the query string query types we want to support
 exports.testSupportedQueryString_Supported = function(test) {
+  // wildcard field is now SUPPORTED
+  supported(test, 'city.\*:something');
+  supported(test, 'book.\*:(quick brown)');
+  // leading wildcard
+  supported(test, '*ing');
+  // alternative: count:>=10
+  supported(test, 'count:[10 TO *]');
+  // alternative: date:<2012-01-01
+  supported(test, 'date:{* TO 2012/01/01}');
+
   supported(test, '@drugtype:human');
 
   supported(test, 'active');

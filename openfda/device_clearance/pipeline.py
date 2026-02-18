@@ -7,7 +7,7 @@
 import glob
 import os
 import re
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 from os.path import dirname, join
 
 import luigi
@@ -37,7 +37,10 @@ class Download_510K(luigi.Task):
     return luigi.LocalTarget(RAW_DIR)
 
   def run(self):
-    soup = BeautifulSoup(urlopen(CLEARED_DEVICE_URL).read(), 'lxml')
+    req = Request(CLEARED_DEVICE_URL)
+    req.add_header('From', 'Open@fda.hhs.gov')
+    req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
+    soup = BeautifulSoup(urlopen(req).read(), 'lxml')
     for a in soup.find_all(href=re.compile('.*.zip')):
       if a.text.startswith('PMN') and a.text != 'PMNLSTMN.ZIP':
         fileURL = a['href']

@@ -95,17 +95,27 @@ var DEVICE_PMA_INDEX = 'devicepma';
 var DEVICE_RECALL_INDEX = 'devicerecall';
 var DEVICE_UDI_INDEX = 'deviceudi';
 var DEVICE_SEROLOGY_INDEX = 'covid19serology';
+var DRUG_SHORTAGES_INDEX = 'drugshortages';
 var DRUG_DRUGSFDA_INDEX = 'drugsfda';
 var DRUG_EVENT_INDEX = 'drugevent';
 var DRUG_LABEL_INDEX = 'druglabel';
+var DRUG_LABEL_SEARCH_INDEX = 'druglabelsearch';
 var DRUG_NDC_INDEX = 'ndc';
+var DRUG_IMPRINT_INDEX = 'drugimprint';
 var FOOD_EVENT_INDEX = 'foodevent';
+var COSMETIC_EVENT_INDEX = 'cosmeticevent';
 var TOBACCO_PROBLEM_INDEX = 'tobaccoproblem';
+var TOBACCO_RESEARCH_PREVENTION_ADS_INDEX = 'tobaccoresearchpreventionads';
+var TOBACCO_RESEARCH_DIGITAL_ADS_INDEX = 'tobaccoresearchdigitalads';
 var OTHER_NSDE_INDEX = 'othernsde';
+var SUBSTANCE_DATA_INDEX = 'substancedata';
+var OTHER_UNII_INDEX = 'otherunii';
+var TRANSPARENCY_CRL_INDEX = 'crl';
 var PROCESS_METADATA_INDEX = 'openfdametadata';
 var EXPORT_DATA_INDEX = 'openfdadata';
-var SUBSTANCE_DATA_INDEX = 'substancedata';
 var DOWNLOAD_STATS_INDEX = 'downloadstats';
+var HISTORICAL_DOCUMENTS_INDEX = 'historicaldocument';
+var HISTORICAL_DOCUMENTS_ANALYTICS_INDEX = 'historicaldocumentanalytics';
 
 // This data structure is the standard way to add an endpoint to the api, which
 // is to say, if there is a one-to-one mapping between an index and an endpoint,
@@ -180,6 +190,11 @@ const ENDPOINTS = [
     'filter': 'product_type:drugs'
   },
   {
+    'index': DRUG_SHORTAGES_INDEX,
+    'endpoint': '/drug/shortages.json',
+    'name': 'drugshortages'
+  },
+  {
     'index': DRUG_DRUGSFDA_INDEX,
     'endpoint': '/drug/drugsfda.json',
     'name': 'drugsfda'
@@ -195,9 +210,21 @@ const ENDPOINTS = [
     'name': 'druglabel'
   },
   {
+    'index': DRUG_LABEL_SEARCH_INDEX,
+    'auxiliary': true,
+    'endpoint': '/drug/labelsearch.json',
+    'name': 'druglabelsearch'
+  },
+  {
     'index': DRUG_NDC_INDEX,
     'endpoint': '/drug/ndc.json',
     'name': 'ndc'
+  },
+  {
+    'index': DRUG_IMPRINT_INDEX,
+    'auxiliary': true,
+    'endpoint': '/drug/imprint.json',
+    'name': 'drugimprint'
   },
   {
     'index': ALL_ENFORCEMENT_INDEX,
@@ -211,9 +238,24 @@ const ENDPOINTS = [
     'name': 'foodevent'
   },
   {
+    'index': COSMETIC_EVENT_INDEX,
+    'endpoint': '/cosmetic/event.json',
+    'name': 'cosmeticevent'
+  },
+  {
     'index': TOBACCO_PROBLEM_INDEX,
     'endpoint': '/tobacco/problem.json',
     'name': 'tobaccoproblem'
+  },
+  {
+    'index': TOBACCO_RESEARCH_PREVENTION_ADS_INDEX,
+    'endpoint': '/tobacco/researchpreventionads.json',
+    'name': 'tobaccoresearchpreventionads'
+  },
+  {
+    'index': TOBACCO_RESEARCH_DIGITAL_ADS_INDEX,
+    'endpoint': '/tobacco/researchdigitalads.json',
+    'name': 'tobaccoresearchdigitalads'
   },
   {
     'index': OTHER_NSDE_INDEX,
@@ -224,6 +266,27 @@ const ENDPOINTS = [
     'index': SUBSTANCE_DATA_INDEX,
     'endpoint': '/other/substance.json',
     'name': 'othersubstance'
+  },
+  {
+    'index': OTHER_UNII_INDEX,
+    'endpoint': '/other/unii.json',
+    'name': 'otherunii'
+  },
+  {
+    'index': HISTORICAL_DOCUMENTS_INDEX,
+    'endpoint': '/other/historicaldocument.json',
+    'name': 'otherhistoricaldocument'
+  },
+  {
+    'index': HISTORICAL_DOCUMENTS_ANALYTICS_INDEX,
+    'endpoint': '/other/historicaldocumentanalytics.json',
+    'name': 'otherhistoricaldocumentanalytics',
+    'auxiliary': true
+  },
+  {
+    'index': TRANSPARENCY_CRL_INDEX,
+    'endpoint': '/transparency/crl.json',
+    'name': 'transparencycrl'
   },
   {
     'index': EXPORT_DATA_INDEX,
@@ -239,12 +302,17 @@ var VALID_URLS = [
   'api.fda.gov/device/',
   'api.fda.gov/drug/',
   'api.fda.gov/food/',
+  'api.fda.gov/cosmetic/',
   'api.fda.gov/tobacco/',
   'api.fda.gov/other/',
+  'api.fda.gov/transparency/',
+  'api.fda.gov/drug/shortages.json',
   'api.fda.gov/drug/drugsfda.json',
   'api.fda.gov/drug/event.json',
   'api.fda.gov/drug/label.json',
+  'api.fda.gov/drug/labelsearch.json',
   'api.fda.gov/drug/ndc.json',
+  'api.fda.gov/drug/imprint.json',
   'api.fda.gov/drug/enforcement.json',
   'api.fda.gov/device/510k.json',
   'api.fda.gov/device/event.json',
@@ -257,9 +325,15 @@ var VALID_URLS = [
   'api.fda.gov/device/covid19serology.json',
   'api.fda.gov/food/enforcement.json',
   'api.fda.gov/food/event.json',
+  'api.fda.gov/cosmetic/event.json',
   'api.fda.gov/tobacco/problem.json',
+  'api.fda.gov/tobacco/researchpreventionads.json',
+  'api.fda.gov/tobacco/researchdigitalads.json',
   'api.fda.gov/other/nsde.json',
-  'api.fda.gov/other/substance.json'
+  'api.fda.gov/other/substance.json',
+  'api.fda.gov/other/unii.json',
+  'api.fda.gov/other/historicaldocument.json',
+  'api.fda.gov/transparency/crl.json'
 ];
 
 
@@ -470,15 +544,15 @@ app.get('/usage.json', cache('1 hour'), asyncHandler(async (req, res) => {
     ));
 
     // Get usage info from API Umbrella.
-    const end_at = req.query.start_at || moment().format("YYYY-MM-DD");
-    const start_at = req.query.end_at || moment().subtract(30, 'day').format("YYYY-MM-DD");
+    const end_at = req.query.end_at || moment().format("YYYY-MM-DD");
+    const start_at = req.query.start_at || moment().subtract(30, 'day').format("YYYY-MM-DD");
     const prefix = req.query.prefix || '0/';
     const params = querystring.stringify({
       start_at: start_at,
       end_at: end_at,
       interval: 'day',
       prefix: prefix,
-      query: {
+      query: JSON.stringify({
         "condition": "AND",
         "rules": [{
           "field": "gatekeeper_denied_code",
@@ -488,7 +562,7 @@ app.get('/usage.json', cache('1 hour'), asyncHandler(async (req, res) => {
           "type": "string",
           "value": null
         }]
-      }
+      })
     });
 
     //NEVER expose this key to public

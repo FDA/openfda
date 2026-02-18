@@ -17,8 +17,6 @@ test -e $PYTHON_ENV || python3 -m venv $PYTHON_ENV
 $PYTHON_ENV/bin/pip uninstall -y openfda || true
 $PYTHON_ENV/bin/pip install cython
 $PYTHON_ENV/bin/pip install -U -r  requirements.txt
-$PYTHON_ENV/bin/python setup.py develop
-
 
 #
 # Node

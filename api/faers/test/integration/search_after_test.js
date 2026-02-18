@@ -128,6 +128,18 @@ describe('GET /device/covid19serology.json', () => {
       });
   });
 
+  it('should not include Link header when there is only one page of results', done => {
+    chai
+      .request(app)
+      .get('/device/covid19serology.json?search=sample_id:C0999')
+      .end((err, res) => {
+        res.should.have.status(200);
+        expect(res).to.not.have.header('Link');
+        done();
+      });
+  });
+
+
   it('should allow page size up to 1,000', done => {
     chai
       .request(app)

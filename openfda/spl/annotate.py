@@ -119,7 +119,8 @@ def AnnotateLabel(label, harmonized_dict):
 
   if spl_set_id != None:
     if spl_set_id in harmonized_dict:
-      AddHarmonizedRowToOpenfda(openfda, harmonized_dict[spl_set_id][0])
+      for row in harmonized_dict[spl_set_id]:
+        AddHarmonizedRowToOpenfda(openfda, row)
 
   openfda_lists = {}
   for field, value in openfda.items():

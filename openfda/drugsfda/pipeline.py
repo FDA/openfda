@@ -64,7 +64,9 @@ class CleanDrugsFDAFiles(luigi.Task):
     return luigi.LocalTarget(EXTRACTED_DIR)
 
   def run(self):
-    for filename in glob.glob(self.input().path + '/ApplicationDocs.txt'):
+    unfilteredfile1 = glob.glob(self.input().path + '/ApplicationDocs.txt')
+    unfilteredfile2 = glob.glob(self.input().path + '/Submissions.txt')
+    for filename in [unfilteredfile1[0], unfilteredfile2[0]]:
       logging.info('Pre-processing %s', filename)
       filtered = filename + '.filtered'
       out = open(filtered, 'w')
@@ -304,7 +306,7 @@ class Submissions2JSONMapper(parallel.Mapper):
 
     json = common.transform_dict(value, _cleaner)
 
-    if json.get('submission_class_code_id') and json.get('submission_class_code_id') is not None:
+    if json.get('submission_class_code_id') and json.get('submission_class_code_id') is not None and json.get('submission_class_code_id').isnumeric():
       json['submission_class_code'] = self.doc_lookup[json['submission_class_code_id']][0]
       descr = self.doc_lookup[json['submission_class_code_id']][1].rstrip()
       if descr:
@@ -313,13 +315,19 @@ class Submissions2JSONMapper(parallel.Mapper):
 
     # Convert date to format used throughout openFDA (yyyymmdd)
     if json.get('submission_status_date'):
-      json['submission_status_date'] = arrow.get(json['submission_status_date']).strftime("%Y%m%d")
+      sub_date = json['submission_status_date']
+      if re.match(r"^[0-9]{1,2}/[0-9]{1,2}/[0-9]{4} [0-9]{1,2}:[0-9]{1,2}", sub_date):
+        json['submission_status_date'] = arrow.get(sub_date, "M/D/YYYY h:mm").strftime("%Y%m%d")
+      elif re.match(r"^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2} [0-9]{1,2}:[0-9]{1,2}:[0-9]{1,2}", sub_date):
+        json['submission_status_date'] = arrow.get(sub_date, "YYYY-M-D h:mm:ss").strftime("%Y%m%d")
+      else:
+        json['submission_status_date'] = arrow.get(sub_date).strftime("%Y%m%d")
 
     # Assign application number as the key, since all three drugs@FDA files can be joined by this key.
-    key = build_submissions_key(json['application_number'], json)
-    del json['application_number']
-
-    output.add(key, json)
+    if json.get('submission_type') and json.get('submission_number'):
+      key = build_submissions_key(json['application_number'], json)
+      del json['application_number']
+      output.add(key, json)
 
 
 def build_submissions_key(app_number, json):

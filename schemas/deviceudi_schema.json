@@ -427,6 +427,10 @@
     "gmdn_terms": {
       "items": {
         "properties": {
+          "code": {
+            "description": "GMDN Preferred Term Code of the common device type associated with the FDA PT Code.",
+            "type": "string"
+          },
           "name": {
             "description": "Name of the common device type associated with the GMDN Preferred Term Code/FDA PT Code.",
             "type": "string"
@@ -434,6 +438,36 @@
           "definition": {
             "description": "Definition of the common device type associated with the GMDN Preferred Term Code/FDA PT Code.",
             "type": "string"
+          },
+          "implantable": {
+            "description": "GMDN Implantable flag.",
+            "type": "boolean",
+            "possible_values": {
+              "type": "one_of",
+              "value": [
+                {
+                  "true": "true"
+                },
+                {
+                  "false": "false"
+                }
+              ]
+            }
+          },
+          "code_status": {
+            "description": "GMDN Term Status, Active or Obsolete.",
+            "type": "string",
+            "possible_values": {
+              "type": "one_of",
+              "value": [
+                {
+                  "Active": "Active"
+                },
+                {
+                  "Obsolete": "Obsolete"
+                }
+              ]
+            }
           }
         },
         "type": "object"

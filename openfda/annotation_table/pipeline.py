@@ -16,7 +16,7 @@ import subprocess
 import traceback
 from os.path import basename, dirname, join
 from urllib.parse import urljoin
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 import arrow
 import luigi
@@ -40,7 +40,7 @@ common.shell_cmd_quiet('mkdir -p %s', BASE_DIR)
 common.shell_cmd_quiet('mkdir -p %s', TMP_DIR)
 
 SPL_SET_ID_INDEX = join(BASE_DIR, 'spl_index.db')
-DAILYMED_PREFIX = 'ftp://public.nlm.nih.gov/nlmdata/.dailymed/'
+DAILYMED_PREFIX = 'https://dailymed-data.nlm.nih.gov/public-release-files/'
 
 PHARM_CLASS_DOWNLOAD = \
   DAILYMED_PREFIX + 'pharmacologic_class_indexing_spl_files.zip'
@@ -49,10 +49,10 @@ RXNORM_DOWNLOAD = \
   DAILYMED_PREFIX + 'rxnorm_mappings.zip'
 
 UNII_WEBSITE = 'https://precision.fda.gov'
-UNII_DOWNLOAD_PAGE = UNII_WEBSITE + '/uniisearch/archive'
+UNII_DOWNLOAD = UNII_WEBSITE + '/uniisearch/archive/latest/UNIIs.zip'
 
-NDC_DOWNLOAD_PAGE = \
-  'https://www.fda.gov/drugs/drug-approvals-and-databases/national-drug-code-directory'
+NDC_DOWNLOAD_URL = \
+  'https://www.accessdata.fda.gov/cder/ndctext.zip'
 
 
 # The database names play a central role in terms of output and the joiner.
@@ -74,17 +74,7 @@ class DownloadNDC(luigi.Task):
     return luigi.LocalTarget(join(BASE_DIR, 'ndc/raw/ndc_database.zip'))
 
   def run(self):
-    zip_url = None
-    soup = BeautifulSoup(urlopen(NDC_DOWNLOAD_PAGE).read(), 'lxml')
-    for a in soup.find_all(href=re.compile('.*.zip')):
-      if 'ndc database file - text' in a.text.lower():
-        zip_url = urljoin('https://www.fda.gov', a['href'])
-        break
-
-    if not zip_url:
-      logging.fatal('NDC database file not found!')
-      raise
-
+    zip_url = NDC_DOWNLOAD_URL
     common.download(zip_url, self.output().path)
 
 
@@ -106,31 +96,7 @@ class DownloadUNII(luigi.Task):
     return luigi.LocalTarget(join(BASE_DIR, 'unii/raw/unii.zip'))
 
   def run(self):
-    '''
-    UNII downloading has changed from being a simple URL pull to a SPA application backed by a Lambda and AWS S3 pre-signed
-    URLs. So we brute force into the HTML/JS here, construct the AWS Lambda URL, obtain a pre-signed URL and finally
-    pull the file. This works, but is fragile and will break if FDA makes significant changes to the SPA structure. We'd
-    need something like Cypress to make this more flexible.
-    '''
-    # SPA Main HTML
-    soup = BeautifulSoup(urlopen(UNII_DOWNLOAD_PAGE).read(), 'lxml')
-    # This script tag has the file name we need
-    script_tag = soup.find(id="__NEXT_DATA__")
-    script_content = json.loads(script_tag.contents[0])
-    unii_file_name = script_content['props']['pageProps']['namesRecords'][0]['fileName']
-
-    # Now go through the page scripts and find the AWS Lambda endpoint URL.
-    for tag in soup.find_all('script'):
-      script_src = tag.get('src')
-      if script_src and '/static/chunks/pages/archive-' in script_src:
-        full_script_url = UNII_WEBSITE + script_src
-        script_content = requests.get(full_script_url).text
-        lambda_endpoint = re.compile('https://\\w+.execute-api.us-east-1.amazonaws.com/production/v\\d').search(
-          script_content).group(0)
-        get_file_url = lambda_endpoint + '/get-file/' + unii_file_name
-        # The lambda endpoint will return a pre-signed S3 URL to download from
-        aws_file_url = requests.get(get_file_url).json()['url']
-        common.download_requests(aws_file_url, self.output().path)
+    common.download_requests(UNII_DOWNLOAD, self.output().path)
 
 
 class DownloadRXNorm(luigi.Task):

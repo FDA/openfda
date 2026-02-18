@@ -3,9 +3,11 @@ import datetime
 import glob
 import logging
 import os
+import pathlib
+import pandas as pd
 import re
 from urllib.parse import urljoin
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 from os.path import join, dirname
 
 import luigi
@@ -19,22 +21,22 @@ BASE_DIR = config.data_dir('caers')
 DOWNLOAD_DIR = config.data_dir('caers/raw')
 common.shell_cmd('mkdir -p %s', BASE_DIR)
 
-CAERS_DOWNLOAD_PAGE_URL = 'https://www.fda.gov/food/compliance-enforcement-food/cfsan-adverse-event-reporting-system-caers'
+CAERS_DOWNLOAD_PAGE_URL = 'https://www.fda.gov/food/compliance-enforcement-food/human-foods-complaint-system-hfcs'
 
 RENAME_MAP = {
-  'report id': 'report_number',
-  'caers created date': 'date_created',
-  'date of event': 'date_started',
-  'product type': 'role',
+  'report_id': 'report_number',
+  'date_fda_first_received_report': 'date_created',
+  'date_event': 'date_started',
+  'product_type': 'role',
   'product': 'name_brand',
-  'product code': 'industry_code',
+  'product_code': 'industry_code',
   'description': 'industry_name',
-  'patient age': 'age',
-  'age units': 'age_unit',
+  'patient_age': 'age',
+  'age_units': 'age_unit',
   'sex': 'gender',
-  'outcomes': 'outcomes',
+  'case_outcome': 'outcomes',
   'medra preferred terms': 'reactions',
-  'meddra preferred terms': 'reactions'
+  'case_meddra_preferred_terms': 'reactions'
 }
 
 # Lists of keys used by the cleaner function in the CSV2JSONMapper() and the
@@ -55,11 +57,14 @@ class DownloadCAERS(luigi.Task):
 
   def run(self):
     common.shell_cmd('mkdir -p %s', self.local_dir)
-    soup = BeautifulSoup(urlopen(CAERS_DOWNLOAD_PAGE_URL).read(), 'lxml')
-    for a in soup.find_all(title=re.compile('CAERS ASCII.*')):
-      if 'Download CAERS ASCII' in re.sub(r'\s', ' ', a.text):
+    req = Request(CAERS_DOWNLOAD_PAGE_URL)
+    req.add_header('From', 'Open@fda.hhs.gov')
+    req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
+    soup = BeautifulSoup(urlopen(req).read(), 'lxml')
+    for a in soup.find_all(title=re.compile('.*Product-Based Data.*')):
         fileURL = urljoin('https://www.fda.gov', a['href'])
-        common.download(fileURL, join(self.output().path, a.attrs['title']+'.csv'))
+        common.download(fileURL, join(self.output().path, 'caers.csv'))
+        break
 
 
 
@@ -85,13 +90,9 @@ class CSV2JSONMapper(parallel.Mapper):
 
     if k in DATES:
       if v:
-        try:
-          v = datetime.datetime.strptime(v, "%m/%d/%Y").strftime("%Y%m%d")
-        except ValueError:
-          logging.warning('Unparseable date: ' + v)
+        v = datetime.datetime.strptime(v, "%m/%d/%Y").strftime("%Y%m%d")
       else:
-        return None
-
+        return (k, None)
 
     return (k, v)
 
@@ -168,9 +169,10 @@ class CSV2JSON(luigi.Task):
     return luigi.LocalTarget(join(BASE_DIR, 'json.db'))
 
   def run(self):
+    caers_file = glob.glob(join(self.input().path, '*.csv'))[0]
     parallel.mapreduce(
-      parallel.Collection.from_glob(glob.glob(join(self.input().path, '*.csv')),
-                                    parallel.CSVDictLineInput(delimiter=',', quoting=csv.QUOTE_MINIMAL, strip_str='\ufeff')),
+      parallel.Collection.from_glob(glob.glob(caers_file),
+                                    parallel.CSVDictLineInput(quoting=csv.QUOTE_MINIMAL, strip_str='\ufeff')),
       mapper=CSV2JSONMapper(),
       reducer=CSV2JSONReducer(),
       output_prefix=self.output().path)

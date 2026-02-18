@@ -197,6 +197,9 @@
       },
       "gmdn_terms": {
         "properties": {
+          "code": {
+            "type": "keyword"
+          },
           "name": {
             "fields": {
               "exact": {
@@ -207,6 +210,12 @@
           },
           "definition": {
             "type": "text"
+          },
+          "implantable": {
+            "type": "boolean"
+          },
+          "code_status": {
+            "type": "keyword"
           }
         }
       },

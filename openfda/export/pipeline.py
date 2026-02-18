@@ -1,4 +1,3 @@
-
 import collections
 import shutil
 from itertools import tee
@@ -30,9 +29,11 @@ ENDPOINT_INDEX_MAP = {
   '/drug/enforcement': 'recall',
   '/drug/ndc': 'ndc',
   '/drug/drugsfda': 'drugsfda',
+  '/drug/shortages': 'drugshortages',
   '/device/enforcement': 'recall',
   '/food/enforcement': 'recall',
   '/food/event': 'foodevent',
+  '/cosmetic/event': 'cosmeticevent',
   '/device/event': 'deviceevent',
   '/device/classification': 'deviceclass',
   '/device/510k': 'deviceclearance',
@@ -43,7 +44,12 @@ ENDPOINT_INDEX_MAP = {
   '/device/covid19serology': 'covid19serology',
   '/other/nsde': 'othernsde',
   '/other/substance': 'substancedata',
-  '/tobacco/problem': 'tobaccoproblem'
+  '/other/unii': 'otherunii',
+  '/other/historicaldocument': 'historicaldocument',
+  '/transparency/crl': 'crl',
+  '/tobacco/problem': 'tobaccoproblem',
+  '/tobacco/researchpreventionads': 'tobaccoresearchpreventionads',
+  '/tobacco/researchdigitalads': 'tobaccoresearchdigitalads'
 
 }
 
@@ -76,19 +82,19 @@ RANGE_ENDPOINT_MAP = {
   '/drug/event': {
     'date_key': '@timestamp',
     'start_date': '2004-01-01',
-    'end_date': '2021-10-01'
+    'end_date': '2026-01-01'
   },
   # Check here for device event:
   # https://www.fda.gov/MedicalDevices/DeviceRegulationandGuidance/PostmarketRequirements/ReportingAdverseEvents/ucm127891.htm
   '/device/event': {
     'date_key': 'date_received',
     'start_date': '1991-10-01',
-    'end_date': '2022-04-01'
+    'end_date': '2026-01-01'
   },
   '/animalandveterinary/event': {
     'date_key': 'original_receive_date',
     'start_date': '1987-01-01',
-    'end_date': '2021-10-01'
+    'end_date': '2025-10-01'
   }
 }
 
@@ -96,7 +102,7 @@ DEFAULT_CHUNKS = 250000
 CUSTOM_CHUNKS = {
   '/drug/label': 20000,
   '/drug/event': 12000,
-  '/device/event': 100000,
+  '/device/event': 95000,
   '/device/udi': 100000
 }
 
@@ -388,7 +394,7 @@ class ParallelExport(AlwaysRunTask):
       reducer=parallel.NullReducer(),
       output_prefix=join(BASE_DIR, 'tmp'),
       output_format=parallel.NullOutput(),
-      map_workers=12)
+      map_workers=9)
 
 
 class CopyIndexToS3(AlwaysRunTask):

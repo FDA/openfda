@@ -18,6 +18,8 @@ import simplejson as json
 from bs4 import BeautifulSoup
 from lxml import etree
 from lxml.etree import XMLSyntaxError
+from urllib.request import Request, urlopen
+from bs4 import BeautifulSoup
 
 from openfda import config, common, index_util, parallel
 from openfda.annotation_table.pipeline import CombineHarmonization
@@ -25,8 +27,6 @@ from openfda.common import ProcessException
 from openfda.parallel import NullOutput
 from openfda.spl import annotate
 from openfda.tasks import AlwaysRunTask
-from bs4 import BeautifulSoup
-import urllib.request
 
 RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 SPL_JS = join(RUN_DIR, 'spl/spl_to_json.js')
@@ -57,7 +57,10 @@ class DownloadDailyMedSPL(luigi.Task):
 
   def run(self):
     common.shell_cmd_quiet('mkdir -p %s', self.local_dir)
-    soup = BeautifulSoup(urllib.request.urlopen(DAILY_MED_DOWNLOADS_PAGE).read(), 'lxml')
+    req = Request(DAILY_MED_DOWNLOADS_PAGE)
+    req.add_header('From', 'Open@fda.hhs.gov')
+    req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
+    soup = BeautifulSoup(urlopen(req).read(), 'lxml')
     for a in soup.find_all(href=re.compile('.*.zip')):
       if '_human_' in a.text:
         try:
@@ -212,7 +215,7 @@ class DetermineSPLToIndex(parallel.MRTask):
         code = next(iter(
           tree.xpath("//ns:document/ns:code[@codeSystem='2.16.840.1.113883.6.1']/@displayName", namespaces=self.NS)),
                     '')
-        if code.lower().find('human') != -1:
+        if code.lower().find('human') != -1 or code.lower().find('cellular') != -1:
           spl_id = tree.xpath('//ns:document/ns:id/@root', namespaces=self.NS)[0].lower()
           spl_set_id = tree.xpath('//ns:document/ns:setId/@root', namespaces=self.NS)[0].lower()
           version = tree.xpath('//ns:document/ns:versionNumber/@value', namespaces=self.NS)[0]

@@ -389,29 +389,6 @@ def copy_mapping(es, source_index, target_index):
     idx.put_mapping(index=target_index, doc_type=doc_type, body=schema)
 
 
-class ResetElasticSearch(AlwaysRunTask):
-  '''Create a new index with the given type and mapping.'''
-  target_host = luigi.Parameter()
-  target_index_name = luigi.Parameter()
-  target_type_name = luigi.Parameter()
-  target_mapping_file = luigi.Parameter()
-  delete_index = luigi.BoolParameter(default=False)
-
-  def _run(self):
-    logging.info('Create index and loading mapping: %s/%s',
-                 self.target_index_name, self.target_type_name)
-    es = elasticsearch.Elasticsearch(self.target_host, timeout=120)
-    if self.delete_index:
-      elasticsearch_requests.clear_and_load(es,
-                                        self.target_index_name,
-                                        self.target_type_name,
-                                        self.target_mapping_file)
-    else:
-      elasticsearch_requests.load_mapping(es,
-                                          self.target_index_name,
-                                          self.target_type_name,
-                                          self.target_mapping_file)
-
 
 class LoadJSONMapper(parallel.Mapper):
   def __init__(self, es_host, index_name, type_name, docid_key, incremental):
@@ -482,17 +459,8 @@ class LoadJSONBase(AlwaysRunTask):
     '''
     return self.data_source
 
-  def _schema(self):
-    return ResetElasticSearch(
-        target_host=config.es_host(),
-        target_index_name=self.index_name,
-        target_type_name=self.type_name,
-        target_mapping_file=self.mapping_file,
-        delete_index=not self.use_checksum)
-
   def requires(self):
     deps = {
-      'schema': self._schema(),
       'data': self._data(),
     }
 
@@ -507,6 +475,21 @@ class LoadJSONBase(AlwaysRunTask):
     return 'LoadJSON(data=%s)' % self._data()
 
   def _run(self):
+    logging.info('Create index and loading mapping: %s/%s',
+                 self.index_name, self.type_name)
+    es = elasticsearch.Elasticsearch(config.es_host(), timeout=120)
+    if not self.use_checksum:
+      elasticsearch_requests.clear_and_load(es,
+                                        self.index_name,
+                                        self.type_name,
+                                        self.mapping_file)
+    else:
+      elasticsearch_requests.load_mapping(es,
+                                          self.index_name,
+                                          self.type_name,
+                                          self.mapping_file)
+
+
     json_dir = self.input()['data'].path
 
     mapper = LoadJSONMapper(

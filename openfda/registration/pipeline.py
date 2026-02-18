@@ -50,7 +50,7 @@ import logging
 import os
 import re
 from os.path import basename, dirname, join
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 import arrow
 import luigi
@@ -63,7 +63,6 @@ from openfda.common import newest_file_timestamp
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
                                                    DeviceAnnotateMapper)
 
-RUN_DIR = dirname(dirname(os.path.abspath(__file__)))
 BASE_DIR = config.data_dir('registration')
 RAW_DIR = config.data_dir('registration/raw')
 common.shell_cmd('mkdir -p %s', BASE_DIR)
@@ -74,12 +73,9 @@ common.shell_cmd('mkdir -p %s', META_DIR)
 DEVICE_REG_PAGE = ('https://www.fda.gov/medical-devices/'
                    'device-registration-and-listing/'
                    'establishment-registration-and-medical-device-listing-files-download')
-
-REG_LISTING_URL = 'https://download.open.fda.gov/reglist/registration_listing.txt'
-REG_LISTING_LOCAL_DIR = config.data_dir('registration/reg_listing')
 REMAPPED_FILES = {
- 'registration_listing.txt': 'remapped_registration_listing.txt',
- }
+  'registration_listing.txt': 'remapped_registration_listing.txt',
+}
 
 # TODO(hansnelsen): analyze and add the following files to the pipeline, schema,
 #                   es mapping, documentation.
@@ -93,37 +89,22 @@ EXCLUDED_FILES = [
 # TODO(hansnelsen): copied from spl/pipeline.py, consolidate to a common place.
 #                   This version has been slightly altered, so we will need to
 #                   do this refactor once all of the S3 requirements are in.
-class DownloadRegListing(luigi.Task):
-  url = REG_LISTING_URL
-  local_dir = REG_LISTING_LOCAL_DIR
-
-  def output(self):
-    return luigi.LocalTarget(self.local_dir)
-
-  def run(self):
-    common.download(self.url, os.path.join(self.local_dir, 'registration_listing.txt'))
-
-def remap_supplemental_files(original, supplemental, output_file):
-  orig = pandas.read_csv(original, sep='|')
-  supp = pandas.read_csv(supplemental, sep='|')
+def remap_reg_listing_file(input_file, output_file):
+  orig = pandas.read_csv(input_file, sep='|')
   orig.columns = list(map(str.lower, orig.columns))
-  supp.columns = list(map(str.lower, supp.columns))
+  orig['premarket_submission_number'] = \
+    orig['premarket_submission_number'].astype('str')
 
-  combined = pandas.merge(orig, supp, how='left')
+  submission = orig['premarket_submission_number']
 
-  combined['premarket_submission_number'] = \
-    combined['premarket_submission_number'].astype('str')
+  orig['pma_number'] = submission.map(common.get_p_number)
+  orig['k_number'] = submission.map(common.get_k_number)
 
-  submission = combined['premarket_submission_number']
-
-  combined['pma_number'] = submission.map(common.get_p_number)
-  combined['k_number'] = submission.map(common.get_k_number)
-
-  combined.drop('premarket_submission_number', axis=1, inplace=True)
+  orig.drop('premarket_submission_number', axis=1, inplace=True)
 
   # to_csv() will prepend an extra delimiter to the CSV header row unless you
   # specifiy `index=False`
-  combined.to_csv(output_file, sep='|', index=False)
+  orig.to_csv(output_file, sep='|', index=False)
 
   return
 
@@ -156,7 +137,10 @@ class DownloadDeviceRegistrationAndListings(luigi.Task):
 
   def run(self):
     zip_urls = []
-    soup = BeautifulSoup(urlopen(DEVICE_REG_PAGE).read())
+    req = Request(DEVICE_REG_PAGE)
+    req.add_header('From', 'Open@fda.hhs.gov')
+    req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
+    soup = BeautifulSoup(urlopen(req).read(), 'lxml')
     for a in soup.find_all(href=re.compile('.*.zip')):
       zip_urls.append(a['href'])
     if not zip_urls:
@@ -172,13 +156,11 @@ class ExtractAndCleanDownloadsReg(luigi.Task):
   # These files have floats, e.g. 123.0 instead of 123, on the join keys, which
   # causes problems downstream.
   problem_files = [
-    'registration_listing.txt',
-    'remapped_registration_listing.txt',
-    'Listing_Proprietary_Name.txt'
+    'Listing_Proprietary_Name.txt', 'Official_Correspondent.txt'
   ]
 
   def requires(self):
-    return [DownloadDeviceRegistrationAndListings(), DownloadRegListing()]
+    return DownloadDeviceRegistrationAndListings()
 
   def output(self):
     return luigi.LocalTarget(config.data_dir('registration/extracted'))
@@ -186,17 +168,15 @@ class ExtractAndCleanDownloadsReg(luigi.Task):
   def run(self):
     output_dir = self.output().path
     common.shell_cmd('mkdir -p %s', output_dir)
-    input_dir = self.input()[0].path
-    supplemental_dir = self.input()[1].path
+    input_dir = self.input().path
     download_util.extract_and_clean(input_dir, 'ISO-8859-1', 'UTF-8', 'txt')
 
     # One of the files needs to be remapped from one column (submission_number)
     # to two columns (pma_number and k_number) depending on the prefix.
     file_name = 'registration_listing.txt'
     output_file = join(output_dir, 'remapped_' + file_name)
-    remap_supplemental_files(join(output_dir, file_name),
-                             join(supplemental_dir, file_name),
-                             output_file)
+    remap_reg_listing_file(join(output_dir, file_name),
+                           output_file)
 
     # There are a handful of files with floats for keys
     # This step can be removed once it is fixed on the source system.
@@ -205,7 +185,9 @@ class ExtractAndCleanDownloadsReg(luigi.Task):
         lines = needs_fixing.readlines()
       with open(join(output_dir, fix_file), 'w') as gets_fixing:
         for line in lines:
-          gets_fixing.write(re.sub(r'\.0', '', line))
+          fixed_line = re.sub(r'\.0', '', line)
+          fixed_line = re.sub(r"\|\s+(\d{3,})", r"|\1", fixed_line)
+          gets_fixing.write(fixed_line)
 
 class TXT2JSONMapper(parallel.Mapper):
   def map_shard(self, map_input, map_output):

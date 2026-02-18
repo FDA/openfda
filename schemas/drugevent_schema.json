@@ -92,6 +92,9 @@
                 "items": {
                   "type": "object",
                   "properties": {
+                    "drugrecuractionmeddraversion": {
+                      "type": "string"
+                    },
                     "drugrecuraction": {
                       "type": "string"
                     }

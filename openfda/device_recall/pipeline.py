@@ -5,19 +5,23 @@
 '''
 import csv
 import glob
+import hashlib
+import logging
 import os
 import re
+import sys
+import time
 from os.path import dirname, join
 from urllib.parse import quote
+from urllib.request import Request, urlopen
 
 import arrow
 import luigi
-import numpy as np
 import pandas as pd
 import usaddress
+from bs4 import BeautifulSoup
 
 from openfda import common, config, index_util, parallel
-from openfda.common import soup_with_retry
 from openfda.device_harmonization.pipeline import (Harmonized2OpenFDA,
                                                    DeviceAnnotateMapper)
 from openfda.tasks import AlwaysRunTask, NoopTask
@@ -40,8 +44,44 @@ DEVICE_RECALL_LOCAL_DIR = config.data_dir('device_recall/s3_sync')
 DEVICE_RECALL_FILTERED_DIR = config.data_dir('device_recall/filtered')
 DEVICE_CSV_TO_JSON_DIR = config.data_dir('device_recall/csv2json.db')
 
+HTML_CACHE_DIR = config.data_dir('device_recall/cache')
+common.cmd(['mkdir', '-p', HTML_CACHE_DIR])
+
+
 def batch_dir(batch):
   return arrow.get(batch[0]).strftime('%Y%m%d') + '_' + arrow.get(batch[1]).strftime('%Y%m%d')
+
+def soup_with_retry(url, use_cache=True):
+  for i in range(100):
+    try:
+      return BeautifulSoup(fetch_url(url, use_cache), 'lxml')
+    except:
+      logging.info('An error trying to cook soup from %s, retrying...', url)
+      logging.info(sys.exc_info()[1])
+      time.sleep(5)
+      continue
+
+  raise Exception('Fetch of %s failed.' % url)
+
+
+def fetch_url(url, use_cache=True):
+  hash = hashlib.md5(bytes(url, 'utf-8')).hexdigest()
+  cached_file = join(HTML_CACHE_DIR, hash)
+
+  if use_cache is True and os.path.isfile(cached_file) and os.path.getsize(cached_file) > 0:
+    with open(cached_file) as f:
+      return f.read()
+
+  time.sleep(0.5)  # FDA.gov Akamai team asked us to not hit them too hard here, so we are rate limiting ourselves.
+  logging.info('Cache miss: %s', url)
+  req = Request(url)
+  req.add_header('From', 'Open@fda.hhs.gov')
+  req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
+  content = str(urlopen(req).read(), 'UTF-8')
+  with open(cached_file, 'w') as out_f:
+    out_f.write(content)
+  return content
+
 
 class SyncS3DeviceRecall(luigi.Task):
   bucket = DEVICE_RECALL_BUCKET
@@ -71,7 +111,7 @@ class RemoveDuplicates(luigi.Task):
     common.cmd(['mkdir', '-p', DEVICE_RECALL_FILTERED_DIR])
     unfiltered = pd.read_csv(glob.glob(DEVICE_RECALL_LOCAL_DIR + '/*.csv')[0], index_col=False,
                              encoding='utf-8',
-                             dtype=np.unicode, keep_default_na=False)
+                             dtype=str, keep_default_na=False)
     filtered = unfiltered.drop_duplicates()
     filtered.to_csv(self.output().path, encoding='utf-8', index=False, quoting=csv.QUOTE_ALL)
 
@@ -274,9 +314,16 @@ class RecallDownloaderAndMapper(parallel.Mapper):
     url = RECALL_RECORD_DOWNLOAD_URL % (id)
     soup = soup_with_retry(url)
 
+    recall_number = self.field_val_str(soup, 'Recall Number')
+    # Some recalls might not have a recall number assigned to them yet, which causes issues at the indexing time (missing key)
+    # For example, recalls with "Correction or Removal Status" set to "Firm initiated action, Not yet classified" may not have a recall number
+    # At the time of this writing, a example that caused the pipeline to fail could be found at https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfres/res.cfm?id=207897#1
+    if recall_number is None:
+      logging.warning('A Device Recall without a Recall Number %s, skipping...', id)
+      return
+
     recall['@id'] = id
     recall['cfres_id'] = id
-    recall_number = self.field_val_str(soup, 'Recall Number')
     recall['product_res_number'] = recall_number
     recall['event_date_initiated'] = self.field_val_date(soup, 'Date Initiated by Firm')
     recall['event_date_created'] = self.field_val_date(soup, 'Create Date')
@@ -334,7 +381,7 @@ class ProcessWeeklyBatch(luigi.Task):
         self.input()[0].path, parallel.CSVDictLineInput()),
       mapper=RecallDownloaderAndMapper(csv2json_db=csv2json_db),
       reducer=parallel.IdentityReducer(),
-      output_prefix=self.output().path, map_workers=10, num_shards=10)  # Do not hit fda.gov too hard here.
+      output_prefix=self.output().path, map_workers=2, num_shards=2)  # Do not hit fda.gov too hard here.
 
 
 class DeviceRecallAnnotateMapper(DeviceAnnotateMapper):

@@ -1,10 +1,5 @@
 {
   "_doc": {
-    "_source": {
-      "includes": [
-        "*"
-      ]
-    },
     "dynamic": "strict",
     "properties": {
       "@version": {
@@ -151,6 +146,9 @@
               },
               "drugrecurrence": {
                 "properties": {
+                  "drugrecuractionmeddraversion": {
+                    "type": "text"
+                  },
                   "drugrecuraction": {
                     "fields": {
                       "exact": {
@@ -162,7 +160,7 @@
                 }
               },
               "drugseparatedosagenumb": {
-                "type": "byte"
+                "type": "integer"
               },
               "drugstartdate": {
                 "format": "basic_date||date||epoch_millis",

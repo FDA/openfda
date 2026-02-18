@@ -9,8 +9,9 @@ import logging
 import os
 import re
 import sys
+import time
 from os.path import basename, dirname, join
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 import arrow
 import luigi
@@ -40,9 +41,7 @@ DATE_FMT = 'YYYY-MM-DD'
 CATEGORIES = ['foidevproblem', 'patientproblemcode', 'mdrfoi', 'patient', 'foidev', 'foitext', 'device']
 IGNORE_FILES = ['deviceproblemcodes', 'patientproblemdata', 'add', 'change']
 
-DEVICE_DOWNLOAD_PAGE = ('https://www.fda.gov/medical-devices/'
-                        'mandatory-reporting-requirements-manufacturers-importers-and-device-user-facilities/'
-                        'manufacturer-and-user-facility-device-experience-database-maude')
+DEVICE_DOWNLOAD_PAGE = 'https://www.fda.gov/medical-devices/medical-device-reporting-mdr-how-report-medical-device-problems/mdr-data-files'
 
 enum_file = join(RUN_DIR, 'maude/data/enums.csv')
 enum_csv = csv.DictReader(open(enum_file))
@@ -56,192 +55,157 @@ for row in enum_csv:
 
   ENUM[key][code] = desc
 
-# patient and text records are missing header rows
-FILE_HEADERS = {
-  'foidevproblem': [
-    'mdr_report_key',
-    'problem_code'],
-  'patientproblemcode': [
-    'mdr_report_key',
-    'patient_sequence_number',
-    'problem_code',
-    'date_added',
-    'date_changed'],
-  'patient': [
-    'mdr_report_key',
-    'patient_sequence_number',
-    'date_received',
-    'sequence_number_treatment',
-    'sequence_number_outcome'],
-  'foitext': [
-    'mdr_report_key',
-    'mdr_text_key',
-    'text_type_code',
-    'patient_sequence_number',
-    'date_report',
-    'text'],
-  'foidev': [
-    'mdr_report_key',
-    'device_event_key',
-    'implant_flag',
-    'date_removed_flag',
-    'device_sequence_number',
-    'date_received',
-    'brand_name',
-    'generic_name',
-    'manufacturer_d_name',
-    'manufacturer_d_address_1',
-    'manufacturer_d_address_2',
-    'manufacturer_d_city',
-    'manufacturer_d_state',
-    'manufacturer_d_zip_code',
-    'manufacturer_d_zip_code_ext',
-    'manufacturer_d_country',
-    'manufacturer_d_postal_code',
-    'expiration_date_of_device',
-    'model_number',
-    'catalog_number',
-    'lot_number',
-    'other_id_number',
-    'device_operator',
-    'device_availability',
-    'date_returned_to_manufacturer',
-    'device_report_product_code',
-    'device_age_text',
-    'device_evaluated_by_manufacturer',
-    'baseline_brand_name',
-    'baseline_generic_name',
-    'baseline_model_number',
-    'baseline_catalog_number',
-    'baseline_other_id_number',
-    'baseline_device_family',
-    'baseline_shelf_life_contained',
-    'baseline_shelf_life_in_months',
-    'baseline_pma_flag',
-    'baseline_pma_number',
-    'baseline_510_k__flag',
-    'baseline_510_k__number',
-    'baseline_preamendment_flag',
-    'baseline_transitional_flag',
-    'baseline_510_k__exempt_flag',
-    'baseline_date_first_marketed',
-    'baseline_date_ceased_marketing'
-  ],
-  'device': [
-    'mdr_report_key',
-    'device_event_key',
-    'implant_flag',
-    'date_removed_flag',
-    'device_sequence_number',
-    'date_received',
-    'brand_name',
-    'generic_name',
-    'manufacturer_d_name',
-    'manufacturer_d_address_1',
-    'manufacturer_d_address_2',
-    'manufacturer_d_city',
-    'manufacturer_d_state',
-    'manufacturer_d_zip_code',
-    'manufacturer_d_zip_code_ext',
-    'manufacturer_d_country',
-    'manufacturer_d_postal_code',
-    'device_operator',
-    'expiration_date_of_device',
-    'model_number',
-    'catalog_number',
-    'lot_number',
-    'other_id_number',
-    'device_availability',
-    'date_returned_to_manufacturer',
-    'device_report_product_code',
-    'device_age_text',
-    'device_evaluated_by_manufacturer',
-    'combination_product_flag'
-  ],
-  'mdrfoi': [
-    'mdr_report_key',
-    'event_key',
-    'report_number',
-    'report_source_code',
-    'manufacturer_link_flag',
-    'number_devices_in_event',
-    'number_patients_in_event',
-    'date_received',
-    'adverse_event_flag',
-    'product_problem_flag',
-    'date_report',
-    'date_of_event',
-    'reprocessed_and_reused_flag',
-    'reporter_occupation_code',
-    'health_professional',
-    'initial_report_to_fda',
-    'date_facility_aware',
-    'report_date',
-    'report_to_fda',
-    'date_report_to_fda',
-    'event_location',
-    'date_report_to_manufacturer',
-    'manufacturer_contact_t_name',
-    'manufacturer_contact_f_name',
-    'manufacturer_contact_l_name',
-    'manufacturer_contact_address_1',
-    'manufacturer_contact_address_2',
-    'manufacturer_contact_city',
-    'manufacturer_contact_state',
-    'manufacturer_contact_zip_code',
-    'manufacturer_contact_zip_ext',
-    'manufacturer_contact_country',
-    'manufacturer_contact_postal_code',
-    'manufacturer_contact_area_code',
-    'manufacturer_contact_exchange',
-    'manufacturer_contact_phone_number',
-    'manufacturer_contact_extension',
-    'manufacturer_contact_pcountry',
-    'manufacturer_contact_pcity',
-    'manufacturer_contact_plocal',
-    'manufacturer_g1_name',
-    'manufacturer_g1_address_1',
-    'manufacturer_g1_address_2',
-    'manufacturer_g1_city',
-    'manufacturer_g1_state',
-    'manufacturer_g1_zip_code',
-    'manufacturer_g1_zip_code_ext',
-    'manufacturer_g1_country',
-    'manufacturer_g1_postal_code',
-    'date_manufacturer_received',
-    'device_date_of_manufacturer',
-    'single_use_flag',
-    'remedial_action',
-    'previous_use_code',
-    'removal_correction_number',
-    'event_type',
-    'distributor_name',
-    'distributor_address_1',
-    'distributor_address_2',
-    'distributor_city',
-    'distributor_state',
-    'distributor_zip_code',
-    'distributor_zip_code_ext',
-    'report_to_manufacturer',
-    'manufacturer_name',
-    'manufacturer_address_1',
-    'manufacturer_address_2',
-    'manufacturer_city',
-    'manufacturer_state',
-    'manufacturer_zip_code',
-    'manufacturer_zip_code_ext',
-    'manufacturer_country',
-    'manufacturer_postal_code',
-    'type_of_report',
-    'source_type',
-    'date_added',
-    'date_changed',
-    'reporter_country_code',
-    'pma_pmn_number',
-    'exemption_number',
-    'summary_report_flag'
-  ]
+FIELD_MAPPING = {
+  "ADVERSE_EVENT_FLAG": "adverse_event_flag",
+  "BASELINE_510_K__EXEMPT_FLAG": "baseline_510_k__exempt_flag",
+  "BASELINE_510_K__FLAG": "baseline_510_k__flag",
+  "BASELINE_510_K__NO": "baseline_510_k__number",
+  "BASELINE_BRAND_NAME": "baseline_brand_name",
+  "BASELINE_CATALOG_NO": "baseline_catalog_number",
+  "BASELINE_DATE_CEASED_MARKETING": "baseline_date_ceased_marketing",
+  "BASELINE_DATE_FIRST_MARKETED": "baseline_date_first_marketed",
+  "BASELINE_DEVICE_FAMILY": "baseline_device_family",
+  "BASELINE_GENERIC_NAME": "baseline_generic_name",
+  "BASELINE_MODEL_NO": "baseline_model_number",
+  "BASELINE_OTHER_ID_NO": "baseline_other_id_number",
+  "BASELINE_PMA_FLAG": "baseline_pma_flag",
+  "BASELINE_PMA_NO": "baseline_pma_number",
+  "BASELINE_PREAMENDMENT": "baseline_preamendment_flag",
+  "BASELINE_SHELF_LIFE_CONTAINED": "baseline_shelf_life_contained",
+  "BASELINE_SHELF_LIFE_IN_MONTHS": "baseline_shelf_life_in_months",
+  "BASELINE_TRANSITIONAL": "baseline_transitional_flag",
+  "BRAND_NAME": "brand_name",
+  "CATALOG_NUMBER": "catalog_number",
+  "COMBINATION_PRODUCT_FLAG": "combination_product_flag",
+  "DATE_ADDED": "date_added",
+  "DATE_CHANGED": "date_changed",
+  "DATE_FACILITY_AWARE": "date_facility_aware",
+  "DATE_MANUFACTURER_RECEIVED": "date_manufacturer_received",
+  "DATE_OF_EVENT": "date_of_event",
+  "DATE_RECEIVED": "date_received",
+  "DATE_REMOVED_FLAG": "date_removed_flag",
+  "DATE_REMOVED_YEAR": "date_removed_year",
+  "DATE_REPORT": "date_report",
+  "DATE_REPORT_TO_FDA": "date_report_to_fda",
+  "DATE_REPORT_TO_MANUFACTURER": "date_report_to_manufacturer",
+  "DATE_RETURNED_TO_MANUFACTURER": "date_returned_to_manufacturer",
+  "DEVICE_AGE_TEXT": "device_age_text",
+  "DEVICE_AVAILABILITY": "device_availability",
+  "DEVICE_DATE_OF_MANUFACTURE": "device_date_of_manufacturer",
+  "DEVICE_EVALUATED_BY_MANUFACTUR": "device_evaluated_by_manufacturer",
+  "DEVICE_EVENT_KEY": "device_event_key",
+  "DEVICE_OPERATOR": "device_operator",
+  "DEVICE_REPORT_PRODUCT_CODE": "device_report_product_code",
+  "DEVICE_SEQUENCE_NO": "device_sequence_number",
+  "DISTRIBUTOR_ADDRESS_1": "distributor_address_1",
+  "DISTRIBUTOR_ADDRESS_2": "distributor_address_2",
+  "DISTRIBUTOR_CITY": "distributor_city",
+  "DISTRIBUTOR_NAME": "distributor_name",
+  "DISTRIBUTOR_STATE_CODE": "distributor_state",
+  "DISTRIBUTOR_ZIP_CODE": "distributor_zip_code",
+  "DISTRIBUTOR_ZIP_CODE_EXT": "distributor_zip_code_ext",
+  "EVENT_KEY": "event_key",
+  "EVENT_LOCATION": "event_location",
+  "EVENT_TYPE": "event_type",
+  "EXEMPTION_NUMBER": "exemption_number",
+  "EXPIRATION_DATE_OF_DEVICE": "expiration_date_of_device",
+  "FOI_TEXT": "text",
+  "GENERIC_NAME": "generic_name",
+  "HEALTH_PROFESSIONAL": "health_professional",
+  "IMPLANT_DATE_YEAR": "implant_date_year",
+  "IMPLANT_FLAG": "implant_flag",
+  "INITIAL_REPORT_TO_FDA": "initial_report_to_fda",
+  "LOT_NUMBER": "lot_number",
+  "MANUFACTURER_ADDRESS_1": "manufacturer_address_1",
+  "MANUFACTURER_ADDRESS_2": "manufacturer_address_2",
+  "MANUFACTURER_CITY": "manufacturer_city",
+  "MANUFACTURER_CONTACT_AREA_CODE": "manufacturer_contact_area_code",
+  "MANUFACTURER_CONTACT_CITY": "manufacturer_contact_city",
+  "MANUFACTURER_CONTACT_COUNTRY": "manufacturer_contact_country",
+  "MANUFACTURER_CONTACT_EXCHANGE": "manufacturer_contact_exchange",
+  "MANUFACTURER_CONTACT_EXTENSION": "manufacturer_contact_extension",
+  "MANUFACTURER_CONTACT_F_NAME": "manufacturer_contact_f_name",
+  "MANUFACTURER_CONTACT_L_NAME": "manufacturer_contact_l_name",
+  "MANUFACTURER_CONTACT_PCITY": "manufacturer_contact_pcity",
+  "MANUFACTURER_CONTACT_PCOUNTRY": "manufacturer_contact_pcountry",
+  "MANUFACTURER_CONTACT_PHONE_NO": "manufacturer_contact_phone_number",
+  "MANUFACTURER_CONTACT_PLOCAL": "manufacturer_contact_plocal",
+  "MANUFACTURER_CONTACT_POSTAL": "manufacturer_contact_postal_code",
+  "MANUFACTURER_CONTACT_STATE": "manufacturer_contact_state",
+  "MANUFACTURER_CONTACT_STREET_1": "manufacturer_contact_address_1",
+  "MANUFACTURER_CONTACT_STREET_2": "manufacturer_contact_address_2",
+  "MANUFACTURER_CONTACT_T_NAME": "manufacturer_contact_t_name",
+  "MANUFACTURER_CONTACT_ZIP_CODE": "manufacturer_contact_zip_code",
+  "MANUFACTURER_CONTACT_ZIP_EXT": "manufacturer_contact_zip_ext",
+  "MANUFACTURER_COUNTRY_CODE": "manufacturer_country",
+  "MANUFACTURER_D_ADDRESS_1": "manufacturer_d_address_1",
+  "MANUFACTURER_D_ADDRESS_2": "manufacturer_d_address_2",
+  "MANUFACTURER_D_CITY": "manufacturer_d_city",
+  "MANUFACTURER_D_COUNTRY_CODE": "manufacturer_d_country",
+  "MANUFACTURER_D_NAME": "manufacturer_d_name",
+  "MANUFACTURER_D_POSTAL_CODE": "manufacturer_d_postal_code",
+  "MANUFACTURER_D_STATE_CODE": "manufacturer_d_state",
+  "MANUFACTURER_D_ZIP_CODE": "manufacturer_d_zip_code",
+  "MANUFACTURER_D_ZIP_CODE_EXT": "manufacturer_d_zip_code_ext",
+  "MANUFACTURER_G1_CITY": "manufacturer_g1_city",
+  "MANUFACTURER_G1_COUNTRY_CODE": "manufacturer_g1_country",
+  "MANUFACTURER_G1_NAME": "manufacturer_g1_name",
+  "MANUFACTURER_G1_POSTAL_CODE": "manufacturer_g1_postal_code",
+  "MANUFACTURER_G1_STATE_CODE": "manufacturer_g1_state",
+  "MANUFACTURER_G1_STREET_1": "manufacturer_g1_address_1",
+  "MANUFACTURER_G1_STREET_2": "manufacturer_g1_address_2",
+  "MANUFACTURER_G1_ZIP_CODE": "manufacturer_g1_zip_code",
+  "MANUFACTURER_G1_ZIP_CODE_EXT": "manufacturer_g1_zip_code_ext",
+  "MANUFACTURER_LINK_FLAG_": "manufacturer_link_flag",
+  "MANUFACTURER_NAME": "manufacturer_name",
+  "MANUFACTURER_POSTAL_CODE": "manufacturer_postal_code",
+  "MANUFACTURER_STATE_CODE": "manufacturer_state",
+  "MANUFACTURER_ZIP_CODE": "manufacturer_zip_code",
+  "MANUFACTURER_ZIP_CODE_EXT": "manufacturer_zip_code_ext",
+  "MDR_REPORT_KEY": "mdr_report_key",
+  "MDR_TEXT_KEY": "mdr_text_key",
+  "MFR_REPORT_TYPE": "mfr_report_type",
+  "MODEL_NUMBER": "model_number",
+  "NOE_SUMMARIZED": "noe_summarized",
+  "NUMBER_DEVICES_IN_EVENT": "number_devices_in_event",
+  "NUMBER_PATIENTS_IN_EVENT": "number_patients_in_event",
+  "OTHER_ID_NUMBER": "other_id_number",
+  "PATIENT_AGE": "patient_age",
+  "PATIENT_ETHNICITY": "patient_ethnicity",
+  "PATIENT_RACE": "patient_race",
+  "PATIENT_SEQUENCE_NO": "patient_sequence_number",
+  "PATIENT_SEQUENCE_NUMBER": "patient_sequence_number",
+  "PATIENT_SEX": "patient_sex",
+  "PATIENT_WEIGHT": "patient_weight",
+  "PMA_PMN_NUM": "pma_pmn_number",
+  "PREVIOUS_USE_CODE": "previous_use_code",
+  "PROBLEM_CODE": "problem_code",
+  "PRODUCT_PROBLEM_FLAG": "product_problem_flag",
+  "REMEDIAL_ACTION": "remedial_action",
+  "REMOVAL_CORRECTION_NUMBER": "removal_correction_number",
+  "REPORTER_COUNTRY_CODE": "reporter_country_code",
+  "REPORTER_OCCUPATION_CODE": "reporter_occupation_code",
+  "REPORTER_STATE_CODE": "reporter_state_code",
+  "REPORT_DATE": "report_date",
+  "REPORT_NUMBER": "report_number",
+  "REPORT_SOURCE_CODE": "report_source_code",
+  "REPORT_TO_FDA": "report_to_fda",
+  "REPORT_TO_MANUFACTURER": "report_to_manufacturer",
+  "REPROCESSED_AND_REUSED_FLAG": "reprocessed_and_reused_flag",
+  "SEQUENCE_NUMBER_OUTCOME": "sequence_number_outcome",
+  "SEQUENCE_NUMBER_TREATMENT": "sequence_number_treatment",
+  "SERVICED_BY_3RD_PARTY_FLAG": "serviced_by_3rd_party_flag",
+  "SINGLE_USE_FLAG": "single_use_flag",
+  "SOURCE_TYPE": "source_type",
+  "SUMMARY_REPORT": "summary_report_flag",
+  "SUPPL_DATES_FDA_RECEIVED": "suppl_dates_fda_received",
+  "SUPPL_DATES_MFR_RECEIVED": "suppl_dates_mfr_received",
+  "TEXT_TYPE_CODE": "text_type_code",
+  "TYPE_OF_REPORT": "type_of_report",
+  "UDI-DI": "udi_di",
+  "UDI-PUBLIC": "udi_public"
 }
+
 
 DATE_KEYS = [
   'date_received',
@@ -267,6 +231,8 @@ SPLIT_KEYS = ['sequence_number_treatment', 'sequence_number_outcome']
 MULTI_SUBMIT = ['source_type', 'remedial_action', 'type_of_report']
 # These keys have malformed integers in them: left-padded with a space and decimal point added.
 MALFORMED_KEYS = ['mdr_report_key', 'device_event_key', 'device_sequence_number', 'patient_sequence_number']
+# These keys use dashes instead of spaces in the key name. Fix in mapper.
+DASH_KEYS = ['udi-di', 'public-udi']
 
 def _fix_date(input_date):
   ''' Converts input dates for known formats to a standard format that is
@@ -283,6 +249,11 @@ def _fix_date(input_date):
 
   # arrow needs 3 char months to be sentence case: e.g. Dec not DEC
   formated_date = input_date.title()
+
+  # This shows up in suppl_dates_mfr_received in the FOI records.
+  if formated_date == '*':
+    return None
+
   try:
     date = arrow.get(formated_date, supported_formats).format('YYYYMMDD')
     return date.format('YYYYMMDD')
@@ -314,14 +285,21 @@ class DownloadDeviceEvents(luigi.Task):
 
   def run(self):
     zip_urls = []
-    soup = BeautifulSoup(urlopen(DEVICE_DOWNLOAD_PAGE).read(), "lxml")
+    req = Request(DEVICE_DOWNLOAD_PAGE)
+    req.add_header('From', 'Open@fda.hhs.gov')
+    req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
+    soup = BeautifulSoup(urlopen(req).read(), 'lxml')
     for a in soup.find_all(href=re.compile('.*.zip')):
-      zip_urls.append(a['href'])
+      if (not 'ASR' in a['href']) and (not 'mdr8' in a['href']) and (not 'mdr9' in a['href']) and (
+      not 'disclaim' in a['href']):
+        zip_urls.append(a['href'])
+
     if not zip_urls:
       logging.fatal('No MAUDE Zip Files Found At %s' % DEVICE_DOWNLOAD_PAGE)
     for zip_url in zip_urls:
       filename = zip_url.split('/')[-1]
       common.download(zip_url, join(self.output().path, filename))
+      time.sleep(20)  # Be nice to the server
 
 
 class ExtractAndCleanDownloadsMaude(luigi.Task):
@@ -359,7 +337,9 @@ class PreprocessFilesToFixIssues(AlwaysRunTask):
     return luigi.LocalTarget(join(BASE_DIR, 'maude/extracted'))
 
   def _run(self):
-    for filename in glob.glob(self.input().path + '/*/*foi*.txt') + glob.glob(self.input().path + '/*/device*.txt'):
+    for filename in glob.glob(self.input().path + '/*/*foi*.txt') + glob.glob(self.input().path + '/*/device.txt') \
+                    + glob.glob(self.input().path + '/*/device2*.txt') + glob.glob(
+      self.input().path + '/*/deviceadd*.txt') + glob.glob(self.input().path + '/*/devicechange*.txt'):
       logging.info('Pre-processing %s', filename)
 
       filtered = filename + '.filtered'
@@ -390,19 +370,37 @@ class PreprocessFilesToFixIssues(AlwaysRunTask):
       os.rename(filtered, filename)
 
 class CSV2JSONMapper(parallel.Mapper):
+
   def __init__(self, device_problem_codes_ref,  patient_problem_codes_ref):
     parallel.Mapper.__init__(self)
+    self.filename = None
+    self.fields = None
     self.device_problem_codes_ref = device_problem_codes_ref
     self.patient_problem_codes_ref = patient_problem_codes_ref
 
   def map_shard(self, map_input, map_output):
     self.filename = map_input.filename
+
+    # foidevproblem is the only data file without a header row
+    if 'foidevproblem' in self.filename:
+      self.fields = [
+        'MDR_REPORT_KEY',
+        'PROBLEM_CODE']
+    else:
+      with open(self.filename, 'r', encoding='utf-8') as f:
+        line = f.readline()
+      # Split by pipe, strip whitespace
+      self.fields = [p.strip() for p in line.split('|')]
+
     return parallel.Mapper.map_shard(self, map_input, map_output)
 
   @staticmethod
   def cleaner(k, v):
     if k is None:
       return None
+
+    if k in DASH_KEYS:
+      k = k.replace('-', '_')
 
     if k in DATE_KEYS:
       new_date = _fix_date(v)
@@ -434,7 +432,7 @@ class CSV2JSONMapper(parallel.Mapper):
   # We are dealing with that by merely concatenating the extra text columns into a single
   # string and stripping out the bogus columns at the end.
   def handle_oversized_foitext(self, value):
-    no_columns = len(FILE_HEADERS['foitext'])
+    no_columns = len(self.fields)
     combined_text = '|'.join([t for t in value[no_columns - 1:]])
     value[no_columns - 1] = combined_text[:-1] if combined_text.endswith("|") else combined_text
     return value[0:no_columns]
@@ -452,25 +450,13 @@ class CSV2JSONMapper(parallel.Mapper):
 
     file_type = [s for s in CATEGORIES if s in self.filename][0]
 
-    if file_type == 'foitext' and len(value) > len(FILE_HEADERS[file_type]):
+    if file_type == 'foitext' and len(value) > len(self.fields):
       value = self.handle_oversized_foitext(value)
 
     # We send all data anomalies to a reducer for each file type.
     # These non-conforming data are written to a reject file for review.
     # This file type as variable lengths over time, so it needs its own check
-    if file_type == 'foidev':
-      if len(value) not in [28, 45]:
-        logging.info('Does not conform to foidev structure. Skipping: %s, %s',
-          mdr_key, '#' * 5)
-        output.add(file_type, '%s: missing fields' % mdr_key + ':' +  '|'.join(value))
-        return
-    elif file_type == 'mdrfoi':
-      if len(value) not in [77, 81]:
-        logging.info('Does not conform to mdrfoi structure. Skipping: %s, %s',
-          mdr_key, '#' * 5)
-        output.add(file_type, '%s: missing fields' % mdr_key + ':' +  '|'.join(value))
-        return
-    elif len(value) != len(FILE_HEADERS[file_type]):
+    if len(value) != len(self.fields):
       logging.info('Does not conform to %s structure. Skipping: %s, %s',
         file_type, mdr_key, '#' * 5)
       output.add(file_type, '%s: missing fields' % mdr_key + ':' +  '|'.join(value))
@@ -482,7 +468,14 @@ class CSV2JSONMapper(parallel.Mapper):
       return
 
     # If it makes it this far, it is a good record
-    new_value = dict(list(zip(FILE_HEADERS[file_type], value)))
+    mapped_fields = []
+
+    for f in self.fields:
+      if f not in FIELD_MAPPING:
+        raise KeyError(f"Mapping not found for field: {f}. A potentially new field has been added?")
+      mapped_fields.append(FIELD_MAPPING[f])
+
+    new_value = dict(list(zip(mapped_fields, value)))
     new_value = common.transform_dict(new_value, self.cleaner)
 
     # https://github.com/FDA/openfda/issues/27
@@ -600,14 +593,14 @@ class CSV2JSON(luigi.Task):
 
     # Load and cache device problem codes.
     device_problem_codes_ref = {}
-    reader = csv.reader(open(DEVICE_PROBLEM_CODES_FILE), quoting=csv.QUOTE_NONE, delimiter='|')
+    reader = csv.reader(open(DEVICE_PROBLEM_CODES_FILE), quoting=csv.QUOTE_MINIMAL, quotechar='"', delimiter=',')
     for idx, line in enumerate(reader):
       if len(line) > 1:
         device_problem_codes_ref[line[0]] = line[1].strip()
 
     # Load and cache patient problem codes.
     patient_problem_codes_ref = {}
-    reader = csv.reader(open(PATIENT_PROBLEM_CODES_FILE), quoting=csv.QUOTE_NONE, delimiter='|')
+    reader = csv.reader(open(PATIENT_PROBLEM_CODES_FILE), quoting=csv.QUOTE_MINIMAL, quotechar='"', delimiter=',')
     for idx, line in enumerate(reader):
       if len(line) > 1:
         patient_problem_codes_ref[line[0]] = line[1].strip()
@@ -679,6 +672,13 @@ class MergeUpdatesReducer(parallel.Reducer):
       change = _safe_get(pivoted.get('change', []))
       add = _safe_get(pivoted.get('add', []))
       init = _safe_get(pivoted.get('init', []))
+
+      # FDA-467 MDR Text Missing in Device Events: a "change" record isn't always complete meaning it may not
+      # include 'mdr_text' collection if adverse event text did not change. This may lead to the fact that mdr text
+      # is gone altogether from the final record, e.g. Report Number	2647580-2020-01444.
+      # So here we have to merge mdr_text from the "init" record, if so.
+      if change and change.get('mdr_text') == [] and init and len(init.get('mdr_text')) > 0:
+        change['mdr_text'] = init.get('mdr_text')
 
       if change:
         output.put(key, change)

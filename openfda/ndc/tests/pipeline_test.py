@@ -284,9 +284,9 @@ class NDCPipelineTests(unittest.TestCase):
     mergedPath = os.path.join(self.test_dir, "merge/product.csv")
     ok_(os.path.isfile(mergedPath))
 
-    dtype = {'STARTMARKETINGDATE': np.unicode, 'ENDMARKETINGDATE': np.unicode, 'APPLICATIONNUMBER': np.unicode
-      , 'ACTIVE_NUMERATOR_STRENGTH': np.unicode, 'LISTING_RECORD_CERTIFIED_THROUGH': np.unicode
-      , 'PROPRIETARYNAMESUFFIX': np.unicode}
+    dtype = {'STARTMARKETINGDATE': str, 'ENDMARKETINGDATE': str, 'APPLICATIONNUMBER': str
+      , 'ACTIVE_NUMERATOR_STRENGTH': str, 'LISTING_RECORD_CERTIFIED_THROUGH': str
+      , 'PROPRIETARYNAMESUFFIX': str}
     csv = pd.read_csv(mergedPath, sep='\t', index_col=False, encoding='utf-8',
                       dtype=dtype)
     # Obviously, the merged file has to have the sum of lines in both source files.
@@ -331,7 +331,7 @@ class NDCPipelineTests(unittest.TestCase):
     mergedPath = os.path.join(self.test_dir, "merge/package.csv")
     ok_(os.path.isfile(mergedPath))
 
-    dtype = {'STARTMARKETINGDATE': np.unicode, 'ENDMARKETINGDATE': np.unicode}
+    dtype = {'STARTMARKETINGDATE': str, 'ENDMARKETINGDATE': str}
     csv = pd.read_csv(mergedPath, sep='\t', index_col=False, encoding='utf-8',
                       dtype=dtype)
     # Obviously, the merged file has to have the sum of lines in both source files.

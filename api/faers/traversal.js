@@ -25,7 +25,8 @@ exports.BuildLinkRelNext = function (request, params, esResponseBody) {
   } else
   // If the current page contains fewer hits than the limit value, this means we have reached
   // the last page and there is no point in generating a Next link.
-  if (esResponseBody.hits.hits.length && esResponseBody.hits.hits.length >= params.limit) {
+  if (esResponseBody.hits.hits.length && esResponseBody.hits.hits.length >= params.limit
+      && esResponseBody.hits.total.value != esResponseBody.hits.hits.length) {
     const nextQuery = Object.assign({}, request.query);
     nextQuery.search_after = qs.stringify(esResponseBody.hits.hits.slice(-1)[0].sort, {delimiter: ';'})
     return buildURL(nextQuery);

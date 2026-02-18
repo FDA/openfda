@@ -11,6 +11,7 @@ import pickle
 import leveldb
 import simplejson as json
 import xmltodict
+import pandas as pd
 
 logger = logging.getLogger('mapreduce')
 
@@ -193,6 +194,28 @@ class JSONListInput(MRInput):
         for item in data:
           for k, v in iter(item.items()):
             yield k, v
+
+
+class XLSXDedupInput(MRInput):
+  def __init__(self,
+               column=''):
+    MRInput.__init__(self)
+    self.column = column
+
+  def create_reader(self, split):
+    return XLSXDedupInput.Reader(split,
+                                 column=self.column)
+
+  class Reader(MRInput.Reader):
+    def entries(self):
+      xlsx_filename = pd.ExcelFile(self.filename)
+      df = xlsx_filename.parse(xlsx_filename.sheet_names[0])
+      df = df.fillna('')
+      df = df.drop_duplicates(subset=self.column)
+      df_dict = df.to_dict('index')
+      for k, v in df_dict.items():
+        yield str(k), v
+
 
 # TODO(hansnelsen): convert all the input parameters to a inputdict_args for
 #                   readability and simplicity

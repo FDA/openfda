@@ -399,6 +399,9 @@
       },
       "type": "array"
     },
+    "noe_summarized": {
+      "type": "string"
+    },
     "number_devices_in_event": {
       "type": "string"
     },
@@ -426,6 +429,21 @@
               "type": "string"
             },
             "type": "array"
+          },
+          "patient_age": {
+             "type": "string"
+          },
+          "patient_sex": {
+             "type": "string"
+          },
+          "patient_weight": {
+            "type": "string"
+          },
+          "patient_ethnicity": {
+            "type": "string"
+          },
+          "patient_race": {
+             "type": "string"
           }
         },
         "type": "object"

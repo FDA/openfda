@@ -5,7 +5,7 @@ var escape = require('escape-html');
 
 var EXPECTED_PARAMS = ['search', 'count', 'limit', 'skip', 'sort', 'search_after'],
     maxSkip = 25000;
-var LIMITLESS_COUNT_FIELDS = ['openfda.generic_name', 'openfda.brand_name', 'openfda.substance_name'];
+var LIMITLESS_COUNT_FIELDS = ['openfda.generic_name', 'openfda.brand_name', 'openfda.substance_name', 'drug.product_ndc'];
 
 exports.API_REQUEST_ERROR = 'ApiRequestError';
 var API_REQUEST_ERROR = exports.API_REQUEST_ERROR;

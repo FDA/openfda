@@ -38,9 +38,11 @@ ENDPOINT_INDEX_MAP = {
   'drug/enforcement': 'drugenforcement',
   'drug/ndc': 'ndc',
   'drug/drugsfda': 'drugsfda',
+  'drug/shortages': 'drugshortages',
   'device/enforcement': 'deviceenforcement',
   'food/enforcement': 'foodenforcement',
   'food/event': 'foodevent',
+  'cosmetic/event': 'cosmeticevent',
   'device/event': 'deviceevent',
   'device/classification': 'deviceclass',
   'device/510k': 'deviceclearance',
@@ -51,7 +53,12 @@ ENDPOINT_INDEX_MAP = {
   'device/covid19serology': 'covid19serology',
   'other/nsde': 'othernsde',
   'other/substance': 'othersubstance',
-  'tobacco/problem': 'tobaccoproblem'
+  'other/unii': 'otherunii',
+  'other/historicaldocument': 'otherhistoricaldocument',
+  'transparency/crl': 'transparencycrl',
+  'tobacco/problem': 'tobaccoproblem',
+  'tobacco/researchpreventionads': 'tobaccoresearchpreventionads',
+  'tobacco/researchdigitalads': 'tobaccoresearchdigitalads'
 }
 
 BOT_USER_AGENTS = map(lambda o: o['pattern'], json.loads(open(join(RUN_DIR, 'crawler-user-agents.json'), 'r').read()))

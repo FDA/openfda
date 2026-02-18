@@ -158,7 +158,7 @@ class CSV2JSONMapper(parallel.Mapper):
       k = RENAME_MAP[k]
 
       if k in DATE_KEYS:
-        if not v:
+        if (not v) or (v == 'N/A'):
           return None
         v = arrow.get(v, 'MM/DD/YYYY').format('YYYYMMDD')
 

@@ -42,6 +42,7 @@ class NSDE2JSONMapper(parallel.Mapper):
     "Proprietary Name": "proprietary_name",
     "Dosage Form": "dosage_form",
     "Application Number or Citation": "application_number_or_citation",
+    "Application Number or Monograph ID": "application_number_or_citation",
     "Product Type": "product_type",
     "Inactivation Date": "inactivation_date",
     "Reactivation Date": "reactivation_date"

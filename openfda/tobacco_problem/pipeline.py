@@ -10,7 +10,7 @@ import re
 import glob
 from os.path import join, dirname
 from urllib.parse import urljoin
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 import arrow
 import luigi
 import pandas as pd
@@ -39,7 +39,11 @@ class DownloadTobaccoProblem(luigi.Task):
     os.system('mkdir -p %s' % output_dir)
 
     # Download all csv source files (current year and archived years).
-    soup = BeautifulSoup(urlopen(TOBACCO_PROBLEM_DOWNLOAD_PAGE).read(), 'lxml')
+    req = Request(TOBACCO_PROBLEM_DOWNLOAD_PAGE)
+    req.add_header('From', 'Open@fda.hhs.gov')
+    req.add_header('User-Agent',
+                   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
+    soup = BeautifulSoup(urlopen(req).read(), 'lxml')
     for a in soup.find_all(title=re.compile('\d{4}.*tppr', re.IGNORECASE)):
       file_name = a['title'] if '.csv' in a['title'] else (a['title'] + '.csv')
       common.download(urljoin('https://www.fda.gov', a['href']), join(output_dir, file_name))

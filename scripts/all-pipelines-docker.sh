@@ -14,6 +14,7 @@ es_host="${ES_HOST:-localhost:9200}"
 BASEDIR=$(dirname "$0")
 $BASEDIR/wait-for.sh $es_host -t 120
 
+$PYTHON openfda/unii/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 $PYTHON openfda/nsde/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 $PYTHON openfda/caers/pipeline.py LoadJSON --FDAConfig-es-host=$es_host
 $PYTHON openfda/substance_data/pipeline.py LoadJSON --FDAConfig-es-host=$es_host

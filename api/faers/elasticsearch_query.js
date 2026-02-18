@@ -25,7 +25,7 @@ const fieldMappingCache = new NodeCache();
 // + for boolean
 // space for terms
 // @ for internal fields.
-var SUPPORTED_QUERY_RE = '^[&0-9a-zA-Z@%/\'\,\.\_\:\(\)\"\\[\\]\{\}\\-\\+\>\<\= ]+$';
+var SUPPORTED_QUERY_RE = '^[&0-9a-zA-Z@%/\\\\\'\,\.\_\:\(\)\"\\[\\]\{\}\\-\\+\>\<\=\* ]+$';
 
 var DATE_FIELDS = [
   // FAERS
@@ -101,6 +101,10 @@ var DATE_FIELDS = [
   'date_created',
   'date_started',
 
+  // Cosmetic Events
+  'latest_received_date',
+  'initial_received_date',
+
   // NSDE
   'marketing_start_date',
   'marketing_end_date',
@@ -120,7 +124,13 @@ var DATE_FIELDS = [
   'date_performed',
 
   //Tobacco Problem
-  'date_submitted'
+  'date_submitted',
+
+  // Drug Shortages
+  'update_date', 'change_date', 'discontinued_date', 'initial_posting_date',
+
+  // CRL
+  'letter_date'
 
 ];
 

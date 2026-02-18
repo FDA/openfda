@@ -197,6 +197,27 @@
           }
         }
       },
+      "cosmetic": {
+        "properties": {
+          "event": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime||epoch_millis",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
+                }
+              }
+            }
+          }
+        }
+      },
       "drug": {
         "properties": {
           "enforcement": {
@@ -283,6 +304,23 @@
                 }
               }
             }
+          },
+          "shortages": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime||epoch_millis",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
+                }
+              }
+            }
           }
         }
       },
@@ -306,6 +344,40 @@
             }
           },
           "substance": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime||epoch_millis",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
+                }
+              }
+            }
+          },
+          "unii": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime||epoch_millis",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
+                }
+              }
+            }
+          },
+          "historicaldocument": {
             "properties": {
               "total_records": { "type": "integer" },
               "export_date": {
@@ -348,6 +420,61 @@
       "tobacco": {
         "properties": {
           "problem": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime||epoch_millis",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
+                }
+              }
+            }
+          },
+          "researchpreventionads": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime||epoch_millis",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
+                }
+              }
+            }
+          },
+          "researchdigitalads": {
+            "properties": {
+              "total_records": { "type": "integer" },
+              "export_date": {
+                "format": "dateOptionalTime||epoch_millis",
+                "type": "date"
+              },
+              "partitions": {
+                "properties": {
+                  "size_mb": { "type": "float" },
+                  "records": { "type": "integer" },
+                  "display_name": { "type": "text" },
+                  "file": { "type": "text" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "transparency": {
+        "properties": {
+          "crl": {
             "properties": {
               "total_records": { "type": "integer" },
               "export_date": {
