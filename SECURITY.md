@@ -18,7 +18,7 @@ FDA follows the HHS Vulnerability Disclosure Policy. Submit your report through 
 ### Contact
 
 For general security questions or concerns about FDA systems, contact:
-- **Repository Maintainer:** [open@fda.hhs.gov]
+- **Repository Maintainer:** [ciocc@fda.hhs.gov]
 
 ---
 ## Security Best Practices for Contributors
@@ -34,6 +34,3 @@ When contributing to this repository:
 
 ---
 
-**Disclaimer:** This repository contains code developed for research, regulatory science, or public health purposes. The code is provided "as-is" without warranty. Use in production systems should follow your organization's security assessment processes.
-
-**Last Updated:** [6/5/26]
