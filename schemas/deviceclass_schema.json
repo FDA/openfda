@@ -33,6 +33,18 @@
           },
           "type": "array"
         },
+        "k_number": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "pma_number": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "registration_number": {
           "items": {
             "type": "string"
