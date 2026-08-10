@@ -292,7 +292,7 @@ def extract_date(date_str):
     year = "1900"
   if 0 >= int(month) or 12 < int(month):
     month = "01"
-  if 0 >= int(day) or 12 < int(day):
+  if 0 >= int(day) or 31 < int(day):
     day = "01"
 
   return year + '-' + month + '-' + day
