@@ -10,6 +10,8 @@ class TestCommonMethods(unittest.TestCase):
     assert common.extract_date("201211103422") == '2012-11-10'
     assert common.extract_date("20121610") == '2012-01-10'
     assert common.extract_date("20120010") == '2012-01-10'
+    assert common.extract_date("20121213") == '2012-12-13'
+    assert common.extract_date("20121231") == '2012-12-31'
     assert common.extract_date("20121132") == '2012-11-01'
     assert common.extract_date("2012000001") == '2012-01-01'
     assert common.extract_date("20561132") == '1900-11-01'
