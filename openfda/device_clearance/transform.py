@@ -48,7 +48,7 @@ for row in CODE_LIST:
 def get_description(data):
   data = data.replace('SESE', 'SE')
   if len(data) > 2:
-    data.replace('SE', '')
+    data = data.replace('SE', '')
   if data in DECISION_CODES:
     return DECISION_CODES[data.strip()]
 
